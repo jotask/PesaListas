@@ -1,2 +1,0 @@
-void printo(String string) {}
-
