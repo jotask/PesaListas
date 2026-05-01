@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/auth/google_auth.dart';
 import 'package:pesalistas/pages/home_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
@@ -18,6 +19,28 @@ class _AuthPageState extends State<AuthPage> {
 
   bool loading = false;
   bool isLogin = true;
+
+  Future<void> signInWithGoogleNativeInternal() async {
+    setState(() => loading = true);
+
+    try {
+      await signInWithGoogleNative();
+      // No Navigator needed here.
+      // Your authSubscription will detect the session and move to HomePage.
+    } catch (error, stackTrace) {
+      debugPrint('GOOGLE LOGIN ERROR: $error', wrapWidth: 1024);
+      debugPrint('STACK TRACE: $stackTrace', wrapWidth: 1024);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Google login failed: $error')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => loading = false);
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -137,7 +160,7 @@ class _AuthPageState extends State<AuthPage> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
-                    onPressed: loading ? null : signInWithGoogle,
+                    onPressed: loading ? null : signInWithGoogleNativeInternal,
                     child: const Text('Continue with Google'),
                   ),
                 ),

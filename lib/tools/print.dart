@@ -1,0 +1,2 @@
+void printo(String string) {}
+
