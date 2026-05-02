@@ -1,3 +1,5 @@
+import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/vote_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class VoteRepository {
@@ -9,10 +11,10 @@ class VoteRepository {
     final userId = _client.auth.currentUser!.id;
 
     final response = await _client
-        .from('item_votes')
+        .from(AppTables.itemVotes)
         .select()
-        .eq('item_id', itemId)
-        .eq('user_id', userId)
+        .eq(AppVoteFields.itemId, itemId)
+        .eq(AppVoteFields.userId, userId)
         .maybeSingle();
 
     return response;
@@ -25,11 +27,11 @@ class VoteRepository {
   }) async {
     final userId = _client.auth.currentUser!.id;
 
-    await _client.from('item_votes').upsert({
-      'item_id': itemId,
-      'user_id': userId,
-      'points': points,
-      'comment': comment,
+    await _client.from(AppTables.itemVotes).upsert({
+      AppVoteFields.itemId: itemId,
+      AppVoteFields.userId: userId,
+      AppVoteFields.points: points,
+      AppVoteFields.comment: comment,
     });
   }
 }

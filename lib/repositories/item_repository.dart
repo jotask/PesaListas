@@ -1,3 +1,6 @@
+import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ItemRepository {
@@ -7,9 +10,9 @@ class ItemRepository {
 
   Future<List<Map<String, dynamic>>> getItemsForList(String listId) async {
     final response = await _client
-        .from('items')
+        .from(AppTables.items)
         .select()
-        .eq('list_id', listId)
+        .eq(AppItemFields.listId, listId)
         .order('position');
 
     return List<Map<String, dynamic>>.from(response);
@@ -23,18 +26,48 @@ class ItemRepository {
   }
 
   Future<void> deleteItem(String itemId) async {
-    await _client.from('items').delete().eq('id', itemId);
+    await _client.from(AppTables.items).delete().eq(AppItemFields.id, itemId);
   }
 
   Future<void> updateItem({
     required String itemId,
     required String title,
     String? description,
+    bool updateTaskFields = false,
+    int priority = 0,
+    DateTime? deadlineAt,
+    bool updateChoreFields = false,
+    String? recurrenceType,
+    int? recurrenceInterval,
+    DateTime? nextDueAt,
   }) async {
+    final values = <String, dynamic>{
+      AppItemFields.title: title,
+      AppItemFields.description: description,
+    };
+
+    if (updateTaskFields) {
+      values.addAll({
+        AppItemFields.priority: priority,
+        AppItemFields.deadlineAt: deadlineAt?.toIso8601String(),
+      });
+    }
+
+    if (updateChoreFields) {
+      values.addAll({
+        AppItemFields.recurrenceType: recurrenceType,
+        AppItemFields.recurrenceInterval:
+            recurrenceType == AppRecurrenceTypes.everyNDays.value
+            ? recurrenceInterval
+            : null,
+        AppItemFields.nextDueAt: nextDueAt?.toIso8601String(),
+      });
+    }
+
     await _client
-        .from('items')
-        .update({'title': title, 'description': description})
-        .eq('id', itemId);
+        .from(AppTables.items)
+        .update(values)
+        .eq(AppItemFields.id, itemId);
   }
 
   Future<void> createItem({
@@ -47,16 +80,16 @@ class ItemRepository {
     int? recurrenceInterval,
     DateTime? nextDueAt,
   }) async {
-    await _client.from('items').insert({
-      'list_id': listId,
-      'title': title,
-      'description': description,
-      'priority': priority,
-      'deadline_at': deadlineAt?.toIso8601String(),
-      'recurrence_type': recurrenceType,
-      'recurrence_interval': recurrenceInterval,
-      'next_due_at': nextDueAt?.toIso8601String(),
-      'created_by': _client.auth.currentUser!.id,
+    await _client.from(AppTables.items).insert({
+      AppItemFields.listId: listId,
+      AppItemFields.title: title,
+      AppItemFields.description: description,
+      AppItemFields.priority: priority,
+      AppItemFields.deadlineAt: deadlineAt?.toIso8601String(),
+      AppItemFields.recurrenceType: recurrenceType,
+      AppItemFields.recurrenceInterval: recurrenceInterval,
+      AppItemFields.nextDueAt: nextDueAt?.toIso8601String(),
+      AppItemFields.createdBy: _client.auth.currentUser!.id,
     });
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/common/empty_info_card.dart';
+import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 import 'package:pesalistas/widgets/list_detail/item_card.dart';
 
 class GenericItemsView extends StatelessWidget {
@@ -27,12 +28,11 @@ class GenericItemsView extends StatelessWidget {
     }
 
     if (items.isEmpty) {
-      return EmptyInfoCard(
+      return EmptyItemsCard(
         icon: Icons.add_task,
         title: 'No items yet',
         subtitle: 'Add your first item.',
-        trailing: const Icon(Icons.add),
-        onTap: onCreate,
+        onCreate: onCreate,
       );
     }
 
@@ -41,9 +41,9 @@ class GenericItemsView extends StatelessWidget {
         for (final item in items)
           ItemCard(
             item: item,
-            onComplete: () => onComplete(item['id']),
+            onComplete: () => onComplete(item[AppItemFields.id].toString()),
             onEdit: () => onEdit(item),
-            onDelete: () => onDelete(item['id']),
+            onDelete: () => onDelete(item[AppItemFields.id].toString()),
           ),
       ],
     );

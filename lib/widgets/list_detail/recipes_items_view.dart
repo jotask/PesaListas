@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/common/empty_info_card.dart';
+import 'package:pesalistas/widgets/list_detail/simple_items_view.dart';
 
 class RecipesItemsView extends StatelessWidget {
   const RecipesItemsView({
@@ -21,10 +21,18 @@ class RecipesItemsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EmptyInfoCard(
-      icon: Icons.restaurant_menu,
-      title: 'Recipes coming soon',
-      subtitle: 'Recipes will use the dedicated recipes table.',
+    return SimpleItemsView(
+      items: items,
+      loading: loading,
+      emptyIcon: Icons.restaurant_menu_outlined,
+      emptyTitle: 'No recipes yet',
+      emptySubtitle: 'Add a recipe idea. Full ingredients will come later.',
+      cardIcon: Icons.restaurant_menu_outlined,
+      fallbackTitle: 'Untitled recipe',
+      defaultSubtitle: 'Recipe details coming later',
+      onCreate: onCreate,
+      onEdit: onEdit,
+      onDelete: onDelete,
     );
   }
 }

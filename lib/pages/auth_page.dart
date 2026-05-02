@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:pesalistas/auth/google_auth.dart';
-import 'package:pesalistas/pages/home_page.dart';
-import 'package:pesalistas/animated_logo.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:pesalistas/animated_logo.dart';
+import 'package:pesalistas/core/ui_feedback.dart';
+import 'package:pesalistas/pages/home_page.dart';
+import 'package:pesalistas/repositories/auth_repository.dart';
+import 'package:pesalistas/repositories/profile_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -16,94 +19,40 @@ class _AuthPageState extends State<AuthPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  late final AuthRepository authRepository;
+  late final ProfileRepository profileRepository;
   late final StreamSubscription<AuthState> authSubscription;
 
   bool loading = false;
   bool isLogin = true;
-
-  Future<void> signInWithGoogleNativeInternal() async {
-    setState(() => loading = true);
-
-    try {
-      await signInWithGoogleNative();
-    } catch (error, stackTrace) {
-      debugPrint('GOOGLE LOGIN ERROR: $error', wrapWidth: 1024);
-      debugPrint('STACK TRACE: $stackTrace', wrapWidth: 1024);
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Google login failed: $error')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => loading = false);
-      }
-    }
-  }
+  bool navigatingHome = false;
 
   @override
   void initState() {
     super.initState();
 
-    authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
-      data,
-    ) {
+    final client = Supabase.instance.client;
+
+    authRepository = AuthRepository(client);
+    profileRepository = ProfileRepository(client);
+
+    authSubscription = authRepository.authStateChanges.listen((data) async {
       final session = data.session;
 
-      if (session != null && mounted) {
+      if (session != null && mounted && !navigatingHome) {
+        navigatingHome = true;
+
+        await profileRepository.syncCurrentProfileFromAuth(
+          debugLabel: 'AuthPageProfileSync',
+        );
+
+        if (!mounted) return;
+
         Navigator.of(
           context,
         ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
       }
     });
-  }
-
-  Future<void> signInWithGoogle() async {
-    await Supabase.instance.client.auth.signInWithOAuth(
-      OAuthProvider.google,
-      redirectTo: 'com.example.pesalistas://login-callback/',
-      authScreenLaunchMode: LaunchMode.externalApplication,
-    );
-  }
-
-  Future<void> submit() async {
-    setState(() => loading = true);
-
-    try {
-      if (isLogin) {
-        await Supabase.instance.client.auth.signInWithPassword(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        );
-      } else {
-        await Supabase.instance.client.auth.signUp(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        );
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Check your email to confirm signup')),
-          );
-        }
-      }
-    } on AuthException catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.message)));
-      }
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Unexpected error: $error')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => loading = false);
-      }
-    }
   }
 
   @override
@@ -114,12 +63,84 @@ class _AuthPageState extends State<AuthPage> {
     super.dispose();
   }
 
+  Future<void> signInWithGoogleNativeInternal() async {
+    if (loading) return;
+
+    setState(() => loading = true);
+
+    try {
+      await authRepository.signInWithGoogle();
+    } catch (error, stackTrace) {
+      debugPrint('GOOGLE LOGIN ERROR: $error', wrapWidth: 1024);
+      debugPrint('STACK TRACE: $stackTrace', wrapWidth: 1024);
+
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Google login failed', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => loading = false);
+    }
+  }
+
+  Future<void> submit() async {
+    if (loading) return;
+
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      showErrorSnackBar(context, 'Email and password are required');
+      return;
+    }
+
+    setState(() => loading = true);
+
+    try {
+      if (isLogin) {
+        await authRepository.signInWithPassword(
+          email: email,
+          password: password,
+        );
+      } else {
+        await authRepository.signUpWithPassword(
+          email: email,
+          password: password,
+        );
+
+        await profileRepository.syncCurrentProfileFromAuth(
+          debugLabel: 'AuthPageProfileSync',
+        );
+
+        if (!mounted) return;
+
+        showSuccessSnackBar(
+          context,
+          'Check your email to confirm your account',
+        );
+      }
+    } on AuthException catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, error.message);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Unexpected error', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final title = isLogin ? 'Welcome back' : 'Create account';
     final subtitle = isLogin
-        ? 'Log in to continue tracking your progress'
-        : 'Start your fitness journey today';
+        ? 'Log in to manage your shared lists, plans, and chores.'
+        : 'Create a space for your shared life: groups, lists, chores, ideas, meals, and more.';
 
     return Scaffold(
       body: Container(
@@ -164,6 +185,16 @@ class _AuthPageState extends State<AuthPage> {
                         child: const AnimatedLogo(),
                       ),
                       const SizedBox(height: 20),
+                      const Text(
+                        'Pesa-Listas',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF1E3A5F),
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       Text(
                         title,
                         style: const TextStyle(
@@ -181,7 +212,6 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                       ),
                       const SizedBox(height: 28),
-
                       TextField(
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -206,7 +236,6 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                       ),
                       const SizedBox(height: 22),
-
                       SizedBox(
                         width: double.infinity,
                         height: 52,
@@ -231,9 +260,7 @@ class _AuthPageState extends State<AuthPage> {
                               : Text(isLogin ? 'Log in' : 'Create account'),
                         ),
                       ),
-
                       const SizedBox(height: 14),
-
                       SizedBox(
                         width: double.infinity,
                         height: 52,
@@ -252,9 +279,7 @@ class _AuthPageState extends State<AuthPage> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 12),
-
                       TextButton(
                         onPressed: loading
                             ? null

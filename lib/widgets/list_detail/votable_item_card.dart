@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/widgets/list_detail/base_item_card.dart';
 
 class VotableItemCard extends StatelessWidget {
   const VotableItemCard({
@@ -20,26 +21,29 @@ class VotableItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        onTap: onEdit,
-        leading: CircleAvatar(child: Icon(icon)),
-        title: Text(item['title'] ?? fallbackTitle),
-        subtitle: Text(item['description'] ?? 'Tap to edit'),
-        trailing: Wrap(
-          spacing: 4,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.stars_outlined),
-              onPressed: onVote,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: onDelete,
-            ),
-          ],
+    final title = item['title']?.toString();
+    final description = item['description']?.toString();
+
+    return BaseItemCard(
+      title: title,
+      fallbackTitle: fallbackTitle,
+      subtitle: description == null || description.isEmpty
+          ? 'Tap to edit'
+          : description,
+      icon: icon,
+      onTap: onEdit,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.stars_outlined),
+          onPressed: onVote,
+          tooltip: 'Vote',
         ),
-      ),
+        IconButton(
+          icon: const Icon(Icons.delete_outline),
+          onPressed: onDelete,
+          tooltip: 'Delete item',
+        ),
+      ],
     );
   }
 }

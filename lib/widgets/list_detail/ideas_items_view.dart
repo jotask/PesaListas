@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/common/empty_info_card.dart';
-import 'package:pesalistas/widgets/list_detail/votable_item_card.dart';
+import 'package:pesalistas/widgets/list_detail/votable_items_view.dart';
 
 class IdeasItemsView extends StatelessWidget {
   const IdeasItemsView({
@@ -24,32 +23,18 @@ class IdeasItemsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (items.isEmpty) {
-      return EmptyInfoCard(
-        icon: Icons.lightbulb_outline,
-        title: 'No ideas yet',
-        subtitle: 'Add your first idea.',
-        trailing: const Icon(Icons.add),
-        onTap: onCreate,
-      );
-    }
-
-    return Column(
-      children: [
-        for (final item in items)
-          VotableItemCard(
-            item: item,
-            icon: Icons.lightbulb_outline,
-            fallbackTitle: 'Untitled idea',
-            onEdit: () => onEdit(item),
-            onVote: () => onVote(item),
-            onDelete: () => onDelete(item['id']),
-          ),
-      ],
+    return VotableItemsView(
+      items: items,
+      loading: loading,
+      emptyIcon: Icons.lightbulb_outline,
+      emptyTitle: 'No ideas yet',
+      emptySubtitle: 'Add your first idea.',
+      cardIcon: Icons.lightbulb_outline,
+      fallbackTitle: 'Untitled idea',
+      onCreate: onCreate,
+      onEdit: onEdit,
+      onDelete: onDelete,
+      onVote: onVote,
     );
   }
 }

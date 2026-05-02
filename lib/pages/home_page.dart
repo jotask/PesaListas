@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/ui_feedback.dart';
+import 'package:pesalistas/dialogs/create_group_dialog.dart';
 import 'package:pesalistas/pages/auth_page.dart';
-import 'package:pesalistas/pages/group_detail_page.dart';
+import 'package:pesalistas/repositories/auth_repository.dart';
+import 'package:pesalistas/repositories/group_repository.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
+import 'package:pesalistas/repositories/profile_repository.dart';
+import 'package:pesalistas/widgets/groups/home_groups_section.dart';
+import 'package:pesalistas/widgets/groups/home_invitations_section.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../repositories/group_repository.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,133 +20,159 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late final AuthRepository authRepository;
   late final GroupRepository groupRepository;
+  late final InvitationRepository invitationRepository;
+  late final ProfileRepository profileRepository;
 
   bool loading = true;
-  List<Map<String, dynamic>> groups = [];
+  bool acceptingInvitation = false;
+  bool creatingGroup = false;
+  bool signingOut = false;
 
-  late final InvitationRepository invitationRepository;
+  List<Map<String, dynamic>> groups = [];
   List<Map<String, dynamic>> invitations = [];
 
   @override
   void initState() {
     super.initState();
-    groupRepository = GroupRepository(Supabase.instance.client);
-    invitationRepository = InvitationRepository(Supabase.instance.client);
+
+    final client = Supabase.instance.client;
+
+    authRepository = AuthRepository(client);
+    groupRepository = GroupRepository(client);
+    invitationRepository = InvitationRepository(client);
+    profileRepository = ProfileRepository(client);
+
+    unawaited(
+      profileRepository.syncCurrentProfileFromAuth(
+        debugLabel: 'HomePageProfileSync',
+      ),
+    );
+
     loadHomeData();
   }
 
   Future<void> loadHomeData() async {
+    if (!mounted) return;
+
     setState(() => loading = true);
 
-    await Future.wait([loadGroups(), loadInvitations()]);
-
-    if (!mounted) return;
-    setState(() => loading = false);
-  }
-
-  Future<void> loadGroups() async {
     try {
-      final result = await groupRepository.getMyGroups();
+      final results = await Future.wait([
+        groupRepository.getMyGroups(),
+        invitationRepository.getPendingInvitations(),
+      ]);
 
       if (!mounted) return;
 
       setState(() {
-        groups = result;
+        groups = results[0];
+        invitations = results[1];
+        loading = false;
       });
     } catch (error) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to load groups: $error')));
-    }
-  }
-
-  Future<void> loadInvitations() async {
-    try {
-      final result = await invitationRepository.getPendingInvitations();
-
-      if (!mounted) return;
-
-      setState(() {
-        invitations = result;
-      });
-    } catch (error) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load invitations: $error')),
-      );
+      setState(() => loading = false);
+      showErrorSnackBar(context, 'Failed to load home data', error);
     }
   }
 
   Future<void> acceptInvitation(String invitationId) async {
-    await invitationRepository.acceptInvitation(invitationId);
-    await loadHomeData();
+    if (acceptingInvitation) return;
+
+    setState(() => acceptingInvitation = true);
+
+    try {
+      await invitationRepository.acceptInvitation(invitationId);
+      await loadHomeData();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Invitation accepted');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to accept invitation', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => acceptingInvitation = false);
+    }
   }
 
   Future<void> createGroupDialog() async {
-    final controller = TextEditingController();
+    if (creatingGroup) return;
 
     final name = await showDialog<String>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Create group'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'Group name',
-              hintText: 'Me and Partner',
-            ),
-            autofocus: true,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, controller.text.trim());
-              },
-              child: const Text('Create'),
-            ),
-          ],
-        );
-      },
+      builder: (_) => const CreateGroupDialog(),
     );
 
     if (name == null || name.isEmpty) return;
 
-    await groupRepository.createGroup(name: name);
-    await loadGroups();
+    setState(() => creatingGroup = true);
+
+    try {
+      await groupRepository.createGroup(name: name);
+      await loadHomeData();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Group created');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to create group', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => creatingGroup = false);
+    }
   }
 
   Future<void> signOut() async {
-    await Supabase.instance.client.auth.signOut();
+    if (signingOut) return;
 
-    if (!mounted) return;
+    setState(() => signingOut = true);
 
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthPage()));
+    try {
+      await authRepository.signOut();
+
+      if (!mounted) return;
+
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthPage()));
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to sign out', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => signingOut = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = Supabase.instance.client.auth.currentUser;
+    final user = authRepository.currentUser;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My groups'),
         actions: [
-          IconButton(onPressed: signOut, icon: const Icon(Icons.logout)),
+          IconButton(
+            onPressed: signingOut ? null : signOut,
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign out',
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: createGroupDialog,
+        onPressed: creatingGroup ? null : createGroupDialog,
         icon: const Icon(Icons.add),
         label: const Text('New group'),
       ),
@@ -150,122 +183,18 @@ class _HomePageState extends State<HomePage> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  const Text(
-                    'Pending invitations',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  HomeInvitationsSection(
+                    invitations: invitations,
+                    acceptingInvitation: acceptingInvitation,
+                    onAcceptInvitation: acceptInvitation,
                   ),
-                  const SizedBox(height: 12),
-
-                  if (invitations.isEmpty)
-                    Card(
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.mark_email_read_outlined),
-                        ),
-                        title: const Text('No pending invitations'),
-                        subtitle: const Text('Group invites will appear here.'),
-                      ),
-                    )
-                  else
-                    for (final invitation in invitations)
-                      Card(
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(Icons.mail_outline),
-                          ),
-                          title: Text(
-                            invitation['groups']?['name'] ?? 'Group invitation',
-                          ),
-                          subtitle: Text(
-                            'Invited as ${invitation['role'] ?? 'member'}',
-                          ),
-                          trailing: ElevatedButton(
-                            onPressed: () => acceptInvitation(invitation['id']),
-                            child: const Text('Accept'),
-                          ),
-                        ),
-                      ),
-
                   const SizedBox(height: 24),
-
-                  const SizedBox(height: 12),
-
-                  for (final invitation in invitations)
-                    Card(
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.mail_outline),
-                        ),
-                        title: Text(
-                          invitation['groups']?['name'] ?? 'Group invitation',
-                        ),
-                        subtitle: Text(
-                          'Invited as ${invitation['role'] ?? 'member'}',
-                        ),
-                        trailing: ElevatedButton(
-                          onPressed: () => acceptInvitation(invitation['id']),
-                          child: const Text('Accept'),
-                        ),
-                      ),
-                    ),
-
-                  const SizedBox(height: 24),
-
-                  const Text(
-                    'My groups',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  HomeGroupsSection(
+                    groups: groups,
+                    userEmail: user?.email,
+                    creatingGroup: creatingGroup,
+                    onCreateGroup: createGroupDialog,
                   ),
-                  const SizedBox(height: 12),
-
-                  if (groups.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 48),
-                      child: Column(
-                        children: [
-                          const Icon(Icons.groups, size: 72),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'No groups yet',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Logged in as ${user?.email ?? "Unknown user"}',
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            onPressed: createGroupDialog,
-                            icon: const Icon(Icons.add),
-                            label: const Text('Create your first group'),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    for (final group in groups)
-                      Card(
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(Icons.groups),
-                          ),
-                          title: Text(group['name'] ?? 'Untitled group'),
-                          subtitle: Text(
-                            group['description'] ?? 'Shared space',
-                          ),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => GroupDetailPage(group: group),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
                 ],
               ),
             ),

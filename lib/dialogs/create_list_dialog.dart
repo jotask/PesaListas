@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/list_types.dart';
 
 class CreateListDialogResult {
   const CreateListDialogResult({required this.name, required this.listType});
@@ -16,19 +17,8 @@ class CreateListDialog extends StatefulWidget {
 
 class _CreateListDialogState extends State<CreateListDialog> {
   final nameController = TextEditingController();
-  String listType = 'generic';
 
-  final listTypes = const [
-    'generic',
-    'movies',
-    'tasks',
-    'chores',
-    'ideas',
-    'activities',
-    'recipes',
-    'shopping',
-    'meal_plan',
-  ];
+  String listType = AppListTypes.generic.value;
 
   @override
   void dispose() {
@@ -48,32 +38,54 @@ class _CreateListDialogState extends State<CreateListDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedConfig = AppListTypes.fromValue(listType);
+
     return AlertDialog(
       title: const Text('Create list'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: nameController,
-            autofocus: false,
-            decoration: const InputDecoration(
-              labelText: 'List name',
-              hintText: 'Movies to watch',
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'List name',
+                hintText: 'Movies to watch',
+              ),
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => submit(),
             ),
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: listType,
-            decoration: const InputDecoration(labelText: 'List type'),
-            items: listTypes.map((type) {
-              return DropdownMenuItem(value: type, child: Text(type));
-            }).toList(),
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() => listType = value);
-            },
-          ),
-        ],
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: listType,
+              decoration: const InputDecoration(labelText: 'List type'),
+              items: AppListTypes.all.map((config) {
+                return DropdownMenuItem<String>(
+                  value: config.value,
+                  child: Row(
+                    children: [
+                      Icon(config.icon, size: 20),
+                      const SizedBox(width: 12),
+                      Text(config.label),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => listType = value);
+              },
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(child: Icon(selectedConfig.icon)),
+              title: Text(selectedConfig.label),
+              subtitle: Text(selectedConfig.description),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/common/empty_info_card.dart';
-import 'package:pesalistas/widgets/list_detail/votable_item_card.dart';
+import 'package:pesalistas/widgets/list_detail/votable_items_view.dart';
 
 class MovieItemsView extends StatelessWidget {
   const MovieItemsView({
@@ -24,30 +23,18 @@ class MovieItemsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) return const Center(child: CircularProgressIndicator());
-
-    if (items.isEmpty) {
-      return EmptyInfoCard(
-        icon: Icons.movie,
-        title: 'No movies yet',
-        subtitle: 'Add a movie to watch.',
-        trailing: const Icon(Icons.add),
-        onTap: onCreate,
-      );
-    }
-
-    return Column(
-      children: [
-        for (final item in items)
-          VotableItemCard(
-            item: item,
-            icon: Icons.movie,
-            fallbackTitle: 'Untitled movie',
-            onEdit: () => onEdit(item),
-            onVote: () => onVote(item),
-            onDelete: () => onDelete(item['id']),
-          ),
-      ],
+    return VotableItemsView(
+      items: items,
+      loading: loading,
+      emptyIcon: Icons.movie,
+      emptyTitle: 'No movies yet',
+      emptySubtitle: 'Add a movie to watch.',
+      cardIcon: Icons.movie,
+      fallbackTitle: 'Untitled movie',
+      onCreate: onCreate,
+      onEdit: onEdit,
+      onDelete: onDelete,
+      onVote: onVote,
     );
   }
 }

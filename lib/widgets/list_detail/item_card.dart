@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/item_status.dart';
+import 'package:pesalistas/widgets/list_detail/base_item_card.dart';
 
 class ItemCard extends StatelessWidget {
   const ItemCard({
@@ -16,29 +19,33 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDone = item['status'] == 'done';
+    final status = item[AppItemFields.status];
+    final isDone = AppItemStatus.isDone(status);
 
-    return Card(
-      child: ListTile(
-        onTap: onEdit,
-        leading: IconButton(
-          icon: Icon(
-            isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-          ),
-          onPressed: isDone ? null : onComplete,
-        ),
-        title: Text(
-          item['title'] ?? 'Untitled item',
-          style: TextStyle(
-            decoration: isDone ? TextDecoration.lineThrough : null,
-          ),
-        ),
-        subtitle: Text(item['description'] ?? item['status'] ?? 'Open'),
-        trailing: IconButton(
+    final title = item[AppItemFields.title]?.toString();
+    final description = item[AppItemFields.description]?.toString();
+
+    return BaseItemCard(
+      title: title,
+      fallbackTitle: 'Untitled item',
+      subtitle: description == null || description.isEmpty
+          ? AppItemStatus.displayText(status)
+          : description,
+      icon: Icons.list_alt,
+      completed: isDone,
+      onTap: onEdit,
+      leadingAction: IconButton(
+        icon: Icon(isDone ? Icons.check_circle : Icons.radio_button_unchecked),
+        onPressed: isDone ? null : onComplete,
+        tooltip: isDone ? 'Completed' : 'Complete item',
+      ),
+      actions: [
+        IconButton(
           icon: const Icon(Icons.delete_outline),
           onPressed: onDelete,
+          tooltip: 'Delete item',
         ),
-      ),
+      ],
     );
   }
 }

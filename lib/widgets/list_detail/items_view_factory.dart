@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/widgets/list_detail/activities_items_view.dart';
 import 'package:pesalistas/widgets/list_detail/chore_items_view.dart';
 import 'package:pesalistas/widgets/list_detail/generic_items_view.dart';
@@ -34,94 +35,108 @@ class ItemsViewFactory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (listType) {
-      case 'tasks':
-        return TaskItemsView(
-          items: items,
-          loading: loading,
-          onCreate: onCreate,
-          onComplete: onComplete,
-          onEdit: onEdit,
-          onDelete: onDelete,
-        );
-      case 'generic':
-        return GenericItemsView(
-          items: items,
-          loading: loading,
-          onCreate: onCreate,
-          onComplete: onComplete,
-          onEdit: onEdit,
-          onDelete: onDelete,
-        );
-      case 'movies':
-        return MovieItemsView(
-          items: items,
-          loading: loading,
-          onCreate: onCreate,
-          onComplete: onComplete,
-          onEdit: onEdit,
-          onDelete: onDelete,
-          onVote: onVote,
-        );
-      case 'chores':
-        return ChoreItemsView(
-          items: items,
-          loading: loading,
-          onCreate: onCreate,
-          onComplete: onComplete,
-          onEdit: onEdit,
-          onDelete: onDelete,
-        );
-      case 'ideas':
-        return IdeasItemsView(
-          items: items,
-          loading: loading,
-          onCreate: onCreate,
-          onComplete: onComplete,
-          onEdit: onEdit,
-          onDelete: onDelete,
-          onVote: onVote,
-        );
-      case 'activities':
-        return ActivitiesItemsView(
-          items: items,
-          loading: loading,
-          onCreate: onCreate,
-          onComplete: onComplete,
-          onEdit: onEdit,
-          onDelete: onDelete,
-          onVote: onVote,
-        );
-      case 'recipes':
-        return RecipesItemsView(
-          items: items,
-          loading: loading,
-          onCreate: onCreate,
-          onComplete: onComplete,
-          onEdit: onEdit,
-          onDelete: onDelete,
-        );
-      case 'shopping':
-        return ShoppingItemsView(
-          items: items,
-          loading: loading,
-          onCreate: onCreate,
-          onComplete: onComplete,
-          onEdit: onEdit,
-          onDelete: onDelete,
-        );
-      case 'meal_plan':
-        return MealPlanItemsView(
-          items: items,
-          loading: loading,
-          onCreate: onCreate,
-          onComplete: onComplete,
-          onEdit: onEdit,
-          onDelete: onDelete,
-        );
-
-      default:
-        return NotImplementedItemsView();
+    if (listType == AppListTypes.tasks.value) {
+      return TaskItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onEdit: onEdit,
+        onDelete: onDelete,
+      );
     }
+
+    if (listType == AppListTypes.chores.value) {
+      return ChoreItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onEdit: onEdit,
+        onDelete: onDelete,
+      );
+    }
+
+    if (listType == AppListTypes.movies.value) {
+      return MovieItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onEdit: onEdit,
+        onDelete: onDelete,
+        onVote: onVote,
+      );
+    }
+
+    if (listType == AppListTypes.ideas.value) {
+      return IdeasItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onEdit: onEdit,
+        onDelete: onDelete,
+        onVote: onVote,
+      );
+    }
+
+    if (listType == AppListTypes.activities.value) {
+      return ActivitiesItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onEdit: onEdit,
+        onDelete: onDelete,
+        onVote: onVote,
+      );
+    }
+
+    if (listType == AppListTypes.recipes.value) {
+      return RecipesItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onEdit: onEdit,
+        onDelete: onDelete,
+      );
+    }
+
+    if (listType == AppListTypes.shopping.value) {
+      return ShoppingItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onEdit: onEdit,
+        onDelete: onDelete,
+      );
+    }
+
+    if (listType == AppListTypes.mealPlan.value) {
+      return MealPlanItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onEdit: onEdit,
+        onDelete: onDelete,
+      );
+    }
+
+    if (listType == AppListTypes.generic.value) {
+      return GenericItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onEdit: onEdit,
+        onDelete: onDelete,
+      );
+    }
+
+    return const NotImplementedItemsView();
   }
 }

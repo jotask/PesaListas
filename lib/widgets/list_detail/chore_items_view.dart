@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/common/empty_info_card.dart';
+import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/widgets/list_detail/chore_item_card.dart';
+import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class ChoreItemsView extends StatelessWidget {
   const ChoreItemsView({
@@ -19,24 +21,6 @@ class ChoreItemsView extends StatelessWidget {
   final void Function(Map<String, dynamic> item) onEdit;
   final void Function(String itemId) onDelete;
 
-  String subtitleFor(Map<String, dynamic> item) {
-    final parts = <String>[];
-
-    if (item['description'] != null) {
-      parts.add(item['description']);
-    }
-
-    if (item['recurrence_type'] != null) {
-      parts.add('Repeats: ${item['recurrence_type']}');
-    }
-
-    if (item['next_due_at'] != null) {
-      parts.add('Next due: ${item['next_due_at'].toString().split('T').first}');
-    }
-
-    return parts.isEmpty ? 'Chore' : parts.join(' • ');
-  }
-
   @override
   Widget build(BuildContext context) {
     if (loading) {
@@ -44,32 +28,22 @@ class ChoreItemsView extends StatelessWidget {
     }
 
     if (items.isEmpty) {
-      return EmptyInfoCard(
+      return EmptyItemsCard(
         icon: Icons.cleaning_services,
         title: 'No chores yet',
         subtitle: 'Create your first chore.',
-        trailing: const Icon(Icons.add),
-        onTap: onCreate,
+        onCreate: onCreate,
       );
     }
 
     return Column(
       children: [
         for (final item in items)
-          Card(
-            child: ListTile(
-              onTap: () => onEdit(item),
-              leading: IconButton(
-                icon: const Icon(Icons.check_circle_outline),
-                onPressed: () => onComplete(item['id']),
-              ),
-              title: Text(item['title'] ?? 'Untitled chore'),
-              subtitle: Text(subtitleFor(item)),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () => onDelete(item['id']),
-              ),
-            ),
+          ChoreItemCard(
+            item: item,
+            onComplete: () => onComplete(item[AppItemFields.id].toString()),
+            onEdit: () => onEdit(item),
+            onDelete: () => onDelete(item[AppItemFields.id].toString()),
           ),
       ],
     );

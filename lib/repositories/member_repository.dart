@@ -1,3 +1,5 @@
+import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/member_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MemberRepository {
@@ -7,12 +9,10 @@ class MemberRepository {
 
   Future<List<Map<String, dynamic>>> getGroupMembers(String groupId) async {
     final response = await _client
-        .from('group_members')
-        .select(
-          'role, created_at, profiles(id, username, display_name, avatar_url)',
-        )
-        .eq('group_id', groupId)
-        .order('created_at');
+        .from(AppTables.groupMembers)
+        .select('*, profiles(id, username, display_name, avatar_url)')
+        .eq(AppMemberFields.groupId, groupId)
+        .order(AppMemberFields.joinedAt);
 
     return List<Map<String, dynamic>>.from(response);
   }

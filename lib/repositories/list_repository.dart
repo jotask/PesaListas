@@ -1,3 +1,5 @@
+import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/list_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ListRepository {
@@ -7,10 +9,10 @@ class ListRepository {
 
   Future<List<Map<String, dynamic>>> getListsForGroup(String groupId) async {
     final response = await _client
-        .from('lists')
+        .from(AppTables.lists)
         .select()
-        .eq('group_id', groupId)
-        .order('created_at', ascending: false);
+        .eq(AppListFields.groupId, groupId)
+        .order(AppListFields.createdAt);
 
     return List<Map<String, dynamic>>.from(response);
   }
@@ -18,17 +20,13 @@ class ListRepository {
   Future<void> createList({
     required String groupId,
     required String name,
-    String? description,
-    String listType = 'generic',
+    required String listType,
   }) async {
-    final userId = _client.auth.currentUser!.id;
-
-    await _client.from('lists').insert({
-      'group_id': groupId,
-      'name': name,
-      'description': description,
-      'list_type': listType,
-      'created_by': userId,
+    await _client.from(AppTables.lists).insert({
+      AppListFields.groupId: groupId,
+      AppListFields.name: name,
+      AppListFields.listType: listType,
+      AppListFields.createdBy: _client.auth.currentUser!.id,
     });
   }
 }

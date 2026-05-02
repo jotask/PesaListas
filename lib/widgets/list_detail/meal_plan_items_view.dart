@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/common/empty_info_card.dart';
+import 'package:pesalistas/widgets/list_detail/simple_items_view.dart';
 
 class MealPlanItemsView extends StatelessWidget {
   const MealPlanItemsView({
@@ -21,10 +21,18 @@ class MealPlanItemsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EmptyInfoCard(
-      icon: Icons.calendar_month,
-      title: 'Meal plan coming soon',
-      subtitle: 'Meal plans will use the meal_plans table.',
+    return SimpleItemsView(
+      items: items,
+      loading: loading,
+      emptyIcon: Icons.calendar_month_outlined,
+      emptyTitle: 'No meal plans yet',
+      emptySubtitle: 'Add a meal idea. Calendar planning will come later.',
+      cardIcon: Icons.calendar_month_outlined,
+      fallbackTitle: 'Untitled meal plan',
+      defaultSubtitle: 'Meal planning calendar coming later',
+      onCreate: onCreate,
+      onEdit: onEdit,
+      onDelete: onDelete,
     );
   }
 }

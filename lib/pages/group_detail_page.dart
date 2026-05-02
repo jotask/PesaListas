@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/pages/list_detail_page.dart';
+import 'package:pesalistas/core/group_fields.dart';
+import 'package:pesalistas/core/ui_feedback.dart';
+import 'package:pesalistas/dialogs/create_list_dialog.dart';
+import 'package:pesalistas/dialogs/invite_member_dialog.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/member_repository.dart';
-import 'package:pesalistas/dialogs/create_list_dialog.dart';
-import 'package:pesalistas/dialogs/invite_member_dialog.dart';
-import 'package:pesalistas/widgets/common/empty_info_card.dart';
-import 'package:pesalistas/widgets/group_detail/group_list_card.dart';
-import 'package:pesalistas/widgets/group_detail/member_card.dart';
-import 'package:pesalistas/widgets/group_detail/pending_group_invite_card.dart';
+import 'package:pesalistas/widgets/group_detail/group_detail_header.dart';
+import 'package:pesalistas/widgets/group_detail/group_lists_section.dart';
+import 'package:pesalistas/widgets/group_detail/group_people_section.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GroupDetailPage extends StatefulWidget {
@@ -28,10 +28,20 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   bool loadingMembers = true;
   bool loadingInvitations = true;
   bool loadingLists = true;
+  bool invitingMember = false;
+  bool creatingList = false;
 
   List<Map<String, dynamic>> members = [];
   List<Map<String, dynamic>> pendingInvitations = [];
   List<Map<String, dynamic>> lists = [];
+
+  String get groupId => widget.group[AppGroupFields.id].toString();
+
+  String get groupName =>
+      widget.group[AppGroupFields.name]?.toString() ?? 'Group';
+
+  String? get groupDescription =>
+      widget.group[AppGroupFields.description]?.toString();
 
   @override
   void initState() {
@@ -51,47 +61,76 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   }
 
   Future<void> loadMembers() async {
-    setState(() => loadingMembers = true);
-
-    final result = await memberRepository.getGroupMembers(widget.group['id']);
-
     if (!mounted) return;
 
-    setState(() {
-      members = result;
-      loadingMembers = false;
-    });
+    setState(() => loadingMembers = true);
+
+    try {
+      final result = await memberRepository.getGroupMembers(groupId);
+
+      if (!mounted) return;
+
+      setState(() {
+        members = result;
+        loadingMembers = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() => loadingMembers = false);
+      showErrorSnackBar(context, 'Failed to load members', error);
+    }
   }
 
   Future<void> loadPendingInvitations() async {
-    setState(() => loadingInvitations = true);
-
-    final result = await invitationRepository.getPendingInvitationsForGroup(
-      widget.group['id'],
-    );
-
     if (!mounted) return;
 
-    setState(() {
-      pendingInvitations = result;
-      loadingInvitations = false;
-    });
+    setState(() => loadingInvitations = true);
+
+    try {
+      final result = await invitationRepository.getPendingInvitationsForGroup(
+        groupId,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        pendingInvitations = result;
+        loadingInvitations = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() => loadingInvitations = false);
+      showErrorSnackBar(context, 'Failed to load pending invitations', error);
+    }
   }
 
   Future<void> loadLists() async {
-    setState(() => loadingLists = true);
-
-    final result = await listRepository.getListsForGroup(widget.group['id']);
-
     if (!mounted) return;
 
-    setState(() {
-      lists = result;
-      loadingLists = false;
-    });
+    setState(() => loadingLists = true);
+
+    try {
+      final result = await listRepository.getListsForGroup(groupId);
+
+      if (!mounted) return;
+
+      setState(() {
+        lists = result;
+        loadingLists = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() => loadingLists = false);
+      showErrorSnackBar(context, 'Failed to load lists', error);
+    }
   }
 
   Future<void> inviteMemberDialog() async {
+    if (invitingMember) return;
+
     final email = await showDialog<String>(
       context: context,
       barrierDismissible: true,
@@ -100,22 +139,24 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
     if (email == null || email.isEmpty) return;
 
+    setState(() => invitingMember = true);
+
     try {
-      await invitationRepository.inviteToGroup(
-        groupId: widget.group['id'],
-        email: email,
-      );
+      await invitationRepository.inviteToGroup(groupId: groupId, email: email);
+
+      await loadPendingInvitations();
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Invitation sent to $email')));
+      showSuccessSnackBar(context, 'Invitation sent to $email');
+    } catch (error) {
+      if (!mounted) return;
 
-      await loadPendingInvitations();
-    } catch (error, stackTrace) {
-      debugPrint('INVITE ERROR: $error');
-      debugPrint('STACK TRACE: $stackTrace');
+      showErrorSnackBar(context, 'Failed to send invitation', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => invitingMember = false);
     }
   }
 
@@ -126,16 +167,17 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Invitation cancelled')));
-    } catch (error, stackTrace) {
-      debugPrint('CANCEL INVITE ERROR: $error');
-      debugPrint('STACK TRACE: $stackTrace');
+      showSuccessSnackBar(context, 'Invitation cancelled');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to cancel invitation', error);
     }
   }
 
   Future<void> createListDialog() async {
+    if (creatingList) return;
+
     final result = await showDialog<CreateListDialogResult>(
       context: context,
       builder: (_) => const CreateListDialog(),
@@ -143,9 +185,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
     if (result == null) return;
 
+    setState(() => creatingList = true);
+
     try {
       await listRepository.createList(
-        groupId: widget.group['id'],
+        groupId: groupId,
         name: result.name,
         listType: result.listType,
       );
@@ -154,27 +198,28 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('List "${result.name}" created')));
-    } catch (error, stackTrace) {
-      debugPrint('CREATE LIST ERROR: $error');
-      debugPrint('STACK TRACE: $stackTrace');
+      showSuccessSnackBar(context, 'List "${result.name}" created');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to create list', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => creatingList = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final groupName = widget.group['name'] ?? 'Group';
-    final description = widget.group['description'];
-
     return Scaffold(
       appBar: AppBar(
         title: Text(groupName),
         actions: [
           IconButton(
-            onPressed: inviteMemberDialog,
+            onPressed: invitingMember ? null : inviteMemberDialog,
             icon: const Icon(Icons.person_add),
+            tooltip: 'Invite member',
           ),
         ],
       ),
@@ -183,94 +228,31 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: ListTile(
-                leading: const CircleAvatar(child: Icon(Icons.groups)),
-                title: Text(groupName),
-                subtitle: Text(description ?? 'Shared space'),
-              ),
+            GroupDetailHeader(
+              groupName: groupName,
+              description: groupDescription,
             ),
 
             const SizedBox(height: 24),
 
-            const Text(
-              'Members',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            GroupPeopleSection(
+              members: members,
+              pendingInvitations: pendingInvitations,
+              loadingMembers: loadingMembers,
+              loadingInvitations: loadingInvitations,
+              invitingMember: invitingMember,
+              onInvite: inviteMemberDialog,
+              onCancelInvitation: cancelInvitation,
             ),
-            const SizedBox(height: 12),
-
-            if (loadingMembers)
-              const Center(child: CircularProgressIndicator())
-            else if (members.isEmpty)
-              const EmptyInfoCard(
-                icon: Icons.person_off,
-                title: 'No members found',
-                subtitle: 'Members will appear here.',
-              )
-            else
-              for (final member in members) MemberCard(member: member),
 
             const SizedBox(height: 24),
 
-            const Text(
-              'Pending invites',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            GroupListsSection(
+              lists: lists,
+              loading: loadingLists,
+              creatingList: creatingList,
+              onCreateList: createListDialog,
             ),
-            const SizedBox(height: 12),
-
-            if (loadingInvitations)
-              const Center(child: CircularProgressIndicator())
-            else if (pendingInvitations.isEmpty)
-              const EmptyInfoCard(
-                icon: Icons.person_off,
-                title: 'No pending invites',
-                subtitle: 'Invited people will appear here.',
-              )
-            else
-              for (final invitation in pendingInvitations)
-                PendingGroupInviteCard(
-                  invitation: invitation,
-                  onCancel: () => cancelInvitation(invitation['id']),
-                ),
-
-            const SizedBox(height: 24),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Lists',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  onPressed: createListDialog,
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
-
-            if (loadingLists)
-              const Center(child: CircularProgressIndicator())
-            else if (lists.isEmpty)
-              Card(
-                child: ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.list_alt)),
-                  title: const Text('No lists yet'),
-                  subtitle: const Text('Create your first shared list here.'),
-                ),
-              )
-            else
-              for (final list in lists)
-                GroupListCard(
-                  list: list,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ListDetailPage(list: list),
-                      ),
-                    );
-                  },
-                ),
           ],
         ),
       ),

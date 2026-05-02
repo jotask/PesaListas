@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/common/empty_info_card.dart';
+import 'package:pesalistas/widgets/list_detail/votable_items_view.dart';
 
 class ActivitiesItemsView extends StatelessWidget {
   const ActivitiesItemsView({
@@ -23,38 +23,18 @@ class ActivitiesItemsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (items.isEmpty) {
-      return EmptyInfoCard(
-        icon: Icons.local_activity_outlined,
-        title: 'No activities yet',
-        subtitle: 'Add something fun to do.',
-        trailing: const Icon(Icons.add),
-        onTap: onCreate,
-      );
-    }
-
-    return Column(
-      children: [
-        for (final item in items)
-          Card(
-            child: ListTile(
-              onTap: () => onEdit(item),
-              leading: const CircleAvatar(
-                child: Icon(Icons.local_activity_outlined),
-              ),
-              title: Text(item['title'] ?? 'Untitled activity'),
-              subtitle: Text(item['description'] ?? 'Tap to edit'),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () => onDelete(item['id']),
-              ),
-            ),
-          ),
-      ],
+    return VotableItemsView(
+      items: items,
+      loading: loading,
+      emptyIcon: Icons.local_activity_outlined,
+      emptyTitle: 'No activities yet',
+      emptySubtitle: 'Add something fun to do.',
+      cardIcon: Icons.local_activity_outlined,
+      fallbackTitle: 'Untitled activity',
+      onCreate: onCreate,
+      onEdit: onEdit,
+      onDelete: onDelete,
+      onVote: onVote,
     );
   }
 }

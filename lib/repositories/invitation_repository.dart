@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/invitation_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class InvitationRepository {
@@ -8,10 +9,23 @@ class InvitationRepository {
 
   Future<List<Map<String, dynamic>>> getPendingInvitations() async {
     final response = await _client
-        .from('group_invitations')
+        .from(AppTables.groupInvitations)
         .select('*, groups(name)')
-        .eq('status', 'pending')
-        .order('created_at', ascending: false);
+        .eq(AppInvitationFields.status, 'pending')
+        .order(AppInvitationFields.createdAt, ascending: false);
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<List<Map<String, dynamic>>> getPendingInvitationsForGroup(
+    String groupId,
+  ) async {
+    final response = await _client
+        .from(AppTables.groupInvitations)
+        .select()
+        .eq(AppInvitationFields.groupId, groupId)
+        .eq(AppInvitationFields.status, 'pending')
+        .order(AppInvitationFields.createdAt, ascending: false);
 
     return List<Map<String, dynamic>>.from(response);
   }
@@ -28,40 +42,26 @@ class InvitationRepository {
     required String email,
     String role = 'member',
   }) async {
-    await _client
-        .rpc(
-          'invite_group_member',
-          params: {
-            'target_group_id': groupId,
-            'target_email': email.trim().toLowerCase(),
-            'target_role': role,
-          },
-        )
-        .timeout(
-          const Duration(seconds: 3),
-          onTimeout: () {
-            throw Exception('Invite RPC timed out');
-          },
-        );
+    final normalizedEmail = email.trim().toLowerCase();
+
+    if (normalizedEmail.isEmpty) {
+      throw Exception('Email is required');
+    }
+
+    await _client.rpc(
+      'invite_group_member',
+      params: {
+        'target_group_id': groupId,
+        'target_email': normalizedEmail,
+        'target_role': role,
+      },
+    );
   }
 
   Future<void> cancelInvitation(String invitationId) async {
     await _client
-        .from('group_invitations')
-        .update({'status': 'cancelled'})
-        .eq('id', invitationId);
-  }
-
-  Future<List<Map<String, dynamic>>> getPendingInvitationsForGroup(
-    String groupId,
-  ) async {
-    final response = await _client
-        .from('group_invitations')
-        .select()
-        .eq('group_id', groupId)
-        .eq('status', 'pending')
-        .order('created_at', ascending: false);
-
-    return List<Map<String, dynamic>>.from(response);
+        .from(AppTables.groupInvitations)
+        .update({AppInvitationFields.status: 'cancelled'})
+        .eq(AppInvitationFields.id, invitationId);
   }
 }
