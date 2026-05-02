@@ -17,6 +17,7 @@ class VotableItemsView extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onVote,
+    required this.onViewVotes,
   });
 
   final List<Map<String, dynamic>> items;
@@ -33,6 +34,7 @@ class VotableItemsView extends StatelessWidget {
   final void Function(Map<String, dynamic> item) onEdit;
   final void Function(String itemId) onDelete;
   final void Function(Map<String, dynamic> item) onVote;
+  final void Function(Map<String, dynamic> item) onViewVotes;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +60,7 @@ class VotableItemsView extends StatelessWidget {
             fallbackTitle: fallbackTitle,
             onEdit: () => onEdit(item),
             onVote: () => onVote(item),
+            onViewVotes: () => onViewVotes(item),
             onDelete: () => onDelete(item[AppItemFields.id].toString()),
           ),
       ],

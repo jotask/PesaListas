@@ -7,6 +7,7 @@ import 'package:pesalistas/core/vote_fields.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/dialogs/create_item_dialog.dart';
 import 'package:pesalistas/dialogs/edit_item_dialog.dart';
+import 'package:pesalistas/dialogs/vote_details_dialog.dart';
 import 'package:pesalistas/dialogs/vote_dialog.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
 import 'package:pesalistas/repositories/vote_repository.dart';
@@ -33,6 +34,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool deletingItem = false;
   bool completingItem = false;
   bool votingItem = false;
+  bool loadingVoteDetails = false;
 
   List<Map<String, dynamic>> items = [];
 
@@ -61,7 +63,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
       editingItem ||
       deletingItem ||
       completingItem ||
-      votingItem;
+      votingItem ||
+      loadingVoteDetails;
 
   @override
   void initState() {
@@ -267,9 +270,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
     setState(() => votingItem = true);
 
     try {
-      final existingVote = await voteRepository.getMyVote(
-        item[AppItemFields.id].toString(),
-      );
+      final itemId = item[AppItemFields.id].toString();
+
+      final existingVote = await voteRepository.getMyVote(itemId);
 
       if (!mounted) return;
 
@@ -283,22 +286,30 @@ class _ListDetailPageState extends State<ListDetailPage> {
         builder: (_) => VoteDialog(
           initialPoints: initialPoints,
           initialComment: existingVote?[AppVoteFields.comment]?.toString(),
+          canRemove: existingVote != null,
         ),
       );
 
       if (result == null) return;
 
-      await voteRepository.upsertVote(
-        itemId: item[AppItemFields.id].toString(),
-        points: result.points,
-        comment: result.comment,
-      );
+      if (result.removeVote) {
+        await voteRepository.deleteMyVote(itemId);
+      } else {
+        await voteRepository.upsertVote(
+          itemId: itemId,
+          points: result.points,
+          comment: result.comment,
+        );
+      }
 
       await loadItems();
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, 'Vote saved');
+      showSuccessSnackBar(
+        context,
+        result.removeVote ? 'Vote removed' : 'Vote saved',
+      );
     } catch (error) {
       if (!mounted) return;
 
@@ -307,6 +318,35 @@ class _ListDetailPageState extends State<ListDetailPage> {
       if (!mounted) return;
 
       setState(() => votingItem = false);
+    }
+  }
+
+  Future<void> viewVotes(Map<String, dynamic> item) async {
+    if (loadingVoteDetails) return;
+
+    setState(() => loadingVoteDetails = true);
+
+    try {
+      final itemId = item[AppItemFields.id].toString();
+      final votes = await voteRepository.getVotesForItem(itemId);
+
+      if (!mounted) return;
+
+      final currentUserId = Supabase.instance.client.auth.currentUser?.id ?? '';
+
+      await showDialog<void>(
+        context: context,
+        builder: (_) =>
+            VoteDetailsDialog(votes: votes, currentUserId: currentUserId),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to load votes', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => loadingVoteDetails = false);
     }
   }
 
@@ -345,6 +385,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
               onEdit: editItem,
               onDelete: deleteItem,
               onVote: voteItem,
+              onViewVotes: viewVotes,
             ),
           ],
         ),

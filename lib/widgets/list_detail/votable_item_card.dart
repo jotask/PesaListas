@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/core/vote_summary_fields.dart';
-import 'package:pesalistas/widgets/list_detail/base_item_card.dart';
 
 class VotableItemCard extends StatelessWidget {
   const VotableItemCard({
@@ -12,6 +11,7 @@ class VotableItemCard extends StatelessWidget {
     required this.fallbackTitle,
     required this.onEdit,
     required this.onVote,
+    required this.onViewVotes,
     required this.onDelete,
   });
 
@@ -20,82 +20,272 @@ class VotableItemCard extends StatelessWidget {
   final String fallbackTitle;
   final VoidCallback onEdit;
   final VoidCallback onVote;
+  final VoidCallback onViewVotes;
   final VoidCallback onDelete;
 
-  String buildSubtitle() {
-    final description = item[AppItemFields.description]?.toString();
-    final voteText = buildVoteText();
+  String get title {
+    final value = item[AppItemFields.title]?.toString();
 
-    final parts = <String>[];
-
-    if (description != null && description.trim().isNotEmpty) {
-      parts.add(description.trim());
+    if (value == null || value.trim().isEmpty) {
+      return fallbackTitle;
     }
 
-    parts.add(voteText);
-
-    return parts.join(' • ');
+    return value.trim();
   }
 
-  String buildVoteText() {
-    final voteCount =
-        AppValueParsing.intOrNull(item[AppVoteSummaryFields.voteCount]) ?? 0;
+  String? get description {
+    final value = item[AppItemFields.description]?.toString();
 
-    final totalPoints =
-        AppValueParsing.intOrNull(item[AppVoteSummaryFields.totalPoints]) ?? 0;
-
-    final myPoints = AppValueParsing.intOrNull(
-      item[AppVoteSummaryFields.myPoints],
-    );
-
-    final averageValue = item[AppVoteSummaryFields.averagePoints];
-    final average = averageValue is num
-        ? averageValue.toDouble()
-        : double.tryParse(averageValue?.toString() ?? '') ?? 0.0;
-
-    if (voteCount == 0) {
-      return 'No votes yet';
+    if (value == null || value.trim().isEmpty) {
+      return null;
     }
 
-    final voteLabel = voteCount == 1 ? 'vote' : 'votes';
+    return value.trim();
+  }
 
-    final parts = <String>[
-      'Avg ${average.toStringAsFixed(1)}',
-      '$voteCount $voteLabel',
-      'Total $totalPoints',
-    ];
+  int get voteCount {
+    return AppValueParsing.intOrNull(item[AppVoteSummaryFields.voteCount]) ?? 0;
+  }
 
-    if (myPoints != null) {
-      parts.add('Your vote $myPoints');
+  int get totalPoints {
+    return AppValueParsing.intOrNull(item[AppVoteSummaryFields.totalPoints]) ??
+        0;
+  }
+
+  int? get myPoints {
+    return AppValueParsing.intOrNull(item[AppVoteSummaryFields.myPoints]);
+  }
+
+  double get averagePoints {
+    final value = item[AppVoteSummaryFields.averagePoints];
+
+    if (value is num) {
+      return value.toDouble();
     }
 
-    return parts.join(' · ');
+    return double.tryParse(value?.toString() ?? '') ?? 0.0;
+  }
+
+  bool get hasVotes => voteCount > 0;
+
+  String get voteCountText {
+    if (voteCount == 0) return 'No votes yet';
+    if (voteCount == 1) return '1 vote';
+    return '$voteCount votes';
+  }
+
+  String get averageText {
+    if (!hasVotes) return '—';
+    return averagePoints.toStringAsFixed(1);
   }
 
   @override
   Widget build(BuildContext context) {
-    final myPoints = AppValueParsing.intOrNull(
-      item[AppVoteSummaryFields.myPoints],
-    );
+    final theme = Theme.of(context);
+    final ownVote = myPoints;
 
-    return BaseItemCard(
-      title: item[AppItemFields.title]?.toString(),
-      fallbackTitle: fallbackTitle,
-      subtitle: buildSubtitle(),
-      icon: icon,
-      onTap: onEdit,
-      actions: [
-        IconButton(
-          icon: Icon(myPoints == null ? Icons.star_border : Icons.star),
-          onPressed: onVote,
-          tooltip: myPoints == null ? 'Vote' : 'Edit your vote',
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onEdit,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _ScoreBadge(averageText: averageText, hasVotes: hasVotes),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(icon, size: 20, color: theme.colorScheme.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (description != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        description!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _InfoChip(
+                          icon: Icons.how_to_vote_outlined,
+                          label: voteCountText,
+                        ),
+                        if (hasVotes)
+                          _InfoChip(
+                            icon: Icons.functions,
+                            label: 'Total $totalPoints',
+                          ),
+                        if (ownVote != null)
+                          _InfoChip(
+                            icon: Icons.person,
+                            label: 'Your vote $ownVote',
+                            filled: true,
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton.icon(
+                          onPressed: onVote,
+                          icon: Icon(
+                            ownVote == null ? Icons.star_border : Icons.star,
+                          ),
+                          label: Text(ownVote == null ? 'Vote' : 'Change vote'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: hasVotes ? onViewVotes : null,
+                          icon: const Icon(Icons.visibility_outlined),
+                          label: const Text('Votes'),
+                        ),
+                        IconButton(
+                          onPressed: onEdit,
+                          icon: const Icon(Icons.edit_outlined),
+                          tooltip: 'Edit item',
+                        ),
+                        IconButton(
+                          onPressed: onDelete,
+                          icon: const Icon(Icons.delete_outline),
+                          tooltip: 'Delete item',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        IconButton(
-          icon: const Icon(Icons.delete_outline),
-          onPressed: onDelete,
-          tooltip: 'Delete item',
-        ),
-      ],
+      ),
+    );
+  }
+}
+
+class _ScoreBadge extends StatelessWidget {
+  const _ScoreBadge({required this.averageText, required this.hasVotes});
+
+  final String averageText;
+  final bool hasVotes;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: 58,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: hasVotes
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.star,
+            size: 20,
+            color: hasVotes
+                ? theme.colorScheme.onPrimaryContainer
+                : theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            averageText,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: hasVotes
+                  ? theme.colorScheme.onPrimaryContainer
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          Text(
+            'avg',
+            style: TextStyle(
+              fontSize: 11,
+              color: hasVotes
+                  ? theme.colorScheme.onPrimaryContainer
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    this.filled = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: filled
+            ? theme.colorScheme.secondaryContainer
+            : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 15,
+            color: filled
+                ? theme.colorScheme.onSecondaryContainer
+                : theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: filled ? FontWeight.w700 : FontWeight.w500,
+              color: filled
+                  ? theme.colorScheme.onSecondaryContainer
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -21,6 +21,20 @@ class VoteRepository {
     return response;
   }
 
+  Future<List<Map<String, dynamic>>> getVotesForItem(String itemId) async {
+    final response = await _client
+        .from(AppTables.itemVotes)
+        .select(
+          '${AppVoteFields.itemId}, '
+          '${AppVoteFields.userId}, '
+          '${AppVoteFields.points}, '
+          '${AppVoteFields.comment}',
+        )
+        .eq(AppVoteFields.itemId, itemId);
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
   Future<Map<String, Map<String, dynamic>>> getVoteSummariesForItems(
     List<String> itemIds,
   ) async {
@@ -109,6 +123,16 @@ class VoteRepository {
       AppVoteFields.points: points,
       AppVoteFields.comment: comment,
     });
+  }
+
+  Future<void> deleteMyVote(String itemId) async {
+    final userId = _client.auth.currentUser!.id;
+
+    await _client
+        .from(AppTables.itemVotes)
+        .delete()
+        .eq(AppVoteFields.itemId, itemId)
+        .eq(AppVoteFields.userId, userId);
   }
 
   int? _parseInt(dynamic value) {
