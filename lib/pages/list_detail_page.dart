@@ -321,6 +321,29 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> reopenItem(String itemId) async {
+    if (completingItem) return;
+
+    setState(() => completingItem = true);
+
+    try {
+      await itemRepository.reopenItem(itemId);
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Task reopened');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to reopen task', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => completingItem = false);
+    }
+  }
+
   Future<void> viewVotes(Map<String, dynamic> item) async {
     if (loadingVoteDetails) return;
 
@@ -386,6 +409,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
               onDelete: deleteItem,
               onVote: voteItem,
               onViewVotes: viewVotes,
+              onReopen: reopenItem,
             ),
           ],
         ),
