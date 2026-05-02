@@ -3,7 +3,6 @@ import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
-import 'package:pesalistas/widgets/list_detail/base_item_card.dart';
 
 class ChoreItemCard extends StatelessWidget {
   const ChoreItemCard({
@@ -19,58 +18,404 @@ class ChoreItemCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  String buildSubtitle() {
-    final description = item[AppItemFields.description];
-    final recurrenceType = item[AppItemFields.recurrenceType]?.toString();
-    final recurrenceInterval = AppValueParsing.intOrNull(
-      item[AppItemFields.recurrenceInterval],
+  String get title {
+    final value = item[AppItemFields.title]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return 'Untitled chore';
+    }
+
+    return value.trim();
+  }
+
+  String? get description {
+    final value = item[AppItemFields.description]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    return value.trim();
+  }
+
+  String? get recurrenceType {
+    final value = item[AppItemFields.recurrenceType]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    return value.trim();
+  }
+
+  int? get recurrenceInterval {
+    return AppValueParsing.intOrNull(item[AppItemFields.recurrenceInterval]);
+  }
+
+  DateTime? get nextDueDate {
+    final parsed = AppValueParsing.dateTimeOrNull(
+      item[AppItemFields.nextDueAt],
     );
-    final nextDueAt = item[AppItemFields.nextDueAt];
 
-    final parts = <String>[];
+    if (parsed == null) return null;
 
-    if (description != null && description.toString().trim().isNotEmpty) {
-      parts.add(description.toString());
+    return DateTime(parsed.year, parsed.month, parsed.day);
+  }
+
+  DateTime get today {
+    final now = DateTime.now();
+
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  String get recurrenceText {
+    return AppRecurrenceTypes.displayText(
+      recurrenceType: recurrenceType,
+      recurrenceInterval: recurrenceInterval,
+    );
+  }
+
+  String get nextDueText {
+    final formatted = AppDateFormatting.yyyyMmDdFromValue(
+      item[AppItemFields.nextDueAt],
+    );
+
+    if (formatted.isEmpty) {
+      return 'No due date';
     }
 
-    if (recurrenceType != null && recurrenceType.trim().isNotEmpty) {
-      parts.add(
-        AppRecurrenceTypes.displayText(
-          recurrenceType: recurrenceType,
-          recurrenceInterval: recurrenceInterval,
-        ),
-      );
-    }
+    return formatted;
+  }
 
-    final formattedNextDue = AppDateFormatting.yyyyMmDdFromValue(nextDueAt);
+  bool get hasRecurrence {
+    return recurrenceType != null;
+  }
 
-    if (formattedNextDue.isNotEmpty) {
-      parts.add('Next due: $formattedNextDue');
-    }
+  bool get hasNextDueDate {
+    return nextDueDate != null;
+  }
 
-    return parts.isEmpty ? 'Chore' : parts.join(' • ');
+  bool get isOverdue {
+    final due = nextDueDate;
+
+    if (due == null) return false;
+
+    return due.isBefore(today);
+  }
+
+  bool get isDueToday {
+    final due = nextDueDate;
+
+    if (due == null) return false;
+
+    return due == today;
+  }
+
+  bool get isUpcoming {
+    final due = nextDueDate;
+
+    if (due == null) return false;
+
+    return due.isAfter(today);
+  }
+
+  ChoreDueState get dueState {
+    if (isOverdue) return ChoreDueState.overdue;
+    if (isDueToday) return ChoreDueState.today;
+    if (isUpcoming) return ChoreDueState.upcoming;
+
+    return ChoreDueState.none;
   }
 
   @override
   Widget build(BuildContext context) {
-    return BaseItemCard(
-      title: item[AppItemFields.title]?.toString(),
-      fallbackTitle: 'Untitled chore',
-      subtitle: buildSubtitle(),
-      icon: Icons.cleaning_services,
-      onTap: onEdit,
-      leadingAction: IconButton(
-        icon: const Icon(Icons.check_circle_outline),
-        onPressed: onComplete,
-        tooltip: 'Complete chore',
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.delete_outline),
-          onPressed: onDelete,
-          tooltip: 'Delete chore',
+    final theme = Theme.of(context);
+    final dueStyle = ChoreDueStyle.fromState(context, dueState);
+
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onEdit,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: dueStyle.avatarBackground,
+                    child: Icon(
+                      dueStyle.icon,
+                      color: dueStyle.avatarForeground,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                title,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            if (dueState != ChoreDueState.none)
+                              _DuePill(
+                                label: dueStyle.label,
+                                backgroundColor: dueStyle.pillBackground,
+                                foregroundColor: dueStyle.pillForeground,
+                              ),
+                          ],
+                        ),
+                        if (description != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            description!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: onDelete,
+                    icon: const Icon(Icons.delete_outline),
+                    tooltip: 'Delete chore',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _ChoreInfoChip(
+                    icon: Icons.repeat,
+                    label: hasRecurrence ? recurrenceText : 'Does not repeat',
+                    filled: hasRecurrence,
+                  ),
+                  _ChoreInfoChip(
+                    icon: dueStyle.dateIcon,
+                    label: hasNextDueDate ? 'Due $nextDueText' : nextDueText,
+                    filled: hasNextDueDate,
+                    backgroundColor: hasNextDueDate
+                        ? dueStyle.chipBackground
+                        : null,
+                    foregroundColor: hasNextDueDate
+                        ? dueStyle.chipForeground
+                        : null,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: onComplete,
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: Text(
+                        isOverdue || isDueToday
+                            ? 'Complete now'
+                            : 'Complete chore',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit_outlined),
+                    tooltip: 'Edit chore',
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
+    );
+  }
+}
+
+enum ChoreDueState { none, overdue, today, upcoming }
+
+class ChoreDueStyle {
+  const ChoreDueStyle({
+    required this.icon,
+    required this.dateIcon,
+    required this.label,
+    required this.avatarBackground,
+    required this.avatarForeground,
+    required this.pillBackground,
+    required this.pillForeground,
+    required this.chipBackground,
+    required this.chipForeground,
+  });
+
+  final IconData icon;
+  final IconData dateIcon;
+  final String label;
+  final Color avatarBackground;
+  final Color avatarForeground;
+  final Color pillBackground;
+  final Color pillForeground;
+  final Color chipBackground;
+  final Color chipForeground;
+
+  factory ChoreDueStyle.fromState(BuildContext context, ChoreDueState state) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    switch (state) {
+      case ChoreDueState.overdue:
+        return ChoreDueStyle(
+          icon: Icons.warning_amber_rounded,
+          dateIcon: Icons.event_busy_outlined,
+          label: 'Overdue',
+          avatarBackground: colors.errorContainer,
+          avatarForeground: colors.onErrorContainer,
+          pillBackground: colors.errorContainer,
+          pillForeground: colors.onErrorContainer,
+          chipBackground: colors.errorContainer,
+          chipForeground: colors.onErrorContainer,
+        );
+
+      case ChoreDueState.today:
+        return ChoreDueStyle(
+          icon: Icons.today_outlined,
+          dateIcon: Icons.today_outlined,
+          label: 'Today',
+          avatarBackground: colors.primaryContainer,
+          avatarForeground: colors.onPrimaryContainer,
+          pillBackground: colors.primaryContainer,
+          pillForeground: colors.onPrimaryContainer,
+          chipBackground: colors.primaryContainer,
+          chipForeground: colors.onPrimaryContainer,
+        );
+
+      case ChoreDueState.upcoming:
+        return ChoreDueStyle(
+          icon: Icons.cleaning_services,
+          dateIcon: Icons.event_outlined,
+          label: 'Upcoming',
+          avatarBackground: colors.secondaryContainer,
+          avatarForeground: colors.onSecondaryContainer,
+          pillBackground: colors.secondaryContainer,
+          pillForeground: colors.onSecondaryContainer,
+          chipBackground: colors.secondaryContainer,
+          chipForeground: colors.onSecondaryContainer,
+        );
+
+      case ChoreDueState.none:
+        return ChoreDueStyle(
+          icon: Icons.cleaning_services,
+          dateIcon: Icons.event_outlined,
+          label: '',
+          avatarBackground: colors.surfaceContainerHighest,
+          avatarForeground: colors.onSurfaceVariant,
+          pillBackground: colors.surfaceContainerHighest,
+          pillForeground: colors.onSurfaceVariant,
+          chipBackground: colors.surfaceContainerHighest,
+          chipForeground: colors.onSurfaceVariant,
+        );
+    }
+  }
+}
+
+class _DuePill extends StatelessWidget {
+  const _DuePill({
+    required this.label,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final String label;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: foregroundColor,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _ChoreInfoChip extends StatelessWidget {
+  const _ChoreInfoChip({
+    required this.icon,
+    required this.label,
+    this.filled = false,
+    this.backgroundColor,
+    this.foregroundColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool filled;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final resolvedBackgroundColor =
+        backgroundColor ??
+        (filled
+            ? theme.colorScheme.secondaryContainer
+            : theme.colorScheme.surfaceContainerHighest);
+
+    final resolvedForegroundColor =
+        foregroundColor ??
+        (filled
+            ? theme.colorScheme.onSecondaryContainer
+            : theme.colorScheme.onSurfaceVariant);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: resolvedBackgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: resolvedForegroundColor),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: filled ? FontWeight.w700 : FontWeight.w500,
+              color: resolvedForegroundColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

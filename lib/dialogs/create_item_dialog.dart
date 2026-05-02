@@ -36,14 +36,16 @@ class CreateItemDialog extends StatefulWidget {
 class _CreateItemDialogState extends State<CreateItemDialog> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
-  final recurrenceIntervalController = TextEditingController(text: '1');
+  final recurrenceIntervalController = TextEditingController(text: '2');
 
   int priority = 0;
   DateTime? deadlineAt;
 
   String? recurrenceType;
-  int recurrenceInterval = 1;
+  int recurrenceInterval = 2;
   DateTime? nextDueAt;
+
+  String? validationMessage;
 
   AppListTypeConfig get listTypeConfig =>
       AppListTypes.fromValue(widget.listType);
@@ -54,6 +56,8 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
 
   bool get usesCustomInterval =>
       recurrenceType == AppRecurrenceTypes.everyNDays.value;
+
+  bool get hasRecurrence => recurrenceType != null;
 
   @override
   void dispose() {
@@ -67,7 +71,19 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
     final title = titleController.text.trim();
     final description = descriptionController.text.trim();
 
-    if (title.isEmpty) return;
+    setState(() => validationMessage = null);
+
+    if (title.isEmpty) {
+      setState(() => validationMessage = 'Title is required.');
+      return;
+    }
+
+    if (isChoreList && usesCustomInterval && recurrenceInterval < 2) {
+      setState(
+        () => validationMessage = 'Custom recurrence must be at least 2 days.',
+      );
+      return;
+    }
 
     Navigator.of(context).pop(
       CreateItemDialogResult(
@@ -106,6 +122,56 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
     if (picked == null) return;
 
     setState(() => nextDueAt = picked);
+  }
+
+  void updateRecurrenceType(String? value) {
+    setState(() {
+      recurrenceType = value;
+      validationMessage = null;
+
+      if (value == null) {
+        nextDueAt = null;
+      } else {
+        nextDueAt ??= DateTime.now();
+
+        if (value == AppRecurrenceTypes.everyNDays.value &&
+            recurrenceInterval < 2) {
+          recurrenceInterval = 2;
+          recurrenceIntervalController.text = '2';
+        }
+      }
+    });
+  }
+
+  void updateRecurrenceInterval(String value) {
+    setState(() {
+      recurrenceInterval = int.tryParse(value) ?? 2;
+      validationMessage = null;
+    });
+  }
+
+  Widget buildValidationMessage() {
+    final message = validationMessage;
+
+    if (message == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget buildTaskFields() {
@@ -156,20 +222,22 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
 
   Widget buildChoreFields() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
         DropdownButtonFormField<String?>(
           value: recurrenceType,
-          decoration: const InputDecoration(labelText: 'Recurrence'),
+          decoration: const InputDecoration(
+            labelText: 'Recurrence',
+            helperText: 'Choose how often this chore repeats.',
+          ),
           items: AppRecurrenceTypes.all.map((config) {
             return DropdownMenuItem<String?>(
               value: config.value,
               child: Text(config.label),
             );
           }).toList(),
-          onChanged: (value) {
-            setState(() => recurrenceType = value);
-          },
+          onChanged: updateRecurrenceType,
         ),
         if (usesCustomInterval) ...[
           const SizedBox(height: 12),
@@ -177,11 +245,11 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
             controller: recurrenceIntervalController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Repeat every how many days?',
+              labelText: 'Repeat every',
+              suffixText: 'days',
+              helperText: 'Minimum 2 days.',
             ),
-            onChanged: (value) {
-              recurrenceInterval = int.tryParse(value) ?? 1;
-            },
+            onChanged: updateRecurrenceInterval,
           ),
         ],
         const SizedBox(height: 12),
@@ -189,7 +257,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: pickNextDueDate,
+                onPressed: hasRecurrence ? pickNextDueDate : null,
                 icon: const Icon(Icons.event_repeat),
                 label: Text(
                   nextDueAt == null
@@ -207,6 +275,13 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
               ),
             ],
           ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          hasRecurrence
+              ? 'When you complete this chore, the app will schedule the next due date.'
+              : 'Non-recurring chores can still be completed manually.',
+          style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
     );
@@ -237,6 +312,11 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
                 hintText: 'Buy milk / Watch movie / Clean kitchen',
               ),
               textInputAction: TextInputAction.next,
+              onChanged: (_) {
+                if (validationMessage != null) {
+                  setState(() => validationMessage = null);
+                }
+              },
             ),
             const SizedBox(height: 12),
             TextField(
@@ -248,6 +328,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
             ),
             if (isTaskList) buildTaskFields(),
             if (isChoreList) buildChoreFields(),
+            buildValidationMessage(),
           ],
         ),
       ),
