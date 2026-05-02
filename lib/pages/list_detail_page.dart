@@ -50,6 +50,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   bool get isChoreList => listType == AppListTypes.chores.value;
 
+  bool get isVotableList {
+    return listType == AppListTypes.movies.value ||
+        listType == AppListTypes.ideas.value ||
+        listType == AppListTypes.activities.value;
+  }
+
   bool get isBusy =>
       creatingItem ||
       editingItem ||
@@ -75,12 +81,13 @@ class _ListDetailPageState extends State<ListDetailPage> {
     setState(() => loadingItems = true);
 
     try {
-      final result = await itemRepository.getItemsForList(listId);
+      final loadedItems = await itemRepository.getItemsForList(listId);
+      final enrichedItems = await enrichItemsWithVoteSummaries(loadedItems);
 
       if (!mounted) return;
 
       setState(() {
-        items = result;
+        items = enrichedItems;
         loadingItems = false;
       });
     } catch (error) {
@@ -89,6 +96,33 @@ class _ListDetailPageState extends State<ListDetailPage> {
       setState(() => loadingItems = false);
       showErrorSnackBar(context, 'Failed to load items', error);
     }
+  }
+
+  Future<List<Map<String, dynamic>>> enrichItemsWithVoteSummaries(
+    List<Map<String, dynamic>> loadedItems,
+  ) async {
+    if (!isVotableList || loadedItems.isEmpty) {
+      return loadedItems;
+    }
+
+    final itemIds = loadedItems
+        .map((item) => item[AppItemFields.id]?.toString())
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toList();
+
+    final summaries = await voteRepository.getVoteSummariesForItems(itemIds);
+
+    return loadedItems.map((item) {
+      final itemId = item[AppItemFields.id]?.toString();
+      final summary = summaries[itemId];
+
+      if (summary == null) {
+        return item;
+      }
+
+      return {...item, ...summary};
+    }).toList();
   }
 
   Future<void> createItemDialog() async {

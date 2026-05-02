@@ -11,8 +11,7 @@ class MemberRepository {
     final response = await _client
         .from(AppTables.groupMembers)
         .select('*, profiles(id, username, display_name, avatar_url)')
-        .eq(AppMemberFields.groupId, groupId)
-        .order(AppMemberFields.joinedAt);
+        .eq(AppMemberFields.groupId, groupId);
 
     return List<Map<String, dynamic>>.from(response);
   }
