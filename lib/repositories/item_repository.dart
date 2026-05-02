@@ -1,5 +1,6 @@
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -23,6 +24,13 @@ class ItemRepository {
       'complete_item',
       params: {'target_item_id': itemId, 'completion_note': null},
     );
+  }
+
+  Future<void> reopenItem(String itemId) async {
+    await _client
+        .from(AppTables.items)
+        .update({AppItemFields.status: AppItemStatus.open})
+        .eq(AppItemFields.id, itemId);
   }
 
   Future<void> deleteItem(String itemId) async {

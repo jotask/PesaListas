@@ -9,6 +9,7 @@ class ListItemsSection extends StatelessWidget {
     required this.loading,
     required this.onCreate,
     required this.onComplete,
+    required this.onReopen,
     required this.onEdit,
     required this.onDelete,
     required this.onVote,
@@ -21,6 +22,7 @@ class ListItemsSection extends StatelessWidget {
 
   final VoidCallback onCreate;
   final void Function(String itemId) onComplete;
+  final void Function(String itemId) onReopen;
   final void Function(Map<String, dynamic> item) onEdit;
   final void Function(String itemId) onDelete;
   final void Function(Map<String, dynamic> item) onVote;
@@ -42,6 +44,7 @@ class ListItemsSection extends StatelessWidget {
           loading: loading,
           onCreate: onCreate,
           onComplete: onComplete,
+          onReopen: onReopen,
           onEdit: onEdit,
           onDelete: onDelete,
           onVote: onVote,
