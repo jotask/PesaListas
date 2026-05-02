@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/dialogs/vote_dialog.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
-import 'package:pesalistas/tools/create_item_dialog.dart';
+import 'package:pesalistas/dialogs/create_item_dialog.dart';
+import 'package:pesalistas/dialogs/edit_item_dialog.dart';
+import 'package:pesalistas/repositories/vote_repository.dart';
+import 'package:pesalistas/widgets/list_detail/generic_items_view.dart';
+import 'package:pesalistas/widgets/list_detail/item_card.dart';
+import 'package:pesalistas/widgets/list_detail/items_view_factory.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ListDetailPage extends StatefulWidget {
@@ -14,6 +20,7 @@ class ListDetailPage extends StatefulWidget {
 
 class _ListDetailPageState extends State<ListDetailPage> {
   late final ItemRepository itemRepository;
+  late final VoteRepository voteRepository;
 
   bool loadingItems = true;
   List<Map<String, dynamic>> items = [];
@@ -22,7 +29,43 @@ class _ListDetailPageState extends State<ListDetailPage> {
   void initState() {
     super.initState();
     itemRepository = ItemRepository(Supabase.instance.client);
+    voteRepository = VoteRepository(Supabase.instance.client);
     loadItems();
+  }
+
+  Future<void> voteItem(Map<String, dynamic> item) async {
+    try {
+      final existingVote = await voteRepository.getMyVote(item['id']);
+
+      final result = await showDialog<VoteDialogResult>(
+        context: context,
+        builder: (_) => VoteDialog(
+          initialPoints: existingVote?['points'] ?? 5,
+          initialComment: existingVote?['comment'],
+        ),
+      );
+
+      if (result == null) return;
+
+      await voteRepository.upsertVote(
+        itemId: item['id'],
+        points: result.points,
+        comment: result.comment,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('VOTE ITEM ERROR: $error');
+      debugPrint('STACK TRACE: $stackTrace');
+    }
+  }
+
+  Future<void> deleteItem(String itemId) async {
+    try {
+      await itemRepository.deleteItem(itemId);
+      await loadItems();
+    } catch (error, stackTrace) {
+      debugPrint('DELETE ITEM ERROR: $error');
+      debugPrint('STACK TRACE: $stackTrace');
+    }
   }
 
   Future<void> loadItems() async {
@@ -56,10 +99,33 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> editItem(Map<String, dynamic> item) async {
+    final result = await showDialog<EditItemDialogResult>(
+      context: context,
+      builder: (_) => EditItemDialog(item: item),
+    );
+
+    if (result == null) return;
+
+    try {
+      await itemRepository.updateItem(
+        itemId: item['id'],
+        title: result.title,
+        description: result.description,
+      );
+
+      await loadItems();
+    } catch (error, stackTrace) {
+      debugPrint('EDIT ITEM ERROR: $error');
+      debugPrint('STACK TRACE: $stackTrace');
+    }
+  }
+
   Future<void> createItemDialog() async {
     final result = await showDialog<CreateItemDialogResult>(
       context: context,
-      builder: (_) => const CreateItemDialog(),
+      builder: (_) =>
+          CreateItemDialog(listType: widget.list['list_type'] ?? 'generic'),
     );
 
     if (result == null) return;
@@ -69,6 +135,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
         listId: widget.list['id'],
         title: result.title,
         description: result.description,
+        priority: result.priority,
+        deadlineAt: result.deadlineAt,
+        recurrenceType: result.recurrenceType,
+        recurrenceInterval: result.recurrenceInterval,
+        nextDueAt: result.nextDueAt,
       );
 
       await loadItems();
@@ -110,45 +181,16 @@ class _ListDetailPageState extends State<ListDetailPage> {
             ),
             const SizedBox(height: 12),
 
-            if (loadingItems)
-              const Center(child: CircularProgressIndicator())
-            else if (items.isEmpty)
-              Card(
-                child: ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.add_task)),
-                  title: const Text('No items yet'),
-                  subtitle: const Text('Add your first item.'),
-                  trailing: const Icon(Icons.add),
-                  onTap: createItemDialog,
-                ),
-              )
-            else
-              for (final item in items)
-                Card(
-                  child: ListTile(
-                    leading: IconButton(
-                      icon: Icon(
-                        item['status'] == 'done'
-                            ? Icons.check_circle
-                            : Icons.radio_button_unchecked,
-                      ),
-                      onPressed: item['status'] == 'done'
-                          ? null
-                          : () => completeItem(item['id']),
-                    ),
-                    title: Text(
-                      item['title'] ?? 'Untitled item',
-                      style: TextStyle(
-                        decoration: item['status'] == 'done'
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
-                    ),
-                    subtitle: Text(
-                      item['description'] ?? item['status'] ?? 'Open',
-                    ),
-                  ),
-                ),
+            ItemsViewFactory(
+              listType: listType,
+              items: items,
+              loading: loadingItems,
+              onCreate: createItemDialog,
+              onComplete: completeItem,
+              onEdit: editItem,
+              onDelete: deleteItem,
+              onVote: voteItem,
+            ),
           ],
         ),
       ),

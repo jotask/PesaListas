@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/auth/google_auth.dart';
 import 'package:pesalistas/pages/home_page.dart';
-import 'package:pesalistas/tools/animated_logo.dart';
+import 'package:pesalistas/animated_logo.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
 

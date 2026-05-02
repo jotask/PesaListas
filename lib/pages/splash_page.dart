@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/home_page.dart';
-import 'package:pesalistas/tools/animated_logo.dart';
+import 'package:pesalistas/animated_logo.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SplashPage extends StatefulWidget {

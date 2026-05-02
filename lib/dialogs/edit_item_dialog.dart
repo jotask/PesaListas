@@ -1,22 +1,35 @@
 import 'package:flutter/material.dart';
 
-class CreateItemDialogResult {
-  const CreateItemDialogResult({required this.title, this.description});
+class EditItemDialogResult {
+  const EditItemDialogResult({required this.title, this.description});
 
   final String title;
   final String? description;
 }
 
-class CreateItemDialog extends StatefulWidget {
-  const CreateItemDialog({super.key});
+class EditItemDialog extends StatefulWidget {
+  const EditItemDialog({super.key, required this.item});
+
+  final Map<String, dynamic> item;
 
   @override
-  State<CreateItemDialog> createState() => _CreateItemDialogState();
+  State<EditItemDialog> createState() => _EditItemDialogState();
 }
 
-class _CreateItemDialogState extends State<CreateItemDialog> {
-  final titleController = TextEditingController();
-  final descriptionController = TextEditingController();
+class _EditItemDialogState extends State<EditItemDialog> {
+  late final TextEditingController titleController;
+  late final TextEditingController descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    titleController = TextEditingController(text: widget.item['title'] ?? '');
+
+    descriptionController = TextEditingController(
+      text: widget.item['description'] ?? '',
+    );
+  }
 
   @override
   void dispose() {
@@ -32,7 +45,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
     if (title.isEmpty) return;
 
     Navigator.of(context).pop(
-      CreateItemDialogResult(
+      EditItemDialogResult(
         title: title,
         description: description.isEmpty ? null : description,
       ),
@@ -42,17 +55,14 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add item'),
+      title: const Text('Edit item'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: titleController,
             autofocus: false,
-            decoration: const InputDecoration(
-              labelText: 'Title',
-              hintText: 'Buy milk / Watch movie / Clean kitchen',
-            ),
+            decoration: const InputDecoration(labelText: 'Title'),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -67,7 +77,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Add')),
+        ElevatedButton(onPressed: submit, child: const Text('Save')),
       ],
     );
   }

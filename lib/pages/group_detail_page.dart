@@ -3,8 +3,12 @@ import 'package:pesalistas/pages/list_detail_page.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/member_repository.dart';
-import 'package:pesalistas/tools/create_list_dialog.dart';
-import 'package:pesalistas/tools/invite_member_dialog.dart';
+import 'package:pesalistas/dialogs/create_list_dialog.dart';
+import 'package:pesalistas/dialogs/invite_member_dialog.dart';
+import 'package:pesalistas/widgets/common/empty_info_card.dart';
+import 'package:pesalistas/widgets/group_detail/group_list_card.dart';
+import 'package:pesalistas/widgets/group_detail/member_card.dart';
+import 'package:pesalistas/widgets/group_detail/pending_group_invite_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GroupDetailPage extends StatefulWidget {
@@ -198,25 +202,13 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             if (loadingMembers)
               const Center(child: CircularProgressIndicator())
             else if (members.isEmpty)
-              const Card(
-                child: ListTile(
-                  leading: CircleAvatar(child: Icon(Icons.person_off)),
-                  title: Text('No members found'),
-                ),
+              const EmptyInfoCard(
+                icon: Icons.person_off,
+                title: 'No members found',
+                subtitle: 'Members will appear here.',
               )
             else
-              for (final member in members)
-                Card(
-                  child: ListTile(
-                    leading: const CircleAvatar(child: Icon(Icons.person)),
-                    title: Text(
-                      member['profiles']?['display_name'] ??
-                          member['profiles']?['username'] ??
-                          'Unknown user',
-                    ),
-                    subtitle: Text('Role: ${member['role'] ?? 'member'}'),
-                  ),
-                ),
+              for (final member in members) MemberCard(member: member),
 
             const SizedBox(height: 24),
 
@@ -229,30 +221,16 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             if (loadingInvitations)
               const Center(child: CircularProgressIndicator())
             else if (pendingInvitations.isEmpty)
-              const Card(
-                child: ListTile(
-                  leading: CircleAvatar(
-                    child: Icon(Icons.mark_email_read_outlined),
-                  ),
-                  title: Text('No pending invites'),
-                  subtitle: Text('Invited people will appear here.'),
-                ),
+              const EmptyInfoCard(
+                icon: Icons.person_off,
+                title: 'No pending invites',
+                subtitle: 'Invited people will appear here.',
               )
             else
               for (final invitation in pendingInvitations)
-                Card(
-                  child: ListTile(
-                    leading: const CircleAvatar(
-                      child: Icon(Icons.mail_outline),
-                    ),
-                    title: Text(invitation['invited_email'] ?? 'Unknown email'),
-                    subtitle: Text('Role: ${invitation['role'] ?? 'member'}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close),
-                      tooltip: 'Cancel invitation',
-                      onPressed: () => cancelInvitation(invitation['id']),
-                    ),
-                  ),
+                PendingGroupInviteCard(
+                  invitation: invitation,
+                  onCancel: () => cancelInvitation(invitation['id']),
                 ),
 
             const SizedBox(height: 24),
@@ -279,26 +257,19 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                   leading: const CircleAvatar(child: Icon(Icons.list_alt)),
                   title: const Text('No lists yet'),
                   subtitle: const Text('Create your first shared list here.'),
-                  trailing: const Icon(Icons.add),
-                  onTap: createListDialog,
                 ),
               )
             else
               for (final list in lists)
-                Card(
-                  child: ListTile(
-                    leading: const CircleAvatar(child: Icon(Icons.list_alt)),
-                    title: Text(list['name'] ?? 'Untitled list'),
-                    subtitle: Text(list['list_type'] ?? 'generic'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ListDetailPage(list: list),
-                        ),
-                      );
-                    },
-                  ),
+                GroupListCard(
+                  list: list,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ListDetailPage(list: list),
+                      ),
+                    );
+                  },
                 ),
           ],
         ),
