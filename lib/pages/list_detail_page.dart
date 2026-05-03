@@ -7,9 +7,11 @@ import 'package:pesalistas/core/vote_fields.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/dialogs/create_item_dialog.dart';
 import 'package:pesalistas/dialogs/edit_item_dialog.dart';
+import 'package:pesalistas/dialogs/recipe_details_dialog.dart';
 import 'package:pesalistas/dialogs/vote_details_dialog.dart';
 import 'package:pesalistas/dialogs/vote_dialog.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
+import 'package:pesalistas/repositories/recipe_repository.dart';
 import 'package:pesalistas/repositories/vote_repository.dart';
 import 'package:pesalistas/widgets/list_detail/list_detail_header.dart';
 import 'package:pesalistas/widgets/list_detail/list_items_section.dart';
@@ -27,6 +29,7 @@ class ListDetailPage extends StatefulWidget {
 class _ListDetailPageState extends State<ListDetailPage> {
   late final ItemRepository itemRepository;
   late final VoteRepository voteRepository;
+  late final RecipeRepository recipeRepository;
 
   bool loadingItems = true;
   bool creatingItem = false;
@@ -35,6 +38,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool completingItem = false;
   bool votingItem = false;
   bool loadingVoteDetails = false;
+  bool loadingRecipeDetails = false;
 
   List<Map<String, dynamic>> items = [];
 
@@ -70,7 +74,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
       deletingItem ||
       completingItem ||
       votingItem ||
-      loadingVoteDetails;
+      loadingVoteDetails ||
+      loadingRecipeDetails;
 
   @override
   void initState() {
@@ -80,6 +85,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     itemRepository = ItemRepository(client);
     voteRepository = VoteRepository(client);
+    recipeRepository = RecipeRepository(client);
 
     loadItems();
   }
@@ -104,6 +110,32 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       setState(() => loadingItems = false);
       showErrorSnackBar(context, 'Failed to load items', error);
+    }
+  }
+
+  Future<void> viewRecipeDetails(Map<String, dynamic> item) async {
+    if (loadingRecipeDetails) return;
+
+    setState(() => loadingRecipeDetails = true);
+
+    try {
+      final itemId = item[AppItemFields.id].toString();
+      final recipe = await recipeRepository.ensureRecipeForItem(itemId);
+
+      if (!mounted) return;
+
+      await showDialog<void>(
+        context: context,
+        builder: (_) => RecipeDetailsDialog(item: item, recipe: recipe),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to load recipe details', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => loadingRecipeDetails = false);
     }
   }
 
@@ -239,6 +271,36 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> reopenItem(String itemId) async {
+    if (completingItem) return;
+
+    setState(() => completingItem = true);
+
+    try {
+      await itemRepository.reopenItem(itemId);
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(
+        context,
+        listType == AppListTypes.shopping.value
+            ? 'Shopping item reopened'
+            : listType == AppListTypes.generic.value
+            ? 'Item reopened'
+            : 'Task reopened',
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to reopen item', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => completingItem = false);
+    }
+  }
+
   Future<void> deleteItem(String itemId) async {
     if (deletingItem) return;
 
@@ -327,34 +389,6 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
-  Future<void> reopenItem(String itemId) async {
-    if (completingItem) return;
-
-    setState(() => completingItem = true);
-
-    try {
-      await itemRepository.reopenItem(itemId);
-      await loadItems();
-
-      if (!mounted) return;
-
-      showSuccessSnackBar(
-        context,
-        listType == AppListTypes.shopping.value
-            ? 'Shopping item reopened'
-            : 'Task reopened',
-      );
-    } catch (error) {
-      if (!mounted) return;
-
-      showErrorSnackBar(context, 'Failed to reopen task', error);
-    } finally {
-      if (!mounted) return;
-
-      setState(() => completingItem = false);
-    }
-  }
-
   Future<void> viewVotes(Map<String, dynamic> item) async {
     if (loadingVoteDetails) return;
 
@@ -384,47 +418,49 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  void goBack() {
+    Navigator.of(context).maybePop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final config = listTypeConfig;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(listName),
-        actions: [
-          IconButton(
-            onPressed: creatingItem ? null : createItemDialog,
-            icon: const Icon(Icons.add),
-            tooltip: 'Add item',
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: creatingItem ? null : createItemDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('Add item'),
+      ),
+      body: Column(
+        children: [
+          ListDetailHeader(listName: listName, config: config, onBack: goBack),
+          if (isBusy) const LinearProgressIndicator(),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: loadItems,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  ListItemsSection(
+                    listType: listType,
+                    items: items,
+                    loading: loadingItems,
+                    showStatusSummary: shouldShowStatusSummary,
+                    onCreate: createItemDialog,
+                    onComplete: completeItem,
+                    onReopen: reopenItem,
+                    onEdit: editItem,
+                    onDelete: deleteItem,
+                    onVote: voteItem,
+                    onViewVotes: viewVotes,
+                    onViewRecipeDetails: viewRecipeDetails,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: loadItems,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            ListDetailHeader(listName: listName, config: config),
-            if (isBusy) ...[
-              const SizedBox(height: 12),
-              const LinearProgressIndicator(),
-            ],
-            const SizedBox(height: 24),
-            ListItemsSection(
-              listType: listType,
-              items: items,
-              loading: loadingItems,
-              onCreate: createItemDialog,
-              onComplete: completeItem,
-              onEdit: editItem,
-              onDelete: deleteItem,
-              onVote: voteItem,
-              onViewVotes: viewVotes,
-              onReopen: reopenItem,
-              showStatusSummary: shouldShowStatusSummary,
-            ),
-          ],
-        ),
       ),
     );
   }

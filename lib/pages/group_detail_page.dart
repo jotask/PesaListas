@@ -6,9 +6,8 @@ import 'package:pesalistas/dialogs/invite_member_dialog.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/member_repository.dart';
-import 'package:pesalistas/widgets/group_detail/group_detail_header.dart';
 import 'package:pesalistas/widgets/group_detail/group_lists_section.dart';
-import 'package:pesalistas/widgets/group_detail/group_people_section.dart';
+import 'package:pesalistas/widgets/group_detail/group_overview_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GroupDetailPage extends StatefulWidget {
@@ -21,8 +20,8 @@ class GroupDetailPage extends StatefulWidget {
 }
 
 class _GroupDetailPageState extends State<GroupDetailPage> {
-  late final InvitationRepository invitationRepository;
   late final MemberRepository memberRepository;
+  late final InvitationRepository invitationRepository;
   late final ListRepository listRepository;
 
   bool loadingMembers = true;
@@ -37,11 +36,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
   String get groupId => widget.group[AppGroupFields.id].toString();
 
-  String get groupName =>
-      widget.group[AppGroupFields.name]?.toString() ?? 'Group';
+  bool get loadingPeople => loadingMembers || loadingInvitations;
 
-  String? get groupDescription =>
-      widget.group[AppGroupFields.description]?.toString();
+  bool get isBusy => invitingMember || creatingList || loadingPeople;
 
   @override
   void initState() {
@@ -49,14 +46,14 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
     final client = Supabase.instance.client;
 
-    invitationRepository = InvitationRepository(client);
     memberRepository = MemberRepository(client);
+    invitationRepository = InvitationRepository(client);
     listRepository = ListRepository(client);
 
-    loadGroupData();
+    loadData();
   }
 
-  Future<void> loadGroupData() async {
+  Future<void> loadData() async {
     await Future.wait([loadMembers(), loadPendingInvitations(), loadLists()]);
   }
 
@@ -102,7 +99,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
       if (!mounted) return;
 
       setState(() => loadingInvitations = false);
-      showErrorSnackBar(context, 'Failed to load pending invitations', error);
+      showErrorSnackBar(context, 'Failed to load invitations', error);
     }
   }
 
@@ -128,7 +125,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     }
   }
 
-  Future<void> inviteMemberDialog() async {
+  Future<void> inviteMember() async {
     if (invitingMember) return;
 
     final email = await showDialog<String>(
@@ -152,7 +149,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, 'Failed to send invitation', error);
+      showErrorSnackBar(context, 'Failed to invite member', error);
     } finally {
       if (!mounted) return;
 
@@ -160,22 +157,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     }
   }
 
-  Future<void> cancelInvitation(String invitationId) async {
-    try {
-      await invitationRepository.cancelInvitation(invitationId);
-      await loadPendingInvitations();
-
-      if (!mounted) return;
-
-      showSuccessSnackBar(context, 'Invitation cancelled');
-    } catch (error) {
-      if (!mounted) return;
-
-      showErrorSnackBar(context, 'Failed to cancel invitation', error);
-    }
-  }
-
-  Future<void> createListDialog() async {
+  Future<void> createList() async {
     if (creatingList) return;
 
     final result = await showDialog<CreateListDialogResult>(
@@ -210,51 +192,45 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     }
   }
 
+  void goBack() {
+    Navigator.of(context).maybePop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(groupName),
-        actions: [
-          IconButton(
-            onPressed: invitingMember ? null : inviteMemberDialog,
-            icon: const Icon(Icons.person_add),
-            tooltip: 'Invite member',
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: creatingList ? null : createList,
+        icon: const Icon(Icons.add),
+        label: const Text('New list'),
+      ),
+      body: Column(
+        children: [
+          GroupOverviewCard(
+            group: widget.group,
+            members: members,
+            pendingInvitations: pendingInvitations,
+            onInvite: inviteMember,
+            onBack: goBack,
+          ),
+          if (isBusy) const LinearProgressIndicator(),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: loadData,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  GroupListsSection(
+                    lists: lists,
+                    loading: loadingLists,
+                    creatingList: creatingList,
+                    onCreateList: createList,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: loadGroupData,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            GroupDetailHeader(
-              groupName: groupName,
-              description: groupDescription,
-            ),
-
-            const SizedBox(height: 24),
-
-            GroupPeopleSection(
-              members: members,
-              pendingInvitations: pendingInvitations,
-              loadingMembers: loadingMembers,
-              loadingInvitations: loadingInvitations,
-              invitingMember: invitingMember,
-              onInvite: inviteMemberDialog,
-              onCancelInvitation: cancelInvitation,
-            ),
-
-            const SizedBox(height: 24),
-
-            GroupListsSection(
-              lists: lists,
-              loading: loadingLists,
-              creatingList: creatingList,
-              onCreateList: createListDialog,
-            ),
-          ],
-        ),
       ),
     );
   }

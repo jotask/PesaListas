@@ -17,6 +17,7 @@ class ListItemsSection extends StatefulWidget {
     required this.onDelete,
     required this.onVote,
     required this.onViewVotes,
+    required this.onViewRecipeDetails,
   });
 
   final String listType;
@@ -31,6 +32,7 @@ class ListItemsSection extends StatefulWidget {
   final void Function(String itemId) onDelete;
   final void Function(Map<String, dynamic> item) onVote;
   final void Function(Map<String, dynamic> item) onViewVotes;
+  final void Function(Map<String, dynamic> item) onViewRecipeDetails;
 
   @override
   State<ListItemsSection> createState() => _ListItemsSectionState();
@@ -49,18 +51,6 @@ class _ListItemsSectionState extends State<ListItemsSection> {
 
   int get openCount {
     return totalCount - doneCount;
-  }
-
-  String get countText {
-    if (totalCount == 0) {
-      return 'No items';
-    }
-
-    if (!widget.showStatusSummary) {
-      return totalCount == 1 ? '1 item' : '$totalCount items';
-    }
-
-    return '$openCount open • $doneCount done';
   }
 
   List<Map<String, dynamic>> get filteredItems {
@@ -129,10 +119,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _ItemsHeader(countText: countText, onCreate: widget.onCreate),
-
         if (widget.showStatusSummary) ...[
-          const SizedBox(height: 8),
           _StatusFilterChips(
             selectedFilter: selectedFilter,
             totalCount: totalCount,
@@ -140,9 +127,8 @@ class _ListItemsSectionState extends State<ListItemsSection> {
             doneCount: doneCount,
             onSelected: selectFilter,
           ),
+          const SizedBox(height: 12),
         ],
-
-        const SizedBox(height: 12),
 
         if (!widget.loading &&
             widget.items.isNotEmpty &&
@@ -165,6 +151,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
             onDelete: widget.onDelete,
             onVote: widget.onVote,
             onViewVotes: widget.onViewVotes,
+            onViewRecipeDetails: widget.onViewRecipeDetails,
           ),
       ],
     );
@@ -172,34 +159,6 @@ class _ListItemsSectionState extends State<ListItemsSection> {
 }
 
 enum ItemStatusFilter { all, open, done }
-
-class _ItemsHeader extends StatelessWidget {
-  const _ItemsHeader({required this.countText, required this.onCreate});
-
-  final String countText;
-  final VoidCallback onCreate;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Expanded(
-          child: Text(
-            'Items',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
-        Text(countText, style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(width: 8),
-        IconButton(
-          onPressed: onCreate,
-          icon: const Icon(Icons.add),
-          tooltip: 'Add item',
-        ),
-      ],
-    );
-  }
-}
 
 class _StatusFilterChips extends StatelessWidget {
   const _StatusFilterChips({

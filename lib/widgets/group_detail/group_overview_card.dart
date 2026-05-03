@@ -1,0 +1,381 @@
+import 'package:flutter/material.dart';
+import 'package:pesalistas/core/group_fields.dart';
+import 'package:pesalistas/core/invitation_fields.dart';
+import 'package:pesalistas/core/member_fields.dart';
+import 'package:pesalistas/core/profile_fields.dart';
+
+class GroupOverviewCard extends StatelessWidget {
+  const GroupOverviewCard({
+    super.key,
+    required this.group,
+    required this.members,
+    required this.pendingInvitations,
+    required this.onInvite,
+    required this.onBack,
+  });
+
+  final Map<String, dynamic> group;
+  final List<Map<String, dynamic>> members;
+  final List<Map<String, dynamic>> pendingInvitations;
+  final VoidCallback onInvite;
+  final VoidCallback onBack;
+
+  String get groupName {
+    final value = group[AppGroupFields.name]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return 'Shared space';
+    }
+
+    return value.trim();
+  }
+
+  String? get groupDescription {
+    final value = group[AppGroupFields.description]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    return value.trim();
+  }
+
+  String get peopleSummary {
+    final memberCount = members.length;
+    final inviteCount = pendingInvitations.length;
+
+    final memberText = memberCount == 1 ? '1 member' : '$memberCount members';
+
+    if (inviteCount == 0) {
+      return memberText;
+    }
+
+    final inviteText = inviteCount == 1
+        ? '1 pending invite'
+        : '$inviteCount pending invites';
+
+    return '$memberText • $inviteText';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.scaffoldBackgroundColor,
+      child: SafeArea(
+        bottom: false,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(8, 4, 16, 12),
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            border: Border(
+              bottom: BorderSide(color: theme.dividerColor.withOpacity(0.4)),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 40,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    onPressed: onBack,
+                    icon: const Icon(Icons.arrow_back),
+                    tooltip: 'Back',
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: theme.colorScheme.primaryContainer,
+                      child: Icon(
+                        Icons.groups_2_outlined,
+                        size: 22,
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        groupName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
+                      onPressed: onInvite,
+                      icon: const Icon(Icons.person_add_alt_1, size: 18),
+                      label: const Text('Invite'),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8, top: 8),
+                child: Text(
+                  groupDescription ?? 'Shared space for lists and planning.',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _PeoplePreview(
+                        members: members,
+                        pendingInvitations: pendingInvitations,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        peopleSummary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PeoplePreview extends StatelessWidget {
+  const _PeoplePreview({
+    required this.members,
+    required this.pendingInvitations,
+  });
+
+  final List<Map<String, dynamic>> members;
+  final List<Map<String, dynamic>> pendingInvitations;
+
+  static const int maxVisibleMembers = 5;
+
+  @override
+  Widget build(BuildContext context) {
+    final visibleMembers = members.take(maxVisibleMembers).toList();
+    final extraMembers = members.length - visibleMembers.length;
+
+    return SizedBox(
+      height: 34,
+      child: Row(
+        children: [
+          for (final member in visibleMembers)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Tooltip(
+                message: _MemberDisplay.nameFor(member),
+                child: _TinyAvatar(
+                  name: _MemberDisplay.nameFor(member),
+                  avatarUrl: _MemberDisplay.avatarUrlFor(member),
+                ),
+              ),
+            ),
+          if (extraMembers > 0)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: _CountAvatar(label: '+$extraMembers'),
+            ),
+          if (pendingInvitations.isNotEmpty)
+            Tooltip(
+              message: _pendingTooltip,
+              child: _PendingAvatar(count: pendingInvitations.length),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String get _pendingTooltip {
+    final emails = pendingInvitations
+        .take(3)
+        .map((invite) {
+          return invite[AppInvitationFields.invitedEmail]?.toString() ??
+              invite[AppInvitationFields.email]?.toString() ??
+              'Pending invite';
+        })
+        .join('\n');
+
+    if (pendingInvitations.length <= 3) {
+      return emails;
+    }
+
+    return '$emails\n+${pendingInvitations.length - 3} more';
+  }
+}
+
+class _MemberDisplay {
+  const _MemberDisplay._();
+
+  static Map<String, dynamic>? profileFor(Map<String, dynamic> member) {
+    final raw = member[AppMemberFields.profiles];
+
+    if (raw is Map<String, dynamic>) {
+      return raw;
+    }
+
+    return null;
+  }
+
+  static String nameFor(Map<String, dynamic> member) {
+    final profile = profileFor(member);
+
+    final displayName = profile?[AppProfileFields.displayName]?.toString();
+    if (displayName != null && displayName.trim().isNotEmpty) {
+      return displayName.trim();
+    }
+
+    final username = profile?[AppProfileFields.username]?.toString();
+    if (username != null && username.trim().isNotEmpty) {
+      return username.trim();
+    }
+
+    return 'Member';
+  }
+
+  static String? avatarUrlFor(Map<String, dynamic> member) {
+    final profile = profileFor(member);
+    final avatarUrl = profile?[AppProfileFields.avatarUrl]?.toString();
+
+    if (avatarUrl == null || avatarUrl.trim().isEmpty) {
+      return null;
+    }
+
+    return avatarUrl.trim();
+  }
+}
+
+class _TinyAvatar extends StatelessWidget {
+  const _TinyAvatar({required this.name, this.avatarUrl});
+
+  final String name;
+  final String? avatarUrl;
+
+  String get initials {
+    final parts = name
+        .split(RegExp(r'\s+'))
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty)
+        .toList();
+
+    if (parts.isEmpty) return '?';
+
+    if (parts.length == 1) {
+      return parts.first.substring(0, 1).toUpperCase();
+    }
+
+    return '${parts.first.substring(0, 1)}${parts.last.substring(0, 1)}'
+        .toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final url = avatarUrl;
+
+    return CircleAvatar(
+      radius: 17,
+      backgroundImage: url == null ? null : NetworkImage(url),
+      child: url == null
+          ? Text(
+              initials,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+            )
+          : null,
+    );
+  }
+}
+
+class _CountAvatar extends StatelessWidget {
+  const _CountAvatar({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return CircleAvatar(
+      radius: 17,
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
+class _PendingAvatar extends StatelessWidget {
+  const _PendingAvatar({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return CircleAvatar(
+      radius: 17,
+      backgroundColor: theme.colorScheme.secondaryContainer,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(
+            Icons.mail_outline,
+            size: 17,
+            color: theme.colorScheme.onSecondaryContainer,
+          ),
+          Positioned(
+            right: -8,
+            top: -8,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.error,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                count > 9 ? '9+' : count.toString(),
+                style: TextStyle(
+                  color: theme.colorScheme.onError,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -24,6 +24,7 @@ class ItemsViewFactory extends StatelessWidget {
     required this.onDelete,
     required this.onVote,
     required this.onViewVotes,
+    required this.onViewRecipeDetails,
   });
 
   final String listType;
@@ -36,6 +37,7 @@ class ItemsViewFactory extends StatelessWidget {
   final void Function(String itemId) onDelete;
   final void Function(Map<String, dynamic> item) onVote;
   final void Function(Map<String, dynamic> item) onViewVotes;
+  final void Function(Map<String, dynamic> item) onViewRecipeDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +111,7 @@ class ItemsViewFactory extends StatelessWidget {
         onComplete: onComplete,
         onEdit: onEdit,
         onDelete: onDelete,
+        onViewRecipeDetails: onViewRecipeDetails,
       );
     }
 

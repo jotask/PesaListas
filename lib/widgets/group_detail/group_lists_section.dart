@@ -19,56 +19,31 @@ class GroupListsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (lists.isEmpty) {
+      return EmptyInfoCard(
+        icon: Icons.list_alt,
+        title: 'No lists yet',
+        subtitle: 'Create your first shared list here.',
+        trailing: const Icon(Icons.add_circle_outline),
+        onTap: creatingList ? null : onCreateList,
+      );
+    }
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _ListsHeader(creatingList: creatingList, onCreateList: onCreateList),
-        const SizedBox(height: 12),
-        if (loading)
-          const Center(child: CircularProgressIndicator())
-        else if (lists.isEmpty)
-          EmptyInfoCard(
-            icon: Icons.list_alt,
-            title: 'No lists yet',
-            subtitle: 'Create your first shared list here.',
-            trailing: const Icon(Icons.add),
-            onTap: creatingList ? null : onCreateList,
-          )
-        else
-          for (final list in lists)
-            ListCard(
-              list: list,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => ListDetailPage(list: list)),
-                );
-              },
-            ),
-      ],
-    );
-  }
-}
-
-class _ListsHeader extends StatelessWidget {
-  const _ListsHeader({required this.creatingList, required this.onCreateList});
-
-  final bool creatingList;
-  final VoidCallback onCreateList;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Lists',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        IconButton(
-          onPressed: creatingList ? null : onCreateList,
-          icon: const Icon(Icons.add),
-          tooltip: 'Create list',
-        ),
+        for (final list in lists)
+          ListCard(
+            list: list,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => ListDetailPage(list: list)),
+              );
+            },
+          ),
       ],
     );
   }
