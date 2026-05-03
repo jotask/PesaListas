@@ -4,13 +4,19 @@ import 'package:pesalistas/core/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/core/vote_fields.dart';
+import 'package:pesalistas/dialogs/add_recipe_ingredient_dialog.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/dialogs/create_item_dialog.dart';
+import 'package:pesalistas/dialogs/create_recipe_dialog.dart';
 import 'package:pesalistas/dialogs/edit_item_dialog.dart';
+import 'package:pesalistas/dialogs/edit_recipe_dialog.dart';
+import 'package:pesalistas/dialogs/edit_recipe_ingredient_dialog.dart';
+import 'package:pesalistas/dialogs/edit_recipe_instructions_dialog.dart';
 import 'package:pesalistas/dialogs/recipe_details_dialog.dart';
 import 'package:pesalistas/dialogs/vote_details_dialog.dart';
 import 'package:pesalistas/dialogs/vote_dialog.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
+import 'package:pesalistas/repositories/recipe_ingredient_repository.dart';
 import 'package:pesalistas/repositories/recipe_repository.dart';
 import 'package:pesalistas/repositories/vote_repository.dart';
 import 'package:pesalistas/widgets/list_detail/list_detail_header.dart';
@@ -30,6 +36,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   late final ItemRepository itemRepository;
   late final VoteRepository voteRepository;
   late final RecipeRepository recipeRepository;
+  late final RecipeIngredientRepository recipeIngredientRepository;
 
   bool loadingItems = true;
   bool creatingItem = false;
@@ -39,10 +46,13 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool votingItem = false;
   bool loadingVoteDetails = false;
   bool loadingRecipeDetails = false;
+  bool deletingRecipe = false;
 
   List<Map<String, dynamic>> items = [];
 
   String get listId => widget.list[AppListFields.id].toString();
+
+  String get groupId => widget.list[AppListFields.groupId].toString();
 
   String get listName => widget.list[AppListFields.name]?.toString() ?? 'List';
 
@@ -55,6 +65,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool get isTaskList => listType == AppListTypes.tasks.value;
 
   bool get isChoreList => listType == AppListTypes.chores.value;
+
+  bool get isRecipeList => listType == AppListTypes.recipes.value;
 
   bool get isVotableList {
     return listType == AppListTypes.movies.value ||
@@ -75,7 +87,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
       completingItem ||
       votingItem ||
       loadingVoteDetails ||
-      loadingRecipeDetails;
+      loadingRecipeDetails ||
+      deletingRecipe;
 
   @override
   void initState() {
@@ -86,6 +99,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
     itemRepository = ItemRepository(client);
     voteRepository = VoteRepository(client);
     recipeRepository = RecipeRepository(client);
+    recipeIngredientRepository = RecipeIngredientRepository(client);
 
     loadItems();
   }
@@ -96,6 +110,19 @@ class _ListDetailPageState extends State<ListDetailPage> {
     setState(() => loadingItems = true);
 
     try {
+      if (isRecipeList) {
+        final recipes = await recipeRepository.getRecipesForGroup(groupId);
+
+        if (!mounted) return;
+
+        setState(() {
+          items = recipes;
+          loadingItems = false;
+        });
+
+        return;
+      }
+
       final loadedItems = await itemRepository.getItemsForList(listId);
       final enrichedItems = await enrichItemsWithVoteSummaries(loadedItems);
 
@@ -110,32 +137,6 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       setState(() => loadingItems = false);
       showErrorSnackBar(context, 'Failed to load items', error);
-    }
-  }
-
-  Future<void> viewRecipeDetails(Map<String, dynamic> item) async {
-    if (loadingRecipeDetails) return;
-
-    setState(() => loadingRecipeDetails = true);
-
-    try {
-      final itemId = item[AppItemFields.id].toString();
-      final recipe = await recipeRepository.ensureRecipeForItem(itemId);
-
-      if (!mounted) return;
-
-      await showDialog<void>(
-        context: context,
-        builder: (_) => RecipeDetailsDialog(item: item, recipe: recipe),
-      );
-    } catch (error) {
-      if (!mounted) return;
-
-      showErrorSnackBar(context, 'Failed to load recipe details', error);
-    } finally {
-      if (!mounted) return;
-
-      setState(() => loadingRecipeDetails = false);
     }
   }
 
@@ -168,6 +169,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   Future<void> createItemDialog() async {
     if (creatingItem) return;
+
+    if (isRecipeList) {
+      await createRecipeDialog();
+      return;
+    }
 
     final result = await showDialog<CreateItemDialogResult>(
       context: context,
@@ -206,8 +212,41 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> createRecipeDialog() async {
+    final result = await showDialog<CreateRecipeDialogResult>(
+      context: context,
+      builder: (_) => const CreateRecipeDialog(),
+    );
+
+    if (result == null) return;
+
+    setState(() => creatingItem = true);
+
+    try {
+      await recipeRepository.createRecipe(
+        groupId: groupId,
+        name: result.name,
+        description: result.description,
+      );
+
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Recipe created');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to create recipe', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => creatingItem = false);
+    }
+  }
+
   Future<void> editItem(Map<String, dynamic> item) async {
-    if (editingItem) return;
+    if (editingItem || isRecipeList) return;
 
     final result = await showDialog<EditItemDialogResult>(
       context: context,
@@ -302,7 +341,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   }
 
   Future<void> deleteItem(String itemId) async {
-    if (deletingItem) return;
+    if (deletingItem || isRecipeList) return;
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
@@ -329,6 +368,37 @@ class _ListDetailPageState extends State<ListDetailPage> {
       if (!mounted) return;
 
       setState(() => deletingItem = false);
+    }
+  }
+
+  Future<void> deleteRecipe(String recipeId) async {
+    if (deletingRecipe) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Delete recipe?',
+      message: 'This will permanently delete this recipe and its ingredients.',
+    );
+
+    if (!confirmed) return;
+
+    setState(() => deletingRecipe = true);
+
+    try {
+      await recipeRepository.deleteRecipe(recipeId);
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Recipe deleted');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to delete recipe', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => deletingRecipe = false);
     }
   }
 
@@ -418,6 +488,226 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> viewRecipeDetails(Map<String, dynamic> recipe) async {
+    if (loadingRecipeDetails) return;
+
+    setState(() => loadingRecipeDetails = true);
+
+    try {
+      final recipeId = recipe['id'].toString();
+
+      var keepDetailsOpen = true;
+
+      while (keepDetailsOpen) {
+        final loadedRecipe = await recipeRepository.getRecipe(recipeId);
+        final currentRecipe = loadedRecipe ?? recipe;
+
+        final ingredients = await recipeIngredientRepository
+            .getIngredientsForRecipe(recipeId);
+
+        if (!mounted) return;
+
+        setState(() => loadingRecipeDetails = false);
+
+        final result = await showDialog<RecipeDetailsDialogResult>(
+          context: context,
+          builder: (_) => RecipeDetailsDialog(
+            recipe: currentRecipe,
+            ingredients: ingredients,
+          ),
+        );
+
+        if (result == null) {
+          keepDetailsOpen = false;
+          break;
+        }
+
+        if (result.action == RecipeDetailsDialogAction.editRecipeInfo) {
+          if (!mounted) return;
+
+          final editResult = await showDialog<EditRecipeDialogResult>(
+            context: context,
+            builder: (_) => EditRecipeDialog(recipe: currentRecipe),
+          );
+
+          if (editResult == null) {
+            keepDetailsOpen = true;
+            continue;
+          }
+
+          if (!mounted) return;
+
+          setState(() => loadingRecipeDetails = true);
+
+          await recipeRepository.updateRecipeInfo(
+            recipeId: recipeId,
+            name: editResult.name,
+            description: editResult.description,
+            prepTimeMinutes: editResult.prepTimeMinutes,
+            cookTimeMinutes: editResult.cookTimeMinutes,
+            servings: editResult.servings,
+          );
+
+          if (!mounted) return;
+
+          await loadItems();
+
+          if (!mounted) return;
+
+          showSuccessSnackBar(context, 'Recipe info updated');
+          continue;
+        }
+
+        if (result.action == RecipeDetailsDialogAction.editRecipeInstructions) {
+          if (!mounted) return;
+
+          final instructionsResult =
+              await showDialog<EditRecipeInstructionsDialogResult>(
+                context: context,
+                builder: (_) =>
+                    EditRecipeInstructionsDialog(recipe: currentRecipe),
+              );
+
+          if (instructionsResult == null) {
+            keepDetailsOpen = true;
+            continue;
+          }
+
+          if (!mounted) return;
+
+          setState(() => loadingRecipeDetails = true);
+
+          await recipeRepository.updateRecipeInstructions(
+            recipeId: recipeId,
+            instructions: instructionsResult.instructions,
+          );
+
+          if (!mounted) return;
+
+          showSuccessSnackBar(context, 'Instructions updated');
+          continue;
+        }
+
+        if (result.action == RecipeDetailsDialogAction.addIngredient) {
+          if (!mounted) return;
+
+          final ingredientResult =
+              await showDialog<AddRecipeIngredientDialogResult>(
+                context: context,
+                builder: (_) => const AddRecipeIngredientDialog(),
+              );
+
+          if (ingredientResult == null) {
+            keepDetailsOpen = true;
+            continue;
+          }
+
+          if (!mounted) return;
+
+          setState(() => loadingRecipeDetails = true);
+
+          await recipeIngredientRepository.createIngredient(
+            recipeId: recipeId,
+            name: ingredientResult.name,
+            quantity: ingredientResult.quantity,
+            unit: ingredientResult.unit,
+            note: ingredientResult.note,
+          );
+
+          if (!mounted) return;
+
+          showSuccessSnackBar(context, 'Ingredient added');
+          continue;
+        }
+
+        if (result.action == RecipeDetailsDialogAction.editIngredient) {
+          final ingredientId = result.ingredientId;
+          final ingredient = result.ingredient;
+
+          if (ingredientId == null ||
+              ingredientId.isEmpty ||
+              ingredient == null) {
+            keepDetailsOpen = true;
+            continue;
+          }
+
+          if (!mounted) return;
+
+          final editIngredientResult =
+              await showDialog<EditRecipeIngredientDialogResult>(
+                context: context,
+                builder: (_) =>
+                    EditRecipeIngredientDialog(ingredient: ingredient),
+              );
+
+          if (editIngredientResult == null) {
+            keepDetailsOpen = true;
+            continue;
+          }
+
+          if (!mounted) return;
+
+          setState(() => loadingRecipeDetails = true);
+
+          await recipeIngredientRepository.updateIngredient(
+            ingredientId: ingredientId,
+            name: editIngredientResult.name,
+            quantity: editIngredientResult.quantity,
+            unit: editIngredientResult.unit,
+            note: editIngredientResult.note,
+          );
+
+          if (!mounted) return;
+
+          showSuccessSnackBar(context, 'Ingredient updated');
+          continue;
+        }
+
+        if (result.action == RecipeDetailsDialogAction.deleteIngredient) {
+          final ingredientId = result.ingredientId;
+
+          if (ingredientId == null || ingredientId.isEmpty) {
+            keepDetailsOpen = true;
+            continue;
+          }
+
+          if (!mounted) return;
+
+          final confirmed = await showConfirmDeleteDialog(
+            context: context,
+            title: 'Delete ingredient?',
+            message:
+                'This will remove "${result.ingredientName ?? 'this ingredient'}" from the recipe.',
+          );
+
+          if (!confirmed) {
+            keepDetailsOpen = true;
+            continue;
+          }
+
+          if (!mounted) return;
+
+          setState(() => loadingRecipeDetails = true);
+
+          await recipeIngredientRepository.deleteIngredient(ingredientId);
+
+          if (!mounted) return;
+
+          showSuccessSnackBar(context, 'Ingredient deleted');
+          continue;
+        }
+      }
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to load recipe details', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => loadingRecipeDetails = false);
+    }
+  }
+
   void goBack() {
     Navigator.of(context).maybePop();
   }
@@ -430,7 +720,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: creatingItem ? null : createItemDialog,
         icon: const Icon(Icons.add),
-        label: const Text('Add item'),
+        label: Text(isRecipeList ? 'Add recipe' : 'Add item'),
       ),
       body: Column(
         children: [
@@ -455,6 +745,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
                     onVote: voteItem,
                     onViewVotes: viewVotes,
                     onViewRecipeDetails: viewRecipeDetails,
+                    onDeleteRecipe: deleteRecipe,
                   ),
                 ],
               ),

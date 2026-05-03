@@ -18,6 +18,7 @@ class ListItemsSection extends StatefulWidget {
     required this.onVote,
     required this.onViewVotes,
     required this.onViewRecipeDetails,
+    required this.onDeleteRecipe,
   });
 
   final String listType;
@@ -32,7 +33,8 @@ class ListItemsSection extends StatefulWidget {
   final void Function(String itemId) onDelete;
   final void Function(Map<String, dynamic> item) onVote;
   final void Function(Map<String, dynamic> item) onViewVotes;
-  final void Function(Map<String, dynamic> item) onViewRecipeDetails;
+  final void Function(Map<String, dynamic> recipe) onViewRecipeDetails;
+  final void Function(String recipeId) onDeleteRecipe;
 
   @override
   State<ListItemsSection> createState() => _ListItemsSectionState();
@@ -129,7 +131,6 @@ class _ListItemsSectionState extends State<ListItemsSection> {
           ),
           const SizedBox(height: 12),
         ],
-
         if (!widget.loading &&
             widget.items.isNotEmpty &&
             visibleItems.isEmpty &&
@@ -152,6 +153,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
             onVote: widget.onVote,
             onViewVotes: widget.onViewVotes,
             onViewRecipeDetails: widget.onViewRecipeDetails,
+            onDeleteRecipe: widget.onDeleteRecipe,
           ),
       ],
     );

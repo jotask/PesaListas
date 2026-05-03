@@ -1,29 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class RecipesItemsView extends StatelessWidget {
   const RecipesItemsView({
     super.key,
-    required this.items,
+    required this.recipes,
     required this.loading,
     required this.onCreate,
-    required this.onComplete,
-    required this.onEdit,
-    required this.onDelete,
     required this.onViewRecipeDetails,
+    required this.onDeleteRecipe,
   });
 
-  final List<Map<String, dynamic>> items;
+  final List<Map<String, dynamic>> recipes;
   final bool loading;
   final VoidCallback onCreate;
-  final void Function(String itemId) onComplete;
-  final void Function(Map<String, dynamic> item) onEdit;
-  final void Function(String itemId) onDelete;
-  final void Function(Map<String, dynamic> item) onViewRecipeDetails;
+  final void Function(Map<String, dynamic> recipe) onViewRecipeDetails;
+  final void Function(String recipeId) onDeleteRecipe;
 
-  String titleFor(Map<String, dynamic> item) {
-    final value = item[AppItemFields.title]?.toString();
+  String titleFor(Map<String, dynamic> recipe) {
+    final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
       return 'Untitled recipe';
@@ -32,8 +28,8 @@ class RecipesItemsView extends StatelessWidget {
     return value.trim();
   }
 
-  String subtitleFor(Map<String, dynamic> item) {
-    final value = item[AppItemFields.description]?.toString();
+  String subtitleFor(Map<String, dynamic> recipe) {
+    final value = recipe[AppRecipeFields.description]?.toString();
 
     if (value == null || value.trim().isEmpty) {
       return 'Recipe details and ingredients';
@@ -48,7 +44,7 @@ class RecipesItemsView extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (items.isEmpty) {
+    if (recipes.isEmpty) {
       return EmptyItemsCard(
         icon: Icons.restaurant_menu,
         title: 'No recipes yet',
@@ -59,32 +55,30 @@ class RecipesItemsView extends StatelessWidget {
 
     return Column(
       children: [
-        for (final item in items)
-          _RecipeItemCard(
-            title: titleFor(item),
-            subtitle: subtitleFor(item),
-            onDetails: () => onViewRecipeDetails(item),
-            onEdit: () => onEdit(item),
-            onDelete: () => onDelete(item[AppItemFields.id].toString()),
+        for (final recipe in recipes)
+          _RecipeCard(
+            title: titleFor(recipe),
+            subtitle: subtitleFor(recipe),
+            onDetails: () => onViewRecipeDetails(recipe),
+            onDelete: () =>
+                onDeleteRecipe(recipe[AppRecipeFields.id].toString()),
           ),
       ],
     );
   }
 }
 
-class _RecipeItemCard extends StatelessWidget {
-  const _RecipeItemCard({
+class _RecipeCard extends StatelessWidget {
+  const _RecipeCard({
     required this.title,
     required this.subtitle,
     required this.onDetails,
-    required this.onEdit,
     required this.onDelete,
   });
 
   final String title;
   final String subtitle;
   final VoidCallback onDetails;
-  final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   @override
@@ -135,11 +129,6 @@ class _RecipeItemCard extends StatelessWidget {
                           onPressed: onDetails,
                           icon: const Icon(Icons.menu_book_outlined),
                           label: const Text('Details'),
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: onEdit,
-                          icon: const Icon(Icons.edit_outlined),
-                          label: const Text('Edit'),
                         ),
                         IconButton(
                           onPressed: onDelete,

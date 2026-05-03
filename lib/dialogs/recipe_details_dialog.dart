@@ -1,20 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
+import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
+
+enum RecipeDetailsDialogAction {
+  addIngredient,
+  editIngredient,
+  deleteIngredient,
+  editRecipeInfo,
+  editRecipeInstructions,
+}
+
+class RecipeDetailsDialogResult {
+  const RecipeDetailsDialogResult({
+    required this.action,
+    this.ingredientId,
+    this.ingredientName,
+    this.ingredient,
+  });
+
+  final RecipeDetailsDialogAction action;
+  final String? ingredientId;
+  final String? ingredientName;
+  final Map<String, dynamic>? ingredient;
+}
 
 class RecipeDetailsDialog extends StatelessWidget {
   const RecipeDetailsDialog({
     super.key,
-    required this.item,
     required this.recipe,
+    required this.ingredients,
   });
 
-  final Map<String, dynamic> item;
-  final Map<String, dynamic>? recipe;
+  final Map<String, dynamic> recipe;
+  final List<Map<String, dynamic>> ingredients;
 
-  String get title {
-    final value = item[AppItemFields.title]?.toString();
+  String get name {
+    final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
       return 'Untitled recipe';
@@ -24,7 +46,7 @@ class RecipeDetailsDialog extends StatelessWidget {
   }
 
   String? get description {
-    final value = item[AppItemFields.description]?.toString();
+    final value = recipe[AppRecipeFields.description]?.toString();
 
     if (value == null || value.trim().isEmpty) {
       return null;
@@ -34,7 +56,7 @@ class RecipeDetailsDialog extends StatelessWidget {
   }
 
   String? get instructions {
-    final value = recipe?[AppRecipeFields.instructions]?.toString();
+    final value = recipe[AppRecipeFields.instructions]?.toString();
 
     if (value == null || value.trim().isEmpty) {
       return null;
@@ -44,21 +66,21 @@ class RecipeDetailsDialog extends StatelessWidget {
   }
 
   int? get prepTime {
-    return AppValueParsing.intOrNull(recipe?[AppRecipeFields.prepTimeMinutes]);
+    return AppValueParsing.intOrNull(recipe[AppRecipeFields.prepTimeMinutes]);
   }
 
   int? get cookTime {
-    return AppValueParsing.intOrNull(recipe?[AppRecipeFields.cookTimeMinutes]);
+    return AppValueParsing.intOrNull(recipe[AppRecipeFields.cookTimeMinutes]);
   }
 
   int? get servings {
-    return AppValueParsing.intOrNull(recipe?[AppRecipeFields.servings]);
+    return AppValueParsing.intOrNull(recipe[AppRecipeFields.servings]);
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(title),
+      title: Text(name),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
@@ -94,29 +116,216 @@ class RecipeDetailsDialog extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 18),
-              const Text(
-                'Instructions',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Instructions',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(
+                        const RecipeDetailsDialogResult(
+                          action:
+                              RecipeDetailsDialogAction.editRecipeInstructions,
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.edit_note_outlined),
+                    tooltip: 'Edit instructions',
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
               Text(instructions ?? 'No instructions yet.'),
               const SizedBox(height: 18),
-              const Text(
-                'Ingredients',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Ingredients',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    ingredients.length == 1
+                        ? '1 ingredient'
+                        : '${ingredients.length} ingredients',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
-              const Text('Ingredient editing will be added in the next step.'),
+              if (ingredients.isEmpty)
+                const Text('No ingredients yet.')
+              else
+                Column(
+                  children: [
+                    for (final ingredient in ingredients)
+                      _IngredientRow(ingredient: ingredient),
+                  ],
+                ),
             ],
           ),
         ),
       ),
       actions: [
+        TextButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop(
+              const RecipeDetailsDialogResult(
+                action: RecipeDetailsDialogAction.editRecipeInfo,
+              ),
+            );
+          },
+          icon: const Icon(Icons.tune_outlined),
+          label: const Text('Info'),
+        ),
+        TextButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop(
+              const RecipeDetailsDialogResult(
+                action: RecipeDetailsDialogAction.addIngredient,
+              ),
+            );
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('Ingredient'),
+        ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Close'),
         ),
       ],
+    );
+  }
+}
+
+class _IngredientRow extends StatelessWidget {
+  const _IngredientRow({required this.ingredient});
+
+  final Map<String, dynamic> ingredient;
+
+  String get id {
+    return ingredient[AppRecipeIngredientFields.id].toString();
+  }
+
+  String get name {
+    final value = ingredient[AppRecipeIngredientFields.name]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return 'Unnamed ingredient';
+    }
+
+    return value.trim();
+  }
+
+  String? get unit {
+    final value = ingredient[AppRecipeIngredientFields.unit]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    return value.trim();
+  }
+
+  String? get note {
+    final value = ingredient[AppRecipeIngredientFields.note]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    return value.trim();
+  }
+
+  String? get quantityText {
+    final value = ingredient[AppRecipeIngredientFields.quantity];
+
+    if (value == null) {
+      return null;
+    }
+
+    final text = value.toString();
+
+    if (text.trim().isEmpty) {
+      return null;
+    }
+
+    return text;
+  }
+
+  String get amountText {
+    final parts = <String>[];
+
+    if (quantityText != null) {
+      parts.add(quantityText!);
+    }
+
+    if (unit != null) {
+      parts.add(unit!);
+    }
+
+    if (parts.isEmpty) {
+      return 'Amount not set';
+    }
+
+    return parts.join(' ');
+  }
+
+  void editIngredient(BuildContext context) {
+    Navigator.of(context).pop(
+      RecipeDetailsDialogResult(
+        action: RecipeDetailsDialogAction.editIngredient,
+        ingredientId: id,
+        ingredientName: name,
+        ingredient: ingredient,
+      ),
+    );
+  }
+
+  void deleteIngredient(BuildContext context) {
+    Navigator.of(context).pop(
+      RecipeDetailsDialogResult(
+        action: RecipeDetailsDialogAction.deleteIngredient,
+        ingredientId: id,
+        ingredientName: name,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        dense: true,
+        leading: const CircleAvatar(child: Icon(Icons.kitchen_outlined)),
+        title: Text(name),
+        subtitle: Text(note == null ? amountText : '$amountText • $note'),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              onPressed: () => editIngredient(context),
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Edit ingredient',
+            ),
+            IconButton(
+              onPressed: () => deleteIngredient(context),
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Delete ingredient',
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
