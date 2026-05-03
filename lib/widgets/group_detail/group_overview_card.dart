@@ -12,6 +12,7 @@ class GroupOverviewCard extends StatelessWidget {
     required this.pendingInvitations,
     required this.onInvite,
     required this.onBack,
+    required this.onEdit,
   });
 
   final Map<String, dynamic> group;
@@ -19,6 +20,7 @@ class GroupOverviewCard extends StatelessWidget {
   final List<Map<String, dynamic>> pendingInvitations;
   final VoidCallback onInvite;
   final VoidCallback onBack;
+  final VoidCallback onEdit;
 
   String get groupName {
     final value = group[AppGroupFields.name]?.toString();
@@ -115,7 +117,13 @@ class GroupOverviewCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      onPressed: onEdit,
+                      icon: const Icon(Icons.edit_outlined),
+                      tooltip: 'Edit group',
+                    ),
+                    const SizedBox(width: 4),
                     FilledButton.icon(
                       onPressed: onInvite,
                       icon: const Icon(Icons.person_add_alt_1, size: 18),
@@ -215,7 +223,6 @@ class _PeoplePreview extends StatelessWidget {
         .take(3)
         .map((invite) {
           return invite[AppInvitationFields.invitedEmail]?.toString() ??
-              invite[AppInvitationFields.email]?.toString() ??
               'Pending invite';
         })
         .join('\n');

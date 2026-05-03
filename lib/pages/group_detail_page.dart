@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/create_list_dialog.dart';
+import 'package:pesalistas/dialogs/edit_group_dialog.dart';
 import 'package:pesalistas/dialogs/invite_member_dialog.dart';
+import 'package:pesalistas/repositories/group_repository.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/member_repository.dart';
@@ -20,6 +22,7 @@ class GroupDetailPage extends StatefulWidget {
 }
 
 class _GroupDetailPageState extends State<GroupDetailPage> {
+  late final GroupRepository groupRepository;
   late final MemberRepository memberRepository;
   late final InvitationRepository invitationRepository;
   late final ListRepository listRepository;
@@ -29,23 +32,30 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   bool loadingLists = true;
   bool invitingMember = false;
   bool creatingList = false;
+  bool editingGroup = false;
+
+  late Map<String, dynamic> currentGroup;
 
   List<Map<String, dynamic>> members = [];
   List<Map<String, dynamic>> pendingInvitations = [];
   List<Map<String, dynamic>> lists = [];
 
-  String get groupId => widget.group[AppGroupFields.id].toString();
+  String get groupId => currentGroup[AppGroupFields.id].toString();
 
   bool get loadingPeople => loadingMembers || loadingInvitations;
 
-  bool get isBusy => invitingMember || creatingList || loadingPeople;
+  bool get isBusy =>
+      invitingMember || creatingList || editingGroup || loadingPeople;
 
   @override
   void initState() {
     super.initState();
 
+    currentGroup = Map<String, dynamic>.from(widget.group);
+
     final client = Supabase.instance.client;
 
+    groupRepository = GroupRepository(client);
     memberRepository = MemberRepository(client);
     invitationRepository = InvitationRepository(client);
     listRepository = ListRepository(client);
@@ -125,6 +135,47 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     }
   }
 
+  Future<void> editGroup() async {
+    if (editingGroup) return;
+
+    final result = await showDialog<EditGroupDialogResult>(
+      context: context,
+      builder: (_) => EditGroupDialog(group: currentGroup),
+    );
+
+    if (result == null) return;
+
+    setState(() => editingGroup = true);
+
+    try {
+      await groupRepository.updateGroup(
+        groupId: groupId,
+        name: result.name,
+        description: result.description,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        currentGroup = {
+          ...currentGroup,
+          AppGroupFields.name: result.name,
+          AppGroupFields.description: result.description,
+        };
+      });
+
+      showSuccessSnackBar(context, 'Group updated');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to update group', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => editingGroup = false);
+    }
+  }
+
   Future<void> inviteMember() async {
     if (invitingMember) return;
 
@@ -193,7 +244,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   }
 
   void goBack() {
-    Navigator.of(context).maybePop();
+    Navigator.of(context).maybePop(currentGroup);
   }
 
   @override
@@ -207,11 +258,12 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
       body: Column(
         children: [
           GroupOverviewCard(
-            group: widget.group,
+            group: currentGroup,
             members: members,
             pendingInvitations: pendingInvitations,
             onInvite: inviteMember,
             onBack: goBack,
+            onEdit: editGroup,
           ),
           if (isBusy) const LinearProgressIndicator(),
           Expanded(

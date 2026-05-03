@@ -7,4 +7,5 @@ class AppMemberFields {
   static const role = 'role';
   static const joinedAt = 'joined_at';
   static const profiles = 'profiles';
+  static const groupMembers = 'group_members';
 }

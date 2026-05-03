@@ -8,8 +8,8 @@ import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/group_repository.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
 import 'package:pesalistas/repositories/profile_repository.dart';
-import 'package:pesalistas/widgets/groups/home_groups_section.dart';
-import 'package:pesalistas/widgets/groups/home_invitations_section.dart';
+import 'package:pesalistas/widgets/home/group_grid_section.dart';
+import 'package:pesalistas/widgets/home/pending_invitations_section.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomePage extends StatefulWidget {
@@ -102,6 +102,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void declineInvitation(String invitationId) {
+    showErrorSnackBar(
+      context,
+      'Decline invitation is not available yet',
+      'We can add proper decline support in the next step.',
+    );
+  }
+
   Future<void> createGroupDialog() async {
     if (creatingGroup) return;
 
@@ -158,8 +166,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = authRepository.currentUser;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('My groups'),
@@ -183,15 +189,17 @@ class _HomePageState extends State<HomePage> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  HomeInvitationsSection(
+                  PendingInvitationsSection(
                     invitations: invitations,
+                    loading: false,
                     acceptingInvitation: acceptingInvitation,
                     onAcceptInvitation: acceptInvitation,
+                    onDeclineInvitation: declineInvitation,
                   ),
-                  const SizedBox(height: 24),
-                  HomeGroupsSection(
+                  if (invitations.isNotEmpty) const SizedBox(height: 16),
+                  GroupGridSection(
                     groups: groups,
-                    userEmail: user?.email,
+                    loading: false,
                     creatingGroup: creatingGroup,
                     onCreateGroup: createGroupDialog,
                   ),
