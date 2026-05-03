@@ -18,13 +18,42 @@ class EmptyInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
-      child: ListTile(
-        leading: CircleAvatar(child: Icon(icon)),
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: trailing,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
         onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: theme.colorScheme.primaryContainer,
+                child: Icon(icon, color: theme.colorScheme.onPrimaryContainer),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(subtitle, style: theme.textTheme.bodyMedium),
+                  ],
+                ),
+              ),
+              if (trailing != null) ...[const SizedBox(width: 12), trailing!],
+            ],
+          ),
+        ),
       ),
     );
   }

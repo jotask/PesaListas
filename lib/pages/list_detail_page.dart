@@ -58,6 +58,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
         listType == AppListTypes.activities.value;
   }
 
+  bool get shouldShowStatusSummary {
+    return listType == AppListTypes.tasks.value ||
+        listType == AppListTypes.shopping.value ||
+        listType == AppListTypes.generic.value;
+  }
+
   bool get isBusy =>
       creatingItem ||
       editingItem ||
@@ -332,7 +338,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, 'Task reopened');
+      showSuccessSnackBar(
+        context,
+        listType == AppListTypes.shopping.value
+            ? 'Shopping item reopened'
+            : 'Task reopened',
+      );
     } catch (error) {
       if (!mounted) return;
 
@@ -410,6 +421,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
               onVote: voteItem,
               onViewVotes: viewVotes,
               onReopen: reopenItem,
+              showStatusSummary: shouldShowStatusSummary,
             ),
           ],
         ),

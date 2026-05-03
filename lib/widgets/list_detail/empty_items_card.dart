@@ -21,7 +21,7 @@ class EmptyItemsCard extends StatelessWidget {
       icon: icon,
       title: title,
       subtitle: subtitle,
-      trailing: const Icon(Icons.add),
+      trailing: const Icon(Icons.add_circle_outline),
       onTap: onCreate,
     );
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/widgets/list_detail/checkable_item_card.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
@@ -9,6 +11,7 @@ class ShoppingItemsView extends StatelessWidget {
     required this.loading,
     required this.onCreate,
     required this.onComplete,
+    required this.onReopen,
     required this.onEdit,
     required this.onDelete,
   });
@@ -17,8 +20,20 @@ class ShoppingItemsView extends StatelessWidget {
   final bool loading;
   final VoidCallback onCreate;
   final void Function(String itemId) onComplete;
+  final void Function(String itemId) onReopen;
   final void Function(Map<String, dynamic> item) onEdit;
   final void Function(String itemId) onDelete;
+
+  void toggleItem(Map<String, dynamic> item) {
+    final itemId = item[AppItemFields.id].toString();
+    final isDone = AppItemStatus.isDone(item[AppItemFields.status]);
+
+    if (isDone) {
+      onReopen(itemId);
+    } else {
+      onComplete(itemId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +60,11 @@ class ShoppingItemsView extends StatelessWidget {
             defaultOpenSubtitle: 'To buy',
             defaultDoneSubtitle: 'Bought',
             completeTooltip: 'Mark as bought',
-            doneTooltip: 'Bought',
+            reopenTooltip: 'Mark as not bought',
             deleteTooltip: 'Delete shopping item',
-            onComplete: () => onComplete(item['id'].toString()),
+            onToggle: () => toggleItem(item),
             onEdit: () => onEdit(item),
-            onDelete: () => onDelete(item['id'].toString()),
+            onDelete: () => onDelete(item[AppItemFields.id].toString()),
           ),
       ],
     );

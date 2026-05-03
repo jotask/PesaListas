@@ -19,11 +19,11 @@ class ItemsViewFactory extends StatelessWidget {
     required this.loading,
     required this.onCreate,
     required this.onComplete,
+    required this.onReopen,
     required this.onEdit,
     required this.onDelete,
     required this.onVote,
     required this.onViewVotes,
-    required this.onReopen,
   });
 
   final String listType;
@@ -31,11 +31,11 @@ class ItemsViewFactory extends StatelessWidget {
   final bool loading;
   final VoidCallback onCreate;
   final void Function(String itemId) onComplete;
+  final void Function(String itemId) onReopen;
   final void Function(Map<String, dynamic> item) onEdit;
   final void Function(String itemId) onDelete;
   final void Function(Map<String, dynamic> item) onVote;
   final void Function(Map<String, dynamic> item) onViewVotes;
-  final void Function(String itemId) onReopen;
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +45,9 @@ class ItemsViewFactory extends StatelessWidget {
         loading: loading,
         onCreate: onCreate,
         onComplete: onComplete,
+        onReopen: onReopen,
         onEdit: onEdit,
         onDelete: onDelete,
-        onReopen: onReopen,
       );
     }
 
@@ -118,6 +118,7 @@ class ItemsViewFactory extends StatelessWidget {
         loading: loading,
         onCreate: onCreate,
         onComplete: onComplete,
+        onReopen: onReopen,
         onEdit: onEdit,
         onDelete: onDelete,
       );
@@ -140,6 +141,7 @@ class ItemsViewFactory extends StatelessWidget {
         loading: loading,
         onCreate: onCreate,
         onComplete: onComplete,
+        onReopen: onReopen,
         onEdit: onEdit,
         onDelete: onDelete,
       );
