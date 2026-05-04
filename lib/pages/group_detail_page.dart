@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
+import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/dialogs/create_list_dialog.dart';
 import 'package:pesalistas/dialogs/edit_group_dialog.dart';
 import 'package:pesalistas/dialogs/invite_member_dialog.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/group_repository.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
@@ -32,6 +33,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   bool loadingInvitations = true;
   bool loadingLists = true;
   bool invitingMember = false;
+  bool cancellingInvitation = false;
   bool creatingList = false;
   bool editingGroup = false;
 
@@ -45,8 +47,13 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
   bool get loadingPeople => loadingMembers || loadingInvitations;
 
-  bool get isBusy =>
-      invitingMember || creatingList || editingGroup || loadingPeople;
+  bool get isBusy {
+    return invitingMember ||
+        cancellingInvitation ||
+        creatingList ||
+        editingGroup ||
+        loadingPeople;
+  }
 
   @override
   void initState() {
@@ -209,6 +216,38 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     }
   }
 
+  Future<void> cancelInvitation(String invitationId) async {
+    if (cancellingInvitation) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: context.l10n.cancelInvitationTitle,
+      message: context.l10n.cancelInvitationMessage,
+      deleteLabel: context.l10n.cancelInvitation,
+    );
+
+    if (!confirmed) return;
+
+    setState(() => cancellingInvitation = true);
+
+    try {
+      await invitationRepository.cancelInvitation(invitationId);
+      await loadPendingInvitations();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, context.l10n.invitationCancelled);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, context.l10n.failedToCancelInvitation, error);
+    } finally {
+      if (mounted) {
+        setState(() => cancellingInvitation = false);
+      }
+    }
+  }
+
   Future<void> createList() async {
     if (creatingList) return;
 
@@ -232,7 +271,10 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, context.l10n.listCreatedWithName(result.name));
+      showSuccessSnackBar(
+        context,
+        context.l10n.listCreatedWithName(result.name),
+      );
     } catch (error) {
       if (!mounted) return;
 
@@ -253,7 +295,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: creatingList ? null : createList,
-        icon: Icon(Icons.add),
+        icon: const Icon(Icons.add),
         label: Text(context.l10n.newList),
       ),
       body: Column(
@@ -265,6 +307,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             onInvite: inviteMember,
             onBack: goBack,
             onEdit: editGroup,
+            onCancelInvitation: cancelInvitation,
           ),
           if (isBusy) const LinearProgressIndicator(),
           Expanded(

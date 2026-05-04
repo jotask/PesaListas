@@ -401,6 +401,17 @@
   "themeSubtitleSystem": "Usando el tema del dispositivo",
   "themeSubtitleLight": "Claro",
   "themeSubtitleDark": "Oscuro",
+  "declineInvitationTitle": "¿Rechazar invitación?",
+  "declineInvitationMessage": "Esta invitación se quitará de tus invitaciones pendientes.",
+  "decline": "Rechazar",
+  "invitationDeclined": "Invitación rechazada",
+  "failedToDeclineInvitation": "No se pudo rechazar la invitación",
+
+  "cancelInvitationTitle": "¿Cancelar invitación?",
+  "cancelInvitationMessage": "Esta invitación pendiente será cancelada.",
+  "cancelInvitation": "Cancelar invitación",
+  "invitationCancelled": "Invitación cancelada",
+  "failedToCancelInvitation": "No se pudo cancelar la invitación",
   "addListTypeItem": "Añadir elemento de {listType}",
   "@addListTypeItem": {
     "placeholders": {

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/invitation_fields.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class PendingInvitationsSection extends StatelessWidget {
   const PendingInvitationsSection({
     super.key,
     required this.invitations,
     required this.loading,
-    required this.acceptingInvitation,
+    required this.processingInvitation,
     required this.onAcceptInvitation,
     required this.onDeclineInvitation,
   });
 
   final List<Map<String, dynamic>> invitations;
   final bool loading;
-  final bool acceptingInvitation;
+  final bool processingInvitation;
   final void Function(String invitationId) onAcceptInvitation;
   final void Function(String invitationId) onDeclineInvitation;
 
@@ -24,15 +24,15 @@ class PendingInvitationsSection extends StatelessWidget {
     if (loading) {
       return Card(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Text(context.l10n.loadingInvitations),
             ],
           ),
@@ -41,7 +41,7 @@ class PendingInvitationsSection extends StatelessWidget {
     }
 
     if (invitations.isEmpty) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return Card(
@@ -51,11 +51,11 @@ class PendingInvitationsSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _InvitationsHeader(count: invitations.length),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             for (final invitation in invitations)
               _InvitationTile(
                 invitation: invitation,
-                acceptingInvitation: acceptingInvitation,
+                processingInvitation: processingInvitation,
                 onAccept: () {
                   onAcceptInvitation(
                     invitation[AppInvitationFields.id].toString(),
@@ -84,8 +84,8 @@ class _InvitationsHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     final label = count == 1
-        ? '1 pending invitation'
-        : '$count pending invitations';
+        ? context.l10n.pendingInvitations
+        : context.l10n.sectionCount(context.l10n.pendingInvitations, count);
 
     return Row(
       children: [
@@ -98,7 +98,7 @@ class _InvitationsHeader extends StatelessWidget {
             color: theme.colorScheme.onSecondaryContainer,
           ),
         ),
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         Expanded(
           child: Text(
             label,
@@ -113,18 +113,18 @@ class _InvitationsHeader extends StatelessWidget {
 class _InvitationTile extends StatelessWidget {
   const _InvitationTile({
     required this.invitation,
-    required this.acceptingInvitation,
+    required this.processingInvitation,
     required this.onAccept,
     required this.onDecline,
   });
 
   final Map<String, dynamic> invitation;
-  final bool acceptingInvitation;
+  final bool processingInvitation;
   final VoidCallback onAccept;
   final VoidCallback onDecline;
 
   Map<String, dynamic>? get group {
-    final value = invitation['groups'];
+    final value = invitation[AppInvitationFields.groups];
 
     if (value is Map<String, dynamic>) {
       return value;
@@ -156,6 +156,8 @@ class _InvitationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final resolvedGroupName = groupName(context);
+    final resolvedRole = role(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -170,34 +172,37 @@ class _InvitationTile extends StatelessWidget {
         children: [
           CircleAvatar(
             child: Text(
-              groupName(context).characters.first.toUpperCase(),
+              resolvedGroupName.characters.first.toUpperCase(),
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  groupName(context),
+                  resolvedGroupName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
-                SizedBox(height: 2),
-                Text(context.l10n.invitedAsRole(role(context)), style: theme.textTheme.bodySmall),
+                const SizedBox(height: 2),
+                Text(
+                  context.l10n.invitedAsRole(resolvedRole),
+                  style: theme.textTheme.bodySmall,
+                ),
               ],
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           TextButton(
-            onPressed: acceptingInvitation ? null : onDecline,
+            onPressed: processingInvitation ? null : onDecline,
             child: Text(context.l10n.decline),
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           FilledButton(
-            onPressed: acceptingInvitation ? null : onAccept,
+            onPressed: processingInvitation ? null : onAccept,
             child: Text(context.l10n.accept),
           ),
         ],

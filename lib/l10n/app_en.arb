@@ -401,6 +401,17 @@
   "themeSubtitleSystem": "Using device theme",
   "themeSubtitleLight": "Light",
   "themeSubtitleDark": "Dark",
+  "declineInvitationTitle": "Decline invitation?",
+  "declineInvitationMessage": "This invitation will be removed from your pending invitations.",
+  "decline": "Decline",
+  "invitationDeclined": "Invitation declined",
+  "failedToDeclineInvitation": "Failed to decline invitation",
+
+  "cancelInvitationTitle": "Cancel invitation?",
+  "cancelInvitationMessage": "This pending invitation will be cancelled.",
+  "cancelInvitation": "Cancel invitation",
+  "invitationCancelled": "Invitation cancelled",
+  "failedToCancelInvitation": "Failed to cancel invitation",
   "addListTypeItem": "Add {listType} item",
   "@addListTypeItem": {
     "placeholders": {

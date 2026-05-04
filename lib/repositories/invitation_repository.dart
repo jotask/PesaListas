@@ -37,6 +37,13 @@ class InvitationRepository {
     );
   }
 
+  Future<void> declineInvitation(String invitationId) async {
+    await _client.rpc(
+      'decline_group_invitation',
+      params: {'invitation_id': invitationId},
+    );
+  }
+
   Future<void> inviteToGroup({
     required String groupId,
     required String email,
@@ -59,9 +66,9 @@ class InvitationRepository {
   }
 
   Future<void> cancelInvitation(String invitationId) async {
-    await _client
-        .from(AppTables.groupInvitations)
-        .update({AppInvitationFields.status: 'cancelled'})
-        .eq(AppInvitationFields.id, invitationId);
+    await _client.rpc(
+      'cancel_group_invitation',
+      params: {'invitation_id': invitationId},
+    );
   }
 }

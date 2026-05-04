@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
+import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/dialogs/create_group_dialog.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/settings_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
@@ -29,11 +30,14 @@ class _HomePageState extends State<HomePage> {
 
   bool loading = true;
   bool acceptingInvitation = false;
+  bool decliningInvitation = false;
   bool creatingGroup = false;
   bool signingOut = false;
 
   List<Map<String, dynamic>> groups = [];
   List<Map<String, dynamic>> invitations = [];
+
+  bool get processingInvitation => acceptingInvitation || decliningInvitation;
 
   @override
   void initState() {
@@ -82,7 +86,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> acceptInvitation(String invitationId) async {
-    if (acceptingInvitation) return;
+    if (processingInvitation) return;
 
     setState(() => acceptingInvitation = true);
 
@@ -104,12 +108,36 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void declineInvitation(String invitationId) {
-    showErrorSnackBar(
-      context,
-      context.l10n.declineInvitationIsNotAvailableYet,
-      context.l10n.weCanAddProperDeclineSupportInTheNextStep,
+  Future<void> declineInvitation(String invitationId) async {
+    if (processingInvitation) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: context.l10n.declineInvitationTitle,
+      message: context.l10n.declineInvitationMessage,
+      deleteLabel: context.l10n.decline,
     );
+
+    if (!confirmed) return;
+
+    setState(() => decliningInvitation = true);
+
+    try {
+      await invitationRepository.declineInvitation(invitationId);
+      await loadHomeData();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, context.l10n.invitationDeclined);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, context.l10n.failedToDeclineInvitation, error);
+    } finally {
+      if (mounted) {
+        setState(() => decliningInvitation = false);
+      }
+    }
   }
 
   Future<void> createGroupDialog() async {
@@ -178,14 +206,14 @@ class _HomePageState extends State<HomePage> {
                 context,
               ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
             },
-            icon: Icon(Icons.settings_outlined),
+            icon: const Icon(Icons.settings_outlined),
             tooltip: context.l10n.settingsTitle,
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: creatingGroup ? null : createGroupDialog,
-        icon: Icon(Icons.add),
+        icon: const Icon(Icons.add),
         label: Text(context.l10n.newGroup),
       ),
       body: loading
@@ -198,11 +226,11 @@ class _HomePageState extends State<HomePage> {
                   PendingInvitationsSection(
                     invitations: invitations,
                     loading: false,
-                    acceptingInvitation: acceptingInvitation,
+                    processingInvitation: processingInvitation,
                     onAcceptInvitation: acceptInvitation,
                     onDeclineInvitation: declineInvitation,
                   ),
-                  if (invitations.isNotEmpty) SizedBox(height: 16),
+                  if (invitations.isNotEmpty) const SizedBox(height: 16),
                   GroupGridSection(
                     groups: groups,
                     loading: false,

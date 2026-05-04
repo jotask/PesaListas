@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/invitation_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
 import 'package:pesalistas/core/profile_fields.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class GroupOverviewCard extends StatelessWidget {
   const GroupOverviewCard({
@@ -14,6 +14,7 @@ class GroupOverviewCard extends StatelessWidget {
     required this.onInvite,
     required this.onBack,
     required this.onEdit,
+    required this.onCancelInvitation,
   });
 
   final Map<String, dynamic> group;
@@ -22,6 +23,7 @@ class GroupOverviewCard extends StatelessWidget {
   final VoidCallback onInvite;
   final VoidCallback onBack;
   final VoidCallback onEdit;
+  final void Function(String invitationId) onCancelInvitation;
 
   String groupName(BuildContext context) {
     final value = group[AppGroupFields.name]?.toString();
@@ -43,19 +45,23 @@ class GroupOverviewCard extends StatelessWidget {
     return value.trim();
   }
 
-  String get peopleSummary {
+  String peopleSummary(BuildContext context) {
     final memberCount = members.length;
     final inviteCount = pendingInvitations.length;
 
-    final memberText = memberCount == 1 ? '1 member' : '$memberCount members';
+    final memberText = context.l10n.sectionCount(
+      context.l10n.member,
+      memberCount,
+    );
 
     if (inviteCount == 0) {
       return memberText;
     }
 
-    final inviteText = inviteCount == 1
-        ? '1 pending invite'
-        : '$inviteCount pending invites';
+    final inviteText = context.l10n.sectionCount(
+      context.l10n.pendingInvite,
+      inviteCount,
+    );
 
     return '$memberText • $inviteText';
   }
@@ -88,7 +94,7 @@ class GroupOverviewCard extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     onPressed: onBack,
-                    icon: Icon(Icons.arrow_back),
+                    icon: const Icon(Icons.arrow_back),
                     tooltip: context.l10n.back,
                     visualDensity: VisualDensity.compact,
                   ),
@@ -108,7 +114,7 @@ class GroupOverviewCard extends StatelessWidget {
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         groupName(context),
@@ -120,16 +126,16 @@ class GroupOverviewCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     IconButton(
                       onPressed: onEdit,
-                      icon: Icon(Icons.edit_outlined),
+                      icon: const Icon(Icons.edit_outlined),
                       tooltip: context.l10n.editGroup,
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     FilledButton.icon(
                       onPressed: onInvite,
-                      icon: Icon(Icons.person_add_alt_1, size: 18),
+                      icon: const Icon(Icons.person_add_alt_1, size: 18),
                       label: Text(context.l10n.invite),
                     ),
                   ],
@@ -138,13 +144,14 @@ class GroupOverviewCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 8, top: 8),
                 child: Text(
-                  groupDescription ?? context.l10n.sharedSpaceForListsAndPlanning,
+                  groupDescription ??
+                      context.l10n.sharedSpaceForListsAndPlanning,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.only(left: 8),
                 child: Row(
@@ -153,12 +160,13 @@ class GroupOverviewCard extends StatelessWidget {
                       child: _PeoplePreview(
                         members: members,
                         pendingInvitations: pendingInvitations,
+                        onCancelInvitation: onCancelInvitation,
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Flexible(
                       child: Text(
-                        peopleSummary,
+                        peopleSummary(context),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall,
@@ -179,12 +187,67 @@ class _PeoplePreview extends StatelessWidget {
   const _PeoplePreview({
     required this.members,
     required this.pendingInvitations,
+    required this.onCancelInvitation,
   });
 
   final List<Map<String, dynamic>> members;
   final List<Map<String, dynamic>> pendingInvitations;
+  final void Function(String invitationId) onCancelInvitation;
 
   static const int maxVisibleMembers = 5;
+
+  void showPendingInvitations(BuildContext context) {
+    if (pendingInvitations.isEmpty) return;
+
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              Text(
+                context.l10n.pendingInvitations,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 12),
+              for (final invitation in pendingInvitations)
+                _PendingInvitationTile(
+                  invitation: invitation,
+                  onCancel: () {
+                    Navigator.of(context).pop();
+                    onCancelInvitation(
+                      invitation[AppInvitationFields.id].toString(),
+                    );
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String pendingTooltip(BuildContext context) {
+    final emails = pendingInvitations
+        .take(3)
+        .map((invite) {
+          return invite[AppInvitationFields.invitedEmail]?.toString() ??
+              context.l10n.pendingInvite;
+        })
+        .join('\n');
+
+    if (pendingInvitations.length <= 3) {
+      return emails;
+    }
+
+    return '$emails\n+${pendingInvitations.length - 3}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,28 +276,66 @@ class _PeoplePreview extends StatelessWidget {
             ),
           if (pendingInvitations.isNotEmpty)
             Tooltip(
-              message: _pendingTooltip(context),
-              child: _PendingAvatar(count: pendingInvitations.length),
+              message: pendingTooltip(context),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(999),
+                onTap: () => showPendingInvitations(context),
+                child: _PendingAvatar(count: pendingInvitations.length),
+              ),
             ),
         ],
       ),
     );
   }
+}
 
-  String _pendingTooltip(BuildContext context) {
-    final emails = pendingInvitations
-        .take(3)
-        .map((invite) {
-          return invite[AppInvitationFields.invitedEmail]?.toString() ??
-              context.l10n.pendingInvite;
-        })
-        .join('\n');
+class _PendingInvitationTile extends StatelessWidget {
+  const _PendingInvitationTile({
+    required this.invitation,
+    required this.onCancel,
+  });
 
-    if (pendingInvitations.length <= 3) {
-      return emails;
+  final Map<String, dynamic> invitation;
+  final VoidCallback onCancel;
+
+  String email(BuildContext context) {
+    final value = invitation[AppInvitationFields.invitedEmail]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return context.l10n.unknownEmail;
     }
 
-    return '$emails\n+${pendingInvitations.length - 3} more';
+    return value.trim();
+  }
+
+  String role(BuildContext context) {
+    final value = invitation[AppInvitationFields.role]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return context.l10n.member;
+    }
+
+    return value.trim();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: const CircleAvatar(child: Icon(Icons.mail_outline)),
+        title: Text(
+          email(context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(context.l10n.invitedAsRole(role(context))),
+        trailing: IconButton(
+          onPressed: onCancel,
+          icon: const Icon(Icons.close),
+          tooltip: context.l10n.cancelInvitation,
+        ),
+      ),
+    );
   }
 }
 

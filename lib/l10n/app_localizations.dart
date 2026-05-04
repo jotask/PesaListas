@@ -2474,6 +2474,60 @@ abstract class AppLocalizations {
   /// **'Dark'**
   String get themeSubtitleDark;
 
+  /// No description provided for @declineInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline invitation?'**
+  String get declineInvitationTitle;
+
+  /// No description provided for @declineInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This invitation will be removed from your pending invitations.'**
+  String get declineInvitationMessage;
+
+  /// No description provided for @decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline;
+
+  /// No description provided for @invitationDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation declined'**
+  String get invitationDeclined;
+
+  /// No description provided for @failedToDeclineInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to decline invitation'**
+  String get failedToDeclineInvitation;
+
+  /// No description provided for @cancelInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel invitation?'**
+  String get cancelInvitationTitle;
+
+  /// No description provided for @cancelInvitationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This pending invitation will be cancelled.'**
+  String get cancelInvitationMessage;
+
+  /// No description provided for @invitationCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation cancelled'**
+  String get invitationCancelled;
+
+  /// No description provided for @failedToCancelInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to cancel invitation'**
+  String get failedToCancelInvitation;
+
   /// No description provided for @addListTypeItem.
   ///
   /// In en, this message translates to:
@@ -2707,12 +2761,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} ingredients'**
   String ingredientCountMany(Object count);
-
-  /// No description provided for @decline.
-  ///
-  /// In en, this message translates to:
-  /// **'Decline'**
-  String get decline;
 }
 
 class _AppLocalizationsDelegate

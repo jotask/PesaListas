@@ -1260,6 +1260,35 @@ class AppLocalizationsEs extends AppLocalizations {
   String get themeSubtitleDark => 'Oscuro';
 
   @override
+  String get declineInvitationTitle => '¿Rechazar invitación?';
+
+  @override
+  String get declineInvitationMessage =>
+      'Esta invitación se quitará de tus invitaciones pendientes.';
+
+  @override
+  String get decline => 'Rechazar';
+
+  @override
+  String get invitationDeclined => 'Invitación rechazada';
+
+  @override
+  String get failedToDeclineInvitation => 'No se pudo rechazar la invitación';
+
+  @override
+  String get cancelInvitationTitle => '¿Cancelar invitación?';
+
+  @override
+  String get cancelInvitationMessage =>
+      'Esta invitación pendiente será cancelada.';
+
+  @override
+  String get invitationCancelled => 'Invitación cancelada';
+
+  @override
+  String get failedToCancelInvitation => 'No se pudo cancelar la invitación';
+
+  @override
   String addListTypeItem(Object listType) {
     return 'Añadir elemento de $listType';
   }
@@ -1443,7 +1472,4 @@ class AppLocalizationsEs extends AppLocalizations {
   String ingredientCountMany(Object count) {
     return '$count ingredientes';
   }
-
-  @override
-  String get decline => 'Rechazar';
 }
