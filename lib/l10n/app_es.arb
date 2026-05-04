@@ -393,5 +393,12 @@
   "everyNDays": "Cada N días",
   "repeatsAfterACustomNumberOfDays": "Se repite después de un número personalizado de días.",
   "doesNotRepeat2": "No se repite.",
-  "days": "días"
+  "days": "días",
+  "themeDialogTitle": "Elegir tema",
+  "themeSystem": "Predeterminado del sistema",
+  "themeLight": "Claro",
+  "themeDark": "Oscuro",
+  "themeSubtitleSystem": "Usando el tema del dispositivo",
+  "themeSubtitleLight": "Claro",
+  "themeSubtitleDark": "Oscuro"
 }

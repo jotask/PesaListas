@@ -1237,4 +1237,25 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get days => 'días';
+
+  @override
+  String get themeDialogTitle => 'Elegir tema';
+
+  @override
+  String get themeSystem => 'Predeterminado del sistema';
+
+  @override
+  String get themeLight => 'Claro';
+
+  @override
+  String get themeDark => 'Oscuro';
+
+  @override
+  String get themeSubtitleSystem => 'Usando el tema del dispositivo';
+
+  @override
+  String get themeSubtitleLight => 'Claro';
+
+  @override
+  String get themeSubtitleDark => 'Oscuro';
 }

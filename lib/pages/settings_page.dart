@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_theme_controller.dart';
 import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/app_locale_controller.dart';
 import 'package:pesalistas/core/profile_fields.dart';
@@ -99,6 +100,19 @@ class _SettingsPageState extends State<SettingsPage> {
         .toUpperCase();
   }
 
+  String get themeSubtitle {
+    final themeMode = AppThemeController.themeMode.value;
+
+    switch (themeMode) {
+      case ThemeMode.light:
+        return context.l10n.themeSubtitleLight;
+      case ThemeMode.dark:
+        return context.l10n.themeSubtitleDark;
+      case ThemeMode.system:
+        return context.l10n.themeSubtitleSystem;
+    }
+  }
+
   String get languageSubtitle {
     final locale = AppLocaleController.locale.value;
 
@@ -183,6 +197,88 @@ class _SettingsPageState extends State<SettingsPage> {
         break;
       case 'es':
         await AppLocaleController.useSpanish();
+        break;
+    }
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
+  Future<void> chooseTheme() async {
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        final l10n = context.l10n;
+        final currentThemeMode = AppThemeController.themeMode.value;
+        final currentValue = switch (currentThemeMode) {
+          ThemeMode.light => 'light',
+          ThemeMode.dark => 'dark',
+          ThemeMode.system => 'system',
+        };
+
+        Widget themeTile({
+          required String value,
+          required String title,
+          required String subtitle,
+        }) {
+          final selected = currentValue == value;
+
+          return ListTile(
+            leading: Icon(
+              selected
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+            ),
+            title: Text(title),
+            subtitle: Text(subtitle),
+            onTap: () => Navigator.of(context).pop(value),
+          );
+        }
+
+        return AlertDialog(
+          title: Text(l10n.themeDialogTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              themeTile(
+                value: 'system',
+                title: l10n.themeSystem,
+                subtitle: l10n.themeSubtitleSystem,
+              ),
+              themeTile(
+                value: 'light',
+                title: l10n.themeLight,
+                subtitle: l10n.themeSubtitleLight,
+              ),
+              themeTile(
+                value: 'dark',
+                title: l10n.themeDark,
+                subtitle: l10n.themeSubtitleDark,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.cancel),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (selected == null) return;
+
+    switch (selected) {
+      case 'system':
+        await AppThemeController.useSystem();
+        break;
+      case 'light':
+        await AppThemeController.useLight();
+        break;
+      case 'dark':
+        await AppThemeController.useDark();
         break;
     }
 
@@ -377,11 +473,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: Icon(Icons.dark_mode_outlined),
-                        title: Text(S.themeTitle),
-                        subtitle: Text(S.themeSubtitle),
-                        trailing: const _ComingSoonPill(),
-                        onTap: () => showComingSoon(S.themeSettingsFeature),
+                        leading: const Icon(Icons.dark_mode_outlined),
+                        title: Text(context.l10n.themeTitle),
+                        subtitle: Text(themeSubtitle),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: chooseTheme,
                       ),
                       const Divider(height: 1),
                       ListTile(

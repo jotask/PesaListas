@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/core/app_theme_controller.dart';
 import 'package:pesalistas/core/app_locale_controller.dart';
 import 'package:pesalistas/pages/splash_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,6 +12,7 @@ Future<void> main() async {
     anonKey: '***REMOVED***',
   );
   await AppLocaleController.loadSavedLocale();
+  await AppThemeController.loadSavedThemeMode();
   runApp(const PesaListas());
 }
 
@@ -23,13 +24,32 @@ class PesaListas extends StatelessWidget {
     return ValueListenableBuilder<Locale?>(
       valueListenable: AppLocaleController.locale,
       builder: (context, locale, _) {
-        return MaterialApp(
-          title: S.pesalistas,
-          locale: locale,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          theme: ThemeData(useMaterial3: true),
-          home: const SplashPage(),
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: AppThemeController.themeMode,
+          builder: (context, themeMode, _) {
+            return MaterialApp(
+              title: 'Pesalistas',
+              locale: locale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              themeMode: themeMode,
+              theme: ThemeData(
+                useMaterial3: true,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.green,
+                  brightness: Brightness.light,
+                ),
+              ),
+              darkTheme: ThemeData(
+                useMaterial3: true,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.green,
+                  brightness: Brightness.dark,
+                ),
+              ),
+              home: const SplashPage(),
+            );
+          },
         );
       },
     );

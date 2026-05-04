@@ -2431,6 +2431,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'days'**
   String get days;
+
+  /// No description provided for @themeDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose theme'**
+  String get themeDialogTitle;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @themeSubtitleSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Using device theme'**
+  String get themeSubtitleSystem;
+
+  /// No description provided for @themeSubtitleLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeSubtitleLight;
+
+  /// No description provided for @themeSubtitleDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeSubtitleDark;
 }
 
 class _AppLocalizationsDelegate
