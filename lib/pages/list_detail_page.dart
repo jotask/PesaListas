@@ -1371,7 +1371,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: creatingItem ? null : createItemDialog,
-        icon: Icon(Icons.add),
+        icon: const Icon(Icons.add),
         label: Text(
           isRecipeList
               ? context.l10n.addRecipe
@@ -1392,31 +1392,35 @@ class _ListDetailPageState extends State<ListDetailPage> {
           ),
           if (isBusy) const LinearProgressIndicator(),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: loadItems,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  ListItemsSection(
-                    listType: listType,
-                    items: items,
-                    loading: loadingItems,
-                    showStatusSummary: shouldShowStatusSummary,
-                    onCreate: createItemDialog,
-                    onComplete: completeItem,
-                    onReopen: reopenItem,
-                    onEdit: editItem,
-                    onDelete: deleteItem,
-                    onVote: voteItem,
-                    onViewVotes: viewVotes,
-                    onViewRecipeDetails: viewRecipeDetails,
-                    onDeleteRecipe: deleteRecipe,
-                    onGenerateShoppingFromMealPlans:
-                        generateShoppingFromMealPlans,
-                    onClearBoughtShoppingItems: clearBoughtShoppingItems,
-                    onClearAllShoppingItems: clearAllShoppingItems,
-                  ),
-                ],
+            child: SafeArea(
+              top: false,
+              child: RefreshIndicator(
+                onRefresh: loadItems,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    ListItemsSection(
+                      listType: listType,
+                      items: items,
+                      loading: loadingItems,
+                      showStatusSummary: shouldShowStatusSummary,
+                      onCreate: createItemDialog,
+                      onComplete: completeItem,
+                      onReopen: reopenItem,
+                      onEdit: editItem,
+                      onDelete: deleteItem,
+                      onVote: voteItem,
+                      onViewVotes: viewVotes,
+                      onViewRecipeDetails: viewRecipeDetails,
+                      onDeleteRecipe: deleteRecipe,
+                      onGenerateShoppingFromMealPlans:
+                          generateShoppingFromMealPlans,
+                      onClearBoughtShoppingItems: clearBoughtShoppingItems,
+                      onClearAllShoppingItems: clearAllShoppingItems,
+                    ),
+                    const SizedBox(height: 96),
+                  ],
+                ),
               ),
             ),
           ),

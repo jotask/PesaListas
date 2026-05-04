@@ -491,20 +491,24 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
           ),
           if (isBusy) const LinearProgressIndicator(),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: loadData,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _ArchivedListsShortcutCard(onTap: openArchivedLists),
-                  const SizedBox(height: 12),
-                  GroupListsSection(
-                    lists: lists,
-                    loading: loadingLists,
-                    creatingList: creatingList,
-                    onCreateList: createList,
-                  ),
-                ],
+            child: SafeArea(
+              top: false,
+              child: RefreshIndicator(
+                onRefresh: loadData,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _ArchivedListsShortcutCard(onTap: openArchivedLists),
+                    const SizedBox(height: 12),
+                    GroupListsSection(
+                      lists: lists,
+                      loading: loadingLists,
+                      creatingList: creatingList,
+                      onCreateList: createList,
+                    ),
+                    const SizedBox(height: 96),
+                  ],
+                ),
               ),
             ),
           ),

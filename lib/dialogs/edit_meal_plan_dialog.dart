@@ -268,6 +268,8 @@ class _EditRecipePicker extends StatelessWidget {
     required this.onSelectedRecipe,
   });
 
+  static const noRecipeValue = '__no_recipe__';
+
   final List<Map<String, dynamic>> recipes;
   final bool allRecipesEmpty;
   final String? selectedRecipeId;
@@ -288,88 +290,93 @@ class _EditRecipePicker extends StatelessWidget {
         labelText: context.l10n.recipe,
         helperText: context.l10n.optional2,
       ),
-      child: Column(
-        children: [
-          RadioListTile<String?>(
-            value: null,
-            groupValue: selectedRecipeId,
-            contentPadding: EdgeInsets.zero,
-            title: Text(context.l10n.noRecipeCustomMeal),
-            onChanged: onSelectedRecipe,
-          ),
-          const Divider(height: 1),
-          const SizedBox(height: 10),
-          SearchBar(
-            controller: searchController,
-            leading: const Icon(Icons.search),
-            hintText: context.l10n.searchRecipesHint,
-            onChanged: onSearchChanged,
-            trailing: [
-              if (searchQuery.isNotEmpty)
-                IconButton(
-                  onPressed: onClearSearch,
-                  icon: const Icon(Icons.close),
-                  tooltip: context.l10n.clearFilter,
-                ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          if (allRecipesEmpty)
-            _EditRecipePickerEmptyMessage(
-              icon: Icons.restaurant_menu_outlined,
-              title: context.l10n.noRecipesYet,
-              subtitle: context.l10n.addYourFirstRecipe,
-            )
-          else if (recipes.isEmpty)
-            _EditRecipePickerEmptyMessage(
-              icon: Icons.search_off_outlined,
-              title: context.l10n.noRecipeResults,
-              subtitle: context.l10n.noRecipeResultsSubtitle,
-            )
-          else
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 260),
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: recipes.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final recipe = recipes[index];
-                  final recipeId = recipe[AppRecipeFields.id]?.toString();
-                  final description = recipeDescription(recipe);
+      child: RadioGroup<String>(
+        groupValue: selectedRecipeId ?? noRecipeValue,
+        onChanged: (value) {
+          if (value == null) return;
 
-                  return RadioListTile<String?>(
-                    value: recipeId,
-                    groupValue: selectedRecipeId,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      recipeName(recipe),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: description == null
-                        ? null
-                        : Text(
-                            description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                    onChanged: onSelectedRecipe,
-                  );
-                },
+          onSelectedRecipe(value == noRecipeValue ? null : value);
+        },
+        child: Column(
+          children: [
+            RadioListTile<String>(
+              value: noRecipeValue,
+              contentPadding: EdgeInsets.zero,
+              title: Text(context.l10n.noRecipeCustomMeal),
+            ),
+            const Divider(height: 1),
+            const SizedBox(height: 10),
+            SearchBar(
+              controller: searchController,
+              leading: const Icon(Icons.search),
+              hintText: context.l10n.searchRecipesHint,
+              onChanged: onSearchChanged,
+              trailing: [
+                if (searchQuery.isNotEmpty)
+                  IconButton(
+                    onPressed: onClearSearch,
+                    icon: const Icon(Icons.close),
+                    tooltip: context.l10n.clearFilter,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            if (allRecipesEmpty)
+              _EditRecipePickerEmptyMessage(
+                icon: Icons.restaurant_menu_outlined,
+                title: context.l10n.noRecipesYet,
+                subtitle: context.l10n.addYourFirstRecipe,
+              )
+            else if (recipes.isEmpty)
+              _EditRecipePickerEmptyMessage(
+                icon: Icons.search_off_outlined,
+                title: context.l10n.noRecipeResults,
+                subtitle: context.l10n.noRecipeResultsSubtitle,
+              )
+            else
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 260),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: recipes.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final recipe = recipes[index];
+                    final recipeId =
+                        recipe[AppRecipeFields.id]?.toString() ?? '';
+                    final description = recipeDescription(recipe);
+
+                    return RadioListTile<String>(
+                      value: recipeId,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        recipeName(recipe),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: description == null
+                          ? null
+                          : Text(
+                              description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                selectedRecipeId == null
+                    ? context.l10n.noRecipeCustomMeal
+                    : context.l10n.recipe,
+                style: theme.textTheme.bodySmall,
               ),
             ),
-          const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              selectedRecipeId == null
-                  ? context.l10n.noRecipeCustomMeal
-                  : context.l10n.recipe,
-              style: theme.textTheme.bodySmall,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
