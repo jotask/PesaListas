@@ -1,0 +1,58 @@
+{
+  "@@locale": "es",
+
+  "settingsTitle": "Ajustes",
+
+  "languageDialogTitle": "Elegir idioma",
+  "languageSystem": "Predeterminado del sistema",
+  "languageEnglish": "Inglés",
+  "languageSpanish": "Español",
+  "languageSubtitleSystem": "Usando el idioma del dispositivo",
+  "languageSubtitleEnglish": "Inglés",
+  "languageSubtitleSpanish": "Español",
+
+  "profileSectionTitle": "Perfil",
+  "profileEditDisplayNameTitle": "Editar nombre visible",
+  "profileEditDisplayNameSubtitle": "Cambia cómo aparece tu nombre para otros miembros.",
+  "profileSyncTitle": "Sincronizar perfil desde Google",
+  "profileSyncSubtitle": "Actualiza tu nombre y avatar desde tu cuenta de autenticación.",
+  "profileUpdated": "Perfil actualizado",
+  "profileSynced": "Perfil sincronizado",
+  "profileLoadFailed": "No se pudo cargar el perfil",
+  "profileUpdateFailed": "No se pudo actualizar el perfil",
+  "profileSyncFailed": "No se pudo sincronizar el perfil",
+  "profileLoading": "Cargando perfil...",
+  "profileNoEmail": "No hay email disponible",
+  "profileEditTooltip": "Editar perfil",
+
+  "preferencesSectionTitle": "Preferencias",
+  "languageTitle": "Idioma",
+  "languageSubtitle": "Español por ahora",
+  "themeTitle": "Tema",
+  "themeSubtitle": "Predeterminado del sistema por ahora",
+  "notificationsTitle": "Notificaciones",
+  "notificationsSubtitle": "Preferencias de notificaciones más adelante",
+  "comingSoon": "Pronto",
+  "comingSoonMessage": "{feature} estará disponible pronto",
+  "@comingSoonMessage": {
+    "placeholders": {
+      "feature": {}
+    }
+  },
+  "languageSettingsFeature": "Ajustes de idioma",
+  "themeSettingsFeature": "Ajustes de tema",
+  "notificationSettingsFeature": "Ajustes de notificaciones",
+
+  "accountSectionTitle": "Cuenta",
+  "signOutTitle": "Cerrar sesión",
+  "signOutSubtitle": "Volver a la pantalla de inicio de sesión.",
+  "signOutFailed": "No se pudo cerrar sesión",
+
+  "editProfileDialogTitle": "Editar perfil",
+  "editProfileDisplayNameTitle": "Nombre visible",
+  "editProfileDisplayNameSubtitle": "Así aparecerá tu nombre para otros miembros.",
+  "editProfileDisplayNameLabel": "Nombre visible",
+  "editProfileDisplayNameRequired": "El nombre visible es obligatorio.",
+  "cancel": "Cancelar",
+  "save": "Guardar"
+}

@@ -1,0 +1,58 @@
+{
+  "@@locale": "en",
+
+  "languageDialogTitle": "Choose language",
+  "languageSystem": "System default",
+  "languageEnglish": "English",
+  "languageSpanish": "Spanish",
+  "languageSubtitleSystem": "Using device language",
+  "languageSubtitleEnglish": "English",
+  "languageSubtitleSpanish": "Spanish",
+
+  "settingsTitle": "Settings",
+
+  "profileSectionTitle": "Profile",
+  "profileEditDisplayNameTitle": "Edit display name",
+  "profileEditDisplayNameSubtitle": "Change how your name appears to other members.",
+  "profileSyncTitle": "Sync profile from Google",
+  "profileSyncSubtitle": "Refresh display name and avatar from your auth account.",
+  "profileUpdated": "Profile updated",
+  "profileSynced": "Profile synced",
+  "profileLoadFailed": "Failed to load profile",
+  "profileUpdateFailed": "Failed to update profile",
+  "profileSyncFailed": "Failed to sync profile",
+  "profileLoading": "Loading profile...",
+  "profileNoEmail": "No email available",
+  "profileEditTooltip": "Edit profile",
+
+  "preferencesSectionTitle": "Preferences",
+  "languageTitle": "Language",
+  "languageSubtitle": "English for now",
+  "themeTitle": "Theme",
+  "themeSubtitle": "System default for now",
+  "notificationsTitle": "Notifications",
+  "notificationsSubtitle": "Notification preferences later",
+  "comingSoon": "Soon",
+  "comingSoonMessage": "{feature} is coming soon",
+  "@comingSoonMessage": {
+    "placeholders": {
+      "feature": {}
+    }
+  },
+  "languageSettingsFeature": "Language settings",
+  "themeSettingsFeature": "Theme settings",
+  "notificationSettingsFeature": "Notification settings",
+
+  "accountSectionTitle": "Account",
+  "signOutTitle": "Sign out",
+  "signOutSubtitle": "Return to the login screen.",
+  "signOutFailed": "Failed to sign out",
+
+  "editProfileDialogTitle": "Edit profile",
+  "editProfileDisplayNameTitle": "Display name",
+  "editProfileDisplayNameSubtitle": "This is how your name appears to other members.",
+  "editProfileDisplayNameLabel": "Display name",
+  "editProfileDisplayNameRequired": "Display name is required.",
+  "cancel": "Cancel",
+  "save": "Save"
+}

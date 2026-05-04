@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_locale_controller.dart';
 import 'package:pesalistas/core/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/edit_profile_dialog.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/profile_repository.dart';
@@ -96,6 +98,78 @@ class _SettingsPageState extends State<SettingsPage> {
         .toUpperCase();
   }
 
+  String get languageSubtitle {
+    final locale = AppLocaleController.locale.value;
+
+    if (locale == null) {
+      return context.l10n.languageSubtitleSystem;
+    }
+
+    if (locale.languageCode == 'es') {
+      return context.l10n.languageSubtitleSpanish;
+    }
+
+    return context.l10n.languageSubtitleEnglish;
+  }
+
+  Future<void> chooseLanguage() async {
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        final l10n = context.l10n;
+        final currentLocale = AppLocaleController.locale.value;
+        final currentValue = currentLocale?.languageCode ?? 'system';
+
+        return AlertDialog(
+          title: Text(l10n.languageDialogTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String>(
+                value: 'system',
+                groupValue: currentValue,
+                title: Text(l10n.languageSystem),
+                onChanged: (value) => Navigator.of(context).pop(value),
+              ),
+              RadioListTile<String>(
+                value: 'en',
+                groupValue: currentValue,
+                title: Text(l10n.languageEnglish),
+                onChanged: (value) => Navigator.of(context).pop(value),
+              ),
+              RadioListTile<String>(
+                value: 'es',
+                groupValue: currentValue,
+                title: Text(l10n.languageSpanish),
+                onChanged: (value) => Navigator.of(context).pop(value),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.cancel),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (selected == null) return;
+
+    switch (selected) {
+      case 'system':
+        AppLocaleController.useSystem();
+        break;
+      case 'en':
+        AppLocaleController.useEnglish();
+        break;
+      case 'es':
+        AppLocaleController.useSpanish();
+        break;
+    }
+  }
+
   Future<void> loadProfile() async {
     if (!mounted) return;
 
@@ -114,7 +188,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (!mounted) return;
 
       setState(() => loadingProfile = false);
-      showErrorSnackBar(context, 'Failed to load profile', error);
+      showErrorSnackBar(context, context.l10n.profileLoadFailed, error);
     }
   }
 
@@ -139,7 +213,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
       setState(() => profile = updatedProfile ?? profile);
 
-      showSuccessSnackBar(context, 'Profile updated');
+      showSuccessSnackBar(context, context.l10n.profileUpdated);
     } catch (error) {
       if (!mounted) return;
 
@@ -167,11 +241,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
       setState(() => profile = refreshedProfile);
 
-      showSuccessSnackBar(context, 'Profile synced');
+      showSuccessSnackBar(context, context.l10n.profileSynced);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, 'Failed to sync profile', error);
+      showErrorSnackBar(context, context.l10n.profileSyncFailed, error);
     } finally {
       if (!mounted) return;
 
@@ -196,7 +270,7 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, 'Failed to sign out', error);
+      showErrorSnackBar(context, context.l10n.signOutFailed, error);
     } finally {
       if (!mounted) return;
 
@@ -205,7 +279,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void showComingSoon(String feature) {
-    showInfoSnackBar(context, '$feature is coming soon');
+    showInfoSnackBar(context, context.l10n.comingSoonMessage(feature));
   }
 
   @override
@@ -214,7 +288,7 @@ class _SettingsPageState extends State<SettingsPage> {
         loadingProfile || syncingProfile || editingProfile || signingOut;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(context.l10n.settingsTitle)),
       body: Column(
         children: [
           if (busy) const LinearProgressIndicator(),
@@ -279,10 +353,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     children: [
                       ListTile(
                         leading: const Icon(Icons.language_outlined),
-                        title: const Text('Language'),
-                        subtitle: const Text('English for now'),
-                        trailing: const _ComingSoonPill(),
-                        onTap: () => showComingSoon('Language settings'),
+                        title: Text(context.l10n.languageTitle),
+                        subtitle: Text(languageSubtitle),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: chooseLanguage,
                       ),
                       const Divider(height: 1),
                       ListTile(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/profile_fields.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class EditProfileDialogResult {
   const EditProfileDialogResult({required this.displayName});
@@ -52,7 +53,9 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     setState(() => validationMessage = null);
 
     if (displayName.isEmpty) {
-      setState(() => validationMessage = 'Display name is required.');
+      setState(
+        () => validationMessage = context.l10n.editProfileDisplayNameRequired,
+      );
       return;
     }
 
@@ -63,23 +66,27 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return AlertDialog(
-      title: const Text('Edit profile'),
+      title: Text(l10n.editProfileDialogTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(child: Icon(Icons.person_outline)),
-              title: Text('Display name'),
-              subtitle: Text('This is how your name appears to other members.'),
+              leading: const CircleAvatar(child: Icon(Icons.person_outline)),
+              title: Text(l10n.editProfileDisplayNameTitle),
+              subtitle: Text(l10n.editProfileDisplayNameSubtitle),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: displayNameController,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Display name'),
+              decoration: InputDecoration(
+                labelText: l10n.editProfileDisplayNameLabel,
+              ),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => submit(),
               onChanged: (_) {
@@ -111,9 +118,9 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Save')),
+        ElevatedButton(onPressed: submit, child: Text(l10n.save)),
       ],
     );
   }

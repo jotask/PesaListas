@@ -27,6 +27,14 @@
       ],
       "group": "build",
       "problemMatcher": []
+    },
+    {
+      "label": "Regenerate Localizations",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["gen-l10n"],
+      "group": "build",
+      "problemMatcher": []
     }
   ]
 }
