@@ -1,38 +1,787 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/list_detail/simple_items_view.dart';
+import 'package:pesalistas/core/meal_plan_fields.dart';
+import 'package:pesalistas/core/recipe_fields.dart';
+import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
+import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
-class MealPlanItemsView extends StatelessWidget {
+class MealPlanItemsView extends StatefulWidget {
   const MealPlanItemsView({
     super.key,
-    required this.items,
+    required this.mealPlans,
     required this.loading,
     required this.onCreate,
-    required this.onComplete,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onGenerateShopping,
+  });
+
+  final List<Map<String, dynamic>> mealPlans;
+  final bool loading;
+  final VoidCallback onCreate;
+  final void Function(Map<String, dynamic> mealPlan) onEdit;
+  final void Function(String mealPlanId) onDelete;
+  final VoidCallback onGenerateShopping;
+
+  @override
+  State<MealPlanItemsView> createState() => _MealPlanItemsViewState();
+}
+
+class _MealPlanItemsViewState extends State<MealPlanItemsView> {
+  MealPlanFilter selectedFilter = MealPlanFilter.all;
+
+  DateTime get today {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  DateTime get weekEnd {
+    return today.add(const Duration(days: 6));
+  }
+
+  DateTime? plannedDateFor(Map<String, dynamic> mealPlan) {
+    final value = mealPlan[AppMealPlanFields.plannedFor]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    final parsed = DateTime.tryParse(value.split('T').first);
+
+    if (parsed == null) {
+      return null;
+    }
+
+    return DateTime(parsed.year, parsed.month, parsed.day);
+  }
+
+  bool isUpcoming(Map<String, dynamic> mealPlan) {
+    final date = plannedDateFor(mealPlan);
+
+    if (date == null) return false;
+
+    return !date.isBefore(today);
+  }
+
+  bool isThisWeek(Map<String, dynamic> mealPlan) {
+    final date = plannedDateFor(mealPlan);
+
+    if (date == null) return false;
+
+    return !date.isBefore(today) && !date.isAfter(weekEnd);
+  }
+
+  bool isPast(Map<String, dynamic> mealPlan) {
+    final date = plannedDateFor(mealPlan);
+
+    if (date == null) return false;
+
+    return date.isBefore(today);
+  }
+
+  List<Map<String, dynamic>> get filteredMealPlans {
+    switch (selectedFilter) {
+      case MealPlanFilter.all:
+        return widget.mealPlans;
+
+      case MealPlanFilter.upcoming:
+        return widget.mealPlans.where(isUpcoming).toList();
+
+      case MealPlanFilter.thisWeek:
+        return widget.mealPlans.where(isThisWeek).toList();
+
+      case MealPlanFilter.past:
+        return widget.mealPlans.where(isPast).toList();
+    }
+  }
+
+  int get upcomingCount {
+    return widget.mealPlans.where(isUpcoming).length;
+  }
+
+  int get thisWeekCount {
+    return widget.mealPlans.where(isThisWeek).length;
+  }
+
+  int get pastCount {
+    return widget.mealPlans.where(isPast).length;
+  }
+
+  int get recipeMealCount {
+    return widget.mealPlans.where((mealPlan) {
+      final recipeId = mealPlan[AppMealPlanFields.recipeId]?.toString();
+      return recipeId != null && recipeId.isNotEmpty;
+    }).length;
+  }
+
+  Map<String, List<Map<String, dynamic>>> groupByDate(
+    List<Map<String, dynamic>> mealPlans,
+  ) {
+    final grouped = <String, List<Map<String, dynamic>>>{};
+
+    for (final mealPlan in mealPlans) {
+      final date = mealPlan[AppMealPlanFields.plannedFor]?.toString();
+      final key = date == null || date.trim().isEmpty
+          ? 'No date'
+          : date.split('T').first;
+
+      grouped.putIfAbsent(key, () => []);
+      grouped[key]!.add(mealPlan);
+    }
+
+    return grouped;
+  }
+
+  String emptyTitleForFilter() {
+    switch (selectedFilter) {
+      case MealPlanFilter.all:
+        return 'No meal plans yet';
+
+      case MealPlanFilter.upcoming:
+        return 'No upcoming meals';
+
+      case MealPlanFilter.thisWeek:
+        return 'No meals this week';
+
+      case MealPlanFilter.past:
+        return 'No past meals';
+    }
+  }
+
+  String emptySubtitleForFilter() {
+    switch (selectedFilter) {
+      case MealPlanFilter.all:
+        return 'Plan your first meal.';
+
+      case MealPlanFilter.upcoming:
+        return 'Plan a meal for today or later.';
+
+      case MealPlanFilter.thisWeek:
+        return 'Nothing planned for the next 7 days.';
+
+      case MealPlanFilter.past:
+        return 'Past meals will appear here.';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final visibleMealPlans = filteredMealPlans;
+    final groupedMealPlans = groupByDate(visibleMealPlans);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _GenerateShoppingCard(onGenerateShopping: widget.onGenerateShopping),
+        const SizedBox(height: 12),
+        if (widget.mealPlans.isNotEmpty) ...[
+          _MealPlanSummaryCard(
+            totalCount: widget.mealPlans.length,
+            upcomingCount: upcomingCount,
+            thisWeekCount: thisWeekCount,
+            pastCount: pastCount,
+            recipeMealCount: recipeMealCount,
+          ),
+          const SizedBox(height: 12),
+          _MealPlanFilterChips(
+            selectedFilter: selectedFilter,
+            totalCount: widget.mealPlans.length,
+            upcomingCount: upcomingCount,
+            thisWeekCount: thisWeekCount,
+            pastCount: pastCount,
+            onSelected: (filter) {
+              setState(() => selectedFilter = filter);
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (visibleMealPlans.isEmpty)
+          EmptyItemsCard(
+            icon: Icons.event_note_outlined,
+            title: emptyTitleForFilter(),
+            subtitle: emptySubtitleForFilter(),
+            onCreate: widget.onCreate,
+          )
+        else
+          for (final entry in groupedMealPlans.entries)
+            _MealPlanDateSection(
+              dateLabel: entry.key,
+              mealPlans: entry.value,
+              onEdit: widget.onEdit,
+              onDelete: widget.onDelete,
+            ),
+      ],
+    );
+  }
+}
+
+enum MealPlanFilter { all, upcoming, thisWeek, past }
+
+class _MealPlanFilterChips extends StatelessWidget {
+  const _MealPlanFilterChips({
+    required this.selectedFilter,
+    required this.totalCount,
+    required this.upcomingCount,
+    required this.thisWeekCount,
+    required this.pastCount,
+    required this.onSelected,
+  });
+
+  final MealPlanFilter selectedFilter;
+  final int totalCount;
+  final int upcomingCount;
+  final int thisWeekCount;
+  final int pastCount;
+  final void Function(MealPlanFilter filter) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        FilterChip(
+          selected: selectedFilter == MealPlanFilter.all,
+          label: Text('All $totalCount'),
+          onSelected: (_) => onSelected(MealPlanFilter.all),
+        ),
+        FilterChip(
+          selected: selectedFilter == MealPlanFilter.upcoming,
+          label: Text('Upcoming $upcomingCount'),
+          onSelected: (_) => onSelected(MealPlanFilter.upcoming),
+        ),
+        FilterChip(
+          selected: selectedFilter == MealPlanFilter.thisWeek,
+          label: Text('This week $thisWeekCount'),
+          onSelected: (_) => onSelected(MealPlanFilter.thisWeek),
+        ),
+        FilterChip(
+          selected: selectedFilter == MealPlanFilter.past,
+          label: Text('Past $pastCount'),
+          onSelected: (_) => onSelected(MealPlanFilter.past),
+        ),
+      ],
+    );
+  }
+}
+
+class _MealPlanSummaryCard extends StatelessWidget {
+  const _MealPlanSummaryCard({
+    required this.totalCount,
+    required this.upcomingCount,
+    required this.thisWeekCount,
+    required this.pastCount,
+    required this.recipeMealCount,
+  });
+
+  final int totalCount;
+  final int upcomingCount;
+  final int thisWeekCount;
+  final int pastCount;
+  final int recipeMealCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: Icon(
+                Icons.calendar_month_outlined,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _SummaryPill(
+                    label: '$thisWeekCount this week',
+                    icon: Icons.today_outlined,
+                  ),
+                  _SummaryPill(
+                    label: '$upcomingCount upcoming',
+                    icon: Icons.event_available_outlined,
+                  ),
+                  _SummaryPill(
+                    label: '$recipeMealCount with recipes',
+                    icon: Icons.restaurant_menu,
+                  ),
+                  _SummaryPill(
+                    label: '$totalCount total',
+                    icon: Icons.list_alt_outlined,
+                  ),
+                  if (pastCount > 0)
+                    _SummaryPill(label: '$pastCount past', icon: Icons.history),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryPill extends StatelessWidget {
+  const _SummaryPill({required this.label, required this.icon});
+
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GenerateShoppingCard extends StatelessWidget {
+  const _GenerateShoppingCard({required this.onGenerateShopping});
+
+  final VoidCallback onGenerateShopping;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onGenerateShopping,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: theme.colorScheme.secondaryContainer,
+                child: Icon(
+                  Icons.auto_awesome_outlined,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Generate shopping list',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text('Add ingredients from planned recipe meals.'),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton.icon(
+                onPressed: onGenerateShopping,
+                icon: const Icon(Icons.shopping_cart_outlined),
+                label: const Text('Generate'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MealPlanDateSection extends StatelessWidget {
+  const _MealPlanDateSection({
+    required this.dateLabel,
+    required this.mealPlans,
     required this.onEdit,
     required this.onDelete,
   });
 
-  final List<Map<String, dynamic>> items;
-  final bool loading;
-  final VoidCallback onCreate;
-  final void Function(String itemId) onComplete;
-  final void Function(Map<String, dynamic> item) onEdit;
-  final void Function(String itemId) onDelete;
+  final String dateLabel;
+  final List<Map<String, dynamic>> mealPlans;
+  final void Function(Map<String, dynamic> mealPlan) onEdit;
+  final void Function(String mealPlanId) onDelete;
+
+  DateTime? get parsedDate {
+    final parsed = DateTime.tryParse(dateLabel);
+
+    if (parsed == null) return null;
+
+    return DateTime(parsed.year, parsed.month, parsed.day);
+  }
+
+  String get friendlyDateLabel {
+    final date = parsedDate;
+
+    if (date == null) return dateLabel;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    if (date == today) return 'Today';
+    if (date == tomorrow) return 'Tomorrow';
+    if (date == yesterday) return 'Yesterday';
+
+    return dateLabel;
+  }
+
+  bool get shouldShowRawDate {
+    return friendlyDateLabel != dateLabel;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SimpleItemsView(
-      items: items,
-      loading: loading,
-      emptyIcon: Icons.calendar_month_outlined,
-      emptyTitle: 'No meal plans yet',
-      emptySubtitle: 'Add a meal idea. Calendar planning will come later.',
-      cardIcon: Icons.calendar_month_outlined,
-      fallbackTitle: 'Untitled meal plan',
-      defaultSubtitle: 'Meal planning calendar coming later',
-      onCreate: onCreate,
-      onEdit: onEdit,
-      onDelete: onDelete,
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.event_outlined,
+                size: 18,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$friendlyDateLabel (${mealPlans.length})',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              if (shouldShowRawDate) ...[
+                const SizedBox(width: 8),
+                Text(dateLabel, style: theme.textTheme.bodySmall),
+              ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          for (final mealPlan in mealPlans)
+            _MealPlanCard(
+              mealPlan: mealPlan,
+              onEdit: () => onEdit(mealPlan),
+              onDelete: () {
+                onDelete(mealPlan[AppMealPlanFields.id].toString());
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MealPlanCard extends StatelessWidget {
+  const _MealPlanCard({
+    required this.mealPlan,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final Map<String, dynamic> mealPlan;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  String get mealType {
+    final value = mealPlan[AppMealPlanFields.mealType]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return AppMealTypes.dinner;
+    }
+
+    return value.trim();
+  }
+
+  AppMealTypeConfig get mealTypeConfig {
+    return AppMealTypes.fromValue(mealType);
+  }
+
+  Map<String, dynamic>? get recipe {
+    final value = mealPlan[AppMealPlanFields.recipes];
+
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+
+    return null;
+  }
+
+  bool get hasRecipe {
+    return recipe != null;
+  }
+
+  String get title {
+    final recipeName = recipe?[AppRecipeFields.name]?.toString();
+
+    if (recipeName != null && recipeName.trim().isNotEmpty) {
+      return recipeName.trim();
+    }
+
+    final note = mealPlan[AppMealPlanFields.note]?.toString();
+
+    if (note != null && note.trim().isNotEmpty) {
+      return note.trim();
+    }
+
+    return 'Custom meal';
+  }
+
+  String? get note {
+    final value = mealPlan[AppMealPlanFields.note]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    final trimmed = value.trim();
+
+    if (trimmed == title) {
+      return null;
+    }
+
+    return trimmed;
+  }
+
+  String get helperText {
+    if (hasRecipe) {
+      return 'Recipe meal • Can generate shopping items';
+    }
+
+    return 'Custom meal • Will not generate shopping items';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onEdit,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                backgroundColor: hasRecipe
+                    ? theme.colorScheme.primaryContainer
+                    : theme.colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  mealTypeConfig.icon,
+                  color: hasRecipe
+                      ? theme.colorScheme.onPrimaryContainer
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        _MealTypePill(config: mealTypeConfig),
+                        _MealSourcePill(hasRecipe: hasRecipe),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(helperText, style: theme.textTheme.bodyMedium),
+                    if (note != null) ...[
+                      const SizedBox(height: 8),
+                      _MealNoteBox(note: note!),
+                    ],
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: onEdit,
+                            icon: const Icon(Icons.edit_outlined),
+                            label: const Text('Edit'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: onDelete,
+                          icon: const Icon(Icons.delete_outline),
+                          tooltip: 'Delete meal plan',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MealSourcePill extends StatelessWidget {
+  const _MealSourcePill({required this.hasRecipe});
+
+  final bool hasRecipe;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final backgroundColor = hasRecipe
+        ? theme.colorScheme.primaryContainer
+        : theme.colorScheme.surfaceContainerHighest;
+
+    final foregroundColor = hasRecipe
+        ? theme.colorScheme.onPrimaryContainer
+        : theme.colorScheme.onSurfaceVariant;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            hasRecipe ? Icons.restaurant_menu : Icons.edit_note_outlined,
+            size: 14,
+            color: foregroundColor,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            hasRecipe ? 'Recipe' : 'Custom',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: foregroundColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MealNoteBox extends StatelessWidget {
+  const _MealNoteBox({required this.note});
+
+  final String note;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.55),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.notes_outlined,
+            size: 16,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Text(note, style: theme.textTheme.bodySmall)),
+        ],
+      ),
+    );
+  }
+}
+
+class _MealTypePill extends StatelessWidget {
+  const _MealTypePill({required this.config});
+
+  final AppMealTypeConfig config;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            config.icon,
+            size: 14,
+            color: theme.colorScheme.onSecondaryContainer,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            config.label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSecondaryContainer,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

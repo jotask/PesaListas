@@ -2,22 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
+import 'package:pesalistas/core/meal_plan_fields.dart';
+import 'package:pesalistas/core/recipe_fields.dart';
+import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/core/vote_fields.dart';
+import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
 import 'package:pesalistas/dialogs/add_recipe_ingredient_dialog.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/dialogs/create_item_dialog.dart';
 import 'package:pesalistas/dialogs/create_recipe_dialog.dart';
 import 'package:pesalistas/dialogs/edit_item_dialog.dart';
+import 'package:pesalistas/dialogs/edit_meal_plan_dialog.dart';
 import 'package:pesalistas/dialogs/edit_recipe_dialog.dart';
 import 'package:pesalistas/dialogs/edit_recipe_ingredient_dialog.dart';
 import 'package:pesalistas/dialogs/edit_recipe_instructions_dialog.dart';
+import 'package:pesalistas/dialogs/generate_shopping_dialog.dart';
 import 'package:pesalistas/dialogs/recipe_details_dialog.dart';
+import 'package:pesalistas/dialogs/shopping_item_dialog.dart';
 import 'package:pesalistas/dialogs/vote_details_dialog.dart';
 import 'package:pesalistas/dialogs/vote_dialog.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
+import 'package:pesalistas/repositories/meal_plan_repository.dart';
 import 'package:pesalistas/repositories/recipe_ingredient_repository.dart';
 import 'package:pesalistas/repositories/recipe_repository.dart';
+import 'package:pesalistas/repositories/shopping_repository.dart';
 import 'package:pesalistas/repositories/vote_repository.dart';
 import 'package:pesalistas/widgets/list_detail/list_detail_header.dart';
 import 'package:pesalistas/widgets/list_detail/list_items_section.dart';
@@ -37,6 +46,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
   late final VoteRepository voteRepository;
   late final RecipeRepository recipeRepository;
   late final RecipeIngredientRepository recipeIngredientRepository;
+  late final MealPlanRepository mealPlanRepository;
+  late final ShoppingRepository shoppingRepository;
 
   bool loadingItems = true;
   bool creatingItem = false;
@@ -47,6 +58,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool loadingVoteDetails = false;
   bool loadingRecipeDetails = false;
   bool deletingRecipe = false;
+  bool generatingShopping = false;
 
   List<Map<String, dynamic>> items = [];
 
@@ -68,6 +80,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   bool get isRecipeList => listType == AppListTypes.recipes.value;
 
+  bool get isMealPlanList => listType == AppListTypes.mealPlan.value;
+
+  bool get isShoppingList => listType == AppListTypes.shopping.value;
+
   bool get isVotableList {
     return listType == AppListTypes.movies.value ||
         listType == AppListTypes.ideas.value ||
@@ -88,7 +104,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
       votingItem ||
       loadingVoteDetails ||
       loadingRecipeDetails ||
-      deletingRecipe;
+      deletingRecipe ||
+      generatingShopping;
 
   @override
   void initState() {
@@ -100,6 +117,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
     voteRepository = VoteRepository(client);
     recipeRepository = RecipeRepository(client);
     recipeIngredientRepository = RecipeIngredientRepository(client);
+    mealPlanRepository = MealPlanRepository(client);
+    shoppingRepository = ShoppingRepository(client);
 
     loadItems();
   }
@@ -110,6 +129,58 @@ class _ListDetailPageState extends State<ListDetailPage> {
     setState(() => loadingItems = true);
 
     try {
+      if (isShoppingList) {
+        final shoppingItems = await shoppingRepository.getShoppingItemsForGroup(
+          groupId,
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          items = shoppingItems;
+          loadingItems = false;
+        });
+
+        return;
+      }
+
+      if (isMealPlanList) {
+        final mealPlans = await mealPlanRepository.getMealPlansForGroup(
+          groupId,
+        );
+        final recipes = await recipeRepository.getRecipesForGroup(groupId);
+
+        final recipesById = {
+          for (final recipe in recipes)
+            recipe[AppRecipeFields.id].toString(): recipe,
+        };
+
+        final enrichedMealPlans = mealPlans.map((mealPlan) {
+          final recipeId = mealPlan[AppMealPlanFields.recipeId]?.toString();
+
+          if (recipeId == null || recipeId.isEmpty) {
+            return mealPlan;
+          }
+
+          final recipe = recipesById[recipeId];
+
+          if (recipe == null) {
+            return mealPlan;
+          }
+
+          return {...mealPlan, AppMealPlanFields.recipes: recipe};
+        }).toList();
+
+        if (!mounted) return;
+
+        setState(() {
+          items = enrichedMealPlans;
+          loadingItems = false;
+        });
+
+        return;
+      }
+
       if (isRecipeList) {
         final recipes = await recipeRepository.getRecipesForGroup(groupId);
 
@@ -137,6 +208,42 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       setState(() => loadingItems = false);
       showErrorSnackBar(context, 'Failed to load items', error);
+    }
+  }
+
+  Future<void> generateShoppingFromMealPlans() async {
+    if (generatingShopping) return;
+
+    final result = await showDialog<GenerateShoppingDialogResult>(
+      context: context,
+      builder: (_) => const GenerateShoppingDialog(),
+    );
+
+    if (result == null) return;
+
+    setState(() => generatingShopping = true);
+
+    try {
+      await mealPlanRepository.generateShoppingFromMealPlans(
+        groupId: groupId,
+        fromDate: result.fromDate,
+        toDate: result.toDate,
+      );
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(
+        context,
+        'Shopping items generated. Open Shopping to review them.',
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to generate shopping items', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => generatingShopping = false);
     }
   }
 
@@ -169,6 +276,16 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   Future<void> createItemDialog() async {
     if (creatingItem) return;
+
+    if (isShoppingList) {
+      await createShoppingItemDialog();
+      return;
+    }
+
+    if (isMealPlanList) {
+      await createMealPlanDialog();
+      return;
+    }
 
     if (isRecipeList) {
       await createRecipeDialog();
@@ -212,6 +329,95 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> createShoppingItemDialog() async {
+    final result = await showDialog<ShoppingItemDialogResult>(
+      context: context,
+      builder: (_) => const ShoppingItemDialog(),
+    );
+
+    if (result == null) return;
+
+    setState(() => creatingItem = true);
+
+    try {
+      await shoppingRepository.createShoppingItem(
+        groupId: groupId,
+        name: result.name,
+        quantity: result.quantity,
+        unit: result.unit,
+      );
+
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Shopping item created');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to create shopping item', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => creatingItem = false);
+    }
+  }
+
+  Future<void> createMealPlanDialog() async {
+    if (creatingItem) return;
+
+    setState(() => creatingItem = true);
+
+    List<Map<String, dynamic>> recipes = [];
+
+    try {
+      recipes = await recipeRepository.getRecipesForGroup(groupId);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to load recipes', error);
+      setState(() => creatingItem = false);
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() => creatingItem = false);
+
+    final result = await showDialog<AddMealPlanDialogResult>(
+      context: context,
+      builder: (_) => AddMealPlanDialog(recipes: recipes),
+    );
+
+    if (result == null) return;
+
+    setState(() => creatingItem = true);
+
+    try {
+      await mealPlanRepository.createMealPlan(
+        groupId: groupId,
+        plannedFor: result.plannedFor,
+        mealType: result.mealType,
+        recipeId: result.recipeId,
+        note: result.note,
+      );
+
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Meal planned');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to create meal plan', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => creatingItem = false);
+    }
+  }
+
   Future<void> createRecipeDialog() async {
     final result = await showDialog<CreateRecipeDialogResult>(
       context: context,
@@ -247,6 +453,16 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   Future<void> editItem(Map<String, dynamic> item) async {
     if (editingItem || isRecipeList) return;
+
+    if (isShoppingList) {
+      await editShoppingItem(item);
+      return;
+    }
+
+    if (isMealPlanList) {
+      await editMealPlan(item);
+      return;
+    }
 
     final result = await showDialog<EditItemDialogResult>(
       context: context,
@@ -287,12 +503,108 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> editShoppingItem(Map<String, dynamic> item) async {
+    if (editingItem) return;
+
+    final result = await showDialog<ShoppingItemDialogResult>(
+      context: context,
+      builder: (_) => ShoppingItemDialog(item: item),
+    );
+
+    if (result == null) return;
+
+    setState(() => editingItem = true);
+
+    try {
+      await shoppingRepository.updateShoppingItem(
+        shoppingItemId: item[AppShoppingItemFields.id].toString(),
+        name: result.name,
+        quantity: result.quantity,
+        unit: result.unit,
+      );
+
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Shopping item updated');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to update shopping item', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => editingItem = false);
+    }
+  }
+
+  Future<void> editMealPlan(Map<String, dynamic> mealPlan) async {
+    if (editingItem) return;
+
+    setState(() => editingItem = true);
+
+    List<Map<String, dynamic>> recipes = [];
+
+    try {
+      recipes = await recipeRepository.getRecipesForGroup(groupId);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to load recipes', error);
+      setState(() => editingItem = false);
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() => editingItem = false);
+
+    final result = await showDialog<EditMealPlanDialogResult>(
+      context: context,
+      builder: (_) => EditMealPlanDialog(mealPlan: mealPlan, recipes: recipes),
+    );
+
+    if (result == null) return;
+
+    setState(() => editingItem = true);
+
+    try {
+      await mealPlanRepository.updateMealPlan(
+        mealPlanId: mealPlan[AppMealPlanFields.id].toString(),
+        plannedFor: result.plannedFor,
+        mealType: result.mealType,
+        recipeId: result.recipeId,
+        note: result.note,
+      );
+
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Meal plan updated');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to update meal plan', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => editingItem = false);
+    }
+  }
+
   Future<void> completeItem(String itemId) async {
     if (completingItem) return;
 
     setState(() => completingItem = true);
 
     try {
+      if (isShoppingList) {
+        await setShoppingItemChecked(shoppingItemId: itemId, checked: true);
+        return;
+      }
+
       await itemRepository.completeItem(itemId);
       await loadItems();
 
@@ -316,6 +628,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
     setState(() => completingItem = true);
 
     try {
+      if (isShoppingList) {
+        await setShoppingItemChecked(shoppingItemId: itemId, checked: false);
+        return;
+      }
+
       await itemRepository.reopenItem(itemId);
       await loadItems();
 
@@ -340,8 +657,51 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> setShoppingItemChecked({
+    required String shoppingItemId,
+    required bool checked,
+  }) async {
+    if (completingItem) return;
+
+    setState(() => completingItem = true);
+
+    try {
+      await shoppingRepository.setShoppingItemChecked(
+        shoppingItemId: shoppingItemId,
+        checked: checked,
+      );
+
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(
+        context,
+        checked ? 'Marked as bought' : 'Marked as not bought',
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to update shopping item', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => completingItem = false);
+    }
+  }
+
   Future<void> deleteItem(String itemId) async {
     if (deletingItem || isRecipeList) return;
+
+    if (isShoppingList) {
+      await deleteShoppingItem(itemId);
+      return;
+    }
+
+    if (isMealPlanList) {
+      await deleteMealPlan(itemId);
+      return;
+    }
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
@@ -364,6 +724,68 @@ class _ListDetailPageState extends State<ListDetailPage> {
       if (!mounted) return;
 
       showErrorSnackBar(context, 'Failed to delete item', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => deletingItem = false);
+    }
+  }
+
+  Future<void> deleteShoppingItem(String shoppingItemId) async {
+    if (deletingItem) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Delete shopping item?',
+      message: 'This will remove this item from your shopping list.',
+    );
+
+    if (!confirmed) return;
+
+    setState(() => deletingItem = true);
+
+    try {
+      await shoppingRepository.deleteShoppingItem(shoppingItemId);
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Shopping item deleted');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to delete shopping item', error);
+    } finally {
+      if (!mounted) return;
+
+      setState(() => deletingItem = false);
+    }
+  }
+
+  Future<void> deleteMealPlan(String mealPlanId) async {
+    if (deletingItem) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Delete meal plan?',
+      message: 'This will remove this meal from your plan.',
+    );
+
+    if (!confirmed) return;
+
+    setState(() => deletingItem = true);
+
+    try {
+      await mealPlanRepository.deleteMealPlan(mealPlanId);
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Meal plan deleted');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to delete meal plan', error);
     } finally {
       if (!mounted) return;
 
@@ -720,7 +1142,15 @@ class _ListDetailPageState extends State<ListDetailPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: creatingItem ? null : createItemDialog,
         icon: const Icon(Icons.add),
-        label: Text(isRecipeList ? 'Add recipe' : 'Add item'),
+        label: Text(
+          isRecipeList
+              ? 'Add recipe'
+              : isMealPlanList
+              ? 'Add meal'
+              : isShoppingList
+              ? 'Add item'
+              : 'Add item',
+        ),
       ),
       body: Column(
         children: [
@@ -746,6 +1176,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
                     onViewVotes: viewVotes,
                     onViewRecipeDetails: viewRecipeDetails,
                     onDeleteRecipe: deleteRecipe,
+                    onGenerateShoppingFromMealPlans:
+                        generateShoppingFromMealPlans,
                   ),
                 ],
               ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
+import 'package:pesalistas/core/list_types.dart';
+import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/widgets/list_detail/items_view_factory.dart';
 
 class ListItemsSection extends StatefulWidget {
@@ -19,6 +21,7 @@ class ListItemsSection extends StatefulWidget {
     required this.onViewVotes,
     required this.onViewRecipeDetails,
     required this.onDeleteRecipe,
+    required this.onGenerateShoppingFromMealPlans,
   });
 
   final String listType;
@@ -35,6 +38,7 @@ class ListItemsSection extends StatefulWidget {
   final void Function(Map<String, dynamic> item) onViewVotes;
   final void Function(Map<String, dynamic> recipe) onViewRecipeDetails;
   final void Function(String recipeId) onDeleteRecipe;
+  final VoidCallback onGenerateShoppingFromMealPlans;
 
   @override
   State<ListItemsSection> createState() => _ListItemsSectionState();
@@ -47,7 +51,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
 
   int get doneCount {
     return widget.items.where((item) {
-      return AppItemStatus.isDone(item[AppItemFields.status]);
+      return isItemDone(item);
     }).length;
   }
 
@@ -66,12 +70,12 @@ class _ListItemsSectionState extends State<ListItemsSection> {
 
       case ItemStatusFilter.open:
         return widget.items.where((item) {
-          return !AppItemStatus.isDone(item[AppItemFields.status]);
+          return !isItemDone(item);
         }).toList();
 
       case ItemStatusFilter.done:
         return widget.items.where((item) {
-          return AppItemStatus.isDone(item[AppItemFields.status]);
+          return isItemDone(item);
         }).toList();
     }
   }
@@ -114,6 +118,14 @@ class _ListItemsSectionState extends State<ListItemsSection> {
     setState(() => selectedFilter = ItemStatusFilter.all);
   }
 
+  bool isItemDone(Map<String, dynamic> item) {
+    if (widget.listType == AppListTypes.shopping.value) {
+      return item[AppShoppingItemFields.checked] == true;
+    }
+
+    return isItemDone(item);
+  }
+
   @override
   Widget build(BuildContext context) {
     final visibleItems = filteredItems;
@@ -154,6 +166,8 @@ class _ListItemsSectionState extends State<ListItemsSection> {
             onViewVotes: widget.onViewVotes,
             onViewRecipeDetails: widget.onViewRecipeDetails,
             onDeleteRecipe: widget.onDeleteRecipe,
+            onGenerateShoppingFromMealPlans:
+                widget.onGenerateShoppingFromMealPlans,
           ),
       ],
     );

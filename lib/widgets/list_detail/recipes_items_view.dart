@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class RecipesItemsView extends StatelessWidget {
@@ -17,26 +18,6 @@ class RecipesItemsView extends StatelessWidget {
   final VoidCallback onCreate;
   final void Function(Map<String, dynamic> recipe) onViewRecipeDetails;
   final void Function(String recipeId) onDeleteRecipe;
-
-  String titleFor(Map<String, dynamic> recipe) {
-    final value = recipe[AppRecipeFields.name]?.toString();
-
-    if (value == null || value.trim().isEmpty) {
-      return 'Untitled recipe';
-    }
-
-    return value.trim();
-  }
-
-  String subtitleFor(Map<String, dynamic> recipe) {
-    final value = recipe[AppRecipeFields.description]?.toString();
-
-    if (value == null || value.trim().isEmpty) {
-      return 'Recipe details and ingredients';
-    }
-
-    return value.trim();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +38,7 @@ class RecipesItemsView extends StatelessWidget {
       children: [
         for (final recipe in recipes)
           _RecipeCard(
-            title: titleFor(recipe),
-            subtitle: subtitleFor(recipe),
+            recipe: recipe,
             onDetails: () => onViewRecipeDetails(recipe),
             onDelete: () =>
                 onDeleteRecipe(recipe[AppRecipeFields.id].toString()),
@@ -70,16 +50,71 @@ class RecipesItemsView extends StatelessWidget {
 
 class _RecipeCard extends StatelessWidget {
   const _RecipeCard({
-    required this.title,
-    required this.subtitle,
+    required this.recipe,
     required this.onDetails,
     required this.onDelete,
   });
 
-  final String title;
-  final String subtitle;
+  final Map<String, dynamic> recipe;
   final VoidCallback onDetails;
   final VoidCallback onDelete;
+
+  String get title {
+    final value = recipe[AppRecipeFields.name]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return 'Untitled recipe';
+    }
+
+    return value.trim();
+  }
+
+  String get description {
+    final value = recipe[AppRecipeFields.description]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return 'Recipe details and ingredients';
+    }
+
+    return value.trim();
+  }
+
+  String? get instructions {
+    final value = recipe[AppRecipeFields.instructions]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    return value.trim();
+  }
+
+  int? get prepTime {
+    return AppValueParsing.intOrNull(recipe[AppRecipeFields.prepTimeMinutes]);
+  }
+
+  int? get cookTime {
+    return AppValueParsing.intOrNull(recipe[AppRecipeFields.cookTimeMinutes]);
+  }
+
+  int? get servings {
+    return AppValueParsing.intOrNull(recipe[AppRecipeFields.servings]);
+  }
+
+  bool get hasInstructions {
+    return instructions != null;
+  }
+
+  int? get totalTime {
+    final prep = prepTime ?? 0;
+    final cook = cookTime ?? 0;
+
+    if (prep == 0 && cook == 0) {
+      return null;
+    }
+
+    return prep + cook;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,16 +141,29 @@ class _RecipeCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: onDelete,
+                          icon: const Icon(Icons.delete_outline),
+                          tooltip: 'Delete recipe',
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      subtitle,
+                      description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium,
@@ -125,17 +173,44 @@ class _RecipeCard extends StatelessWidget {
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        FilledButton.icon(
-                          onPressed: onDetails,
-                          icon: const Icon(Icons.menu_book_outlined),
-                          label: const Text('Details'),
-                        ),
-                        IconButton(
-                          onPressed: onDelete,
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Delete recipe',
+                        if (totalTime != null)
+                          _RecipeMetaPill(
+                            icon: Icons.schedule_outlined,
+                            label: '$totalTime min total',
+                          ),
+                        if (prepTime != null)
+                          _RecipeMetaPill(
+                            icon: Icons.timer_outlined,
+                            label: 'Prep $prepTime min',
+                          ),
+                        if (cookTime != null)
+                          _RecipeMetaPill(
+                            icon: Icons.local_fire_department_outlined,
+                            label: 'Cook $cookTime min',
+                          ),
+                        if (servings != null)
+                          _RecipeMetaPill(
+                            icon: Icons.people_outline,
+                            label: '$servings servings',
+                          ),
+                        _RecipeMetaPill(
+                          icon: hasInstructions
+                              ? Icons.menu_book_outlined
+                              : Icons.menu_book_outlined,
+                          label: hasInstructions
+                              ? 'Instructions added'
+                              : 'No instructions',
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: FilledButton.icon(
+                        onPressed: onDetails,
+                        icon: const Icon(Icons.menu_book_outlined),
+                        label: const Text('Open recipe'),
+                      ),
                     ),
                   ],
                 ),
@@ -143,6 +218,41 @@ class _RecipeCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _RecipeMetaPill extends StatelessWidget {
+  const _RecipeMetaPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }
