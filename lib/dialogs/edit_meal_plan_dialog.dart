@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
@@ -102,7 +103,7 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
     final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Untitled recipe';
+      return S.untitledRecipe;
     }
 
     return value.trim();
@@ -126,33 +127,33 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit meal plan'),
+      title: Text(S.editMealPlan),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.event_note_outlined)),
-              title: Text('Meal plan'),
-              subtitle: Text('Update date, meal type, recipe, or note.'),
+              title: Text(S.mealPlan),
+              subtitle: Text(S.updateDateMealTypeRecipeOrNote),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: pickDate,
-                    icon: const Icon(Icons.calendar_today),
+                    icon: Icon(Icons.calendar_today),
                     label: Text(formatDate(plannedFor)),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: mealType,
-              decoration: const InputDecoration(labelText: 'Meal type'),
+              initialValue: mealType,
+              decoration: InputDecoration(labelText: S.mealType),
               items: AppMealTypes.all.map((config) {
                 return DropdownMenuItem<String>(
                   value: config.value,
@@ -164,17 +165,17 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
                 setState(() => mealType = value);
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: selectedRecipeValue,
-              decoration: const InputDecoration(
-                labelText: 'Recipe',
-                helperText: 'Optional.',
+              initialValue: selectedRecipeValue,
+              decoration: InputDecoration(
+                labelText: S.recipe,
+                helperText: S.optional2,
               ),
               items: [
-                const DropdownMenuItem<String>(
+                DropdownMenuItem<String>(
                   value: noRecipeValue,
-                  child: Text('No recipe / custom meal'),
+                  child: Text(S.noRecipeCustomMeal),
                 ),
                 for (final recipe in widget.recipes)
                   DropdownMenuItem<String>(
@@ -187,12 +188,12 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
                 setState(() => selectedRecipeValue = value);
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: noteController,
-              decoration: const InputDecoration(
-                labelText: 'Note',
-                hintText: 'Optional',
+              decoration: InputDecoration(
+                labelText: S.note,
+                hintText: S.optional,
               ),
               minLines: 1,
               maxLines: 3,
@@ -203,9 +204,9 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Save')),
+        ElevatedButton(onPressed: submit, child: Text(S.save)),
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/group_fields.dart';
 
 class GroupCard extends StatelessWidget {
@@ -9,19 +10,19 @@ class GroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = group[AppGroupFields.name]?.toString() ?? 'Untitled group';
+    final name = group[AppGroupFields.name]?.toString() ?? S.untitledGroup;
     final description = group[AppGroupFields.description]?.toString();
 
     return Card(
       child: ListTile(
-        leading: const CircleAvatar(child: Icon(Icons.groups)),
+        leading: CircleAvatar(child: Icon(Icons.groups)),
         title: Text(name),
         subtitle: Text(
           description == null || description.trim().isEmpty
-              ? 'Shared space'
+              ? S.sharedSpace
               : description.trim(),
         ),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: Icon(Icons.chevron_right),
         onTap: onTap,
       ),
     );

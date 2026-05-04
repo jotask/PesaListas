@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/pages/list_detail_page.dart';
 import 'package:pesalistas/widgets/common/empty_info_card.dart';
 import 'package:pesalistas/widgets/group_detail/list_card.dart';
@@ -26,9 +27,9 @@ class GroupListsSection extends StatelessWidget {
     if (lists.isEmpty) {
       return EmptyInfoCard(
         icon: Icons.list_alt,
-        title: 'No lists yet',
-        subtitle: 'Create your first shared list here.',
-        trailing: const Icon(Icons.add_circle_outline),
+        title: S.noListsYet,
+        subtitle: S.createYourFirstSharedListHere,
+        trailing: Icon(Icons.add_circle_outline),
         onTap: creatingList ? null : onCreateList,
       );
     }

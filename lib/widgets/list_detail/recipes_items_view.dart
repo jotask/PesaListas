@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
@@ -28,8 +29,8 @@ class RecipesItemsView extends StatelessWidget {
     if (recipes.isEmpty) {
       return EmptyItemsCard(
         icon: Icons.restaurant_menu,
-        title: 'No recipes yet',
-        subtitle: 'Add your first recipe.',
+        title: S.noRecipesYet,
+        subtitle: S.addYourFirstRecipe,
         onCreate: onCreate,
       );
     }
@@ -63,7 +64,7 @@ class _RecipeCard extends StatelessWidget {
     final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Untitled recipe';
+      return S.untitledRecipe;
     }
 
     return value.trim();
@@ -73,7 +74,7 @@ class _RecipeCard extends StatelessWidget {
     final value = recipe[AppRecipeFields.description]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Recipe details and ingredients';
+      return S.recipeDetailsAndIngredients;
     }
 
     return value.trim();
@@ -136,7 +137,7 @@ class _RecipeCard extends StatelessWidget {
                   color: theme.colorScheme.onPrimaryContainer,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,20 +156,20 @@ class _RecipeCard extends StatelessWidget {
                         ),
                         IconButton(
                           onPressed: onDelete,
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Delete recipe',
+                          icon: Icon(Icons.delete_outline),
+                          tooltip: S.deleteRecipe,
                           visualDensity: VisualDensity.compact,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -198,18 +199,18 @@ class _RecipeCard extends StatelessWidget {
                               ? Icons.menu_book_outlined
                               : Icons.menu_book_outlined,
                           label: hasInstructions
-                              ? 'Instructions added'
-                              : 'No instructions',
+                              ? S.instructionsAdded
+                              : S.noInstructions,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: FilledButton.icon(
                         onPressed: onDetails,
-                        icon: const Icon(Icons.menu_book_outlined),
-                        label: const Text('Open recipe'),
+                        icon: Icon(Icons.menu_book_outlined),
+                        label: Text(S.openRecipe),
                       ),
                     ),
                   ],
@@ -243,7 +244,7 @@ class _RecipeMetaPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(

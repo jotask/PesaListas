@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/core/vote_summary_fields.dart';
@@ -69,7 +70,7 @@ class VotableItemCard extends StatelessWidget {
   bool get hasVotes => voteCount > 0;
 
   String get voteCountText {
-    if (voteCount == 0) return 'No votes yet';
+    if (voteCount == 0) return S.noVotesYet;
     if (voteCount == 1) return '1 vote';
     return '$voteCount votes';
   }
@@ -94,7 +95,7 @@ class VotableItemCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _ScoreBadge(averageText: averageText, hasVotes: hasVotes),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +104,7 @@ class VotableItemCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(icon, size: 20, color: theme.colorScheme.primary),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             title,
@@ -116,7 +117,7 @@ class VotableItemCard extends StatelessWidget {
                       ],
                     ),
                     if (description != null) ...[
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       Text(
                         description!,
                         maxLines: 2,
@@ -124,7 +125,7 @@ class VotableItemCard extends StatelessWidget {
                         style: theme.textTheme.bodyMedium,
                       ),
                     ],
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -146,7 +147,7 @@ class VotableItemCard extends StatelessWidget {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -156,22 +157,22 @@ class VotableItemCard extends StatelessWidget {
                           icon: Icon(
                             ownVote == null ? Icons.star_border : Icons.star,
                           ),
-                          label: Text(ownVote == null ? 'Vote' : 'Change vote'),
+                          label: Text(ownVote == null ? S.vote : S.changeVote),
                         ),
                         OutlinedButton.icon(
                           onPressed: hasVotes ? onViewVotes : null,
-                          icon: const Icon(Icons.visibility_outlined),
-                          label: const Text('Votes'),
+                          icon: Icon(Icons.visibility_outlined),
+                          label: Text(S.votes),
                         ),
                         IconButton(
                           onPressed: onEdit,
-                          icon: const Icon(Icons.edit_outlined),
-                          tooltip: 'Edit item',
+                          icon: Icon(Icons.edit_outlined),
+                          tooltip: S.editItem,
                         ),
                         IconButton(
                           onPressed: onDelete,
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Delete item',
+                          icon: Icon(Icons.delete_outline),
+                          tooltip: S.deleteItem,
                         ),
                       ],
                     ),
@@ -214,7 +215,7 @@ class _ScoreBadge extends StatelessWidget {
                 ? theme.colorScheme.onPrimaryContainer
                 : theme.colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             averageText,
             style: TextStyle(
@@ -273,7 +274,7 @@ class _InfoChip extends StatelessWidget {
                 ? theme.colorScheme.onSecondaryContainer
                 : theme.colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(

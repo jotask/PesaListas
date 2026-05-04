@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 
 class EditRecipeIngredientDialogResult {
@@ -75,7 +76,7 @@ class _EditRecipeIngredientDialogState
     setState(() => validationMessage = null);
 
     if (name.isEmpty) {
-      setState(() => validationMessage = 'Ingredient name is required.');
+      setState(() => validationMessage = S.ingredientNameIsRequired);
       return;
     }
 
@@ -84,7 +85,7 @@ class _EditRecipeIngredientDialogState
         : double.tryParse(quantityText.replaceAll(',', '.'));
 
     if (quantityText.isNotEmpty && quantity == null) {
-      setState(() => validationMessage = 'Quantity must be a number.');
+      setState(() => validationMessage = S.quantityMustBeANumber);
       return;
     }
 
@@ -101,24 +102,24 @@ class _EditRecipeIngredientDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit ingredient'),
+      title: Text(S.editIngredient),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.kitchen_outlined)),
-              title: Text('Ingredient'),
-              subtitle: Text('Update this recipe ingredient.'),
+              title: Text(S.ingredient),
+              subtitle: Text(S.updateThisRecipeIngredient),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: nameController,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                hintText: 'Tomatoes',
+              decoration: InputDecoration(
+                labelText: S.name,
+                hintText: S.tomatoes,
               ),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
@@ -127,7 +128,7 @@ class _EditRecipeIngredientDialogState
                 }
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -136,40 +137,40 @@ class _EditRecipeIngredientDialogState
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Quantity',
+                    decoration: InputDecoration(
+                      labelText: S.quantity,
                       hintText: '2',
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: TextField(
                     controller: unitController,
-                    decoration: const InputDecoration(
-                      labelText: 'Unit',
-                      hintText: 'pcs / g / ml',
+                    decoration: InputDecoration(
+                      labelText: S.unit,
+                      hintText: S.pcsGMl,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: noteController,
-              decoration: const InputDecoration(
-                labelText: 'Note',
-                hintText: 'Optional',
+              decoration: InputDecoration(
+                labelText: S.note,
+                hintText: S.optional,
               ),
               minLines: 1,
               maxLines: 3,
             ),
             if (validationMessage != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.error_outline, size: 18),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       validationMessage!,
@@ -187,9 +188,9 @@ class _EditRecipeIngredientDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Save')),
+        ElevatedButton(onPressed: submit, child: Text(S.save)),
       ],
     );
   }

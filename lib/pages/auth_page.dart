@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/animated_logo.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/pages/home_page.dart';
@@ -76,11 +77,11 @@ class _AuthPageState extends State<AuthPage> {
 
       if (!mounted) return;
 
-      showErrorSnackBar(context, 'Google login failed', error);
+      showErrorSnackBar(context, S.googleLoginFailed, error);
     } finally {
-      if (!mounted) return;
-
-      setState(() => loading = false);
+      if (mounted) {
+        setState(() => loading = false);
+      }
     }
   }
 
@@ -91,7 +92,7 @@ class _AuthPageState extends State<AuthPage> {
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      showErrorSnackBar(context, 'Email and password are required');
+      showErrorSnackBar(context, S.emailAndPasswordAreRequired);
       return;
     }
 
@@ -115,10 +116,7 @@ class _AuthPageState extends State<AuthPage> {
 
         if (!mounted) return;
 
-        showSuccessSnackBar(
-          context,
-          'Check your email to confirm your account',
-        );
+        showSuccessSnackBar(context, S.checkYourEmailToConfirmYourAccount);
       }
     } on AuthException catch (error) {
       if (!mounted) return;
@@ -127,20 +125,20 @@ class _AuthPageState extends State<AuthPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, 'Unexpected error', error);
+      showErrorSnackBar(context, S.unexpectedError, error);
     } finally {
-      if (!mounted) return;
-
-      setState(() => loading = false);
+      if (mounted) {
+        setState(() => loading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final title = isLogin ? 'Welcome back' : 'Create account';
+    final title = isLogin ? S.welcomeBack : S.createAccount;
     final subtitle = isLogin
-        ? 'Log in to manage your shared lists, plans, and chores.'
-        : 'Create a space for your shared life: groups, lists, chores, ideas, meals, and more.';
+        ? S.logInToManageYourSharedListsPlansAndChores
+        : S.createASpaceForYourSharedLifeGroupsListsChoresIdeasMealsAndM;
 
     return Scaffold(
       body: Container(
@@ -166,7 +164,7 @@ class _AuthPageState extends State<AuthPage> {
                     borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.18),
+                        color: Colors.black.withValues(alpha: 0.18),
                         blurRadius: 30,
                         offset: const Offset(0, 16),
                       ),
@@ -179,14 +177,14 @@ class _AuthPageState extends State<AuthPage> {
                         width: 72,
                         height: 72,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E3A5F).withOpacity(0.1),
+                          color: const Color(0xFF1E3A5F).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(22),
                         ),
                         child: const AnimatedLogo(),
                       ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Pesa-Listas',
+                      SizedBox(height: 20),
+                      Text(
+                        S.pesaListas,
                         style: TextStyle(
                           fontSize: 16,
                           color: Color(0xFF1E3A5F),
@@ -194,7 +192,7 @@ class _AuthPageState extends State<AuthPage> {
                           letterSpacing: 0.4,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Text(
                         title,
                         style: const TextStyle(
@@ -202,7 +200,7 @@ class _AuthPageState extends State<AuthPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Text(
                         subtitle,
                         textAlign: TextAlign.center,
@@ -211,31 +209,31 @@ class _AuthPageState extends State<AuthPage> {
                           color: Colors.grey.shade600,
                         ),
                       ),
-                      const SizedBox(height: 28),
+                      SizedBox(height: 28),
                       TextField(
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: const Icon(Icons.email_outlined),
+                          labelText: S.email,
+                          prefixIcon: Icon(Icons.email_outlined),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      SizedBox(height: 14),
                       TextField(
                         controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
+                          labelText: S.password,
+                          prefixIcon: Icon(Icons.lock_outline),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 22),
+                      SizedBox(height: 22),
                       SizedBox(
                         width: double.infinity,
                         height: 52,
@@ -249,7 +247,7 @@ class _AuthPageState extends State<AuthPage> {
                             ),
                           ),
                           child: loading
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 22,
                                   height: 22,
                                   child: CircularProgressIndicator(
@@ -257,10 +255,10 @@ class _AuthPageState extends State<AuthPage> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : Text(isLogin ? 'Log in' : 'Create account'),
+                              : Text(isLogin ? S.logIn : S.createAccount),
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      SizedBox(height: 14),
                       SizedBox(
                         width: double.infinity,
                         height: 52,
@@ -268,8 +266,8 @@ class _AuthPageState extends State<AuthPage> {
                           onPressed: loading
                               ? null
                               : signInWithGoogleNativeInternal,
-                          icon: const Icon(Icons.login),
-                          label: const Text('Continue with Google'),
+                          icon: Icon(Icons.login),
+                          label: Text(S.continueWithGoogle),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF1E3A5F),
                             side: const BorderSide(color: Color(0xFF1E3A5F)),
@@ -279,7 +277,7 @@ class _AuthPageState extends State<AuthPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       TextButton(
                         onPressed: loading
                             ? null
@@ -288,8 +286,8 @@ class _AuthPageState extends State<AuthPage> {
                               },
                         child: Text(
                           isLogin
-                              ? 'Need an account? Sign up'
-                              : 'Already have an account? Log in',
+                              ? S.needAnAccountSignUp
+                              : S.alreadyHaveAnAccountLogIn,
                           style: const TextStyle(
                             color: Color(0xFF1E3A5F),
                             fontWeight: FontWeight.w600,

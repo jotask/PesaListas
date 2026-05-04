@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 
 class MemberCard extends StatelessWidget {
   const MemberCard({super.key, required this.member});
@@ -11,9 +12,9 @@ class MemberCard extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        leading: const CircleAvatar(child: Icon(Icons.person)),
+        leading: CircleAvatar(child: Icon(Icons.person)),
         title: Text(
-          profile?['display_name'] ?? profile?['username'] ?? 'Unknown user',
+          profile?['display_name'] ?? profile?['username'] ?? S.unknownUser,
         ),
         subtitle: Text('Role: ${member['role'] ?? 'member'}'),
       ),

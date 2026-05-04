@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
@@ -115,7 +116,7 @@ class _SimpleItemCard extends StatelessWidget {
                 backgroundColor: theme.colorScheme.primaryContainer,
                 child: Icon(icon, color: theme.colorScheme.onPrimaryContainer),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,26 +128,26 @@ class _SimpleItemCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       subtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Row(
                       children: [
                         OutlinedButton.icon(
                           onPressed: onEdit,
-                          icon: const Icon(Icons.edit_outlined),
-                          label: const Text('Edit'),
+                          icon: Icon(Icons.edit_outlined),
+                          label: Text(S.edit),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         IconButton(
                           onPressed: onDelete,
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Delete item',
+                          icon: Icon(Icons.delete_outline),
+                          tooltip: S.deleteItem,
                         ),
                       ],
                     ),

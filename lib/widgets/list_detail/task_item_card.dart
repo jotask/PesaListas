@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
@@ -23,7 +24,7 @@ class TaskItemCard extends StatelessWidget {
     final value = item[AppItemFields.title]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Untitled task';
+      return S.untitledTask;
     }
 
     return value.trim();
@@ -77,7 +78,7 @@ class TaskItemCard extends StatelessWidget {
     );
 
     if (formatted.isEmpty) {
-      return 'No deadline';
+      return S.noDeadline;
     }
 
     return formatted;
@@ -155,7 +156,7 @@ class TaskItemCard extends StatelessWidget {
                         color: deadlineStyle.avatarForeground,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +184,7 @@ class TaskItemCard extends StatelessWidget {
                             ],
                           ),
                           if (description != null) ...[
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4),
                             Text(
                               description!,
                               maxLines: 2,
@@ -196,19 +197,19 @@ class TaskItemCard extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: onDelete,
-                      icon: const Icon(Icons.delete_outline),
-                      tooltip: 'Delete task',
+                      icon: Icon(Icons.delete_outline),
+                      tooltip: S.deleteTask,
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
                     _TaskInfoChip(
                       icon: priorityStyle.icon,
-                      label: hasPriority ? priorityText : 'No priority',
+                      label: hasPriority ? priorityText : S.noPriority,
                       filled: hasPriority,
                       backgroundColor: hasPriority
                           ? priorityStyle.chipBackground
@@ -230,7 +231,7 @@ class TaskItemCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Row(
                   children: [
                     Expanded(
@@ -243,18 +244,18 @@ class TaskItemCard extends StatelessWidget {
                         ),
                         label: Text(
                           isDone
-                              ? 'Mark as open'
+                              ? S.markAsOpen
                               : isOverdue || isDueToday
-                              ? 'Complete now'
-                              : 'Complete task',
+                              ? S.completeNow
+                              : S.completeTask,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     IconButton(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: 'Edit task',
+                      icon: Icon(Icons.edit_outlined),
+                      tooltip: S.editTask,
                     ),
                   ],
                 ),
@@ -303,7 +304,7 @@ class TaskDeadlineStyle {
         return TaskDeadlineStyle(
           icon: Icons.warning_amber_rounded,
           dateIcon: Icons.event_busy_outlined,
-          label: 'Overdue',
+          label: S.overdue,
           avatarBackground: colors.errorContainer,
           avatarForeground: colors.onErrorContainer,
           pillBackground: colors.errorContainer,
@@ -316,7 +317,7 @@ class TaskDeadlineStyle {
         return TaskDeadlineStyle(
           icon: Icons.today_outlined,
           dateIcon: Icons.today_outlined,
-          label: 'Today',
+          label: S.today,
           avatarBackground: colors.primaryContainer,
           avatarForeground: colors.onPrimaryContainer,
           pillBackground: colors.primaryContainer,
@@ -329,7 +330,7 @@ class TaskDeadlineStyle {
         return TaskDeadlineStyle(
           icon: Icons.checklist,
           dateIcon: Icons.event_outlined,
-          label: 'Upcoming',
+          label: S.upcoming,
           avatarBackground: colors.secondaryContainer,
           avatarForeground: colors.onSecondaryContainer,
           pillBackground: colors.secondaryContainer,
@@ -342,7 +343,7 @@ class TaskDeadlineStyle {
         return TaskDeadlineStyle(
           icon: Icons.check_circle,
           dateIcon: Icons.event_available_outlined,
-          label: 'Done',
+          label: S.done,
           avatarBackground: colors.surfaceContainerHighest,
           avatarForeground: colors.onSurfaceVariant,
           pillBackground: colors.surfaceContainerHighest,
@@ -491,7 +492,7 @@ class _TaskInfoChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 15, color: resolvedForegroundColor),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(

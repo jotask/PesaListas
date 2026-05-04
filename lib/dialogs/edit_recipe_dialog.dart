@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 
@@ -114,24 +115,24 @@ class _EditRecipeDialogState extends State<EditRecipeDialog> {
     setState(() => validationMessage = null);
 
     if (name.isEmpty) {
-      setState(() => validationMessage = 'Recipe name is required.');
+      setState(() => validationMessage = S.recipeNameIsRequired);
       return;
     }
 
     try {
       final prepTime = parseOptionalPositiveInt(
         value: prepTimeController.text,
-        fieldName: 'Prep time',
+        fieldName: S.prepTime,
       );
 
       final cookTime = parseOptionalPositiveInt(
         value: cookTimeController.text,
-        fieldName: 'Cook time',
+        fieldName: S.cookTime,
       );
 
       final servings = parseOptionalPositiveInt(
         value: servingsController.text,
-        fieldName: 'Servings',
+        fieldName: S.servings,
         allowZero: false,
       );
 
@@ -152,22 +153,22 @@ class _EditRecipeDialogState extends State<EditRecipeDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit recipe info'),
+      title: Text(S.editRecipeInfo),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.restaurant_menu)),
-              title: Text('Recipe info'),
-              subtitle: Text('Update name, description, time, and servings.'),
+              title: Text(S.recipeInfo),
+              subtitle: Text(S.updateNameDescriptionTimeAndServings),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: nameController,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Recipe name'),
+              decoration: InputDecoration(labelText: S.recipeName),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
                 if (validationMessage != null) {
@@ -175,57 +176,57 @@ class _EditRecipeDialogState extends State<EditRecipeDialog> {
                 }
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'Optional',
+              decoration: InputDecoration(
+                labelText: S.description,
+                hintText: S.optional,
               ),
               minLines: 1,
               maxLines: 3,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: prepTimeController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Prep',
+                    decoration: InputDecoration(
+                      labelText: S.prep,
                       suffixText: 'min',
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: TextField(
                     controller: cookTimeController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Cook',
+                    decoration: InputDecoration(
+                      labelText: S.cook,
                       suffixText: 'min',
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: servingsController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Servings',
-                hintText: 'Optional',
+              decoration: InputDecoration(
+                labelText: S.servings,
+                hintText: S.optional,
               ),
             ),
             if (validationMessage != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.error_outline, size: 18),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       validationMessage!,
@@ -243,9 +244,9 @@ class _EditRecipeDialogState extends State<EditRecipeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Save')),
+        ElevatedButton(onPressed: submit, child: Text(S.save)),
       ],
     );
   }

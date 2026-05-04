@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/create_group_dialog.dart';
 import 'package:pesalistas/pages/auth_page.dart';
@@ -76,7 +77,7 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
 
       setState(() => loading = false);
-      showErrorSnackBar(context, 'Failed to load home data', error);
+      showErrorSnackBar(context, S.failedToLoadHomeData, error);
     }
   }
 
@@ -91,23 +92,23 @@ class _HomePageState extends State<HomePage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, 'Invitation accepted');
+      showSuccessSnackBar(context, S.invitationAccepted);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, 'Failed to accept invitation', error);
+      showErrorSnackBar(context, S.failedToAcceptInvitation, error);
     } finally {
-      if (!mounted) return;
-
-      setState(() => acceptingInvitation = false);
+      if (mounted) {
+        setState(() => acceptingInvitation = false);
+      }
     }
   }
 
   void declineInvitation(String invitationId) {
     showErrorSnackBar(
       context,
-      'Decline invitation is not available yet',
-      'We can add proper decline support in the next step.',
+      S.declineInvitationIsNotAvailableYet,
+      S.weCanAddProperDeclineSupportInTheNextStep,
     );
   }
 
@@ -129,15 +130,15 @@ class _HomePageState extends State<HomePage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, 'Group created');
+      showSuccessSnackBar(context, S.groupCreated);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, 'Failed to create group', error);
+      showErrorSnackBar(context, S.failedToCreateGroup, error);
     } finally {
-      if (!mounted) return;
-
-      setState(() => creatingGroup = false);
+      if (mounted) {
+        setState(() => creatingGroup = false);
+      }
     }
   }
 
@@ -157,11 +158,11 @@ class _HomePageState extends State<HomePage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, 'Failed to sign out', error);
+      showErrorSnackBar(context, S.signOutFailed, error);
     } finally {
-      if (!mounted) return;
-
-      setState(() => signingOut = false);
+      if (mounted) {
+        setState(() => signingOut = false);
+      }
     }
   }
 
@@ -169,7 +170,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My groups'),
+        title: Text(S.myGroups),
         actions: [
           IconButton(
             onPressed: () {
@@ -177,15 +178,15 @@ class _HomePageState extends State<HomePage> {
                 context,
               ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
             },
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
+            icon: Icon(Icons.settings_outlined),
+            tooltip: S.settingsTitle,
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: creatingGroup ? null : createGroupDialog,
-        icon: const Icon(Icons.add),
-        label: const Text('New group'),
+        icon: Icon(Icons.add),
+        label: Text(S.newGroup),
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
@@ -201,7 +202,7 @@ class _HomePageState extends State<HomePage> {
                     onAcceptInvitation: acceptInvitation,
                     onDeclineInvitation: declineInvitation,
                   ),
-                  if (invitations.isNotEmpty) const SizedBox(height: 16),
+                  if (invitations.isNotEmpty) SizedBox(height: 16),
                   GroupGridSection(
                     groups: groups,
                     loading: false,

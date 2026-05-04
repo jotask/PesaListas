@@ -48,10 +48,8 @@ class ShoppingRepository {
 
       return {
         ...item,
-        if (sourceRecipe != null)
-          AppShoppingItemFields.sourceRecipe: sourceRecipe,
-        if (sourceMealPlan != null)
-          AppShoppingItemFields.sourceMealPlan: sourceMealPlan,
+        AppShoppingItemFields.sourceRecipe: ?sourceRecipe,
+        AppShoppingItemFields.sourceMealPlan: ?sourceMealPlan,
       };
     }).toList();
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/core/vote_fields.dart';
 
@@ -33,11 +34,11 @@ class VoteDetailsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Votes'),
+      title: Text(S.votes),
       content: SizedBox(
         width: double.maxFinite,
         child: votes.isEmpty
-            ? const Text('No votes yet.')
+            ? Text(S.noVotesYet2)
             : SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -47,7 +48,7 @@ class VoteDetailsDialog extends StatelessWidget {
                       totalPoints: totalPoints,
                       averagePoints: averagePoints,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     for (final vote in votes)
                       _VoteRow(vote: vote, currentUserId: currentUserId),
                   ],
@@ -57,7 +58,7 @@ class VoteDetailsDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(S.close),
         ),
       ],
     );
@@ -86,19 +87,19 @@ class _VoteSummaryHeader extends StatelessWidget {
           children: [
             Expanded(
               child: _SummaryValue(
-                label: 'Average',
+                label: S.average,
                 value: averagePoints.toStringAsFixed(1),
               ),
             ),
             Expanded(
               child: _SummaryValue(
-                label: 'Votes',
+                label: S.votes,
                 value: '$voteCount $voteLabel',
               ),
             ),
             Expanded(
               child: _SummaryValue(
-                label: 'Total',
+                label: S.total,
                 value: totalPoints.toString(),
               ),
             ),
@@ -124,7 +125,7 @@ class _SummaryValue extends StatelessWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: 2),
         Text(
           label,
           textAlign: TextAlign.center,
@@ -169,8 +170,8 @@ class _VoteRow extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
-        title: Text(isMine ? 'You' : 'Member'),
-        subtitle: Text(comment ?? 'No comment'),
+        title: Text(isMine ? S.you : S.member),
+        subtitle: Text(comment ?? S.noComment),
       ),
     );
   }

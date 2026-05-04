@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 
 class CreateRecipeDialogResult {
   const CreateRecipeDialogResult({required this.name, this.description});
@@ -34,7 +35,7 @@ class _CreateRecipeDialogState extends State<CreateRecipeDialog> {
     setState(() => validationMessage = null);
 
     if (name.isEmpty) {
-      setState(() => validationMessage = 'Recipe name is required.');
+      setState(() => validationMessage = S.recipeNameIsRequired);
       return;
     }
 
@@ -49,24 +50,24 @@ class _CreateRecipeDialogState extends State<CreateRecipeDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add recipe'),
+      title: Text(S.addRecipe),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.restaurant_menu)),
-              title: Text('Recipe'),
-              subtitle: Text('Save meals you can plan and shop from later.'),
+              title: Text(S.recipe),
+              subtitle: Text(S.saveMealsYouCanPlanAndShopFromLater),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: nameController,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Recipe name',
-                hintText: 'Spaghetti carbonara',
+              decoration: InputDecoration(
+                labelText: S.recipeName,
+                hintText: S.spaghettiCarbonara,
               ),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
@@ -75,22 +76,22 @@ class _CreateRecipeDialogState extends State<CreateRecipeDialog> {
                 }
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'Optional',
+              decoration: InputDecoration(
+                labelText: S.description,
+                hintText: S.optional,
               ),
               minLines: 1,
               maxLines: 3,
             ),
             if (validationMessage != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.error_outline, size: 18),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       validationMessage!,
@@ -108,9 +109,9 @@ class _CreateRecipeDialogState extends State<CreateRecipeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Add')),
+        ElevatedButton(onPressed: submit, child: Text(S.add)),
       ],
     );
   }

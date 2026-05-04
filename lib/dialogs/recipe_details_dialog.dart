@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
@@ -39,7 +40,7 @@ class RecipeDetailsDialog extends StatelessWidget {
     final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Untitled recipe';
+      return S.untitledRecipe;
     }
 
     return value.trim();
@@ -89,7 +90,7 @@ class RecipeDetailsDialog extends StatelessWidget {
             children: [
               if (description != null) ...[
                 Text(description!),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
               ],
               Wrap(
                 spacing: 8,
@@ -98,29 +99,29 @@ class RecipeDetailsDialog extends StatelessWidget {
                   _RecipeInfoChip(
                     icon: Icons.timer_outlined,
                     label: prepTime == null
-                        ? 'Prep not set'
+                        ? S.prepNotSet
                         : 'Prep $prepTime min',
                   ),
                   _RecipeInfoChip(
                     icon: Icons.local_fire_department_outlined,
                     label: cookTime == null
-                        ? 'Cook not set'
+                        ? S.cookNotSet
                         : 'Cook $cookTime min',
                   ),
                   _RecipeInfoChip(
                     icon: Icons.people_outline,
                     label: servings == null
-                        ? 'Servings not set'
+                        ? S.servingsNotSet
                         : '$servings servings',
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: 18),
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Instructions',
+                      S.instructions,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
@@ -136,18 +137,18 @@ class RecipeDetailsDialog extends StatelessWidget {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.edit_note_outlined),
-                    tooltip: 'Edit instructions',
+                    icon: Icon(Icons.edit_note_outlined),
+                    tooltip: S.editInstructions,
                   ),
                 ],
               ),
-              Text(instructions ?? 'No instructions yet.'),
-              const SizedBox(height: 18),
+              Text(instructions ?? S.noInstructionsYet),
+              SizedBox(height: 18),
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Ingredients',
+                      S.ingredients,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
@@ -162,9 +163,9 @@ class RecipeDetailsDialog extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               if (ingredients.isEmpty)
-                const Text('No ingredients yet.')
+                Text(S.noIngredientsYet)
               else
                 Column(
                   children: [
@@ -185,8 +186,8 @@ class RecipeDetailsDialog extends StatelessWidget {
               ),
             );
           },
-          icon: const Icon(Icons.tune_outlined),
-          label: const Text('Info'),
+          icon: Icon(Icons.tune_outlined),
+          label: Text(S.info),
         ),
         TextButton.icon(
           onPressed: () {
@@ -196,12 +197,12 @@ class RecipeDetailsDialog extends StatelessWidget {
               ),
             );
           },
-          icon: const Icon(Icons.add),
-          label: const Text('Ingredient'),
+          icon: Icon(Icons.add),
+          label: Text(S.ingredient),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(S.close),
         ),
       ],
     );
@@ -221,7 +222,7 @@ class _IngredientRow extends StatelessWidget {
     final value = ingredient[AppRecipeIngredientFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Unnamed ingredient';
+      return S.unnamedIngredient;
     }
 
     return value.trim();
@@ -275,7 +276,7 @@ class _IngredientRow extends StatelessWidget {
     }
 
     if (parts.isEmpty) {
-      return 'Amount not set';
+      return S.amountNotSet;
     }
 
     return parts.join(' ');
@@ -307,7 +308,7 @@ class _IngredientRow extends StatelessWidget {
     return Card(
       child: ListTile(
         dense: true,
-        leading: const CircleAvatar(child: Icon(Icons.kitchen_outlined)),
+        leading: CircleAvatar(child: Icon(Icons.kitchen_outlined)),
         title: Text(name),
         subtitle: Text(note == null ? amountText : '$amountText • $note'),
         trailing: Row(
@@ -315,13 +316,13 @@ class _IngredientRow extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () => editIngredient(context),
-              icon: const Icon(Icons.edit_outlined),
-              tooltip: 'Edit ingredient',
+              icon: Icon(Icons.edit_outlined),
+              tooltip: S.editIngredient,
             ),
             IconButton(
               onPressed: () => deleteIngredient(context),
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'Delete ingredient',
+              icon: Icon(Icons.delete_outline),
+              tooltip: S.deleteIngredient,
             ),
           ],
         ),
@@ -350,7 +351,7 @@ class _RecipeInfoChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 15, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 6),
+          SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(

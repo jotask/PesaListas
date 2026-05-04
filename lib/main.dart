@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/app_locale_controller.dart';
 import 'package:pesalistas/pages/splash_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -22,7 +23,7 @@ class PesaListas extends StatelessWidget {
       valueListenable: AppLocaleController.locale,
       builder: (context, locale, _) {
         return MaterialApp(
-          title: 'Pesalistas',
+          title: S.pesalistas,
           locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

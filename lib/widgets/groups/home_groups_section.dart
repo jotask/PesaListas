@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/pages/group_detail_page.dart';
 import 'package:pesalistas/widgets/groups/group_card.dart';
 
@@ -21,32 +22,32 @@ class HomeGroupsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'My groups',
+        Text(
+          S.myGroups,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         if (groups.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48),
             child: Column(
               children: [
-                const Icon(Icons.groups, size: 72),
-                const SizedBox(height: 16),
-                const Text(
-                  'No groups yet',
+                Icon(Icons.groups, size: 72),
+                SizedBox(height: 16),
+                Text(
+                  S.noGroupsYet,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   'Logged in as ${userEmail ?? "Unknown user"}',
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: creatingGroup ? null : onCreateGroup,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Create your first group'),
+                  icon: Icon(Icons.add),
+                  label: Text(S.createYourFirstGroup),
                 ),
               ],
             ),

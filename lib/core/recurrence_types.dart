@@ -1,5 +1,7 @@
-class AppRecurrenceTypeConfig {
-  const AppRecurrenceTypeConfig({
+import 'package:pesalistas/l10n/app_strings.dart';
+
+class AppRecurrenceConfig {
+  const AppRecurrenceConfig({
     required this.value,
     required this.label,
     required this.description,
@@ -13,39 +15,45 @@ class AppRecurrenceTypeConfig {
 class AppRecurrenceTypes {
   const AppRecurrenceTypes._();
 
-  static const none = AppRecurrenceTypeConfig(
-    value: null,
-    label: 'None',
-    description: 'Does not repeat.',
-  );
+  static AppRecurrenceConfig get none => AppRecurrenceConfig(
+        value: null,
+        label: S.none,
+        description: S.doesNotRepeat2,
+      );
 
-  static const daily = AppRecurrenceTypeConfig(
-    value: 'daily',
-    label: 'Daily',
-    description: 'Repeats every day.',
-  );
+  static AppRecurrenceConfig get daily => AppRecurrenceConfig(
+        value: 'daily',
+        label: S.daily,
+        description: S.repeatsEveryDay,
+      );
 
-  static const weekly = AppRecurrenceTypeConfig(
-    value: 'weekly',
-    label: 'Weekly',
-    description: 'Repeats every week.',
-  );
+  static AppRecurrenceConfig get weekly => AppRecurrenceConfig(
+        value: 'weekly',
+        label: S.weekly,
+        description: S.repeatsEveryWeek,
+      );
 
-  static const monthly = AppRecurrenceTypeConfig(
-    value: 'monthly',
-    label: 'Monthly',
-    description: 'Repeats every month.',
-  );
+  static AppRecurrenceConfig get monthly => AppRecurrenceConfig(
+        value: 'monthly',
+        label: S.monthly,
+        description: S.repeatsEveryMonth,
+      );
 
-  static const everyNDays = AppRecurrenceTypeConfig(
-    value: 'every_n_days',
-    label: 'Every N days',
-    description: 'Repeats after a custom number of days.',
-  );
+  static AppRecurrenceConfig get everyNDays => AppRecurrenceConfig(
+        value: 'every_n_days',
+        label: S.everyNDays,
+        description: S.repeatsAfterACustomNumberOfDays,
+      );
 
-  static const all = [none, daily, weekly, monthly, everyNDays];
+  static List<AppRecurrenceConfig> get all => [
+        none,
+        daily,
+        weekly,
+        monthly,
+        everyNDays,
+      ];
 
-  static AppRecurrenceTypeConfig fromValue(String? value) {
+  static AppRecurrenceConfig fromValue(String? value) {
     for (final config in all) {
       if (config.value == value) return config;
     }
@@ -53,26 +61,13 @@ class AppRecurrenceTypes {
     return none;
   }
 
-  static String displayText({
-    required String? recurrenceType,
-    required int? recurrenceInterval,
-  }) {
-    final config = fromValue(recurrenceType);
+  static String displayText(String? value, int? interval) {
+    if (value == null) return S.doesNotRepeat;
 
-    if (config.value == null) {
-      return 'Does not repeat';
+    if (value == 'every_n_days') {
+      return '${S.repeatEvery} ${interval ?? 1} ${S.days}';
     }
 
-    if (config.value == everyNDays.value) {
-      final interval = recurrenceInterval ?? 1;
-
-      if (interval <= 1) {
-        return 'Repeats every day';
-      }
-
-      return 'Repeats every $interval days';
-    }
-
-    return config.description;
+    return fromValue(value).label;
   }
 }

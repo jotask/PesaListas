@@ -1,3 +1,5 @@
+import 'package:pesalistas/l10n/app_strings.dart';
+
 class AppItemStatus {
   const AppItemStatus._();
 
@@ -8,17 +10,7 @@ class AppItemStatus {
     return value?.toString() == done;
   }
 
-  static bool isOpen(dynamic value) {
-    final text = value?.toString();
-
-    return text == null || text.isEmpty || text == open;
-  }
-
-  static String displayText(dynamic value) {
-    if (isDone(value)) {
-      return 'Done';
-    }
-
-    return 'Open';
+  static String label(dynamic value) {
+    return isDone(value) ? S.done : S.open;
   }
 }

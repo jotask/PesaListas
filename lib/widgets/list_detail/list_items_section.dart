@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/item_fields.dart';
-import 'package:pesalistas/core/item_status.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/widgets/list_detail/items_view_factory.dart';
@@ -87,26 +86,26 @@ class _ListItemsSectionState extends State<ListItemsSection> {
   String get emptyFilteredTitle {
     switch (selectedFilter) {
       case ItemStatusFilter.all:
-        return 'No items yet';
+        return S.noItemsYet;
 
       case ItemStatusFilter.open:
-        return 'No open items';
+        return S.noOpenItems;
 
       case ItemStatusFilter.done:
-        return 'No done items';
+        return S.noDoneItems;
     }
   }
 
   String get emptyFilteredSubtitle {
     switch (selectedFilter) {
       case ItemStatusFilter.all:
-        return 'Add your first item.';
+        return S.addYourFirstItem;
 
       case ItemStatusFilter.open:
-        return 'Everything in this list is done.';
+        return S.everythingInThisListIsDone;
 
       case ItemStatusFilter.done:
-        return 'Nothing has been completed yet.';
+        return S.nothingHasBeenCompletedYet;
     }
   }
 
@@ -141,7 +140,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
             doneCount: doneCount,
             onSelected: selectFilter,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
         ],
         if (!widget.loading &&
             widget.items.isNotEmpty &&
@@ -245,7 +244,7 @@ class _NoFilteredItemsCard extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,13 +256,13 @@ class _NoFilteredItemsCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(subtitle, style: theme.textTheme.bodyMedium),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: onClearFilter,
-                    icon: const Icon(Icons.clear),
-                    label: const Text('Clear filter'),
+                    icon: Icon(Icons.clear),
+                    label: Text(S.clearFilter),
                   ),
                 ],
               ),

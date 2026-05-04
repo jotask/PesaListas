@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/invitation_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
@@ -26,7 +27,7 @@ class GroupOverviewCard extends StatelessWidget {
     final value = group[AppGroupFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Shared space';
+      return S.sharedSpace;
     }
 
     return value.trim();
@@ -73,7 +74,9 @@ class GroupOverviewCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.scaffoldBackgroundColor,
             border: Border(
-              bottom: BorderSide(color: theme.dividerColor.withOpacity(0.4)),
+              bottom: BorderSide(
+                color: theme.dividerColor.withValues(alpha: 0.4),
+              ),
             ),
           ),
           child: Column(
@@ -85,8 +88,8 @@ class GroupOverviewCard extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     onPressed: onBack,
-                    icon: const Icon(Icons.arrow_back),
-                    tooltip: 'Back',
+                    icon: Icon(Icons.arrow_back),
+                    tooltip: S.back,
                     visualDensity: VisualDensity.compact,
                   ),
                 ),
@@ -105,7 +108,7 @@ class GroupOverviewCard extends StatelessWidget {
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         groupName,
@@ -117,17 +120,17 @@ class GroupOverviewCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     IconButton(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: 'Edit group',
+                      icon: Icon(Icons.edit_outlined),
+                      tooltip: S.editGroup,
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     FilledButton.icon(
                       onPressed: onInvite,
-                      icon: const Icon(Icons.person_add_alt_1, size: 18),
-                      label: const Text('Invite'),
+                      icon: Icon(Icons.person_add_alt_1, size: 18),
+                      label: Text(S.invite),
                     ),
                   ],
                 ),
@@ -135,13 +138,13 @@ class GroupOverviewCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 8, top: 8),
                 child: Text(
-                  groupDescription ?? 'Shared space for lists and planning.',
+                  groupDescription ?? S.sharedSpaceForListsAndPlanning,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.only(left: 8),
                 child: Row(
@@ -152,7 +155,7 @@ class GroupOverviewCard extends StatelessWidget {
                         pendingInvitations: pendingInvitations,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Flexible(
                       child: Text(
                         peopleSummary,
@@ -223,7 +226,7 @@ class _PeoplePreview extends StatelessWidget {
         .take(3)
         .map((invite) {
           return invite[AppInvitationFields.invitedEmail]?.toString() ??
-              'Pending invite';
+              S.pendingInvite;
         })
         .join('\n');
 
@@ -261,7 +264,7 @@ class _MemberDisplay {
       return username.trim();
     }
 
-    return 'Member';
+    return S.member;
   }
 
   static String? avatarUrlFor(Map<String, dynamic> member) {

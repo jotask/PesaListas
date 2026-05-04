@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 
 class ShoppingItemDialogResult {
@@ -66,7 +67,7 @@ class _ShoppingItemDialogState extends State<ShoppingItemDialog> {
     setState(() => validationMessage = null);
 
     if (name.isEmpty) {
-      setState(() => validationMessage = 'Item name is required.');
+      setState(() => validationMessage = S.itemNameIsRequired);
       return;
     }
 
@@ -75,7 +76,7 @@ class _ShoppingItemDialogState extends State<ShoppingItemDialog> {
         : double.tryParse(quantityText.replaceAll(',', '.'));
 
     if (quantityText.isNotEmpty && quantity == null) {
-      setState(() => validationMessage = 'Quantity must be a number.');
+      setState(() => validationMessage = S.quantityMustBeANumber);
       return;
     }
 
@@ -91,24 +92,24 @@ class _ShoppingItemDialogState extends State<ShoppingItemDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(isEditing ? 'Edit shopping item' : 'Add shopping item'),
+      title: Text(isEditing ? S.editShoppingItem : S.addShoppingItem),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.shopping_cart_outlined)),
-              title: Text('Shopping item'),
-              subtitle: Text('Add an item, quantity, and unit.'),
+              title: Text(S.shoppingItem),
+              subtitle: Text(S.addAnItemQuantityAndUnit),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: nameController,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                hintText: 'Tomatoes',
+              decoration: InputDecoration(
+                labelText: S.name,
+                hintText: S.tomatoes,
               ),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
@@ -117,7 +118,7 @@ class _ShoppingItemDialogState extends State<ShoppingItemDialog> {
                 }
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -126,30 +127,30 @@ class _ShoppingItemDialogState extends State<ShoppingItemDialog> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Quantity',
+                    decoration: InputDecoration(
+                      labelText: S.quantity,
                       hintText: '2',
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: TextField(
                     controller: unitController,
-                    decoration: const InputDecoration(
-                      labelText: 'Unit',
-                      hintText: 'pcs / g / ml',
+                    decoration: InputDecoration(
+                      labelText: S.unit,
+                      hintText: S.pcsGMl,
                     ),
                   ),
                 ),
               ],
             ),
             if (validationMessage != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.error_outline, size: 18),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       validationMessage!,
@@ -167,11 +168,11 @@ class _ShoppingItemDialogState extends State<ShoppingItemDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
         ElevatedButton(
           onPressed: submit,
-          child: Text(isEditing ? 'Save' : 'Add'),
+          child: Text(isEditing ? S.save : S.add),
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 
 class VoteDialogResult {
   const VoteDialogResult({
@@ -70,7 +71,7 @@ class _VoteDialogState extends State<VoteDialog> {
     final roundedPoints = points.round();
 
     return AlertDialog(
-      title: Text(widget.canRemove ? 'Change vote' : 'Vote'),
+      title: Text(widget.canRemove ? S.changeVote : S.vote),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -89,12 +90,12 @@ class _VoteDialogState extends State<VoteDialog> {
                 setState(() => points = value);
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: commentController,
-              decoration: const InputDecoration(
-                labelText: 'Comment',
-                hintText: 'Optional',
+              decoration: InputDecoration(
+                labelText: S.comment,
+                hintText: S.optional,
               ),
               minLines: 1,
               maxLines: 3,
@@ -104,12 +105,12 @@ class _VoteDialogState extends State<VoteDialog> {
       ),
       actions: [
         if (widget.canRemove)
-          TextButton(onPressed: removeVote, child: const Text('Remove vote')),
+          TextButton(onPressed: removeVote, child: Text(S.removeVote)),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Save')),
+        ElevatedButton(onPressed: submit, child: Text(S.save)),
       ],
     );
   }

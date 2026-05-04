@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/app_locale_controller.dart';
 import 'package:pesalistas/core/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
@@ -60,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
       return metadataName.trim();
     }
 
-    return userEmail ?? 'User';
+    return userEmail ?? S.user;
   }
 
   String? get avatarUrl {
@@ -120,28 +121,44 @@ class _SettingsPageState extends State<SettingsPage> {
         final currentLocale = AppLocaleController.locale.value;
         final currentValue = currentLocale?.languageCode ?? 'system';
 
+        Widget languageTile({
+          required String value,
+          required String title,
+          required String subtitle,
+        }) {
+          final selected = currentValue == value;
+
+          return ListTile(
+            leading: Icon(
+              selected
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+            ),
+            title: Text(title),
+            subtitle: Text(subtitle),
+            onTap: () => Navigator.of(context).pop(value),
+          );
+        }
+
         return AlertDialog(
           title: Text(l10n.languageDialogTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RadioListTile<String>(
+              languageTile(
                 value: 'system',
-                groupValue: currentValue,
-                title: Text(l10n.languageSystem),
-                onChanged: (value) => Navigator.of(context).pop(value),
+                title: l10n.languageSystem,
+                subtitle: l10n.languageSubtitleSystem,
               ),
-              RadioListTile<String>(
+              languageTile(
                 value: 'en',
-                groupValue: currentValue,
-                title: Text(l10n.languageEnglish),
-                onChanged: (value) => Navigator.of(context).pop(value),
+                title: l10n.languageEnglish,
+                subtitle: l10n.languageSubtitleEnglish,
               ),
-              RadioListTile<String>(
+              languageTile(
                 value: 'es',
-                groupValue: currentValue,
-                title: Text(l10n.languageSpanish),
-                onChanged: (value) => Navigator.of(context).pop(value),
+                title: l10n.languageSpanish,
+                subtitle: l10n.languageSubtitleSpanish,
               ),
             ],
           ),
@@ -217,11 +234,11 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, 'Failed to update profile', error);
+      showErrorSnackBar(context, S.profileUpdateFailed, error);
     } finally {
-      if (!mounted) return;
-
-      setState(() => editingProfile = false);
+      if (mounted) {
+        setState(() => editingProfile = false);
+      }
     }
   }
 
@@ -247,9 +264,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
       showErrorSnackBar(context, context.l10n.profileSyncFailed, error);
     } finally {
-      if (!mounted) return;
-
-      setState(() => syncingProfile = false);
+      if (mounted) {
+        setState(() => syncingProfile = false);
+      }
     }
   }
 
@@ -272,9 +289,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
       showErrorSnackBar(context, context.l10n.signOutFailed, error);
     } finally {
-      if (!mounted) return;
-
-      setState(() => signingOut = false);
+      if (mounted) {
+        setState(() => signingOut = false);
+      }
     }
   }
 
@@ -306,93 +323,90 @@ class _SettingsPageState extends State<SettingsPage> {
                     loading: loadingProfile,
                     onEdit: editingProfile ? null : editProfile,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _SettingsSection(
-                    title: 'Profile',
+                    title: S.profileSectionTitle,
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.person_outline),
-                        title: const Text('Edit display name'),
-                        subtitle: const Text(
-                          'Change how your name appears to other members.',
-                        ),
+                        leading: Icon(Icons.person_outline),
+                        title: Text(S.profileEditDisplayNameTitle),
+                        subtitle: Text(S.profileEditDisplayNameSubtitle),
                         trailing: editingProfile
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 22,
                                 height: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.chevron_right),
+                            : Icon(Icons.chevron_right),
                         onTap: editingProfile ? null : editProfile,
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: const Icon(Icons.sync),
-                        title: const Text('Sync profile from Google'),
-                        subtitle: const Text(
-                          'Refresh display name and avatar from your auth account.',
-                        ),
+                        leading: Icon(Icons.sync),
+                        title: Text(S.profileSyncTitle),
+                        subtitle: Text(S.profileSyncSubtitle),
                         trailing: syncingProfile
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 22,
                                 height: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.chevron_right),
+                            : Icon(Icons.chevron_right),
                         onTap: syncingProfile ? null : syncProfile,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _SettingsSection(
-                    title: 'Preferences',
+                    title: S.preferencesSectionTitle,
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.language_outlined),
+                        leading: Icon(Icons.language_outlined),
                         title: Text(context.l10n.languageTitle),
                         subtitle: Text(languageSubtitle),
-                        trailing: const Icon(Icons.chevron_right),
+                        trailing: Icon(Icons.chevron_right),
                         onTap: chooseLanguage,
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: const Icon(Icons.dark_mode_outlined),
-                        title: const Text('Theme'),
-                        subtitle: const Text('System default for now'),
+                        leading: Icon(Icons.dark_mode_outlined),
+                        title: Text(S.themeTitle),
+                        subtitle: Text(S.themeSubtitle),
                         trailing: const _ComingSoonPill(),
-                        onTap: () => showComingSoon('Theme settings'),
+                        onTap: () => showComingSoon(S.themeSettingsFeature),
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: const Icon(Icons.notifications_none_outlined),
-                        title: const Text('Notifications'),
-                        subtitle: const Text('Notification preferences later'),
+                        leading: Icon(Icons.notifications_none_outlined),
+                        title: Text(S.notificationsTitle),
+                        subtitle: Text(S.notificationsSubtitle),
                         trailing: const _ComingSoonPill(),
-                        onTap: () => showComingSoon('Notification settings'),
+                        onTap: () =>
+                            showComingSoon(S.notificationSettingsFeature),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _SettingsSection(
-                    title: 'Account',
+                    title: S.accountSectionTitle,
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.logout),
-                        title: const Text('Sign out'),
-                        subtitle: const Text('Return to the login screen.'),
+                        leading: Icon(Icons.logout),
+                        title: Text(S.signOutTitle),
+                        subtitle: Text(S.signOutSubtitle),
                         trailing: signingOut
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 22,
                                 height: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.chevron_right),
+                            : Icon(Icons.chevron_right),
                         onTap: signingOut ? null : signOut,
                       ),
                     ],
@@ -449,10 +463,10 @@ class _ProfileHeaderCard extends StatelessWidget {
                     )
                   : null,
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: loading
-                  ? const Text('Loading profile...')
+                  ? Text(S.profileLoading)
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -465,19 +479,19 @@ class _ProfileHeaderCard extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
-                          email ?? 'No email available',
+                          email ?? S.profileNoEmail,
                           style: theme.textTheme.bodyMedium,
                         ),
                       ],
                     ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             IconButton(
               onPressed: onEdit,
-              icon: const Icon(Icons.edit_outlined),
-              tooltip: 'Edit profile',
+              icon: Icon(Icons.edit_outlined),
+              tooltip: S.profileEditTooltip,
             ),
           ],
         ),
@@ -524,7 +538,7 @@ class _ComingSoonPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        'Soon',
+        S.comingSoon,
         style: TextStyle(
           color: theme.colorScheme.onSurfaceVariant,
           fontSize: 11,

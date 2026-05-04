@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
 import 'package:pesalistas/core/profile_fields.dart';
@@ -28,9 +29,9 @@ class GroupGridSection extends StatelessWidget {
     if (groups.isEmpty) {
       return EmptyInfoCard(
         icon: Icons.groups_2_outlined,
-        title: 'No groups yet',
-        subtitle: 'Create your first shared space.',
-        trailing: const Icon(Icons.add_circle_outline),
+        title: S.noGroupsYet,
+        subtitle: S.createYourFirstSharedSpace,
+        trailing: Icon(Icons.add_circle_outline),
         onTap: creatingGroup ? null : onCreateGroup,
       );
     }
@@ -98,7 +99,7 @@ class _GroupGridCard extends StatelessWidget {
     final value = group[AppGroupFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Shared space';
+      return S.sharedSpace;
     }
 
     return value.trim();
@@ -109,15 +110,15 @@ class _GroupGridCard extends StatelessWidget {
 
     if (value == null || value.trim().isEmpty) {
       return isShared
-          ? 'A shared space for lists, recipes, chores, and planning.'
-          : 'Your personal space for lists, recipes, chores, and planning.';
+          ? S.aSharedSpaceForListsRecipesChoresAndPlanning
+          : S.yourPersonalSpaceForListsRecipesChoresAndPlanning;
     }
 
     return value.trim();
   }
 
   String get typeLabel {
-    return isShared ? 'Shared group' : 'Individual';
+    return isShared ? S.sharedGroup : S.individual;
   }
 
   IconData get typeIcon {
@@ -127,7 +128,7 @@ class _GroupGridCard extends StatelessWidget {
   String get memberCountLabel {
     final count = members.length;
 
-    if (count == 0) return 'No members loaded';
+    if (count == 0) return S.noMembersLoaded;
     if (count == 1) return '1 member';
 
     return '$count members';
@@ -158,7 +159,7 @@ class _GroupGridCard extends StatelessWidget {
                       : theme.colorScheme.onSecondaryContainer,
                 ),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -177,7 +178,7 @@ class _GroupGridCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         _GroupTypePill(
                           icon: typeIcon,
                           label: typeLabel,
@@ -185,24 +186,24 @@ class _GroupGridCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Text(
                       description,
                       softWrap: true,
                       style: theme.textTheme.bodyMedium,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(child: _MemberPreview(members: members)),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Text(
                           memberCountLabel,
                           style: theme.textTheme.bodySmall,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -211,9 +212,9 @@ class _GroupGridCard extends StatelessWidget {
                           size: 16,
                           color: theme.colorScheme.primary,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4),
                         Text(
-                          'Open',
+                          S.open,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: theme.colorScheme.primary,
@@ -242,7 +243,7 @@ class _MemberPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (members.isEmpty) {
-      return const SizedBox.shrink();
+      return SizedBox.shrink();
     }
 
     final visibleMembers = members.take(maxVisible).toList();
@@ -302,7 +303,7 @@ class _MemberDisplay {
       return username.trim();
     }
 
-    return 'Member';
+    return S.member;
   }
 
   static String? avatarUrlFor(Map<String, dynamic> member) {
@@ -414,7 +415,7 @@ class _GroupTypePill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 13, color: foregroundColor),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           Text(
             label,
             style: TextStyle(

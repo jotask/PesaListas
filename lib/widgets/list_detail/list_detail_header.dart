@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/list_types.dart';
 
 class ListDetailHeader extends StatelessWidget {
@@ -27,7 +28,9 @@ class ListDetailHeader extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.scaffoldBackgroundColor,
             border: Border(
-              bottom: BorderSide(color: theme.dividerColor.withOpacity(0.4)),
+              bottom: BorderSide(
+                color: theme.dividerColor.withValues(alpha: 0.4),
+              ),
             ),
           ),
           child: Column(
@@ -39,8 +42,8 @@ class ListDetailHeader extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     onPressed: onBack,
-                    icon: const Icon(Icons.arrow_back),
-                    tooltip: 'Back',
+                    icon: Icon(Icons.arrow_back),
+                    tooltip: S.back,
                     visualDensity: VisualDensity.compact,
                   ),
                 ),
@@ -59,7 +62,7 @@ class ListDetailHeader extends StatelessWidget {
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         listName,
@@ -114,7 +117,7 @@ class _ListTypePill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 15, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 6),
+          SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(

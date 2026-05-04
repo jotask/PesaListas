@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/widgets/groups/pending_invite_card.dart';
 
 class HomeInvitationsSection extends StatelessWidget {
@@ -19,15 +20,15 @@ class HomeInvitationsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _InvitationsHeader(count: invitations.length),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         if (invitations.isEmpty)
-          const Card(
+          Card(
             child: ListTile(
               leading: CircleAvatar(
                 child: Icon(Icons.mark_email_read_outlined),
               ),
-              title: Text('No pending invitations'),
-              subtitle: Text('Group invites will appear here.'),
+              title: Text(S.noPendingInvitations),
+              subtitle: Text(S.groupInvitesWillAppearHere),
             ),
           )
         else
@@ -52,9 +53,9 @@ class _InvitationsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
-            'Pending invitations',
+            S.pendingInvitations,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),

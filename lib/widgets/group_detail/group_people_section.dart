@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/invitation_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
 import 'package:pesalistas/core/profile_fields.dart';
@@ -41,18 +42,18 @@ class GroupPeopleSection extends StatelessWidget {
           invitingMember: invitingMember,
           onInvite: onInvite,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         if (isLoading)
-          const SizedBox(
+          SizedBox(
             height: 132,
             child: Center(child: CircularProgressIndicator()),
           )
         else if (totalPeopleItems == 0)
           EmptyInfoCard(
             icon: Icons.people_outline,
-            title: 'No people yet',
-            subtitle: 'Invite someone to share this group.',
-            trailing: const Icon(Icons.person_add_alt_1),
+            title: S.noPeopleYet,
+            subtitle: S.inviteSomeoneToShareThisGroup,
+            trailing: Icon(Icons.person_add_alt_1),
             onTap: invitingMember ? null : onInvite,
           )
         else
@@ -104,7 +105,7 @@ class _PeopleHeader extends StatelessWidget {
 
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
             'People',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -114,7 +115,7 @@ class _PeopleHeader extends StatelessWidget {
           subtitleParts.join(' • '),
           style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         _InviteIconButton(
           pendingInviteCount: pendingInviteCount,
           invitingMember: invitingMember,
@@ -143,8 +144,8 @@ class _InviteIconButton extends StatelessWidget {
       children: [
         IconButton(
           onPressed: invitingMember ? null : onPressed,
-          icon: const Icon(Icons.person_add_alt_1),
-          tooltip: 'Invite member',
+          icon: Icon(Icons.person_add_alt_1),
+          tooltip: S.inviteMember,
         ),
         if (pendingInviteCount > 0)
           Positioned(
@@ -200,7 +201,7 @@ class _MemberPersonCard extends StatelessWidget {
       return username;
     }
 
-    return 'Unknown user';
+    return S.unknownUser;
   }
 
   String? get avatarUrl {
@@ -220,7 +221,7 @@ class _MemberPersonCard extends StatelessWidget {
   String get initials {
     final name = displayName.trim();
 
-    if (name.isEmpty || name == 'Unknown user') {
+    if (name.isEmpty || name == S.unknownUser) {
       return '?';
     }
 
@@ -249,7 +250,7 @@ class _MemberPersonCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _ProfileAvatar(avatarUrl: avatarUrl, fallbackText: initials),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Text(
                   displayName,
                   maxLines: 1,
@@ -257,7 +258,7 @@ class _MemberPersonCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   role,
                   maxLines: 1,
@@ -314,7 +315,7 @@ class _ProfileAvatar extends StatelessWidget {
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
 
-            return const CircleAvatar(
+            return CircleAvatar(
               radius: 28,
               child: SizedBox(
                 width: 20,
@@ -341,7 +342,7 @@ class _PendingInvitePersonCard extends StatelessWidget {
   String get email {
     return invitation[AppInvitationFields.invitedEmail]?.toString() ??
         invitation[AppInvitationFields.email]?.toString() ??
-        'Unknown email';
+        S.unknownEmail;
   }
 
   String get role {
@@ -371,7 +372,7 @@ class _PendingInvitePersonCard extends StatelessWidget {
                       color: Theme.of(context).colorScheme.onSecondaryContainer,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   Text(
                     email,
                     maxLines: 1,
@@ -379,7 +380,7 @@ class _PendingInvitePersonCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     'Pending • $role',
                     maxLines: 1,
@@ -393,8 +394,8 @@ class _PendingInvitePersonCard extends StatelessWidget {
               right: 2,
               top: 2,
               child: IconButton(
-                icon: const Icon(Icons.close, size: 18),
-                tooltip: 'Cancel invitation',
+                icon: Icon(Icons.close, size: 18),
+                tooltip: S.cancelInvitation,
                 onPressed: onCancel,
               ),
             ),

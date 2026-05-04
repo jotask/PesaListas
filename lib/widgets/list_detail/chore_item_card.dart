@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
@@ -22,7 +23,7 @@ class ChoreItemCard extends StatelessWidget {
     final value = item[AppItemFields.title]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Untitled chore';
+      return S.untitledChore;
     }
 
     return value.trim();
@@ -69,10 +70,7 @@ class ChoreItemCard extends StatelessWidget {
   }
 
   String get recurrenceText {
-    return AppRecurrenceTypes.displayText(
-      recurrenceType: recurrenceType,
-      recurrenceInterval: recurrenceInterval,
-    );
+    return AppRecurrenceTypes.displayText(recurrenceType, recurrenceInterval);
   }
 
   String get nextDueText {
@@ -81,7 +79,7 @@ class ChoreItemCard extends StatelessWidget {
     );
 
     if (formatted.isEmpty) {
-      return 'No due date';
+      return S.noDueDate;
     }
 
     return formatted;
@@ -151,7 +149,7 @@ class ChoreItemCard extends StatelessWidget {
                       color: dueStyle.avatarForeground,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +174,7 @@ class ChoreItemCard extends StatelessWidget {
                           ],
                         ),
                         if (description != null) ...[
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Text(
                             description!,
                             maxLines: 2,
@@ -189,19 +187,19 @@ class ChoreItemCard extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: onDelete,
-                    icon: const Icon(Icons.delete_outline),
-                    tooltip: 'Delete chore',
+                    icon: Icon(Icons.delete_outline),
+                    tooltip: S.deleteChore,
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
                   _ChoreInfoChip(
                     icon: Icons.repeat,
-                    label: hasRecurrence ? recurrenceText : 'Does not repeat',
+                    label: hasRecurrence ? recurrenceText : S.doesNotRepeat,
                     filled: hasRecurrence,
                   ),
                   _ChoreInfoChip(
@@ -217,25 +215,25 @@ class ChoreItemCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: 14),
               Row(
                 children: [
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: onComplete,
-                      icon: const Icon(Icons.check_circle_outline),
+                      icon: Icon(Icons.check_circle_outline),
                       label: Text(
                         isOverdue || isDueToday
-                            ? 'Complete now'
-                            : 'Complete chore',
+                            ? S.completeNow
+                            : S.completeChore,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   IconButton(
                     onPressed: onEdit,
-                    icon: const Icon(Icons.edit_outlined),
-                    tooltip: 'Edit chore',
+                    icon: Icon(Icons.edit_outlined),
+                    tooltip: S.editChore,
                   ),
                 ],
               ),
@@ -281,7 +279,7 @@ class ChoreDueStyle {
         return ChoreDueStyle(
           icon: Icons.warning_amber_rounded,
           dateIcon: Icons.event_busy_outlined,
-          label: 'Overdue',
+          label: S.overdue,
           avatarBackground: colors.errorContainer,
           avatarForeground: colors.onErrorContainer,
           pillBackground: colors.errorContainer,
@@ -294,7 +292,7 @@ class ChoreDueStyle {
         return ChoreDueStyle(
           icon: Icons.today_outlined,
           dateIcon: Icons.today_outlined,
-          label: 'Today',
+          label: S.today,
           avatarBackground: colors.primaryContainer,
           avatarForeground: colors.onPrimaryContainer,
           pillBackground: colors.primaryContainer,
@@ -307,7 +305,7 @@ class ChoreDueStyle {
         return ChoreDueStyle(
           icon: Icons.cleaning_services,
           dateIcon: Icons.event_outlined,
-          label: 'Upcoming',
+          label: S.upcoming,
           avatarBackground: colors.secondaryContainer,
           avatarForeground: colors.onSecondaryContainer,
           pillBackground: colors.secondaryContainer,
@@ -405,7 +403,7 @@ class _ChoreInfoChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 15, color: resolvedForegroundColor),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(

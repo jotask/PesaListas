@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 
@@ -88,7 +89,7 @@ class CheckableItemCard extends StatelessWidget {
                             : theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +114,7 @@ class CheckableItemCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Text(
                             subtitle,
                             maxLines: 2,
@@ -125,7 +126,7 @@ class CheckableItemCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Row(
                   children: [
                     Expanded(
@@ -135,19 +136,19 @@ class CheckableItemCard extends StatelessWidget {
                           isDone ? Icons.undo : Icons.check_circle_outline,
                         ),
                         label: Text(
-                          isDone ? 'Mark as not bought' : 'Mark as bought',
+                          isDone ? S.markAsNotBought : S.markAsBought,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     IconButton(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: 'Edit item',
+                      icon: Icon(Icons.edit_outlined),
+                      tooltip: S.editItem,
                     ),
                     IconButton(
                       onPressed: onDelete,
-                      icon: const Icon(Icons.delete_outline),
+                      icon: Icon(Icons.delete_outline),
                       tooltip: deleteTooltip,
                     ),
                   ],

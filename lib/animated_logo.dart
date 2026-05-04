@@ -49,9 +49,10 @@ class _AnimatedLogoState extends State<AnimatedLogo>
   @override
   Widget build(BuildContext context) {
     final backgroundColor =
-        widget.backgroundColor ?? Colors.white.withOpacity(0.12);
+        widget.backgroundColor ?? Colors.white.withValues(alpha: 0.12);
 
-    final borderColor = widget.borderColor ?? Colors.white.withOpacity(0.2);
+    final borderColor =
+        widget.borderColor ?? Colors.white.withValues(alpha: 0.2);
 
     return ScaleTransition(
       scale: _pulse,

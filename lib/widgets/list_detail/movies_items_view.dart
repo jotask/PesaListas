@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/widgets/list_detail/votable_items_view.dart';
 
 class MovieItemsView extends StatelessWidget {
@@ -29,10 +30,10 @@ class MovieItemsView extends StatelessWidget {
       items: items,
       loading: loading,
       emptyIcon: Icons.movie,
-      emptyTitle: 'No movies yet',
-      emptySubtitle: 'Add a movie to watch.',
+      emptyTitle: S.noMoviesYet,
+      emptySubtitle: S.addAMovieToWatch,
       cardIcon: Icons.movie,
-      fallbackTitle: 'Untitled movie',
+      fallbackTitle: S.untitledMovie,
       onCreate: onCreate,
       onEdit: onEdit,
       onDelete: onDelete,

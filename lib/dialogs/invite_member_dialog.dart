@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 
 class InviteMemberDialog extends StatefulWidget {
   const InviteMemberDialog({super.key});
@@ -41,19 +42,19 @@ class _InviteMemberDialogState extends State<InviteMemberDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Invite member'),
+      title: Text(S.inviteMember),
       content: TextField(
         controller: emailController,
         keyboardType: TextInputType.emailAddress,
         autofocus: false,
-        decoration: const InputDecoration(
-          labelText: 'Email',
-          hintText: 'friend@example.com',
+        decoration: InputDecoration(
+          labelText: S.email,
+          hintText: S.friendExampleCom,
         ),
       ),
       actions: [
-        TextButton(onPressed: cancel, child: const Text('Cancel')),
-        ElevatedButton(onPressed: closeWithEmail, child: const Text('Invite')),
+        TextButton(onPressed: cancel, child: Text(S.cancel)),
+        ElevatedButton(onPressed: closeWithEmail, child: Text(S.invite)),
       ],
     );
   }

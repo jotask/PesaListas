@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 
 class GenerateShoppingDialogResult {
   const GenerateShoppingDialogResult({
@@ -83,7 +84,7 @@ class _GenerateShoppingDialogState extends State<GenerateShoppingDialog> {
 
     if (toDate.isBefore(fromDate)) {
       setState(() {
-        validationMessage = 'To date cannot be before from date.';
+        validationMessage = S.toDateCannotBeBeforeFromDate;
       });
       return;
     }
@@ -96,53 +97,53 @@ class _GenerateShoppingDialogState extends State<GenerateShoppingDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Generate shopping list'),
+      title: Text(S.generateShoppingList),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.auto_awesome_outlined)),
-              title: Text('From meal plans'),
+              title: Text(S.fromMealPlans),
               subtitle: Text(
-                'Ingredients from recipe-based meal plans in this date range will be added to shopping.',
+                S.ingredientsFromRecipeBasedMealPlansInThisDateRangeWillBeAdde,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: pickFromDate,
-                    icon: const Icon(Icons.calendar_today),
+                    icon: Icon(Icons.calendar_today),
                     label: Text('From ${formatDate(fromDate)}'),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: pickToDate,
-                    icon: const Icon(Icons.event_outlined),
+                    icon: Icon(Icons.event_outlined),
                     label: Text('To ${formatDate(toDate)}'),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            const Text(
-              'Note: generating the same range more than once may create duplicate shopping items.',
+            SizedBox(height: 12),
+            Text(
+              S.noteGeneratingTheSameRangeMoreThanOnceMayCreateDuplicateShop,
             ),
             if (validationMessage != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.error_outline, size: 18),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       validationMessage!,
@@ -160,12 +161,12 @@ class _GenerateShoppingDialogState extends State<GenerateShoppingDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
         ElevatedButton.icon(
           onPressed: submit,
-          icon: const Icon(Icons.auto_awesome_outlined),
-          label: const Text('Generate'),
+          icon: Icon(Icons.auto_awesome_outlined),
+          label: Text(S.generate),
         ),
       ],
     );

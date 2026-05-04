@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
@@ -121,7 +122,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
     for (final mealPlan in mealPlans) {
       final date = mealPlan[AppMealPlanFields.plannedFor]?.toString();
       final key = date == null || date.trim().isEmpty
-          ? 'No date'
+          ? S.noDate
           : date.split('T').first;
 
       grouped.putIfAbsent(key, () => []);
@@ -134,32 +135,32 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
   String emptyTitleForFilter() {
     switch (selectedFilter) {
       case MealPlanFilter.all:
-        return 'No meal plans yet';
+        return S.noMealPlansYet;
 
       case MealPlanFilter.upcoming:
-        return 'No upcoming meals';
+        return S.noUpcomingMeals;
 
       case MealPlanFilter.thisWeek:
-        return 'No meals this week';
+        return S.noMealsThisWeek;
 
       case MealPlanFilter.past:
-        return 'No past meals';
+        return S.noPastMeals;
     }
   }
 
   String emptySubtitleForFilter() {
     switch (selectedFilter) {
       case MealPlanFilter.all:
-        return 'Plan your first meal.';
+        return S.planYourFirstMeal;
 
       case MealPlanFilter.upcoming:
-        return 'Plan a meal for today or later.';
+        return S.planAMealForTodayOrLater;
 
       case MealPlanFilter.thisWeek:
-        return 'Nothing planned for the next 7 days.';
+        return S.nothingPlannedForTheNext7Days;
 
       case MealPlanFilter.past:
-        return 'Past meals will appear here.';
+        return S.pastMealsWillAppearHere;
     }
   }
 
@@ -176,7 +177,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _GenerateShoppingCard(onGenerateShopping: widget.onGenerateShopping),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         if (widget.mealPlans.isNotEmpty) ...[
           _MealPlanSummaryCard(
             totalCount: widget.mealPlans.length,
@@ -185,7 +186,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
             pastCount: pastCount,
             recipeMealCount: recipeMealCount,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _MealPlanFilterChips(
             selectedFilter: selectedFilter,
             totalCount: widget.mealPlans.length,
@@ -196,7 +197,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
               setState(() => selectedFilter = filter);
             },
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
         ],
         if (visibleMealPlans.isEmpty)
           EmptyItemsCard(
@@ -299,7 +300,7 @@ class _MealPlanSummaryCard extends StatelessWidget {
                 color: theme.colorScheme.onPrimaryContainer,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Wrap(
                 spacing: 8,
@@ -353,7 +354,7 @@ class _SummaryPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(
@@ -392,28 +393,28 @@ class _GenerateShoppingCard extends StatelessWidget {
                   color: theme.colorScheme.onSecondaryContainer,
                 ),
               ),
-              const SizedBox(width: 12),
-              const Expanded(
+              SizedBox(width: 12),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Generate shopping list',
+                      S.generateShoppingList,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     SizedBox(height: 4),
-                    Text('Add ingredients from planned recipe meals.'),
+                    Text(S.addIngredientsFromPlannedRecipeMeals),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: onGenerateShopping,
-                icon: const Icon(Icons.shopping_cart_outlined),
-                label: const Text('Generate'),
+                icon: Icon(Icons.shopping_cart_outlined),
+                label: Text(S.generate),
               ),
             ],
           ),
@@ -454,9 +455,9 @@ class _MealPlanDateSection extends StatelessWidget {
     final tomorrow = today.add(const Duration(days: 1));
     final yesterday = today.subtract(const Duration(days: 1));
 
-    if (date == today) return 'Today';
-    if (date == tomorrow) return 'Tomorrow';
-    if (date == yesterday) return 'Yesterday';
+    if (date == today) return S.today;
+    if (date == tomorrow) return S.tomorrow;
+    if (date == yesterday) return S.yesterday;
 
     return dateLabel;
   }
@@ -481,7 +482,7 @@ class _MealPlanDateSection extends StatelessWidget {
                 size: 18,
                 color: theme.colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 '$friendlyDateLabel (${mealPlans.length})',
                 style: const TextStyle(
@@ -490,12 +491,12 @@ class _MealPlanDateSection extends StatelessWidget {
                 ),
               ),
               if (shouldShowRawDate) ...[
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Text(dateLabel, style: theme.textTheme.bodySmall),
               ],
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           for (final mealPlan in mealPlans)
             _MealPlanCard(
               mealPlan: mealPlan,
@@ -562,7 +563,7 @@ class _MealPlanCard extends StatelessWidget {
       return note.trim();
     }
 
-    return 'Custom meal';
+    return S.customMeal;
   }
 
   String? get note {
@@ -583,10 +584,10 @@ class _MealPlanCard extends StatelessWidget {
 
   String get helperText {
     if (hasRecipe) {
-      return 'Recipe meal • Can generate shopping items';
+      return S.recipeMealCanGenerateShoppingItems;
     }
 
-    return 'Custom meal • Will not generate shopping items';
+    return S.customMealWillNotGenerateShoppingItems;
   }
 
   @override
@@ -613,7 +614,7 @@ class _MealPlanCard extends StatelessWidget {
                       : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -627,7 +628,7 @@ class _MealPlanCard extends StatelessWidget {
                         _MealSourcePill(hasRecipe: hasRecipe),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       title,
                       style: const TextStyle(
@@ -635,27 +636,27 @@ class _MealPlanCard extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(helperText, style: theme.textTheme.bodyMedium),
                     if (note != null) ...[
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       _MealNoteBox(note: note!),
                     ],
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: onEdit,
-                            icon: const Icon(Icons.edit_outlined),
-                            label: const Text('Edit'),
+                            icon: Icon(Icons.edit_outlined),
+                            label: Text(S.edit),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         IconButton(
                           onPressed: onDelete,
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Delete meal plan',
+                          icon: Icon(Icons.delete_outline),
+                          tooltip: S.deleteMealPlan,
                         ),
                       ],
                     ),
@@ -701,9 +702,9 @@ class _MealSourcePill extends StatelessWidget {
             size: 14,
             color: foregroundColor,
           ),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Text(
-            hasRecipe ? 'Recipe' : 'Custom',
+            hasRecipe ? S.recipe : S.custom,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
@@ -729,7 +730,9 @@ class _MealNoteBox extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.55),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.55,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -740,7 +743,7 @@ class _MealNoteBox extends StatelessWidget {
             size: 16,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(child: Text(note, style: theme.textTheme.bodySmall)),
         ],
       ),
@@ -771,7 +774,7 @@ class _MealTypePill extends StatelessWidget {
             size: 14,
             color: theme.colorScheme.onSecondaryContainer,
           ),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Text(
             config.label,
             style: TextStyle(

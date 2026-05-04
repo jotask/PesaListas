@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 
 Future<bool> showConfirmDeleteDialog({
   required BuildContext context,
   required String title,
   required String message,
-  String cancelLabel = 'Cancel',
-  String deleteLabel = 'Delete',
+  String? cancelLabel,
+  String? deleteLabel,
 }) async {
+  final resolvedCancelLabel = cancelLabel ?? S.cancel;
+  final resolvedDeleteLabel = deleteLabel ?? S.delete;
+
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) {
@@ -16,11 +20,11 @@ Future<bool> showConfirmDeleteDialog({
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(cancelLabel),
+            child: Text(resolvedCancelLabel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(deleteLabel),
+            child: Text(resolvedDeleteLabel),
           ),
         ],
       );

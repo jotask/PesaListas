@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
@@ -114,14 +115,12 @@ class _EditItemDialogState extends State<EditItemDialog> {
     setState(() => validationMessage = null);
 
     if (title.isEmpty) {
-      setState(() => validationMessage = 'Title is required.');
+      setState(() => validationMessage = S.titleIsRequired);
       return;
     }
 
     if (isChoreList && usesCustomInterval && recurrenceInterval < 2) {
-      setState(
-        () => validationMessage = 'Custom recurrence must be at least 2 days.',
-      );
+      setState(() => validationMessage = S.customRecurrenceMustBeAtLeast2Days);
       return;
     }
 
@@ -194,15 +193,15 @@ class _EditItemDialogState extends State<EditItemDialog> {
     final message = validationMessage;
 
     if (message == null) {
-      return const SizedBox.shrink();
+      return SizedBox.shrink();
     }
 
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, size: 18),
-          const SizedBox(width: 8),
+          Icon(Icons.error_outline, size: 18),
+          SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
@@ -217,10 +216,10 @@ class _EditItemDialogState extends State<EditItemDialog> {
   Widget buildTaskFields() {
     return Column(
       children: [
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         DropdownButtonFormField<int>(
-          value: priority,
-          decoration: const InputDecoration(labelText: 'Priority'),
+          initialValue: priority,
+          decoration: InputDecoration(labelText: S.priority),
           items: AppPriorityTypes.all.map((config) {
             return DropdownMenuItem<int>(
               value: config.value,
@@ -232,26 +231,26 @@ class _EditItemDialogState extends State<EditItemDialog> {
             setState(() => priority = value);
           },
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Row(
           children: [
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: pickDeadline,
-                icon: const Icon(Icons.calendar_today),
+                icon: Icon(Icons.calendar_today),
                 label: Text(
                   deadlineAt == null
-                      ? 'Add deadline'
+                      ? S.addDeadline
                       : 'Deadline: ${AppDateFormatting.yyyyMmDd(deadlineAt!)}',
                 ),
               ),
             ),
             if (deadlineAt != null) ...[
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               IconButton(
                 onPressed: () => setState(() => deadlineAt = null),
-                icon: const Icon(Icons.close),
-                tooltip: 'Remove deadline',
+                icon: Icon(Icons.close),
+                tooltip: S.removeDeadline,
               ),
             ],
           ],
@@ -264,12 +263,12 @@ class _EditItemDialogState extends State<EditItemDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         DropdownButtonFormField<String?>(
-          value: recurrenceType,
-          decoration: const InputDecoration(
-            labelText: 'Recurrence',
-            helperText: 'Choose how often this chore repeats.',
+          initialValue: recurrenceType,
+          decoration: InputDecoration(
+            labelText: S.recurrence,
+            helperText: S.chooseHowOftenThisChoreRepeats,
           ),
           items: AppRecurrenceTypes.all.map((config) {
             return DropdownMenuItem<String?>(
@@ -280,47 +279,47 @@ class _EditItemDialogState extends State<EditItemDialog> {
           onChanged: updateRecurrenceType,
         ),
         if (usesCustomInterval) ...[
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           TextField(
             controller: recurrenceIntervalController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Repeat every',
+            decoration: InputDecoration(
+              labelText: S.repeatEvery,
               suffixText: 'days',
-              helperText: 'Minimum 2 days.',
+              helperText: S.minimum2Days,
             ),
             onChanged: updateRecurrenceInterval,
           ),
         ],
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Row(
           children: [
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: hasRecurrence ? pickNextDueDate : null,
-                icon: const Icon(Icons.event_repeat),
+                icon: Icon(Icons.event_repeat),
                 label: Text(
                   nextDueAt == null
-                      ? 'Set next due date'
+                      ? S.setNextDueDate
                       : 'Next due: ${AppDateFormatting.yyyyMmDd(nextDueAt!)}',
                 ),
               ),
             ),
             if (nextDueAt != null) ...[
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               IconButton(
                 onPressed: () => setState(() => nextDueAt = null),
-                icon: const Icon(Icons.close),
-                tooltip: 'Remove next due date',
+                icon: Icon(Icons.close),
+                tooltip: S.removeNextDueDate,
               ),
             ],
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Text(
           hasRecurrence
-              ? 'When you complete this chore, the app will schedule the next due date.'
-              : 'Non-recurring chores can still be completed manually.',
+              ? S.whenYouCompleteThisChoreTheAppWillScheduleTheNextDueDate
+              : S.nonRecurringChoresCanStillBeCompletedManually,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -330,7 +329,7 @@ class _EditItemDialogState extends State<EditItemDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit item'),
+      title: Text(S.editItem),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -338,7 +337,7 @@ class _EditItemDialogState extends State<EditItemDialog> {
             TextField(
               controller: titleController,
               autofocus: false,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: InputDecoration(labelText: S.title),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
                 if (validationMessage != null) {
@@ -346,11 +345,11 @@ class _EditItemDialogState extends State<EditItemDialog> {
                 }
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: descriptionController,
               autofocus: false,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(labelText: S.description),
               minLines: 1,
               maxLines: 3,
             ),
@@ -363,9 +362,9 @@ class _EditItemDialogState extends State<EditItemDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Save')),
+        ElevatedButton(onPressed: submit, child: Text(S.save)),
       ],
     );
   }

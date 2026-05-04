@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
 
@@ -10,7 +11,7 @@ class ListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = list[AppListFields.name]?.toString() ?? 'Untitled list';
+    final name = list[AppListFields.name]?.toString() ?? S.untitledList;
     final listType = list[AppListFields.listType]?.toString();
 
     final config = AppListTypes.fromValue(listType);

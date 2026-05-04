@@ -1,3 +1,5 @@
+import 'package:pesalistas/l10n/app_strings.dart';
+
 class AppPriorityConfig {
   const AppPriorityConfig({
     required this.value,
@@ -13,31 +15,31 @@ class AppPriorityConfig {
 class AppPriorityTypes {
   const AppPriorityTypes._();
 
-  static const none = AppPriorityConfig(
-    value: 0,
-    label: 'None',
-    description: 'No priority',
-  );
+  static AppPriorityConfig get none => AppPriorityConfig(
+        value: 0,
+        label: S.none,
+        description: S.noPriority,
+      );
 
-  static const low = AppPriorityConfig(
-    value: 1,
-    label: 'Low',
-    description: 'Low priority',
-  );
+  static AppPriorityConfig get low => AppPriorityConfig(
+        value: 1,
+        label: S.low,
+        description: S.lowPriority,
+      );
 
-  static const medium = AppPriorityConfig(
-    value: 2,
-    label: 'Medium',
-    description: 'Medium priority',
-  );
+  static AppPriorityConfig get medium => AppPriorityConfig(
+        value: 2,
+        label: S.medium,
+        description: S.mediumPriority,
+      );
 
-  static const high = AppPriorityConfig(
-    value: 3,
-    label: 'High',
-    description: 'High priority',
-  );
+  static AppPriorityConfig get high => AppPriorityConfig(
+        value: 3,
+        label: S.high,
+        description: S.highPriority,
+      );
 
-  static const all = [none, low, medium, high];
+  static List<AppPriorityConfig> get all => [none, low, medium, high];
 
   static AppPriorityConfig fromValue(int? value) {
     for (final config in all) {
@@ -51,9 +53,9 @@ class AppPriorityTypes {
     final config = fromValue(value);
 
     if (config.value == 0) {
-      return 'No priority';
+      return S.noPriority;
     }
 
-    return '${config.label} priority';
+    return '${config.label} ${S.priority.toLowerCase()}';
   }
 }

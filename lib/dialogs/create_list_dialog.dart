@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/list_types.dart';
 
 class CreateListDialogResult {
@@ -41,7 +42,7 @@ class _CreateListDialogState extends State<CreateListDialog> {
     final selectedConfig = AppListTypes.fromValue(listType);
 
     return AlertDialog(
-      title: const Text('Create list'),
+      title: Text(S.createList),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -49,24 +50,24 @@ class _CreateListDialogState extends State<CreateListDialog> {
             TextField(
               controller: nameController,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'List name',
-                hintText: 'Movies to watch',
+              decoration: InputDecoration(
+                labelText: S.listName,
+                hintText: S.moviesToWatch,
               ),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => submit(),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: listType,
-              decoration: const InputDecoration(labelText: 'List type'),
+              initialValue: listType,
+              decoration: InputDecoration(labelText: S.listType),
               items: AppListTypes.all.map((config) {
                 return DropdownMenuItem<String>(
                   value: config.value,
                   child: Row(
                     children: [
                       Icon(config.icon, size: 20),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Text(config.label),
                     ],
                   ),
@@ -77,7 +78,7 @@ class _CreateListDialogState extends State<CreateListDialog> {
                 setState(() => listType = value);
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(selectedConfig.icon)),
@@ -90,9 +91,9 @@ class _CreateListDialogState extends State<CreateListDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Create')),
+        ElevatedButton(onPressed: submit, child: Text(S.create)),
       ],
     );
   }

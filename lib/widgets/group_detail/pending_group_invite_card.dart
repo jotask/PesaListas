@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 
 class PendingGroupInviteCard extends StatelessWidget {
   const PendingGroupInviteCard({
@@ -14,12 +15,12 @@ class PendingGroupInviteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: const CircleAvatar(child: Icon(Icons.mail_outline)),
-        title: Text(invitation['invited_email'] ?? 'Unknown email'),
+        leading: CircleAvatar(child: Icon(Icons.mail_outline)),
+        title: Text(invitation['invited_email'] ?? S.unknownEmail),
         subtitle: Text('Role: ${invitation['role'] ?? 'member'}'),
         trailing: IconButton(
-          icon: const Icon(Icons.close),
-          tooltip: 'Cancel invitation',
+          icon: Icon(Icons.close),
+          tooltip: S.cancelInvitation,
           onPressed: onCancel,
         ),
       ),

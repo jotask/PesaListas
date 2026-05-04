@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/animated_logo.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/home_page.dart';
@@ -72,15 +73,17 @@ class _SplashPageState extends State<SplashPage> {
                 width: 96,
                 height: 96,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: const AnimatedLogo(),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Pesa-Listas',
+              SizedBox(height: 24),
+              Text(
+                S.pesaListas,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 32,
@@ -88,16 +91,16 @@ class _SplashPageState extends State<SplashPage> {
                   letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
-                'Organize life together',
+                S.organizeLifeTogether,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.75),
+                  color: Colors.white.withValues(alpha: 0.75),
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 40),
-              const SizedBox(
+              SizedBox(height: 40),
+              SizedBox(
                 width: 32,
                 height: 32,
                 child: CircularProgressIndicator(

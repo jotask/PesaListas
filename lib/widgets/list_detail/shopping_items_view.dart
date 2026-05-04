@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
@@ -67,8 +68,8 @@ class ShoppingItemsView extends StatelessWidget {
     if (items.isEmpty) {
       return EmptyItemsCard(
         icon: Icons.shopping_cart_outlined,
-        title: 'No shopping items yet',
-        subtitle: 'Add your first item.',
+        title: S.noShoppingItemsYet,
+        subtitle: S.addYourFirstItem,
         onCreate: onCreate,
       );
     }
@@ -82,10 +83,10 @@ class ShoppingItemsView extends StatelessWidget {
           boughtCount: boughtItems.length,
           generatedCount: generatedCount,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         if (toBuyItems.isNotEmpty)
           _ShoppingSection(
-            title: 'To buy',
+            title: S.toBuy,
             icon: Icons.shopping_cart_outlined,
             items: toBuyItems,
             onToggle: toggleItem,
@@ -93,10 +94,10 @@ class ShoppingItemsView extends StatelessWidget {
             onDelete: onDelete,
           ),
         if (toBuyItems.isNotEmpty && boughtItems.isNotEmpty)
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
         if (boughtItems.isNotEmpty)
           _ShoppingSection(
-            title: 'Bought',
+            title: S.bought,
             icon: Icons.shopping_cart_checkout,
             items: boughtItems,
             onToggle: toggleItem,
@@ -137,7 +138,7 @@ class _ShoppingSummaryCard extends StatelessWidget {
                 color: theme.colorScheme.onPrimaryContainer,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Wrap(
                 spacing: 8,
@@ -189,7 +190,7 @@ class _SummaryPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(
@@ -231,14 +232,14 @@ class _ShoppingSection extends StatelessWidget {
         Row(
           children: [
             Icon(icon, size: 18, color: theme.colorScheme.primary),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               '$title (${items.length})',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         for (final item in items)
           _ShoppingItemCard(
             item: item,
@@ -270,7 +271,7 @@ class _ShoppingItemCard extends StatelessWidget {
     final value = item[AppShoppingItemFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Unnamed item';
+      return S.unnamedItem;
     }
 
     return value.trim();
@@ -333,7 +334,7 @@ class _ShoppingItemCard extends StatelessWidget {
     }
 
     if (parts.isEmpty) {
-      return checked ? 'Bought' : 'To buy';
+      return checked ? S.bought : S.toBuy;
     }
 
     return parts.join(' ');
@@ -375,7 +376,7 @@ class _ShoppingItemCard extends StatelessWidget {
     if (recipeName != null) {
       parts.add('Recipe: $recipeName');
     } else if (generatedFromMealPlan) {
-      parts.add('From meal plan');
+      parts.add(S.fromMealPlan);
     }
 
     return parts.join(' • ');
@@ -434,7 +435,7 @@ class _ShoppingItemCard extends StatelessWidget {
                             : theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -456,10 +457,10 @@ class _ShoppingItemCard extends StatelessWidget {
                               _ShoppingStatePill(checked: checked),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Text(subtitle, style: theme.textTheme.bodyMedium),
                           if (sourceContextText != null) ...[
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             _SourceContextPill(text: sourceContextText!),
                           ],
                         ],
@@ -467,7 +468,7 @@ class _ShoppingItemCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Row(
                   children: [
                     Expanded(
@@ -477,20 +478,20 @@ class _ShoppingItemCard extends StatelessWidget {
                           checked ? Icons.undo : Icons.check_circle_outline,
                         ),
                         label: Text(
-                          checked ? 'Mark as not bought' : 'Mark as bought',
+                          checked ? S.markAsNotBought : S.markAsBought,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     IconButton(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: 'Edit item',
+                      icon: Icon(Icons.edit_outlined),
+                      tooltip: S.editItem,
                     ),
                     IconButton(
                       onPressed: onDelete,
-                      icon: const Icon(Icons.delete_outline),
-                      tooltip: 'Delete item',
+                      icon: Icon(Icons.delete_outline),
+                      tooltip: S.deleteItem,
                     ),
                   ],
                 ),
@@ -526,7 +527,7 @@ class _SourceContextPill extends StatelessWidget {
             size: 14,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Flexible(
             child: Text(
               text,
@@ -568,7 +569,7 @@ class _ShoppingStatePill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        checked ? 'Bought' : 'To buy',
+        checked ? S.bought : S.toBuy,
         style: TextStyle(
           color: foregroundColor,
           fontSize: 11,

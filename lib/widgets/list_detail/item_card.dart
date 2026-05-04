@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 
@@ -24,7 +25,7 @@ class ItemCard extends StatelessWidget {
     final value = item[AppItemFields.title]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Untitled item';
+      return S.untitledItem;
     }
 
     return value.trim();
@@ -37,11 +38,11 @@ class ItemCard extends StatelessWidget {
       return description.trim();
     }
 
-    return isDone ? 'Done' : 'Open';
+    return isDone ? S.done : S.open;
   }
 
   String get stateLabel {
-    return isDone ? 'Done' : 'Open';
+    return isDone ? S.done : S.open;
   }
 
   @override
@@ -75,7 +76,7 @@ class ItemCard extends StatelessWidget {
                             : theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,7 +98,7 @@ class ItemCard extends StatelessWidget {
                               _ItemStatePill(isDone: isDone, label: stateLabel),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Text(
                             subtitle,
                             maxLines: 2,
@@ -109,7 +110,7 @@ class ItemCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Row(
                   children: [
                     Expanded(
@@ -118,19 +119,19 @@ class ItemCard extends StatelessWidget {
                         icon: Icon(
                           isDone ? Icons.undo : Icons.check_circle_outline,
                         ),
-                        label: Text(isDone ? 'Mark as open' : 'Mark as done'),
+                        label: Text(isDone ? S.markAsOpen : S.markAsDone),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     IconButton(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: 'Edit item',
+                      icon: Icon(Icons.edit_outlined),
+                      tooltip: S.editItem,
                     ),
                     IconButton(
                       onPressed: onDelete,
-                      icon: const Icon(Icons.delete_outline),
-                      tooltip: 'Delete item',
+                      icon: Icon(Icons.delete_outline),
+                      tooltip: S.deleteItem,
                     ),
                   ],
                 ),

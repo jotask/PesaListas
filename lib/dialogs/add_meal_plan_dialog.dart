@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 
 class AddMealPlanDialogResult {
@@ -66,7 +67,7 @@ class _AddMealPlanDialogState extends State<AddMealPlanDialog> {
     final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'Untitled recipe';
+      return S.untitledRecipe;
     }
 
     return value.trim();
@@ -92,35 +93,33 @@ class _AddMealPlanDialogState extends State<AddMealPlanDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add meal plan'),
+      title: Text(S.addMealPlan),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.event_note_outlined)),
-              title: Text('Meal plan'),
-              subtitle: Text(
-                'Plan a meal for a date and optionally choose a recipe.',
-              ),
+              title: Text(S.mealPlan),
+              subtitle: Text(S.planAMealForADateAndOptionallyChooseARecipe),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: pickDate,
-                    icon: const Icon(Icons.calendar_today),
+                    icon: Icon(Icons.calendar_today),
                     label: Text(formatDate(plannedFor)),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: mealType,
-              decoration: const InputDecoration(labelText: 'Meal type'),
+              initialValue: mealType,
+              decoration: InputDecoration(labelText: S.mealType),
               items: AppMealTypes.all.map((config) {
                 return DropdownMenuItem<String>(
                   value: config.value,
@@ -132,17 +131,17 @@ class _AddMealPlanDialogState extends State<AddMealPlanDialog> {
                 setState(() => mealType = value);
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: selectedRecipeValue,
-              decoration: const InputDecoration(
-                labelText: 'Recipe',
-                helperText: 'Optional. You can also create a custom meal note.',
+              initialValue: selectedRecipeValue,
+              decoration: InputDecoration(
+                labelText: S.recipe,
+                helperText: S.optionalYouCanAlsoCreateACustomMealNote,
               ),
               items: [
-                const DropdownMenuItem<String>(
+                DropdownMenuItem<String>(
                   value: noRecipeValue,
-                  child: Text('No recipe / custom meal'),
+                  child: Text(S.noRecipeCustomMeal),
                 ),
                 for (final recipe in widget.recipes)
                   DropdownMenuItem<String>(
@@ -155,22 +154,22 @@ class _AddMealPlanDialogState extends State<AddMealPlanDialog> {
                 setState(() => selectedRecipeValue = value);
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: noteController,
-              decoration: const InputDecoration(
-                labelText: 'Note',
-                hintText: 'Optional, e.g. family dinner or leftovers',
+              decoration: InputDecoration(
+                labelText: S.note,
+                hintText: S.optionalEGFamilyDinnerOrLeftovers,
               ),
               minLines: 1,
               maxLines: 3,
             ),
             if (validationMessage != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.error_outline, size: 18),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       validationMessage!,
@@ -188,9 +187,9 @@ class _AddMealPlanDialogState extends State<AddMealPlanDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Add')),
+        ElevatedButton(onPressed: submit, child: Text(S.add)),
       ],
     );
   }
@@ -204,25 +203,25 @@ class AppMealTypes {
   static const dinner = 'dinner';
   static const snack = 'snack';
 
-  static const all = [
+  static List<AppMealTypeConfig> get all => [
     AppMealTypeConfig(
       value: breakfast,
-      label: 'Breakfast',
+      label: S.breakfast,
       icon: Icons.free_breakfast_outlined,
     ),
     AppMealTypeConfig(
       value: lunch,
-      label: 'Lunch',
+      label: S.lunch,
       icon: Icons.lunch_dining_outlined,
     ),
     AppMealTypeConfig(
       value: dinner,
-      label: 'Dinner',
+      label: S.dinner,
       icon: Icons.dinner_dining_outlined,
     ),
     AppMealTypeConfig(
       value: snack,
-      label: 'Snack',
+      label: S.snack,
       icon: Icons.cookie_outlined,
     ),
   ];
@@ -232,9 +231,9 @@ class AppMealTypes {
       if (config.value == value) return config;
     }
 
-    return const AppMealTypeConfig(
+    return AppMealTypeConfig(
       value: dinner,
-      label: 'Dinner',
+      label: S.dinner,
       icon: Icons.dinner_dining_outlined,
     );
   }

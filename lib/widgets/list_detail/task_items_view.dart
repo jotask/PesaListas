@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
@@ -33,8 +34,8 @@ class TaskItemsView extends StatelessWidget {
     if (items.isEmpty) {
       return EmptyItemsCard(
         icon: Icons.checklist,
-        title: 'No tasks yet',
-        subtitle: 'Create your first task.',
+        title: S.noTasksYet,
+        subtitle: S.createYourFirstTask,
         onCreate: onCreate,
       );
     }

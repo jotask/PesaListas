@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/group_fields.dart';
 
 class EditGroupDialogResult {
@@ -50,7 +51,7 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
     setState(() => validationMessage = null);
 
     if (name.isEmpty) {
-      setState(() => validationMessage = 'Group name is required.');
+      setState(() => validationMessage = S.groupNameIsRequired);
       return;
     }
 
@@ -65,22 +66,22 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit group'),
+      title: Text(S.editGroup),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.groups_2_outlined)),
-              title: Text('Group info'),
-              subtitle: Text('Update the shared space name and description.'),
+              title: Text(S.groupInfo),
+              subtitle: Text(S.updateTheSharedSpaceNameAndDescription),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: nameController,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Group name'),
+              decoration: InputDecoration(labelText: S.groupName),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
                 if (validationMessage != null) {
@@ -88,22 +89,22 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
                 }
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'Optional',
+              decoration: InputDecoration(
+                labelText: S.description,
+                hintText: S.optional,
               ),
               minLines: 1,
               maxLines: 4,
             ),
             if (validationMessage != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.error_outline, size: 18),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       validationMessage!,
@@ -121,9 +122,9 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Save')),
+        ElevatedButton(onPressed: submit, child: Text(S.save)),
       ],
     );
   }

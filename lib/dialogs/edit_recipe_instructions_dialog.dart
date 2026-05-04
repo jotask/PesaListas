@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 
 class EditRecipeInstructionsDialogResult {
@@ -49,23 +50,23 @@ class _EditRecipeInstructionsDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit instructions'),
+      title: Text(S.editInstructions),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
+            ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.menu_book_outlined)),
-              title: Text('Cooking instructions'),
-              subtitle: Text('Add the preparation steps for this recipe.'),
+              title: Text(S.cookingInstructions),
+              subtitle: Text(S.addThePreparationStepsForThisRecipe),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: instructionsController,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Instructions',
+              decoration: InputDecoration(
+                labelText: S.instructions,
                 hintText:
                     '1. Chop vegetables\n2. Cook pasta\n3. Mix everything',
                 alignLabelWithHint: true,
@@ -81,9 +82,9 @@ class _EditRecipeInstructionsDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(S.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: const Text('Save')),
+        ElevatedButton(onPressed: submit, child: Text(S.save)),
       ],
     );
   }
