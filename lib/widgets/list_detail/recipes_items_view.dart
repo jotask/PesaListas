@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
-import 'package:pesalistas/core/value_parsing.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
-class RecipesItemsView extends StatelessWidget {
+class RecipesItemsView extends StatefulWidget {
   const RecipesItemsView({
     super.key,
     required this.recipes,
@@ -21,30 +20,312 @@ class RecipesItemsView extends StatelessWidget {
   final void Function(String recipeId) onDeleteRecipe;
 
   @override
+  State<RecipesItemsView> createState() => _RecipesItemsViewState();
+}
+
+class _RecipesItemsViewState extends State<RecipesItemsView> {
+  final TextEditingController searchController = TextEditingController();
+
+  String searchQuery = '';
+  RecipeFilter selectedFilter = RecipeFilter.all;
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  List<Map<String, dynamic>> get visibleRecipes {
+    return widget.recipes.where((recipe) {
+      return matchesSearch(recipe) && matchesFilter(recipe);
+    }).toList();
+  }
+
+  bool matchesSearch(Map<String, dynamic> recipe) {
+    final query = searchQuery.trim().toLowerCase();
+
+    if (query.isEmpty) {
+      return true;
+    }
+
+    final name = recipe[AppRecipeFields.name]?.toString().toLowerCase() ?? '';
+    final description =
+        recipe[AppRecipeFields.description]?.toString().toLowerCase() ?? '';
+    final instructions =
+        recipe[AppRecipeFields.instructions]?.toString().toLowerCase() ?? '';
+
+    return name.contains(query) ||
+        description.contains(query) ||
+        instructions.contains(query);
+  }
+
+  bool matchesFilter(Map<String, dynamic> recipe) {
+    switch (selectedFilter) {
+      case RecipeFilter.all:
+        return true;
+
+      case RecipeFilter.withInstructions:
+        return hasInstructions(recipe);
+
+      case RecipeFilter.missingInstructions:
+        return !hasInstructions(recipe);
+
+      case RecipeFilter.withTiming:
+        return hasTiming(recipe);
+    }
+  }
+
+  bool hasInstructions(Map<String, dynamic> recipe) {
+    final value = recipe[AppRecipeFields.instructions]?.toString();
+    return value != null && value.trim().isNotEmpty;
+  }
+
+  bool hasTiming(Map<String, dynamic> recipe) {
+    return intValue(recipe[AppRecipeFields.prepTimeMinutes]) != null ||
+        intValue(recipe[AppRecipeFields.cookTimeMinutes]) != null;
+  }
+
+  int? intValue(dynamic value) {
+    if (value is int) return value;
+
+    return int.tryParse(value?.toString() ?? '');
+  }
+
+  int get withInstructionsCount {
+    return widget.recipes.where(hasInstructions).length;
+  }
+
+  int get missingInstructionsCount {
+    return widget.recipes.where((recipe) => !hasInstructions(recipe)).length;
+  }
+
+  int get withTimingCount {
+    return widget.recipes.where(hasTiming).length;
+  }
+
+  void updateSearch(String value) {
+    setState(() => searchQuery = value);
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    setState(() => searchQuery = '');
+  }
+
+  void selectFilter(RecipeFilter filter) {
+    setState(() => selectedFilter = filter);
+  }
+
+  void resetFilters() {
+    searchController.clear();
+    setState(() {
+      searchQuery = '';
+      selectedFilter = RecipeFilter.all;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (loading) {
+    if (widget.loading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (recipes.isEmpty) {
+    if (widget.recipes.isEmpty) {
       return EmptyItemsCard(
-        icon: Icons.restaurant_menu,
+        icon: Icons.restaurant_menu_outlined,
         title: context.l10n.noRecipesYet,
         subtitle: context.l10n.addYourFirstRecipe,
-        onCreate: onCreate,
+        onCreate: widget.onCreate,
       );
     }
 
+    final recipes = visibleRecipes;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final recipe in recipes)
-          _RecipeCard(
-            recipe: recipe,
-            onDetails: () => onViewRecipeDetails(recipe),
-            onDelete: () =>
-                onDeleteRecipe(recipe[AppRecipeFields.id].toString()),
+        _RecipeSearchField(
+          controller: searchController,
+          query: searchQuery,
+          onChanged: updateSearch,
+          onClear: clearSearch,
+        ),
+        const SizedBox(height: 12),
+        _RecipeFilterChips(
+          selectedFilter: selectedFilter,
+          totalCount: widget.recipes.length,
+          withInstructionsCount: withInstructionsCount,
+          missingInstructionsCount: missingInstructionsCount,
+          withTimingCount: withTimingCount,
+          onSelected: selectFilter,
+        ),
+        const SizedBox(height: 12),
+        if (recipes.isEmpty)
+          _NoRecipeResultsCard(
+            hasActiveFilter:
+                searchQuery.trim().isNotEmpty ||
+                selectedFilter != RecipeFilter.all,
+            onClear: resetFilters,
+          )
+        else
+          for (final recipe in recipes)
+            _RecipeCard(
+              recipe: recipe,
+              onTap: () => widget.onViewRecipeDetails(recipe),
+              onDelete: () {
+                widget.onDeleteRecipe(recipe[AppRecipeFields.id].toString());
+              },
+            ),
+      ],
+    );
+  }
+}
+
+enum RecipeFilter { all, withInstructions, missingInstructions, withTiming }
+
+class _RecipeSearchField extends StatelessWidget {
+  const _RecipeSearchField({
+    required this.controller,
+    required this.query,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  final TextEditingController controller;
+  final String query;
+  final void Function(String value) onChanged;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return SearchBar(
+      controller: controller,
+      leading: const Icon(Icons.search),
+      hintText: context.l10n.searchRecipesHint,
+      onChanged: onChanged,
+      trailing: [
+        if (query.isNotEmpty)
+          IconButton(
+            onPressed: onClear,
+            icon: const Icon(Icons.close),
+            tooltip: context.l10n.clearFilter,
           ),
       ],
+    );
+  }
+}
+
+class _RecipeFilterChips extends StatelessWidget {
+  const _RecipeFilterChips({
+    required this.selectedFilter,
+    required this.totalCount,
+    required this.withInstructionsCount,
+    required this.missingInstructionsCount,
+    required this.withTimingCount,
+    required this.onSelected,
+  });
+
+  final RecipeFilter selectedFilter;
+  final int totalCount;
+  final int withInstructionsCount;
+  final int missingInstructionsCount;
+  final int withTimingCount;
+  final void Function(RecipeFilter filter) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        FilterChip(
+          selected: selectedFilter == RecipeFilter.all,
+          label: Text('${context.l10n.allRecipes} $totalCount'),
+          onSelected: (_) => onSelected(RecipeFilter.all),
+        ),
+        FilterChip(
+          selected: selectedFilter == RecipeFilter.withInstructions,
+          label: Text(
+            '${context.l10n.recipesWithInstructions} $withInstructionsCount',
+          ),
+          onSelected: (_) => onSelected(RecipeFilter.withInstructions),
+        ),
+        FilterChip(
+          selected: selectedFilter == RecipeFilter.missingInstructions,
+          label: Text(
+            '${context.l10n.recipesMissingInstructions} $missingInstructionsCount',
+          ),
+          onSelected: (_) => onSelected(RecipeFilter.missingInstructions),
+        ),
+        FilterChip(
+          selected: selectedFilter == RecipeFilter.withTiming,
+          label: Text('${context.l10n.recipesWithTiming} $withTimingCount'),
+          onSelected: (_) => onSelected(RecipeFilter.withTiming),
+        ),
+      ],
+    );
+  }
+}
+
+class _NoRecipeResultsCard extends StatelessWidget {
+  const _NoRecipeResultsCard({
+    required this.hasActiveFilter,
+    required this.onClear,
+  });
+
+  final bool hasActiveFilter;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              child: Icon(
+                Icons.search_off_outlined,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    hasActiveFilter
+                        ? context.l10n.noRecipesForFilter
+                        : context.l10n.noRecipeResults,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    hasActiveFilter
+                        ? context.l10n.noRecipesForFilterSubtitle
+                        : context.l10n.noRecipeResultsSubtitle,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: onClear,
+                    icon: const Icon(Icons.clear),
+                    label: Text(context.l10n.clearFilter),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -52,12 +333,12 @@ class RecipesItemsView extends StatelessWidget {
 class _RecipeCard extends StatelessWidget {
   const _RecipeCard({
     required this.recipe,
-    required this.onDetails,
+    required this.onTap,
     required this.onDelete,
   });
 
   final Map<String, dynamic> recipe;
-  final VoidCallback onDetails;
+  final VoidCallback onTap;
   final VoidCallback onDelete;
 
   String title(BuildContext context) {
@@ -91,30 +372,39 @@ class _RecipeCard extends StatelessWidget {
   }
 
   int? get prepTime {
-    return AppValueParsing.intOrNull(recipe[AppRecipeFields.prepTimeMinutes]);
+    final value = recipe[AppRecipeFields.prepTimeMinutes];
+
+    if (value is int) return value;
+
+    return int.tryParse(value?.toString() ?? '');
   }
 
   int? get cookTime {
-    return AppValueParsing.intOrNull(recipe[AppRecipeFields.cookTimeMinutes]);
+    final value = recipe[AppRecipeFields.cookTimeMinutes];
+
+    if (value is int) return value;
+
+    return int.tryParse(value?.toString() ?? '');
   }
 
   int? get servings {
-    return AppValueParsing.intOrNull(recipe[AppRecipeFields.servings]);
+    final value = recipe[AppRecipeFields.servings];
+
+    if (value is int) return value;
+
+    return int.tryParse(value?.toString() ?? '');
+  }
+
+  int? get totalTime {
+    final total = (prepTime ?? 0) + (cookTime ?? 0);
+
+    if (total <= 0) return null;
+
+    return total;
   }
 
   bool get hasInstructions {
     return instructions != null;
-  }
-
-  int? get totalTime {
-    final prep = prepTime ?? 0;
-    final cook = cookTime ?? 0;
-
-    if (prep == 0 && cook == 0) {
-      return null;
-    }
-
-    return prep + cook;
   }
 
   @override
@@ -124,7 +414,7 @@ class _RecipeCard extends StatelessWidget {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: onDetails,
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
@@ -137,51 +427,38 @@ class _RecipeCard extends StatelessWidget {
                   color: theme.colorScheme.onPrimaryContainer,
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title(context),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: onDelete,
-                          icon: Icon(Icons.delete_outline),
-                          tooltip: context.l10n.deleteRecipe,
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ],
+                    Text(
+                      title(context),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       description(context),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium,
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
                         if (totalTime != null)
                           _RecipeMetaPill(
-                            icon: Icons.schedule_outlined,
+                            icon: Icons.schedule,
                             label: context.l10n.minutesTotal(totalTime!),
                           ),
                         if (prepTime != null)
                           _RecipeMetaPill(
-                            icon: Icons.timer_outlined,
+                            icon: Icons.kitchen_outlined,
                             label: context.l10n.prepMinutes(prepTime!),
                           ),
                         if (cookTime != null)
@@ -195,23 +472,30 @@ class _RecipeCard extends StatelessWidget {
                             label: context.l10n.servingsCount(servings!),
                           ),
                         _RecipeMetaPill(
-                          icon: hasInstructions
-                              ? Icons.menu_book_outlined
-                              : Icons.menu_book_outlined,
+                          icon: Icons.notes_outlined,
                           label: hasInstructions
                               ? context.l10n.instructionsAdded
                               : context.l10n.noInstructions,
                         ),
                       ],
                     ),
-                    SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: FilledButton.icon(
-                        onPressed: onDetails,
-                        icon: Icon(Icons.menu_book_outlined),
-                        label: Text(context.l10n.openRecipe),
-                      ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: onTap,
+                            icon: const Icon(Icons.open_in_new),
+                            label: Text(context.l10n.openRecipe),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: onDelete,
+                          icon: const Icon(Icons.delete_outline),
+                          tooltip: context.l10n.deleteRecipe,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -244,7 +528,7 @@ class _RecipeMetaPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(

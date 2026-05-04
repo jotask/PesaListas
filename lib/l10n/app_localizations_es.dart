@@ -1488,6 +1488,99 @@ class AppLocalizationsEs extends AppLocalizations {
       'Planificación compartida para grupos y hogares.';
 
   @override
+  String get clearAll => 'Limpiar todo';
+
+  @override
+  String get clearAllShoppingItems => 'Limpiar toda la lista';
+
+  @override
+  String get clearAllShoppingItemsTitle => '¿Limpiar toda la lista?';
+
+  @override
+  String get clearAllShoppingItemsMessage =>
+      'Esto eliminará permanentemente todos los artículos de esta lista de la compra.';
+
+  @override
+  String get allShoppingItemsCleared => 'Lista de la compra limpiada';
+
+  @override
+  String get failedToClearAllShoppingItems =>
+      'No se pudo limpiar la lista de la compra';
+
+  @override
+  String get searchRecipes => 'Buscar recetas';
+
+  @override
+  String get searchRecipesHint =>
+      'Busca por nombre, descripción o instrucciones';
+
+  @override
+  String get noRecipeResults => 'No se encontraron recetas';
+
+  @override
+  String get noRecipeResultsSubtitle => 'Prueba con otra búsqueda.';
+
+  @override
+  String get manualShoppingItems => 'Manual items';
+
+  @override
+  String get generatedShoppingItems => 'Generated from meal plans';
+
+  @override
+  String get allRecipes => 'Todas';
+
+  @override
+  String get recipesWithInstructions => 'Con instrucciones';
+
+  @override
+  String get recipesMissingInstructions => 'Sin instrucciones';
+
+  @override
+  String get recipesWithTiming => 'Con tiempos';
+
+  @override
+  String get noRecipesForFilter => 'No hay recetas para este filtro';
+
+  @override
+  String get noRecipesForFilterSubtitle =>
+      'Prueba cambiando la búsqueda o el filtro.';
+
+  @override
+  String get allMeals => 'All meals';
+
+  @override
+  String get noMealsForFilters => 'No meals match these filters';
+
+  @override
+  String get noMealsForFiltersSubtitle =>
+      'Try changing the date or meal type filter.';
+
+  @override
+  String get allShoppingItems => 'Todos';
+
+  @override
+  String get manual => 'Manual';
+
+  @override
+  String get generated => 'Generados';
+
+  @override
+  String get noShoppingItemsForFilter => 'No hay artículos para este filtro';
+
+  @override
+  String get noShoppingItemsForFilterSubtitle =>
+      'Prueba cambiando el filtro de compra.';
+
+  @override
+  String get owner => 'Propietario';
+
+  @override
+  String get admin => 'Admin';
+
+  @override
+  String get memberRole => 'Miembro';
+
+  @override
   String get appVersion => 'Versión';
 
   @override

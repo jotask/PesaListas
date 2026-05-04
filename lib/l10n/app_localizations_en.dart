@@ -1463,6 +1463,97 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutAppSubtitle => 'Shared planning for groups and households.';
 
   @override
+  String get clearAll => 'Clear all';
+
+  @override
+  String get clearAllShoppingItems => 'Clear all shopping items';
+
+  @override
+  String get clearAllShoppingItemsTitle => 'Clear all shopping items?';
+
+  @override
+  String get clearAllShoppingItemsMessage =>
+      'This will permanently remove every item from this shopping list.';
+
+  @override
+  String get allShoppingItemsCleared => 'Shopping list cleared';
+
+  @override
+  String get failedToClearAllShoppingItems => 'Failed to clear shopping list';
+
+  @override
+  String get searchRecipes => 'Search recipes';
+
+  @override
+  String get searchRecipesHint =>
+      'Search by name, description, or instructions';
+
+  @override
+  String get noRecipeResults => 'No recipes found';
+
+  @override
+  String get noRecipeResultsSubtitle => 'Try a different search term.';
+
+  @override
+  String get manualShoppingItems => 'Manual items';
+
+  @override
+  String get generatedShoppingItems => 'Generated from meal plans';
+
+  @override
+  String get allRecipes => 'All';
+
+  @override
+  String get recipesWithInstructions => 'With instructions';
+
+  @override
+  String get recipesMissingInstructions => 'Missing instructions';
+
+  @override
+  String get recipesWithTiming => 'With timing';
+
+  @override
+  String get noRecipesForFilter => 'No recipes match this filter';
+
+  @override
+  String get noRecipesForFilterSubtitle => 'Try changing the search or filter.';
+
+  @override
+  String get allMeals => 'All meals';
+
+  @override
+  String get noMealsForFilters => 'No meals match these filters';
+
+  @override
+  String get noMealsForFiltersSubtitle =>
+      'Try changing the date or meal type filter.';
+
+  @override
+  String get allShoppingItems => 'All';
+
+  @override
+  String get manual => 'Manual';
+
+  @override
+  String get generated => 'Generated';
+
+  @override
+  String get noShoppingItemsForFilter => 'No shopping items match this filter';
+
+  @override
+  String get noShoppingItemsForFilterSubtitle =>
+      'Try changing the shopping filter.';
+
+  @override
+  String get owner => 'Owner';
+
+  @override
+  String get admin => 'Admin';
+
+  @override
+  String get memberRole => 'Member';
+
+  @override
   String get appVersion => 'Version';
 
   @override

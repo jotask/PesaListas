@@ -67,6 +67,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool archivingList = false;
   bool clearingBoughtItems = false;
   bool deletingList = false;
+  bool clearingAllShoppingItems = false;
 
   List<Map<String, dynamic>> items = [];
   late Map<String, dynamic> currentList;
@@ -117,6 +118,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
       loadingRecipeDetails ||
       deletingRecipe ||
       generatingShopping ||
+      clearingAllShoppingItems ||
       archivingList ||
       deletingList ||
       editingList;
@@ -224,6 +226,42 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       setState(() => loadingItems = false);
       showErrorSnackBar(context, context.l10n.failedToLoadItems, error);
+    }
+  }
+
+  Future<void> clearAllShoppingItems() async {
+    if (clearingAllShoppingItems) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: context.l10n.clearAllShoppingItemsTitle,
+      message: context.l10n.clearAllShoppingItemsMessage,
+      deleteLabel: context.l10n.clearAll,
+    );
+
+    if (!confirmed) return;
+
+    setState(() => clearingAllShoppingItems = true);
+
+    try {
+      await shoppingRepository.clearAllItems(groupId);
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, context.l10n.allShoppingItemsCleared);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(
+        context,
+        context.l10n.failedToClearAllShoppingItems,
+        error,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => clearingAllShoppingItems = false);
+      }
     }
   }
 
@@ -1376,6 +1414,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
                     onGenerateShoppingFromMealPlans:
                         generateShoppingFromMealPlans,
                     onClearBoughtShoppingItems: clearBoughtShoppingItems,
+                    onClearAllShoppingItems: clearAllShoppingItems,
                   ),
                 ],
               ),

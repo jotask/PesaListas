@@ -24,6 +24,7 @@ class ListItemsSection extends StatefulWidget {
     required this.onDeleteRecipe,
     required this.onGenerateShoppingFromMealPlans,
     required this.onClearBoughtShoppingItems,
+    required this.onClearAllShoppingItems,
   });
 
   final String listType;
@@ -42,6 +43,7 @@ class ListItemsSection extends StatefulWidget {
   final void Function(String recipeId) onDeleteRecipe;
   final VoidCallback onGenerateShoppingFromMealPlans;
   final VoidCallback onClearBoughtShoppingItems;
+  final VoidCallback onClearAllShoppingItems;
 
   @override
   State<ListItemsSection> createState() => _ListItemsSectionState();
@@ -165,6 +167,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
             onDeleteRecipe: widget.onDeleteRecipe,
             onGenerateShoppingFromMealPlans:
                 widget.onGenerateShoppingFromMealPlans,
+            onClearAll: widget.onClearAllShoppingItems,
           ),
       ],
     );

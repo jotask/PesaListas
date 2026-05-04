@@ -333,7 +333,7 @@ class _PeoplePreview extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 6),
               child: Tooltip(
-                message: _MemberDisplay.nameFor(context, member),
+                message: _MemberDisplay.tooltipFor(context, member),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(999),
                   onTap: () => showMembers(context),
@@ -432,7 +432,13 @@ class _MemberManagementTile extends StatelessWidget {
       child: ListTile(
         leading: _TinyAvatar(name: name, avatarUrl: avatarUrl),
         title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: Text(context.l10n.roleLabel(role)),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: _RoleBadge(role: role),
+          ),
+        ),
         trailing: canManage
             ? PopupMenuButton<String>(
                 tooltip: context.l10n.manageMembers,
@@ -454,21 +460,107 @@ class _MemberManagementTile extends StatelessWidget {
                     if (canMakeAdmin)
                       PopupMenuItem(
                         value: 'make_admin',
-                        child: Text(context.l10n.makeAdmin),
+                        child: ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.admin_panel_settings_outlined,
+                          ),
+                          title: Text(context.l10n.makeAdmin),
+                        ),
                       ),
                     if (canMakeMember)
                       PopupMenuItem(
                         value: 'make_member',
-                        child: Text(context.l10n.makeMember),
+                        child: ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.person_outline),
+                          title: Text(context.l10n.makeMember),
+                        ),
                       ),
                     PopupMenuItem(
                       value: 'remove',
-                      child: Text(context.l10n.removeMember),
+                      child: ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.person_remove_outlined),
+                        title: Text(context.l10n.removeMember),
+                      ),
                     ),
                   ];
                 },
               )
             : null,
+      ),
+    );
+  }
+}
+
+class _RoleBadge extends StatelessWidget {
+  const _RoleBadge({required this.role});
+
+  final String role;
+
+  IconData get icon {
+    switch (role) {
+      case 'owner':
+        return Icons.workspace_premium_outlined;
+      case 'admin':
+        return Icons.admin_panel_settings_outlined;
+      default:
+        return Icons.person_outline;
+    }
+  }
+
+  Color backgroundColor(ColorScheme colorScheme) {
+    switch (role) {
+      case 'owner':
+        return colorScheme.primaryContainer;
+      case 'admin':
+        return colorScheme.secondaryContainer;
+      default:
+        return colorScheme.surfaceContainerHighest;
+    }
+  }
+
+  Color foregroundColor(ColorScheme colorScheme) {
+    switch (role) {
+      case 'owner':
+        return colorScheme.onPrimaryContainer;
+      case 'admin':
+        return colorScheme.onSecondaryContainer;
+      default:
+        return colorScheme.onSurfaceVariant;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final foreground = foregroundColor(colorScheme);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: backgroundColor(colorScheme),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: foreground),
+          const SizedBox(width: 5),
+          Text(
+            _MemberDisplay.roleLabel(context, role),
+            style: TextStyle(
+              color: foreground,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -535,6 +627,26 @@ class _MemberDisplay {
     }
 
     return null;
+  }
+
+  static String roleLabel(BuildContext context, String role) {
+    switch (role) {
+      case 'owner':
+        return context.l10n.owner;
+      case 'admin':
+        return context.l10n.admin;
+      case 'member':
+        return context.l10n.memberRole;
+      default:
+        return role;
+    }
+  }
+
+  static String tooltipFor(BuildContext context, Map<String, dynamic> member) {
+    final name = nameFor(context, member);
+    final role = member[AppMemberFields.role]?.toString() ?? 'member';
+
+    return '$name • ${roleLabel(context, role)}';
   }
 
   static String nameFor(BuildContext context, Map<String, dynamic> member) {

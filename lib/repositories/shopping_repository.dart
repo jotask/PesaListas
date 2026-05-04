@@ -67,6 +67,13 @@ class ShoppingRepository {
     return List<Map<String, dynamic>>.from(response);
   }
 
+  Future<void> clearAllItems(String groupId) async {
+    await _client
+        .from(AppTables.shoppingListItems)
+        .delete()
+        .eq(AppShoppingItemFields.groupId, groupId);
+  }
+
   Future<void> clearBoughtItems(String groupId) async {
     await _client
         .from(AppTables.shoppingListItems)

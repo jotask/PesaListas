@@ -2882,6 +2882,180 @@ abstract class AppLocalizations {
   /// **'Shared planning for groups and households.'**
   String get aboutAppSubtitle;
 
+  /// No description provided for @clearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get clearAll;
+
+  /// No description provided for @clearAllShoppingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all shopping items'**
+  String get clearAllShoppingItems;
+
+  /// No description provided for @clearAllShoppingItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all shopping items?'**
+  String get clearAllShoppingItemsTitle;
+
+  /// No description provided for @clearAllShoppingItemsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently remove every item from this shopping list.'**
+  String get clearAllShoppingItemsMessage;
+
+  /// No description provided for @allShoppingItemsCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list cleared'**
+  String get allShoppingItemsCleared;
+
+  /// No description provided for @failedToClearAllShoppingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clear shopping list'**
+  String get failedToClearAllShoppingItems;
+
+  /// No description provided for @searchRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Search recipes'**
+  String get searchRecipes;
+
+  /// No description provided for @searchRecipesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, description, or instructions'**
+  String get searchRecipesHint;
+
+  /// No description provided for @noRecipeResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found'**
+  String get noRecipeResults;
+
+  /// No description provided for @noRecipeResultsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term.'**
+  String get noRecipeResultsSubtitle;
+
+  /// No description provided for @manualShoppingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual items'**
+  String get manualShoppingItems;
+
+  /// No description provided for @generatedShoppingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated from meal plans'**
+  String get generatedShoppingItems;
+
+  /// No description provided for @allRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allRecipes;
+
+  /// No description provided for @recipesWithInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'With instructions'**
+  String get recipesWithInstructions;
+
+  /// No description provided for @recipesMissingInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing instructions'**
+  String get recipesMissingInstructions;
+
+  /// No description provided for @recipesWithTiming.
+  ///
+  /// In en, this message translates to:
+  /// **'With timing'**
+  String get recipesWithTiming;
+
+  /// No description provided for @noRecipesForFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes match this filter'**
+  String get noRecipesForFilter;
+
+  /// No description provided for @noRecipesForFilterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try changing the search or filter.'**
+  String get noRecipesForFilterSubtitle;
+
+  /// No description provided for @allMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'All meals'**
+  String get allMeals;
+
+  /// No description provided for @noMealsForFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No meals match these filters'**
+  String get noMealsForFilters;
+
+  /// No description provided for @noMealsForFiltersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try changing the date or meal type filter.'**
+  String get noMealsForFiltersSubtitle;
+
+  /// No description provided for @allShoppingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allShoppingItems;
+
+  /// No description provided for @manual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get manual;
+
+  /// No description provided for @generated.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated'**
+  String get generated;
+
+  /// No description provided for @noShoppingItemsForFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No shopping items match this filter'**
+  String get noShoppingItemsForFilter;
+
+  /// No description provided for @noShoppingItemsForFilterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try changing the shopping filter.'**
+  String get noShoppingItemsForFilterSubtitle;
+
+  /// No description provided for @owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get owner;
+
+  /// No description provided for @admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get admin;
+
+  /// No description provided for @memberRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get memberRole;
+
   /// No description provided for @appVersion.
   ///
   /// In en, this message translates to:

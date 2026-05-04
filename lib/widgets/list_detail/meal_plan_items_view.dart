@@ -29,6 +29,7 @@ class MealPlanItemsView extends StatefulWidget {
 
 class _MealPlanItemsViewState extends State<MealPlanItemsView> {
   MealPlanFilter selectedFilter = MealPlanFilter.all;
+  String? selectedMealType;
 
   DateTime get today {
     final now = DateTime.now();
@@ -55,6 +56,16 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
     return DateTime(parsed.year, parsed.month, parsed.day);
   }
 
+  String mealTypeFor(Map<String, dynamic> mealPlan) {
+    final value = mealPlan[AppMealPlanFields.mealType]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return AppMealTypes.dinner;
+    }
+
+    return value.trim();
+  }
+
   bool isUpcoming(Map<String, dynamic> mealPlan) {
     final date = plannedDateFor(mealPlan);
 
@@ -79,20 +90,36 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
     return date.isBefore(today);
   }
 
-  List<Map<String, dynamic>> get filteredMealPlans {
+  bool matchesDateFilter(Map<String, dynamic> mealPlan) {
     switch (selectedFilter) {
       case MealPlanFilter.all:
-        return widget.mealPlans;
+        return true;
 
       case MealPlanFilter.upcoming:
-        return widget.mealPlans.where(isUpcoming).toList();
+        return isUpcoming(mealPlan);
 
       case MealPlanFilter.thisWeek:
-        return widget.mealPlans.where(isThisWeek).toList();
+        return isThisWeek(mealPlan);
 
       case MealPlanFilter.past:
-        return widget.mealPlans.where(isPast).toList();
+        return isPast(mealPlan);
     }
+  }
+
+  bool matchesMealTypeFilter(Map<String, dynamic> mealPlan) {
+    final filter = selectedMealType;
+
+    if (filter == null) {
+      return true;
+    }
+
+    return mealTypeFor(mealPlan) == filter;
+  }
+
+  List<Map<String, dynamic>> get filteredMealPlans {
+    return widget.mealPlans.where((mealPlan) {
+      return matchesDateFilter(mealPlan) && matchesMealTypeFilter(mealPlan);
+    }).toList();
   }
 
   int get upcomingCount {
@@ -114,6 +141,16 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
     }).length;
   }
 
+  int countForMealType(String mealType) {
+    return widget.mealPlans.where((mealPlan) {
+      return mealTypeFor(mealPlan) == mealType;
+    }).length;
+  }
+
+  bool get hasActiveFilters {
+    return selectedFilter != MealPlanFilter.all || selectedMealType != null;
+  }
+
   Map<String, List<Map<String, dynamic>>> groupByDate(
     List<Map<String, dynamic>> mealPlans,
   ) {
@@ -133,6 +170,10 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
   }
 
   String emptyTitleForFilter() {
+    if (hasActiveFilters) {
+      return context.l10n.noMealsForFilters;
+    }
+
     switch (selectedFilter) {
       case MealPlanFilter.all:
         return context.l10n.noMealPlansYet;
@@ -149,6 +190,10 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
   }
 
   String emptySubtitleForFilter() {
+    if (hasActiveFilters) {
+      return context.l10n.noMealsForFiltersSubtitle;
+    }
+
     switch (selectedFilter) {
       case MealPlanFilter.all:
         return context.l10n.planYourFirstMeal;
@@ -162,6 +207,21 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
       case MealPlanFilter.past:
         return context.l10n.pastMealsWillAppearHere;
     }
+  }
+
+  void selectDateFilter(MealPlanFilter filter) {
+    setState(() => selectedFilter = filter);
+  }
+
+  void selectMealType(String? mealType) {
+    setState(() => selectedMealType = mealType);
+  }
+
+  void clearFilters() {
+    setState(() {
+      selectedFilter = MealPlanFilter.all;
+      selectedMealType = null;
+    });
   }
 
   @override
@@ -193,9 +253,14 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
             upcomingCount: upcomingCount,
             thisWeekCount: thisWeekCount,
             pastCount: pastCount,
-            onSelected: (filter) {
-              setState(() => selectedFilter = filter);
-            },
+            onSelected: selectDateFilter,
+          ),
+          const SizedBox(height: 8),
+          _MealTypeFilterChips(
+            selectedMealType: selectedMealType,
+            totalCount: widget.mealPlans.length,
+            countForMealType: countForMealType,
+            onSelected: selectMealType,
           ),
           const SizedBox(height: 12),
         ],
@@ -204,7 +269,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
             icon: Icons.event_note_outlined,
             title: emptyTitleForFilter(),
             subtitle: emptySubtitleForFilter(),
-            onCreate: widget.onCreate,
+            onCreate: hasActiveFilters ? clearFilters : widget.onCreate,
           )
         else
           for (final entry in groupedMealPlans.entries)
@@ -264,6 +329,44 @@ class _MealPlanFilterChips extends StatelessWidget {
           label: Text(context.l10n.pastCount(pastCount)),
           onSelected: (_) => onSelected(MealPlanFilter.past),
         ),
+      ],
+    );
+  }
+}
+
+class _MealTypeFilterChips extends StatelessWidget {
+  const _MealTypeFilterChips({
+    required this.selectedMealType,
+    required this.totalCount,
+    required this.countForMealType,
+    required this.onSelected,
+  });
+
+  final String? selectedMealType;
+  final int totalCount;
+  final int Function(String mealType) countForMealType;
+  final void Function(String? mealType) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        FilterChip(
+          selected: selectedMealType == null,
+          label: Text('${context.l10n.allMeals} $totalCount'),
+          onSelected: (_) => onSelected(null),
+        ),
+        for (final config in AppMealTypes.all)
+          FilterChip(
+            selected: selectedMealType == config.value,
+            avatar: Icon(config.icon, size: 16),
+            label: Text(
+              '${config.label(context)} ${countForMealType(config.value)}',
+            ),
+            onSelected: (_) => onSelected(config.value),
+          ),
       ],
     );
   }
