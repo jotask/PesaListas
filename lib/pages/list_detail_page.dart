@@ -64,6 +64,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool deletingRecipe = false;
   bool generatingShopping = false;
   bool editingList = false;
+  bool archivingList = false;
+  bool deletingList = false;
 
   List<Map<String, dynamic>> items = [];
   late Map<String, dynamic> currentList;
@@ -113,6 +115,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
       loadingRecipeDetails ||
       deletingRecipe ||
       generatingShopping ||
+      archivingList ||
+      deletingList ||
       editingList;
 
   @override
@@ -221,8 +225,72 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> archiveList() async {
+    if (archivingList) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: context.l10n.archiveListTitle,
+      message: context.l10n.archiveListMessage,
+      deleteLabel: context.l10n.archive,
+    );
+
+    if (!confirmed) return;
+
+    setState(() => archivingList = true);
+
+    try {
+      await listRepository.archiveList(listId);
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, context.l10n.listArchived);
+      Navigator.of(context).maybePop();
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, context.l10n.failedToArchiveList, error);
+    } finally {
+      if (mounted) {
+        setState(() => archivingList = false);
+      }
+    }
+  }
+
+  Future<void> deleteList() async {
+    if (deletingList) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: context.l10n.deleteListTitle,
+      message: context.l10n.deleteListMessage,
+      deleteLabel: context.l10n.deleteList,
+    );
+
+    if (!confirmed) return;
+
+    setState(() => deletingList = true);
+
+    try {
+      await listRepository.deleteList(listId);
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, context.l10n.listDeleted);
+      Navigator.of(context).maybePop();
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, context.l10n.failedToDeleteList, error);
+    } finally {
+      if (mounted) {
+        setState(() => deletingList = false);
+      }
+    }
+  }
+
   Future<void> editList() async {
-    if (editingList) return;
+    if (editingList || archivingList || deletingList) return;
 
     final result = await showDialog<EditListDialogResult>(
       context: context,
@@ -231,12 +299,29 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     if (result == null) return;
 
+    switch (result.action) {
+      case EditListDialogAction.archive:
+        await archiveList();
+        return;
+
+      case EditListDialogAction.delete:
+        await deleteList();
+        return;
+
+      case EditListDialogAction.save:
+        break;
+    }
+
+    final name = result.name?.trim();
+
+    if (name == null || name.isEmpty) return;
+
     setState(() => editingList = true);
 
     try {
       await listRepository.updateListInfo(
         listId: listId,
-        name: result.name,
+        name: name,
         description: result.description,
       );
 
@@ -245,7 +330,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
       setState(() {
         currentList = {
           ...currentList,
-          AppListFields.name: result.name,
+          AppListFields.name: name,
           AppListFields.description: result.description,
         };
       });

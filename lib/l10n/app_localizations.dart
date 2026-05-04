@@ -2564,6 +2564,78 @@ abstract class AppLocalizations {
   /// **'Failed to update list'**
   String get failedToUpdateList;
 
+  /// No description provided for @archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get archive;
+
+  /// No description provided for @archiveList.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive list'**
+  String get archiveList;
+
+  /// No description provided for @archiveListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive list?'**
+  String get archiveListTitle;
+
+  /// No description provided for @archiveListMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This list will be hidden from the group, but its data will remain in the database.'**
+  String get archiveListMessage;
+
+  /// No description provided for @listArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'List archived'**
+  String get listArchived;
+
+  /// No description provided for @failedToArchiveList.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to archive list'**
+  String get failedToArchiveList;
+
+  /// No description provided for @deleteList.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete list'**
+  String get deleteList;
+
+  /// No description provided for @deleteListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete list?'**
+  String get deleteListTitle;
+
+  /// No description provided for @deleteListMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete this list. This cannot be undone.'**
+  String get deleteListMessage;
+
+  /// No description provided for @listDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'List deleted'**
+  String get listDeleted;
+
+  /// No description provided for @failedToDeleteList.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete list'**
+  String get failedToDeleteList;
+
+  /// No description provided for @dangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger zone'**
+  String get dangerZone;
+
   /// No description provided for @listTypeCannotBeChangedYet.
   ///
   /// In en, this message translates to:

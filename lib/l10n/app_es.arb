@@ -419,6 +419,18 @@
   "listUpdated": "Lista actualizada",
   "failedToUpdateList": "No se pudo actualizar la lista",
   "listTypeCannotBeChangedYet": "El tipo de lista todavía no se puede cambiar",
+  "archive": "Archivar",
+  "archiveList": "Archivar lista",
+  "archiveListTitle": "¿Archivar lista?",
+  "archiveListMessage": "Esta lista se ocultará del grupo, pero sus datos permanecerán en la base de datos.",
+  "listArchived": "Lista archivada",
+  "failedToArchiveList": "No se pudo archivar la lista",
+  "deleteList": "Eliminar lista",
+  "deleteListTitle": "¿Eliminar lista?",
+  "deleteListMessage": "Esto eliminará permanentemente esta lista. No se puede deshacer.",
+  "listDeleted": "Lista eliminada",
+  "failedToDeleteList": "No se pudo eliminar la lista",
+  "dangerZone": "Zona de peligro",
   "addListTypeItem": "Añadir elemento de {listType}",
   "@addListTypeItem": {
     "placeholders": {

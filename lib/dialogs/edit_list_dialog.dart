@@ -3,10 +3,17 @@ import 'package:pesalistas/core/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 
-class EditListDialogResult {
-  const EditListDialogResult({required this.name, this.description});
+enum EditListDialogAction { save, archive, delete }
 
-  final String name;
+class EditListDialogResult {
+  const EditListDialogResult({
+    required this.action,
+    this.name,
+    this.description,
+  });
+
+  final EditListDialogAction action;
+  final String? name;
   final String? description;
 }
 
@@ -67,15 +74,29 @@ class _EditListDialogState extends State<EditListDialog> {
 
     Navigator.of(context).pop(
       EditListDialogResult(
+        action: EditListDialogAction.save,
         name: name,
         description: description.isEmpty ? null : description,
       ),
     );
   }
 
+  void archive() {
+    Navigator.of(
+      context,
+    ).pop(const EditListDialogResult(action: EditListDialogAction.archive));
+  }
+
+  void delete() {
+    Navigator.of(
+      context,
+    ).pop(const EditListDialogResult(action: EditListDialogAction.delete));
+  }
+
   @override
   Widget build(BuildContext context) {
     final listConfig = config;
+    final theme = Theme.of(context);
 
     return AlertDialog(
       title: Text(context.l10n.editList),
@@ -130,7 +151,38 @@ class _EditListDialogState extends State<EditListDialog> {
             const SizedBox(height: 8),
             Text(
               context.l10n.listTypeCannotBeChangedYet,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                context.l10n.dangerZone,
+                style: TextStyle(
+                  color: theme.colorScheme.error,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: archive,
+                    icon: const Icon(Icons.archive_outlined),
+                    label: Text(context.l10n.archive),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  onPressed: delete,
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: context.l10n.deleteList,
+                  color: theme.colorScheme.error,
+                ),
+              ],
             ),
             if (validationMessage != null) ...[
               const SizedBox(height: 12),
@@ -141,9 +193,7 @@ class _EditListDialogState extends State<EditListDialog> {
                   Expanded(
                     child: Text(
                       validationMessage!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                      style: TextStyle(color: theme.colorScheme.error),
                     ),
                   ),
                 ],

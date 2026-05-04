@@ -12,9 +12,23 @@ class ListRepository {
         .from(AppTables.lists)
         .select()
         .eq(AppListFields.groupId, groupId)
-        .order(AppListFields.createdAt);
+        .filter(AppListFields.archivedAt, 'is', null)
+        .order(AppListFields.createdAt, ascending: true);
 
     return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<void> createList({
+    required String groupId,
+    required String name,
+    required String listType,
+  }) async {
+    await _client.from(AppTables.lists).insert({
+      AppListFields.groupId: groupId,
+      AppListFields.name: name,
+      AppListFields.listType: listType,
+      AppListFields.createdBy: _client.auth.currentUser!.id,
+    });
   }
 
   Future<void> updateListInfo({
@@ -31,16 +45,16 @@ class ListRepository {
         .eq(AppListFields.id, listId);
   }
 
-  Future<void> createList({
-    required String groupId,
-    required String name,
-    required String listType,
-  }) async {
-    await _client.from(AppTables.lists).insert({
-      AppListFields.groupId: groupId,
-      AppListFields.name: name,
-      AppListFields.listType: listType,
-      AppListFields.createdBy: _client.auth.currentUser!.id,
-    });
+  Future<void> archiveList(String listId) async {
+    await _client
+        .from(AppTables.lists)
+        .update({
+          AppListFields.archivedAt: DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq(AppListFields.id, listId);
+  }
+
+  Future<void> deleteList(String listId) async {
+    await _client.from(AppTables.lists).delete().eq(AppListFields.id, listId);
   }
 }

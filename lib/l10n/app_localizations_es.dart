@@ -1308,6 +1308,44 @@ class AppLocalizationsEs extends AppLocalizations {
   String get failedToUpdateList => 'No se pudo actualizar la lista';
 
   @override
+  String get archive => 'Archivar';
+
+  @override
+  String get archiveList => 'Archivar lista';
+
+  @override
+  String get archiveListTitle => '¿Archivar lista?';
+
+  @override
+  String get archiveListMessage =>
+      'Esta lista se ocultará del grupo, pero sus datos permanecerán en la base de datos.';
+
+  @override
+  String get listArchived => 'Lista archivada';
+
+  @override
+  String get failedToArchiveList => 'No se pudo archivar la lista';
+
+  @override
+  String get deleteList => 'Eliminar lista';
+
+  @override
+  String get deleteListTitle => '¿Eliminar lista?';
+
+  @override
+  String get deleteListMessage =>
+      'Esto eliminará permanentemente esta lista. No se puede deshacer.';
+
+  @override
+  String get listDeleted => 'Lista eliminada';
+
+  @override
+  String get failedToDeleteList => 'No se pudo eliminar la lista';
+
+  @override
+  String get dangerZone => 'Zona de peligro';
+
+  @override
   String get listTypeCannotBeChangedYet =>
       'El tipo de lista todavía no se puede cambiar';
 

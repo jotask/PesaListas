@@ -1290,6 +1290,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToUpdateList => 'Failed to update list';
 
   @override
+  String get archive => 'Archive';
+
+  @override
+  String get archiveList => 'Archive list';
+
+  @override
+  String get archiveListTitle => 'Archive list?';
+
+  @override
+  String get archiveListMessage =>
+      'This list will be hidden from the group, but its data will remain in the database.';
+
+  @override
+  String get listArchived => 'List archived';
+
+  @override
+  String get failedToArchiveList => 'Failed to archive list';
+
+  @override
+  String get deleteList => 'Delete list';
+
+  @override
+  String get deleteListTitle => 'Delete list?';
+
+  @override
+  String get deleteListMessage =>
+      'This will permanently delete this list. This cannot be undone.';
+
+  @override
+  String get listDeleted => 'List deleted';
+
+  @override
+  String get failedToDeleteList => 'Failed to delete list';
+
+  @override
+  String get dangerZone => 'Danger zone';
+
+  @override
   String get listTypeCannotBeChangedYet => 'List type cannot be changed yet';
 
   @override
