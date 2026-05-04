@@ -4,6 +4,7 @@ import 'package:pesalistas/core/app_locale_controller.dart';
 import 'package:pesalistas/pages/splash_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/l10n/app_localizations.dart';
+import 'package:pesalistas/core/app_notification_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,8 @@ Future<void> main() async {
   );
   await AppLocaleController.loadSavedLocale();
   await AppThemeController.loadSavedThemeMode();
+  await AppNotificationController.initialize();
+
   runApp(const PesaListas());
 }
 

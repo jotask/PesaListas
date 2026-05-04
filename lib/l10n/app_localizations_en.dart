@@ -1545,6 +1545,38 @@ class AppLocalizationsEn extends AppLocalizations {
       'Try changing the shopping filter.';
 
   @override
+  String get enableNotifications => 'Enable notifications';
+
+  @override
+  String get enableNotificationsSubtitle =>
+      'Allow PesaListas to use notification reminders.';
+
+  @override
+  String get choreReminderNotifications => 'Chore reminders';
+
+  @override
+  String get choreReminderNotificationsSubtitle =>
+      'Remind me about recurring chores.';
+
+  @override
+  String get mealPlanReminderNotifications => 'Meal plan reminders';
+
+  @override
+  String get mealPlanReminderNotificationsSubtitle =>
+      'Remind me about planned meals.';
+
+  @override
+  String get shoppingReminderNotifications => 'Shopping reminders';
+
+  @override
+  String get shoppingReminderNotificationsSubtitle =>
+      'Remind me about shopping list activity.';
+
+  @override
+  String get notificationPreferencesStoredOnDevice =>
+      'Notification preferences are stored on this device.';
+
+  @override
   String get owner => 'Owner';
 
   @override

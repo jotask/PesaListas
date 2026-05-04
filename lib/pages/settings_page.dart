@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pesalistas/core/app_locale_controller.dart';
+import 'package:pesalistas/core/app_notification_controller.dart';
 import 'package:pesalistas/core/app_theme_controller.dart';
 import 'package:pesalistas/core/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
@@ -397,10 +398,6 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  void showComingSoon(String feature) {
-    showInfoSnackBar(context, context.l10n.comingSoonMessage(feature));
-  }
-
   @override
   Widget build(BuildContext context) {
     final busy =
@@ -412,113 +409,108 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           if (busy) const LinearProgressIndicator(),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: loadProfile,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _ProfileHeaderCard(
-                    displayName: displayName,
-                    email: userEmail,
-                    avatarUrl: avatarUrl,
-                    initials: initials,
-                    loading: loadingProfile,
-                    onEdit: editingProfile ? null : editProfile,
-                  ),
-                  const SizedBox(height: 16),
-                  _SettingsSection(
-                    title: context.l10n.profileSectionTitle,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.person_outline),
-                        title: Text(context.l10n.profileEditDisplayNameTitle),
-                        subtitle: Text(
-                          context.l10n.profileEditDisplayNameSubtitle,
+            child: SafeArea(
+              top: false,
+              child: RefreshIndicator(
+                onRefresh: loadProfile,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _ProfileHeaderCard(
+                      displayName: displayName,
+                      email: userEmail,
+                      avatarUrl: avatarUrl,
+                      initials: initials,
+                      loading: loadingProfile,
+                      onEdit: editingProfile ? null : editProfile,
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsSection(
+                      title: context.l10n.profileSectionTitle,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.person_outline),
+                          title: Text(context.l10n.profileEditDisplayNameTitle),
+                          subtitle: Text(
+                            context.l10n.profileEditDisplayNameSubtitle,
+                          ),
+                          trailing: editingProfile
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.chevron_right),
+                          onTap: editingProfile ? null : editProfile,
                         ),
-                        trailing: editingProfile
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.chevron_right),
-                        onTap: editingProfile ? null : editProfile,
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.sync),
-                        title: Text(context.l10n.profileSyncTitle),
-                        subtitle: Text(context.l10n.profileSyncSubtitle),
-                        trailing: syncingProfile
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.chevron_right),
-                        onTap: syncingProfile ? null : syncProfile,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _SettingsSection(
-                    title: context.l10n.preferencesSectionTitle,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.language_outlined),
-                        title: Text(context.l10n.languageTitle),
-                        subtitle: Text(languageSubtitle),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: chooseLanguage,
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.dark_mode_outlined),
-                        title: Text(context.l10n.themeTitle),
-                        subtitle: Text(themeSubtitle),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: chooseTheme,
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.notifications_none_outlined),
-                        title: Text(context.l10n.notificationsTitle),
-                        subtitle: Text(context.l10n.notificationsSubtitle),
-                        trailing: const _ComingSoonPill(),
-                        onTap: () => showComingSoon(
-                          context.l10n.notificationSettingsFeature,
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.sync),
+                          title: Text(context.l10n.profileSyncTitle),
+                          subtitle: Text(context.l10n.profileSyncSubtitle),
+                          trailing: syncingProfile
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.chevron_right),
+                          onTap: syncingProfile ? null : syncProfile,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _AboutSection(packageInfoFuture: packageInfoFuture),
-                  const SizedBox(height: 16),
-                  _SettingsSection(
-                    title: context.l10n.accountSectionTitle,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.logout),
-                        title: Text(context.l10n.signOutTitle),
-                        subtitle: Text(context.l10n.signOutSubtitle),
-                        trailing: signingOut
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.chevron_right),
-                        onTap: signingOut ? null : signOut,
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsSection(
+                      title: context.l10n.preferencesSectionTitle,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.language_outlined),
+                          title: Text(context.l10n.languageTitle),
+                          subtitle: Text(languageSubtitle),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: chooseLanguage,
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.dark_mode_outlined),
+                          title: Text(context.l10n.themeTitle),
+                          subtitle: Text(themeSubtitle),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: chooseTheme,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const _NotificationsSection(),
+                    const SizedBox(height: 16),
+                    _AboutSection(packageInfoFuture: packageInfoFuture),
+                    const SizedBox(height: 16),
+                    _SettingsSection(
+                      title: context.l10n.accountSectionTitle,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.logout),
+                          title: Text(context.l10n.signOutTitle),
+                          subtitle: Text(context.l10n.signOutSubtitle),
+                          trailing: signingOut
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.chevron_right),
+                          onTap: signingOut ? null : signOut,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -631,31 +623,6 @@ class _SettingsSection extends StatelessWidget {
   }
 }
 
-class _ComingSoonPill extends StatelessWidget {
-  const _ComingSoonPill();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        context.l10n.comingSoon,
-        style: TextStyle(
-          color: theme.colorScheme.onSurfaceVariant,
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-}
-
 class _AboutSection extends StatelessWidget {
   const _AboutSection({required this.packageInfoFuture});
 
@@ -687,6 +654,72 @@ class _AboutSection extends StatelessWidget {
               leading: const Icon(Icons.numbers_outlined),
               title: Text(context.l10n.buildNumber),
               subtitle: Text(packageInfo?.buildNumber ?? '—'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _NotificationsSection extends StatelessWidget {
+  const _NotificationsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<AppNotificationPreferences>(
+      valueListenable: AppNotificationController.preferences,
+      builder: (context, preferences, _) {
+        final enabled = preferences.enabled;
+
+        return _SettingsSection(
+          title: context.l10n.notificationsTitle,
+          children: [
+            SwitchListTile(
+              secondary: const Icon(Icons.notifications_active_outlined),
+              title: Text(context.l10n.enableNotifications),
+              subtitle: Text(context.l10n.enableNotificationsSubtitle),
+              value: preferences.enabled,
+              onChanged: AppNotificationController.setEnabled,
+            ),
+            const Divider(height: 1),
+            SwitchListTile(
+              secondary: const Icon(Icons.cleaning_services_outlined),
+              title: Text(context.l10n.choreReminderNotifications),
+              subtitle: Text(context.l10n.choreReminderNotificationsSubtitle),
+              value: preferences.choreReminders,
+              onChanged: enabled
+                  ? AppNotificationController.setChoreReminders
+                  : null,
+            ),
+            const Divider(height: 1),
+            SwitchListTile(
+              secondary: const Icon(Icons.restaurant_menu_outlined),
+              title: Text(context.l10n.mealPlanReminderNotifications),
+              subtitle: Text(
+                context.l10n.mealPlanReminderNotificationsSubtitle,
+              ),
+              value: preferences.mealPlanReminders,
+              onChanged: enabled
+                  ? AppNotificationController.setMealPlanReminders
+                  : null,
+            ),
+            const Divider(height: 1),
+            SwitchListTile(
+              secondary: const Icon(Icons.shopping_cart_outlined),
+              title: Text(context.l10n.shoppingReminderNotifications),
+              subtitle: Text(
+                context.l10n.shoppingReminderNotificationsSubtitle,
+              ),
+              value: preferences.shoppingReminders,
+              onChanged: enabled
+                  ? AppNotificationController.setShoppingReminders
+                  : null,
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(context.l10n.notificationPreferencesStoredOnDevice),
             ),
           ],
         );

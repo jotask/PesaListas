@@ -1572,6 +1572,38 @@ class AppLocalizationsEs extends AppLocalizations {
       'Prueba cambiando el filtro de compra.';
 
   @override
+  String get enableNotifications => 'Activar notificaciones';
+
+  @override
+  String get enableNotificationsSubtitle =>
+      'Permitir que PesaListas use recordatorios.';
+
+  @override
+  String get choreReminderNotifications => 'Recordatorios de tareas del hogar';
+
+  @override
+  String get choreReminderNotificationsSubtitle =>
+      'Recordarme las tareas recurrentes.';
+
+  @override
+  String get mealPlanReminderNotifications => 'Recordatorios de menús';
+
+  @override
+  String get mealPlanReminderNotificationsSubtitle =>
+      'Recordarme las comidas planificadas.';
+
+  @override
+  String get shoppingReminderNotifications => 'Recordatorios de compra';
+
+  @override
+  String get shoppingReminderNotificationsSubtitle =>
+      'Recordarme actividad de la lista de la compra.';
+
+  @override
+  String get notificationPreferencesStoredOnDevice =>
+      'Las preferencias de notificaciones se guardan en este dispositivo.';
+
+  @override
   String get owner => 'Propietario';
 
   @override

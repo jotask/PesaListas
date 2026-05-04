@@ -3038,6 +3038,60 @@ abstract class AppLocalizations {
   /// **'Try changing the shopping filter.'**
   String get noShoppingItemsForFilterSubtitle;
 
+  /// No description provided for @enableNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable notifications'**
+  String get enableNotifications;
+
+  /// No description provided for @enableNotificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow PesaListas to use notification reminders.'**
+  String get enableNotificationsSubtitle;
+
+  /// No description provided for @choreReminderNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Chore reminders'**
+  String get choreReminderNotifications;
+
+  /// No description provided for @choreReminderNotificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me about recurring chores.'**
+  String get choreReminderNotificationsSubtitle;
+
+  /// No description provided for @mealPlanReminderNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal plan reminders'**
+  String get mealPlanReminderNotifications;
+
+  /// No description provided for @mealPlanReminderNotificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me about planned meals.'**
+  String get mealPlanReminderNotificationsSubtitle;
+
+  /// No description provided for @shoppingReminderNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping reminders'**
+  String get shoppingReminderNotifications;
+
+  /// No description provided for @shoppingReminderNotificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me about shopping list activity.'**
+  String get shoppingReminderNotificationsSubtitle;
+
+  /// No description provided for @notificationPreferencesStoredOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification preferences are stored on this device.'**
+  String get notificationPreferencesStoredOnDevice;
+
   /// No description provided for @owner.
   ///
   /// In en, this message translates to:
