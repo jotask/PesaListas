@@ -7,6 +7,25 @@ import 'package:pesalistas/l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    final message = details.exceptionAsString();
+
+    final isOverflow =
+        message.contains('A RenderFlex overflowed') ||
+        message.contains('A RenderViewport overflowed') ||
+        message.contains('overflowed by');
+
+    if (isOverflow) {
+      debugPrint('================ UI OVERFLOW DETECTED ================');
+      debugPrint(message);
+      debugPrintStack(stackTrace: details.stack);
+      debugPrint('=======================================================');
+    }
+
+    FlutterError.presentError(details);
+  };
+
   await Supabase.initialize(
     url: '***REMOVED***',
     anonKey: '***REMOVED***',
