@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/create_group_dialog.dart';
 import 'package:pesalistas/pages/auth_page.dart';
+import 'package:pesalistas/pages/settings_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/group_repository.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
@@ -171,9 +172,13 @@ class _HomePageState extends State<HomePage> {
         title: const Text('My groups'),
         actions: [
           IconButton(
-            onPressed: signingOut ? null : signOut,
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sign out',
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
+            },
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
           ),
         ],
       ),

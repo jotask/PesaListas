@@ -99,6 +99,41 @@ class ProfileRepository {
     }
   }
 
+  Future<Map<String, dynamic>?> updateCurrentProfileDisplayName({
+    required String displayName,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+
+    if (userId == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await _client
+        .from(AppTables.profiles)
+        .update({AppProfileFields.displayName: displayName})
+        .eq(AppProfileFields.id, userId)
+        .select()
+        .maybeSingle();
+
+    return response;
+  }
+
+  Future<Map<String, dynamic>?> getCurrentProfile() async {
+    final userId = _client.auth.currentUser?.id;
+
+    if (userId == null) {
+      return null;
+    }
+
+    final response = await _client
+        .from(AppTables.profiles)
+        .select()
+        .eq(AppProfileFields.id, userId)
+        .maybeSingle();
+
+    return response;
+  }
+
   String? _firstNonEmpty(List<dynamic> values) {
     for (final value in values) {
       if (value == null) continue;
