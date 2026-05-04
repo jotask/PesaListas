@@ -176,15 +176,19 @@ class _SettingsPageState extends State<SettingsPage> {
 
     switch (selected) {
       case 'system':
-        AppLocaleController.useSystem();
+        await AppLocaleController.useSystem();
         break;
       case 'en':
-        AppLocaleController.useEnglish();
+        await AppLocaleController.useEnglish();
         break;
       case 'es':
-        AppLocaleController.useSpanish();
+        await AppLocaleController.useSpanish();
         break;
     }
+
+    if (!mounted) return;
+
+    setState(() {});
   }
 
   Future<void> loadProfile() async {

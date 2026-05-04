@@ -11,6 +11,7 @@ Future<void> main() async {
     url: '***REMOVED***',
     anonKey: '***REMOVED***',
   );
+  await AppLocaleController.loadSavedLocale();
   runApp(const PesaListas());
 }
 
