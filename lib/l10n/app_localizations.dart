@@ -2648,6 +2648,186 @@ abstract class AppLocalizations {
   /// **'Add {listType} item'**
   String addListTypeItem(Object listType);
 
+  /// No description provided for @archivedLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived lists'**
+  String get archivedLists;
+
+  /// No description provided for @archivedListsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore archived lists or permanently delete them.'**
+  String get archivedListsSubtitle;
+
+  /// No description provided for @noArchivedListsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No archived lists yet'**
+  String get noArchivedListsYet;
+
+  /// No description provided for @noArchivedListsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived lists will appear here.'**
+  String get noArchivedListsSubtitle;
+
+  /// No description provided for @restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// No description provided for @restoreList.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore list'**
+  String get restoreList;
+
+  /// No description provided for @restoreListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore list?'**
+  String get restoreListTitle;
+
+  /// No description provided for @restoreListMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This list will appear again in the group.'**
+  String get restoreListMessage;
+
+  /// No description provided for @listRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'List restored'**
+  String get listRestored;
+
+  /// No description provided for @failedToLoadArchivedLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load archived lists'**
+  String get failedToLoadArchivedLists;
+
+  /// No description provided for @failedToRestoreList.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore list'**
+  String get failedToRestoreList;
+
+  /// No description provided for @members.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get members;
+
+  /// No description provided for @removeMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member'**
+  String get removeMember;
+
+  /// No description provided for @removeMemberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member?'**
+  String get removeMemberTitle;
+
+  /// No description provided for @removeMemberMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {memberName} from this group?'**
+  String removeMemberMessage(Object memberName);
+
+  /// No description provided for @memberRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Member removed'**
+  String get memberRemoved;
+
+  /// No description provided for @failedToRemoveMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove member'**
+  String get failedToRemoveMember;
+
+  /// No description provided for @cannotRemoveYourself.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot remove yourself'**
+  String get cannotRemoveYourself;
+
+  /// No description provided for @ownersCannotBeRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Owners cannot be removed'**
+  String get ownersCannotBeRemoved;
+
+  /// No description provided for @roleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role: {role}'**
+  String roleLabel(Object role);
+
+  /// No description provided for @manageMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage members'**
+  String get manageMembers;
+
+  /// No description provided for @makeAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Make admin'**
+  String get makeAdmin;
+
+  /// No description provided for @makeMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Make member'**
+  String get makeMember;
+
+  /// No description provided for @changeRoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change role?'**
+  String get changeRoleTitle;
+
+  /// No description provided for @changeRoleToAdminMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Make {memberName} an admin of this group?'**
+  String changeRoleToAdminMessage(Object memberName);
+
+  /// No description provided for @changeRoleToMemberMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Change {memberName} back to member?'**
+  String changeRoleToMemberMessage(Object memberName);
+
+  /// No description provided for @memberRoleUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Member role updated'**
+  String get memberRoleUpdated;
+
+  /// No description provided for @failedToUpdateMemberRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update member role'**
+  String get failedToUpdateMemberRole;
+
+  /// No description provided for @onlyOwnersCanChangeRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Only owners can change member roles'**
+  String get onlyOwnersCanChangeRoles;
+
+  /// No description provided for @ownerRoleCannotBeChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner role cannot be changed'**
+  String get ownerRoleCannotBeChanged;
+
   /// No description provided for @deadlineDate.
   ///
   /// In en, this message translates to:
@@ -2707,12 +2887,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invited as {role}'**
   String invitedAsRole(Object role);
-
-  /// No description provided for @roleLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Role: {role}'**
-  String roleLabel(Object role);
 
   /// No description provided for @allCount.
   ///

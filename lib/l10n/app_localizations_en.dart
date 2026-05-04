@@ -1336,6 +1336,105 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get archivedLists => 'Archived lists';
+
+  @override
+  String get archivedListsSubtitle =>
+      'Restore archived lists or permanently delete them.';
+
+  @override
+  String get noArchivedListsYet => 'No archived lists yet';
+
+  @override
+  String get noArchivedListsSubtitle => 'Archived lists will appear here.';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String get restoreList => 'Restore list';
+
+  @override
+  String get restoreListTitle => 'Restore list?';
+
+  @override
+  String get restoreListMessage => 'This list will appear again in the group.';
+
+  @override
+  String get listRestored => 'List restored';
+
+  @override
+  String get failedToLoadArchivedLists => 'Failed to load archived lists';
+
+  @override
+  String get failedToRestoreList => 'Failed to restore list';
+
+  @override
+  String get members => 'Members';
+
+  @override
+  String get removeMember => 'Remove member';
+
+  @override
+  String get removeMemberTitle => 'Remove member?';
+
+  @override
+  String removeMemberMessage(Object memberName) {
+    return 'Remove $memberName from this group?';
+  }
+
+  @override
+  String get memberRemoved => 'Member removed';
+
+  @override
+  String get failedToRemoveMember => 'Failed to remove member';
+
+  @override
+  String get cannotRemoveYourself => 'You cannot remove yourself';
+
+  @override
+  String get ownersCannotBeRemoved => 'Owners cannot be removed';
+
+  @override
+  String roleLabel(Object role) {
+    return 'Role: $role';
+  }
+
+  @override
+  String get manageMembers => 'Manage members';
+
+  @override
+  String get makeAdmin => 'Make admin';
+
+  @override
+  String get makeMember => 'Make member';
+
+  @override
+  String get changeRoleTitle => 'Change role?';
+
+  @override
+  String changeRoleToAdminMessage(Object memberName) {
+    return 'Make $memberName an admin of this group?';
+  }
+
+  @override
+  String changeRoleToMemberMessage(Object memberName) {
+    return 'Change $memberName back to member?';
+  }
+
+  @override
+  String get memberRoleUpdated => 'Member role updated';
+
+  @override
+  String get failedToUpdateMemberRole => 'Failed to update member role';
+
+  @override
+  String get onlyOwnersCanChangeRoles => 'Only owners can change member roles';
+
+  @override
+  String get ownerRoleCannotBeChanged => 'Owner role cannot be changed';
+
+  @override
   String deadlineDate(Object date) {
     return 'Deadline: $date';
   }
@@ -1379,11 +1478,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String invitedAsRole(Object role) {
     return 'Invited as $role';
-  }
-
-  @override
-  String roleLabel(Object role) {
-    return 'Role: $role';
   }
 
   @override

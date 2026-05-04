@@ -18,6 +18,19 @@ class ListRepository {
     return List<Map<String, dynamic>>.from(response);
   }
 
+  Future<List<Map<String, dynamic>>> getArchivedListsForGroup(
+    String groupId,
+  ) async {
+    final response = await _client
+        .from(AppTables.lists)
+        .select()
+        .eq(AppListFields.groupId, groupId)
+        .not(AppListFields.archivedAt, 'is', null)
+        .order(AppListFields.archivedAt, ascending: false);
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
   Future<void> createList({
     required String groupId,
     required String name,
@@ -51,6 +64,13 @@ class ListRepository {
         .update({
           AppListFields.archivedAt: DateTime.now().toUtc().toIso8601String(),
         })
+        .eq(AppListFields.id, listId);
+  }
+
+  Future<void> restoreList(String listId) async {
+    await _client
+        .from(AppTables.lists)
+        .update({AppListFields.archivedAt: null})
         .eq(AppListFields.id, listId);
   }
 

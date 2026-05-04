@@ -1355,6 +1355,109 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get archivedLists => 'Listas archivadas';
+
+  @override
+  String get archivedListsSubtitle =>
+      'Restaura listas archivadas o elimínalas permanentemente.';
+
+  @override
+  String get noArchivedListsYet => 'No hay listas archivadas';
+
+  @override
+  String get noArchivedListsSubtitle =>
+      'Las listas archivadas aparecerán aquí.';
+
+  @override
+  String get restore => 'Restaurar';
+
+  @override
+  String get restoreList => 'Restaurar lista';
+
+  @override
+  String get restoreListTitle => '¿Restaurar lista?';
+
+  @override
+  String get restoreListMessage => 'Esta lista volverá a aparecer en el grupo.';
+
+  @override
+  String get listRestored => 'Lista restaurada';
+
+  @override
+  String get failedToLoadArchivedLists =>
+      'No se pudieron cargar las listas archivadas';
+
+  @override
+  String get failedToRestoreList => 'No se pudo restaurar la lista';
+
+  @override
+  String get members => 'Miembros';
+
+  @override
+  String get removeMember => 'Eliminar miembro';
+
+  @override
+  String get removeMemberTitle => '¿Eliminar miembro?';
+
+  @override
+  String removeMemberMessage(Object memberName) {
+    return '¿Eliminar a $memberName de este grupo?';
+  }
+
+  @override
+  String get memberRemoved => 'Miembro eliminado';
+
+  @override
+  String get failedToRemoveMember => 'No se pudo eliminar el miembro';
+
+  @override
+  String get cannotRemoveYourself => 'No puedes eliminarte a ti mismo';
+
+  @override
+  String get ownersCannotBeRemoved => 'Los propietarios no se pueden eliminar';
+
+  @override
+  String roleLabel(Object role) {
+    return 'Rol: $role';
+  }
+
+  @override
+  String get manageMembers => 'Gestionar miembros';
+
+  @override
+  String get makeAdmin => 'Hacer admin';
+
+  @override
+  String get makeMember => 'Hacer miembro';
+
+  @override
+  String get changeRoleTitle => '¿Cambiar rol?';
+
+  @override
+  String changeRoleToAdminMessage(Object memberName) {
+    return '¿Hacer admin de este grupo a $memberName?';
+  }
+
+  @override
+  String changeRoleToMemberMessage(Object memberName) {
+    return '¿Cambiar a $memberName de nuevo a miembro?';
+  }
+
+  @override
+  String get memberRoleUpdated => 'Rol actualizado';
+
+  @override
+  String get failedToUpdateMemberRole => 'No se pudo actualizar el rol';
+
+  @override
+  String get onlyOwnersCanChangeRoles =>
+      'Solo los propietarios pueden cambiar roles';
+
+  @override
+  String get ownerRoleCannotBeChanged =>
+      'El rol de propietario no se puede cambiar';
+
+  @override
   String deadlineDate(Object date) {
     return 'Fecha límite: $date';
   }
@@ -1398,11 +1501,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String invitedAsRole(Object role) {
     return 'Invitado como $role';
-  }
-
-  @override
-  String roleLabel(Object role) {
-    return 'Rol: $role';
   }
 
   @override

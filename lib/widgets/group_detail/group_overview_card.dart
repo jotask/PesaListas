@@ -11,19 +11,31 @@ class GroupOverviewCard extends StatelessWidget {
     required this.group,
     required this.members,
     required this.pendingInvitations,
+    required this.currentUserId,
+    required this.currentUserRole,
     required this.onInvite,
     required this.onBack,
     required this.onEdit,
     required this.onCancelInvitation,
+    required this.onRemoveMember,
+    required this.onChangeMemberRole,
   });
 
   final Map<String, dynamic> group;
   final List<Map<String, dynamic>> members;
   final List<Map<String, dynamic>> pendingInvitations;
+  final String? currentUserId;
+  final String? currentUserRole;
   final VoidCallback onInvite;
   final VoidCallback onBack;
   final VoidCallback onEdit;
   final void Function(String invitationId) onCancelInvitation;
+  final void Function(Map<String, dynamic> member) onRemoveMember;
+  final void Function({
+    required Map<String, dynamic> member,
+    required String role,
+  })
+  onChangeMemberRole;
 
   String groupName(BuildContext context) {
     final value = group[AppGroupFields.name]?.toString();
@@ -160,7 +172,11 @@ class GroupOverviewCard extends StatelessWidget {
                       child: _PeoplePreview(
                         members: members,
                         pendingInvitations: pendingInvitations,
+                        currentUserId: currentUserId,
+                        currentUserRole: currentUserRole,
                         onCancelInvitation: onCancelInvitation,
+                        onRemoveMember: onRemoveMember,
+                        onChangeMemberRole: onChangeMemberRole,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -187,14 +203,69 @@ class _PeoplePreview extends StatelessWidget {
   const _PeoplePreview({
     required this.members,
     required this.pendingInvitations,
+    required this.currentUserId,
+    required this.currentUserRole,
     required this.onCancelInvitation,
+    required this.onRemoveMember,
+    required this.onChangeMemberRole,
   });
 
   final List<Map<String, dynamic>> members;
   final List<Map<String, dynamic>> pendingInvitations;
+  final String? currentUserId;
+  final String? currentUserRole;
   final void Function(String invitationId) onCancelInvitation;
+  final void Function(Map<String, dynamic> member) onRemoveMember;
+  final void Function({
+    required Map<String, dynamic> member,
+    required String role,
+  })
+  onChangeMemberRole;
 
   static const int maxVisibleMembers = 5;
+
+  void showMembers(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              Text(
+                context.l10n.members,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 12),
+              for (final member in members)
+                _MemberManagementTile(
+                  member: member,
+                  currentUserId: currentUserId,
+                  currentUserRole: currentUserRole,
+                  onRemove: () {
+                    Navigator.of(context).pop();
+                    onRemoveMember(member);
+                  },
+                  onMakeAdmin: () {
+                    Navigator.of(context).pop();
+                    onChangeMemberRole(member: member, role: 'admin');
+                  },
+                  onMakeMember: () {
+                    Navigator.of(context).pop();
+                    onChangeMemberRole(member: member, role: 'member');
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   void showPendingInvitations(BuildContext context) {
     if (pendingInvitations.isEmpty) return;
@@ -263,16 +334,30 @@ class _PeoplePreview extends StatelessWidget {
               padding: const EdgeInsets.only(right: 6),
               child: Tooltip(
                 message: _MemberDisplay.nameFor(context, member),
-                child: _TinyAvatar(
-                  name: _MemberDisplay.nameFor(context, member),
-                  avatarUrl: _MemberDisplay.avatarUrlFor(member),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: () => showMembers(context),
+                  child: _TinyAvatar(
+                    name: _MemberDisplay.nameFor(context, member),
+                    avatarUrl: _MemberDisplay.avatarUrlFor(member),
+                  ),
                 ),
               ),
             ),
           if (extraMembers > 0)
             Padding(
               padding: const EdgeInsets.only(right: 6),
-              child: _CountAvatar(label: '+$extraMembers'),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(999),
+                onTap: () => showMembers(context),
+                child: _CountAvatar(label: '+$extraMembers'),
+              ),
+            ),
+          if (members.isEmpty)
+            InkWell(
+              borderRadius: BorderRadius.circular(999),
+              onTap: () => showMembers(context),
+              child: const _CountAvatar(label: '0'),
             ),
           if (pendingInvitations.isNotEmpty)
             Tooltip(
@@ -284,6 +369,106 @@ class _PeoplePreview extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _MemberManagementTile extends StatelessWidget {
+  const _MemberManagementTile({
+    required this.member,
+    required this.currentUserId,
+    required this.currentUserRole,
+    required this.onRemove,
+    required this.onMakeAdmin,
+    required this.onMakeMember,
+  });
+
+  final Map<String, dynamic> member;
+  final String? currentUserId;
+  final String? currentUserRole;
+  final VoidCallback onRemove;
+  final VoidCallback onMakeAdmin;
+  final VoidCallback onMakeMember;
+
+  String get userId {
+    return member[AppMemberFields.userId]?.toString() ?? '';
+  }
+
+  String get role {
+    return member[AppMemberFields.role]?.toString() ?? 'member';
+  }
+
+  bool get isCurrentUser {
+    return currentUserId != null && currentUserId == userId;
+  }
+
+  bool get isOwner {
+    return role == 'owner';
+  }
+
+  bool get canManage {
+    return currentUserRole == 'owner' && !isCurrentUser && !isOwner;
+  }
+
+  bool get canRemove {
+    return canManage;
+  }
+
+  bool get canMakeAdmin {
+    return canManage && role == 'member';
+  }
+
+  bool get canMakeMember {
+    return canManage && role == 'admin';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = _MemberDisplay.nameFor(context, member);
+    final avatarUrl = _MemberDisplay.avatarUrlFor(member);
+
+    return Card(
+      child: ListTile(
+        leading: _TinyAvatar(name: name, avatarUrl: avatarUrl),
+        title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        subtitle: Text(context.l10n.roleLabel(role)),
+        trailing: canManage
+            ? PopupMenuButton<String>(
+                tooltip: context.l10n.manageMembers,
+                onSelected: (value) {
+                  switch (value) {
+                    case 'make_admin':
+                      onMakeAdmin();
+                      break;
+                    case 'make_member':
+                      onMakeMember();
+                      break;
+                    case 'remove':
+                      onRemove();
+                      break;
+                  }
+                },
+                itemBuilder: (context) {
+                  return [
+                    if (canMakeAdmin)
+                      PopupMenuItem(
+                        value: 'make_admin',
+                        child: Text(context.l10n.makeAdmin),
+                      ),
+                    if (canMakeMember)
+                      PopupMenuItem(
+                        value: 'make_member',
+                        child: Text(context.l10n.makeMember),
+                      ),
+                    PopupMenuItem(
+                      value: 'remove',
+                      child: Text(context.l10n.removeMember),
+                    ),
+                  ];
+                },
+              )
+            : null,
       ),
     );
   }

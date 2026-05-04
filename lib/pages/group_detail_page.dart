@@ -13,6 +13,9 @@ import 'package:pesalistas/repositories/member_repository.dart';
 import 'package:pesalistas/widgets/group_detail/group_lists_section.dart';
 import 'package:pesalistas/widgets/group_detail/group_overview_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/pages/archived_lists_page.dart';
+import 'package:pesalistas/core/member_fields.dart';
+import 'package:pesalistas/core/profile_fields.dart';
 
 class GroupDetailPage extends StatefulWidget {
   const GroupDetailPage({super.key, required this.group});
@@ -36,6 +39,8 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   bool cancellingInvitation = false;
   bool creatingList = false;
   bool editingGroup = false;
+  bool removingMember = false;
+  bool updatingMemberRole = false;
 
   late Map<String, dynamic> currentGroup;
 
@@ -52,6 +57,8 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         cancellingInvitation ||
         creatingList ||
         editingGroup ||
+        updatingMemberRole ||
+        removingMember ||
         loadingPeople;
   }
 
@@ -69,6 +76,22 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     listRepository = ListRepository(client);
 
     loadData();
+  }
+
+  String? get currentUserRole {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+
+    if (currentUserId == null) return null;
+
+    for (final member in members) {
+      final userId = member[AppMemberFields.userId]?.toString();
+
+      if (userId == currentUserId) {
+        return member[AppMemberFields.role]?.toString();
+      }
+    }
+
+    return null;
   }
 
   Future<void> loadData() async {
@@ -94,6 +117,149 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
       setState(() => loadingMembers = false);
       showErrorSnackBar(context, context.l10n.failedToLoadMembers, error);
+    }
+  }
+
+  String memberDisplayName(Map<String, dynamic> member) {
+    final profile = member[AppMemberFields.profiles];
+
+    if (profile is Map<String, dynamic>) {
+      final displayName = profile[AppProfileFields.displayName]?.toString();
+
+      if (displayName != null && displayName.trim().isNotEmpty) {
+        return displayName.trim();
+      }
+
+      final username = profile[AppProfileFields.username]?.toString();
+
+      if (username != null && username.trim().isNotEmpty) {
+        return username.trim();
+      }
+    }
+
+    return context.l10n.member;
+  }
+
+  Future<void> updateMemberRole({
+    required Map<String, dynamic> member,
+    required String role,
+  }) async {
+    if (updatingMemberRole) return;
+
+    final userId = member[AppMemberFields.userId]?.toString();
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+
+    if (userId == null || userId.isEmpty) return;
+
+    if (currentUserRole != 'owner') {
+      showErrorSnackBar(context, context.l10n.onlyOwnersCanChangeRoles);
+      return;
+    }
+
+    if (userId == currentUserId) {
+      showErrorSnackBar(context, context.l10n.cannotRemoveYourself);
+      return;
+    }
+
+    final currentRole = member[AppMemberFields.role]?.toString();
+
+    if (currentRole == 'owner') {
+      showErrorSnackBar(context, context.l10n.ownerRoleCannotBeChanged);
+      return;
+    }
+
+    final name = memberDisplayName(member);
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: context.l10n.changeRoleTitle,
+      message: role == 'admin'
+          ? context.l10n.changeRoleToAdminMessage(name)
+          : context.l10n.changeRoleToMemberMessage(name),
+      deleteLabel: role == 'admin'
+          ? context.l10n.makeAdmin
+          : context.l10n.makeMember,
+    );
+
+    if (!confirmed) return;
+
+    setState(() => updatingMemberRole = true);
+
+    try {
+      await memberRepository.updateGroupMemberRole(
+        groupId: groupId,
+        userId: userId,
+        role: role,
+      );
+
+      await loadMembers();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, context.l10n.memberRoleUpdated);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, context.l10n.failedToUpdateMemberRole, error);
+    } finally {
+      if (mounted) {
+        setState(() => updatingMemberRole = false);
+      }
+    }
+  }
+
+  Future<void> removeMember(Map<String, dynamic> member) async {
+    if (removingMember) return;
+
+    final userId = member[AppMemberFields.userId]?.toString();
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+
+    if (userId == null || userId.isEmpty) return;
+
+    if (userId == currentUserId) {
+      showErrorSnackBar(context, context.l10n.cannotRemoveYourself);
+      return;
+    }
+
+    final role = member[AppMemberFields.role]?.toString();
+
+    if (role == 'owner') {
+      showErrorSnackBar(context, context.l10n.ownersCannotBeRemoved);
+      return;
+    }
+
+    final name = memberDisplayName(member);
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: context.l10n.removeMemberTitle,
+      message: context.l10n.removeMemberMessage(name),
+      deleteLabel: context.l10n.removeMember,
+    );
+
+    if (!confirmed) return;
+
+    setState(() => removingMember = true);
+
+    try {
+      await memberRepository.removeGroupMember(
+        groupId: groupId,
+        userId: userId,
+      );
+
+      await loadMembers();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, context.l10n.memberRemoved);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, context.l10n.failedToRemoveMember, error);
+    } finally {
+      if (mounted) {
+        setState(() => removingMember = false);
+      }
     }
   }
 
@@ -141,6 +307,16 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
       setState(() => loadingLists = false);
       showErrorSnackBar(context, context.l10n.failedToLoadLists, error);
     }
+  }
+
+  Future<void> openArchivedLists() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ArchivedListsPage(groupId: groupId)),
+    );
+
+    if (!mounted) return;
+
+    await loadLists();
   }
 
   Future<void> editGroup() async {
@@ -304,10 +480,14 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             group: currentGroup,
             members: members,
             pendingInvitations: pendingInvitations,
+            currentUserId: Supabase.instance.client.auth.currentUser?.id,
+            currentUserRole: currentUserRole,
             onInvite: inviteMember,
             onBack: goBack,
             onEdit: editGroup,
             onCancelInvitation: cancelInvitation,
+            onRemoveMember: removeMember,
+            onChangeMemberRole: updateMemberRole,
           ),
           if (isBusy) const LinearProgressIndicator(),
           Expanded(
@@ -316,6 +496,8 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  _ArchivedListsShortcutCard(onTap: openArchivedLists),
+                  const SizedBox(height: 12),
                   GroupListsSection(
                     lists: lists,
                     loading: loadingLists,
@@ -327,6 +509,25 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ArchivedListsShortcutCard extends StatelessWidget {
+  const _ArchivedListsShortcutCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: const CircleAvatar(child: Icon(Icons.archive_outlined)),
+        title: Text(context.l10n.archivedLists),
+        subtitle: Text(context.l10n.archivedListsSubtitle),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }

@@ -15,4 +15,29 @@ class MemberRepository {
 
     return List<Map<String, dynamic>>.from(response);
   }
+
+  Future<void> removeGroupMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _client.rpc(
+      'remove_group_member',
+      params: {'target_group_id': groupId, 'target_user_id': userId},
+    );
+  }
+
+  Future<void> updateGroupMemberRole({
+    required String groupId,
+    required String userId,
+    required String role,
+  }) async {
+    await _client.rpc(
+      'update_group_member_role',
+      params: {
+        'target_group_id': groupId,
+        'target_user_id': userId,
+        'target_role': role,
+      },
+    );
+  }
 }
