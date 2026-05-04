@@ -201,7 +201,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
                 label: Text(
                   deadlineAt == null
                       ? S.addDeadline
-                      : 'Deadline: ${AppDateFormatting.yyyyMmDd(deadlineAt!)}',
+                      : S.deadlineDate(AppDateFormatting.yyyyMmDd(deadlineAt!)),
                 ),
               ),
             ),
@@ -245,7 +245,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: S.repeatEvery,
-              suffixText: 'days',
+              suffixText: S.days,
               helperText: S.minimum2Days,
             ),
             onChanged: updateRecurrenceInterval,
@@ -261,7 +261,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
                 label: Text(
                   nextDueAt == null
                       ? S.setNextDueDate
-                      : 'Next due: ${AppDateFormatting.yyyyMmDd(nextDueAt!)}',
+                      : S.nextDueDate(AppDateFormatting.yyyyMmDd(nextDueAt!)),
                 ),
               ),
             ),
@@ -291,7 +291,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
     final config = listTypeConfig;
 
     return AlertDialog(
-      title: Text('Add ${config.label.toLowerCase()} item'),
+      title: Text(S.addListTypeItem(config.label.toLowerCase())),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

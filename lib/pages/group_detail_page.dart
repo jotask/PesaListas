@@ -197,7 +197,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, 'Invitation sent to $email');
+      showSuccessSnackBar(context, S.invitationSentTo(email));
     } catch (error) {
       if (!mounted) return;
 
@@ -232,7 +232,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, 'List "${result.name}" created');
+      showSuccessSnackBar(context, S.listCreatedWithName(result.name));
     } catch (error) {
       if (!mounted) return;
 

@@ -71,8 +71,8 @@ class VotableItemCard extends StatelessWidget {
 
   String get voteCountText {
     if (voteCount == 0) return S.noVotesYet;
-    if (voteCount == 1) return '1 vote';
-    return '$voteCount votes';
+    if (voteCount == 1) return S.voteCountOne;
+    return S.voteCountMany(voteCount);
   }
 
   String get averageText {
@@ -137,12 +137,12 @@ class VotableItemCard extends StatelessWidget {
                         if (hasVotes)
                           _InfoChip(
                             icon: Icons.functions,
-                            label: 'Total $totalPoints',
+                            label: S.totalPointsLabel(totalPoints),
                           ),
                         if (ownVote != null)
                           _InfoChip(
                             icon: Icons.person,
-                            label: 'Your vote $ownVote',
+                            label: S.yourVoteLabel(ownVote),
                             filled: true,
                           ),
                       ],
@@ -227,7 +227,7 @@ class _ScoreBadge extends StatelessWidget {
             ),
           ),
           Text(
-            'avg',
+            S.averageShort,
             style: TextStyle(
               fontSize: 11,
               color: hasVotes

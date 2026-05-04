@@ -400,5 +400,216 @@
   "themeDark": "Dark",
   "themeSubtitleSystem": "Using device theme",
   "themeSubtitleLight": "Light",
-  "themeSubtitleDark": "Dark"
+  "themeSubtitleDark": "Dark",
+  "addListTypeItem": "Add {listType} item",
+  "@addListTypeItem": {
+    "placeholders": {
+      "listType": {}
+    }
+  },
+  "deadlineDate": "Deadline: {date}",
+  "@deadlineDate": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "nextDueDate": "Next due: {date}",
+  "@nextDueDate": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "fromDateLabel": "From {date}",
+  "@fromDateLabel": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "toDateLabel": "To {date}",
+  "@toDateLabel": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "invitationSentTo": "Invitation sent to {email}",
+  "@invitationSentTo": {
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "listCreatedWithName": "List \"{name}\" created",
+  "@listCreatedWithName": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "thisIngredient": "this ingredient",
+  "deleteIngredientMessage": "This will remove \"{name}\" from the recipe.",
+  "@deleteIngredientMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "ingredientDeleted": "Ingredient deleted",
+  "invitedAsRole": "Invited as {role}",
+  "@invitedAsRole": {
+    "placeholders": {
+      "role": {}
+    }
+  },
+  "roleLabel": "Role: {role}",
+  "@roleLabel": {
+    "placeholders": {
+      "role": {}
+    }
+  },
+  "allCount": "All {count}",
+  "@allCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "openCount": "Open {count}",
+  "@openCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "doneCount": "Done {count}",
+  "@doneCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "upcomingCount": "Upcoming {count}",
+  "@upcomingCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "thisWeekCount": "This week {count}",
+  "@thisWeekCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "pastCount": "Past {count}",
+  "@pastCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "thisWeekSummary": "{count} this week",
+  "@thisWeekSummary": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "upcomingSummary": "{count} upcoming",
+  "@upcomingSummary": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "withRecipesSummary": "{count} with recipes",
+  "@withRecipesSummary": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "totalCountSummary": "{count} total",
+  "@totalCountSummary": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "pastSummary": "{count} past",
+  "@pastSummary": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "toBuySummary": "{count} to buy",
+  "@toBuySummary": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "boughtSummary": "{count} bought",
+  "@boughtSummary": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "generatedSummary": "{count} generated",
+  "@generatedSummary": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "sectionCount": "{title} ({count})",
+  "@sectionCount": {
+    "placeholders": {
+      "title": {},
+      "count": {}
+    }
+  },
+  "recipeSourceLabel": "Recipe: {name}",
+  "@recipeSourceLabel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "minutesTotal": "{minutes} min total",
+  "@minutesTotal": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "prepMinutes": "Prep {minutes} min",
+  "@prepMinutes": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "cookMinutes": "Cook {minutes} min",
+  "@cookMinutes": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "servingsCount": "{count} servings",
+  "@servingsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "voteCountOne": "1 vote",
+  "voteCountMany": "{count} votes",
+  "@voteCountMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "totalPointsLabel": "Total {points}",
+  "@totalPointsLabel": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "yourVoteLabel": "Your vote {points}",
+  "@yourVoteLabel": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "averageShort": "avg",
+  "ingredientCountOne": "1 ingredient",
+  "ingredientCountMany": "{count} ingredients",
+  "@ingredientCountMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "decline": "Decline"
 }

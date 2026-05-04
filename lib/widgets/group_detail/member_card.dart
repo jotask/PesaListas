@@ -16,7 +16,7 @@ class MemberCard extends StatelessWidget {
         title: Text(
           profile?['display_name'] ?? profile?['username'] ?? S.unknownUser,
         ),
-        subtitle: Text('Role: ${member['role'] ?? 'member'}'),
+        subtitle: Text(S.roleLabel(member['role']?.toString() ?? S.member)),
       ),
     );
   }

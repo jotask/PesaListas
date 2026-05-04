@@ -80,6 +80,7 @@ class S {
   static String get daily => tr('daily');
   static String get days => tr('days');
   static String get declineInvitationIsNotAvailableYet => tr('declineInvitationIsNotAvailableYet');
+  static String get decline => tr('decline');
   static String get delete => tr('delete');
   static String get deleteChore => tr('deleteChore');
   static String get deleteIngredient => tr('deleteIngredient');
@@ -165,6 +166,7 @@ class S {
   static String get individual => tr('individual');
   static String get info => tr('info');
   static String get ingredient => tr('ingredient');
+  static String get ingredientCountOne => tr('ingredientCountOne');
   static String get ingredientAdded => tr('ingredientAdded');
   static String get ingredientNameIsRequired => tr('ingredientNameIsRequired');
   static String get ingredientUpdated => tr('ingredientUpdated');
@@ -406,9 +408,95 @@ class S {
   static String get you => tr('you');
   static String get yourPersonalSpaceForListsRecipesChoresAndPlanning => tr('yourPersonalSpaceForListsRecipesChoresAndPlanning');
 
+
+  static String get thisIngredient => tr('thisIngredient');
+  static String get ingredientDeleted => tr('ingredientDeleted');
+  static String get voteCountOne => tr('voteCountOne');
+  static String get averageShort => tr('averageShort');
+
+  static String _format(String key, Map<String, Object?> values) {
+    var text = tr(key);
+    for (final entry in values.entries) {
+      text = text.replaceAll('{${entry.key}}', entry.value.toString());
+    }
+    return text;
+  }
+
+  static String addListTypeItem(String listType) => _format('addListTypeItem', {'listType': listType});
+  static String deadlineDate(String date) => _format('deadlineDate', {'date': date});
+  static String nextDueDate(String date) => _format('nextDueDate', {'date': date});
+  static String fromDateLabel(String date) => _format('fromDateLabel', {'date': date});
+  static String toDateLabel(String date) => _format('toDateLabel', {'date': date});
+  static String invitationSentTo(String email) => _format('invitationSentTo', {'email': email});
+  static String listCreatedWithName(String name) => _format('listCreatedWithName', {'name': name});
+  static String deleteIngredientMessage(String name) => _format('deleteIngredientMessage', {'name': name});
+  static String invitedAsRole(String role) => _format('invitedAsRole', {'role': role});
+  static String ingredientCountMany(int count) => _format('ingredientCountMany', {'count': count});
+  static String roleLabel(String role) => _format('roleLabel', {'role': role});
+  static String allCount(int count) => _format('allCount', {'count': count});
+  static String openCount(int count) => _format('openCount', {'count': count});
+  static String doneCount(int count) => _format('doneCount', {'count': count});
+  static String upcomingCount(int count) => _format('upcomingCount', {'count': count});
+  static String thisWeekCount(int count) => _format('thisWeekCount', {'count': count});
+  static String pastCount(int count) => _format('pastCount', {'count': count});
+  static String thisWeekSummary(int count) => _format('thisWeekSummary', {'count': count});
+  static String upcomingSummary(int count) => _format('upcomingSummary', {'count': count});
+  static String withRecipesSummary(int count) => _format('withRecipesSummary', {'count': count});
+  static String totalCountSummary(int count) => _format('totalCountSummary', {'count': count});
+  static String pastSummary(int count) => _format('pastSummary', {'count': count});
+  static String toBuySummary(int count) => _format('toBuySummary', {'count': count});
+  static String boughtSummary(int count) => _format('boughtSummary', {'count': count});
+  static String generatedSummary(int count) => _format('generatedSummary', {'count': count});
+  static String sectionCount(String title, int count) => _format('sectionCount', {'title': title, 'count': count});
+  static String recipeSourceLabel(String name) => _format('recipeSourceLabel', {'name': name});
+  static String minutesTotal(int minutes) => _format('minutesTotal', {'minutes': minutes});
+  static String prepMinutes(int minutes) => _format('prepMinutes', {'minutes': minutes});
+  static String cookMinutes(int minutes) => _format('cookMinutes', {'minutes': minutes});
+  static String servingsCount(int count) => _format('servingsCount', {'count': count});
+  static String voteCountMany(int count) => _format('voteCountMany', {'count': count});
+  static String totalPointsLabel(int points) => _format('totalPointsLabel', {'points': points});
+  static String yourVoteLabel(int points) => _format('yourVoteLabel', {'points': points});
+
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
-      'aSharedSpaceForListsRecipesChoresAndPlanning': 'A shared space for lists, recipes, chores, and planning.',
+      'addListTypeItem': 'Add {listType} item',
+      'deadlineDate': 'Deadline: {date}',
+      'nextDueDate': 'Next due: {date}',
+      'fromDateLabel': 'From {date}',
+      'toDateLabel': 'To {date}',
+      'invitationSentTo': 'Invitation sent to {email}',
+      'listCreatedWithName': 'List "{name}" created',
+      'thisIngredient': 'this ingredient',
+      'deleteIngredientMessage': 'This will remove "{name}" from the recipe.',
+      'ingredientDeleted': 'Ingredient deleted',
+      'invitedAsRole': 'Invited as {role}',
+      'roleLabel': 'Role: {role}',
+      'allCount': 'All {count}',
+      'openCount': 'Open {count}',
+      'doneCount': 'Done {count}',
+      'upcomingCount': 'Upcoming {count}',
+      'thisWeekCount': 'This week {count}',
+      'pastCount': 'Past {count}',
+      'thisWeekSummary': '{count} this week',
+      'upcomingSummary': '{count} upcoming',
+      'withRecipesSummary': '{count} with recipes',
+      'totalCountSummary': '{count} total',
+      'pastSummary': '{count} past',
+      'toBuySummary': '{count} to buy',
+      'boughtSummary': '{count} bought',
+      'generatedSummary': '{count} generated',
+      'sectionCount': '{title} ({count})',
+      'recipeSourceLabel': 'Recipe: {name}',
+      'minutesTotal': '{minutes} min total',
+      'prepMinutes': 'Prep {minutes} min',
+      'cookMinutes': 'Cook {minutes} min',
+      'servingsCount': '{count} servings',
+      'voteCountOne': '1 vote',
+      'voteCountMany': '{count} votes',
+      'totalPointsLabel': 'Total {points}',
+      'yourVoteLabel': 'Your vote {points}',
+      'averageShort': 'avg',
+            'aSharedSpaceForListsRecipesChoresAndPlanning': 'A shared space for lists, recipes, chores, and planning.',
       'accept': 'Accept',
       'accountSectionTitle': 'Account',
       'activities': 'Activities',
@@ -472,6 +560,7 @@ class S {
       'daily': 'Daily',
       'days': 'days',
       'declineInvitationIsNotAvailableYet': 'Decline invitation is not available yet',
+      'decline': 'Decline',
       'delete': 'Delete',
       'deleteChore': 'Delete chore',
       'deleteIngredient': 'Delete ingredient',
@@ -557,6 +646,8 @@ class S {
       'individual': 'Individual',
       'info': 'Info',
       'ingredient': 'Ingredient',
+      'ingredientCountOne': '1 ingredient',
+      'ingredientCountMany': '{count} ingredients',
       'ingredientAdded': 'Ingredient added',
       'ingredientNameIsRequired': 'Ingredient name is required.',
       'ingredientUpdated': 'Ingredient updated',
@@ -799,6 +890,43 @@ class S {
       'yourPersonalSpaceForListsRecipesChoresAndPlanning': 'Your personal space for lists, recipes, chores, and planning.',
     },
     'es': {
+      'addListTypeItem': 'Añadir elemento de {listType}',
+      'deadlineDate': 'Fecha límite: {date}',
+      'nextDueDate': 'Próxima fecha: {date}',
+      'fromDateLabel': 'Desde {date}',
+      'toDateLabel': 'Hasta {date}',
+      'invitationSentTo': 'Invitación enviada a {email}',
+      'listCreatedWithName': 'Lista "{name}" creada',
+      'thisIngredient': 'este ingrediente',
+      'deleteIngredientMessage': 'Esto eliminará "{name}" de la receta.',
+      'ingredientDeleted': 'Ingrediente eliminado',
+      'invitedAsRole': 'Invitado como {role}',
+      'roleLabel': 'Rol: {role}',
+      'allCount': 'Todo {count}',
+      'openCount': 'Pendiente {count}',
+      'doneCount': 'Hecho {count}',
+      'upcomingCount': 'Próximas {count}',
+      'thisWeekCount': 'Esta semana {count}',
+      'pastCount': 'Pasadas {count}',
+      'thisWeekSummary': '{count} esta semana',
+      'upcomingSummary': '{count} próximas',
+      'withRecipesSummary': '{count} con recetas',
+      'totalCountSummary': '{count} total',
+      'pastSummary': '{count} pasadas',
+      'toBuySummary': '{count} por comprar',
+      'boughtSummary': '{count} comprado',
+      'generatedSummary': '{count} generado',
+      'sectionCount': '{title} ({count})',
+      'recipeSourceLabel': 'Receta: {name}',
+      'minutesTotal': '{minutes} min total',
+      'prepMinutes': 'Prep {minutes} min',
+      'cookMinutes': 'Cocción {minutes} min',
+      'servingsCount': '{count} raciones',
+      'voteCountOne': '1 voto',
+      'voteCountMany': '{count} votos',
+      'totalPointsLabel': 'Total {points}',
+      'yourVoteLabel': 'Tu voto {points}',
+      'averageShort': 'media',
       'aSharedSpaceForListsRecipesChoresAndPlanning': 'Un espacio compartido para listas, recetas, tareas y planificación.',
       'accept': 'Aceptar',
       'accountSectionTitle': 'Cuenta',
@@ -863,6 +991,7 @@ class S {
       'daily': 'Diaria',
       'days': 'días',
       'declineInvitationIsNotAvailableYet': 'Rechazar invitaciones aún no está disponible',
+      'decline': 'Rechazar',
       'delete': 'Eliminar',
       'deleteChore': 'Eliminar tarea recurrente',
       'deleteIngredient': 'Eliminar ingrediente',
@@ -948,6 +1077,8 @@ class S {
       'individual': 'Individual',
       'info': 'Información',
       'ingredient': 'Ingrediente',
+      'ingredientCountOne': '1 ingrediente',
+      'ingredientCountMany': '{count} ingredientes',
       'ingredientAdded': 'Ingrediente añadido',
       'ingredientNameIsRequired': 'El nombre del ingrediente es obligatorio.',
       'ingredientUpdated': 'Ingrediente actualizado',

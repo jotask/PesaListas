@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class ShoppingItemsView extends StatelessWidget {
@@ -83,7 +83,7 @@ class ShoppingItemsView extends StatelessWidget {
           boughtCount: boughtItems.length,
           generatedCount: generatedCount,
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         if (toBuyItems.isNotEmpty)
           _ShoppingSection(
             title: S.toBuy,
@@ -94,7 +94,7 @@ class ShoppingItemsView extends StatelessWidget {
             onDelete: onDelete,
           ),
         if (toBuyItems.isNotEmpty && boughtItems.isNotEmpty)
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
         if (boughtItems.isNotEmpty)
           _ShoppingSection(
             title: S.bought,
@@ -138,26 +138,26 @@ class _ShoppingSummaryCard extends StatelessWidget {
                 color: theme.colorScheme.onPrimaryContainer,
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
                   _SummaryPill(
-                    label: '$toBuyCount to buy',
+                    label: S.toBuySummary(toBuyCount),
                     icon: Icons.shopping_cart_outlined,
                   ),
                   _SummaryPill(
-                    label: '$boughtCount bought',
+                    label: S.boughtSummary(boughtCount),
                     icon: Icons.shopping_cart_checkout,
                   ),
                   _SummaryPill(
-                    label: '$generatedCount generated',
+                    label: S.generatedSummary(generatedCount),
                     icon: Icons.auto_awesome_outlined,
                   ),
                   _SummaryPill(
-                    label: '$totalCount total',
+                    label: S.totalCountSummary(totalCount),
                     icon: Icons.list_alt_outlined,
                   ),
                 ],
@@ -190,7 +190,7 @@ class _SummaryPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(
@@ -232,14 +232,14 @@ class _ShoppingSection extends StatelessWidget {
         Row(
           children: [
             Icon(icon, size: 18, color: theme.colorScheme.primary),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
-              '$title (${items.length})',
+              S.sectionCount(title, items.length),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
             ),
           ],
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         for (final item in items)
           _ShoppingItemCard(
             item: item,
@@ -374,7 +374,7 @@ class _ShoppingItemCard extends StatelessWidget {
     final parts = <String>[amountText];
 
     if (recipeName != null) {
-      parts.add('Recipe: $recipeName');
+      parts.add(S.recipeSourceLabel(recipeName!));
     } else if (generatedFromMealPlan) {
       parts.add(S.fromMealPlan);
     }
@@ -435,7 +435,7 @@ class _ShoppingItemCard extends StatelessWidget {
                             : theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -457,10 +457,10 @@ class _ShoppingItemCard extends StatelessWidget {
                               _ShoppingStatePill(checked: checked),
                             ],
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(subtitle, style: theme.textTheme.bodyMedium),
                           if (sourceContextText != null) ...[
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             _SourceContextPill(text: sourceContextText!),
                           ],
                         ],
@@ -468,7 +468,7 @@ class _ShoppingItemCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 Row(
                   children: [
                     Expanded(
@@ -482,15 +482,15 @@ class _ShoppingItemCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     IconButton(
                       onPressed: onEdit,
-                      icon: Icon(Icons.edit_outlined),
+                      icon: const Icon(Icons.edit_outlined),
                       tooltip: S.editItem,
                     ),
                     IconButton(
                       onPressed: onDelete,
-                      icon: Icon(Icons.delete_outline),
+                      icon: const Icon(Icons.delete_outline),
                       tooltip: S.deleteItem,
                     ),
                   ],
@@ -527,7 +527,7 @@ class _SourceContextPill extends StatelessWidget {
             size: 14,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Flexible(
             child: Text(
               text,

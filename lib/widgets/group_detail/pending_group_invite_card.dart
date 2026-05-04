@@ -17,7 +17,7 @@ class PendingGroupInviteCard extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(child: Icon(Icons.mail_outline)),
         title: Text(invitation['invited_email'] ?? S.unknownEmail),
-        subtitle: Text('Role: ${invitation['role'] ?? 'member'}'),
+        subtitle: Text(S.roleLabel(invitation['role']?.toString() ?? S.member)),
         trailing: IconButton(
           icon: Icon(Icons.close),
           tooltip: S.cancelInvitation,

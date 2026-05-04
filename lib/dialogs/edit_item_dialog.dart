@@ -241,7 +241,7 @@ class _EditItemDialogState extends State<EditItemDialog> {
                 label: Text(
                   deadlineAt == null
                       ? S.addDeadline
-                      : 'Deadline: ${AppDateFormatting.yyyyMmDd(deadlineAt!)}',
+                      : S.deadlineDate(AppDateFormatting.yyyyMmDd(deadlineAt!)),
                 ),
               ),
             ),
@@ -285,7 +285,7 @@ class _EditItemDialogState extends State<EditItemDialog> {
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: S.repeatEvery,
-              suffixText: 'days',
+              suffixText: S.days,
               helperText: S.minimum2Days,
             ),
             onChanged: updateRecurrenceInterval,
@@ -301,7 +301,7 @@ class _EditItemDialogState extends State<EditItemDialog> {
                 label: Text(
                   nextDueAt == null
                       ? S.setNextDueDate
-                      : 'Next due: ${AppDateFormatting.yyyyMmDd(nextDueAt!)}',
+                      : S.nextDueDate(AppDateFormatting.yyyyMmDd(nextDueAt!)),
                 ),
               ),
             ),

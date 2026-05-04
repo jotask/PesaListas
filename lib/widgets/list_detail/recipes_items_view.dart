@@ -177,22 +177,22 @@ class _RecipeCard extends StatelessWidget {
                         if (totalTime != null)
                           _RecipeMetaPill(
                             icon: Icons.schedule_outlined,
-                            label: '$totalTime min total',
+                            label: S.minutesTotal(totalTime!),
                           ),
                         if (prepTime != null)
                           _RecipeMetaPill(
                             icon: Icons.timer_outlined,
-                            label: 'Prep $prepTime min',
+                            label: S.prepMinutes(prepTime!),
                           ),
                         if (cookTime != null)
                           _RecipeMetaPill(
                             icon: Icons.local_fire_department_outlined,
-                            label: 'Cook $cookTime min',
+                            label: S.cookMinutes(cookTime!),
                           ),
                         if (servings != null)
                           _RecipeMetaPill(
                             icon: Icons.people_outline,
-                            label: '$servings servings',
+                            label: S.servingsCount(servings!),
                           ),
                         _RecipeMetaPill(
                           icon: hasInstructions

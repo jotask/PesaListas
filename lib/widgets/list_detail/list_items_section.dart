@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/widgets/list_detail/items_view_factory.dart';
 
 class ListItemsSection extends StatefulWidget {
@@ -49,9 +51,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
   int get totalCount => widget.items.length;
 
   int get doneCount {
-    return widget.items.where((item) {
-      return isItemDone(item);
-    }).length;
+    return widget.items.where(isItemDone).length;
   }
 
   int get openCount {
@@ -68,14 +68,10 @@ class _ListItemsSectionState extends State<ListItemsSection> {
         return widget.items;
 
       case ItemStatusFilter.open:
-        return widget.items.where((item) {
-          return !isItemDone(item);
-        }).toList();
+        return widget.items.where((item) => !isItemDone(item)).toList();
 
       case ItemStatusFilter.done:
-        return widget.items.where((item) {
-          return isItemDone(item);
-        }).toList();
+        return widget.items.where(isItemDone).toList();
     }
   }
 
@@ -122,7 +118,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
       return item[AppShoppingItemFields.checked] == true;
     }
 
-    return isItemDone(item);
+    return AppItemStatus.isDone(item[AppItemFields.status]);
   }
 
   @override
@@ -140,7 +136,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
             doneCount: doneCount,
             onSelected: selectFilter,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
         ],
         if (!widget.loading &&
             widget.items.isNotEmpty &&
@@ -198,17 +194,17 @@ class _StatusFilterChips extends StatelessWidget {
       children: [
         FilterChip(
           selected: selectedFilter == ItemStatusFilter.all,
-          label: Text('All $totalCount'),
+          label: Text(S.allCount(totalCount)),
           onSelected: (_) => onSelected(ItemStatusFilter.all),
         ),
         FilterChip(
           selected: selectedFilter == ItemStatusFilter.open,
-          label: Text('Open $openCount'),
+          label: Text(S.openCount(openCount)),
           onSelected: (_) => onSelected(ItemStatusFilter.open),
         ),
         FilterChip(
           selected: selectedFilter == ItemStatusFilter.done,
-          label: Text('Done $doneCount'),
+          label: Text(S.doneCount(doneCount)),
           onSelected: (_) => onSelected(ItemStatusFilter.done),
         ),
       ],
@@ -244,7 +240,7 @@ class _NoFilteredItemsCard extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,12 +252,12 @@ class _NoFilteredItemsCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(subtitle, style: theme.textTheme.bodyMedium),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: onClearFilter,
-                    icon: Icon(Icons.clear),
+                    icon: const Icon(Icons.clear),
                     label: Text(S.clearFilter),
                   ),
                 ],

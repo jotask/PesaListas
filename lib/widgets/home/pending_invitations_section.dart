@@ -147,7 +147,7 @@ class _InvitationTile extends StatelessWidget {
     final value = invitation[AppInvitationFields.role]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'member';
+      return S.member;
     }
 
     return value.trim();
@@ -186,14 +186,14 @@ class _InvitationTile extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
                 SizedBox(height: 2),
-                Text('Invited as $role', style: theme.textTheme.bodySmall),
+                Text(S.invitedAsRole(role), style: theme.textTheme.bodySmall),
               ],
             ),
           ),
           SizedBox(width: 8),
           TextButton(
             onPressed: acceptingInvitation ? null : onDecline,
-            child: Text('Decline'),
+            child: Text(S.decline),
           ),
           SizedBox(width: 4),
           FilledButton(

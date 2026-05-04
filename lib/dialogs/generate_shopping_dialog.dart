@@ -117,7 +117,7 @@ class _GenerateShoppingDialogState extends State<GenerateShoppingDialog> {
                   child: OutlinedButton.icon(
                     onPressed: pickFromDate,
                     icon: Icon(Icons.calendar_today),
-                    label: Text('From ${formatDate(fromDate)}'),
+                    label: Text(S.fromDateLabel(formatDate(fromDate))),
                   ),
                 ),
               ],
@@ -129,7 +129,7 @@ class _GenerateShoppingDialogState extends State<GenerateShoppingDialog> {
                   child: OutlinedButton.icon(
                     onPressed: pickToDate,
                     icon: Icon(Icons.event_outlined),
-                    label: Text('To ${formatDate(toDate)}'),
+                    label: Text(S.toDateLabel(formatDate(toDate))),
                   ),
                 ),
               ],

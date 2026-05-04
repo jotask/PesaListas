@@ -19,13 +19,13 @@ class PendingInviteCard extends StatelessWidget {
         invitation[AppInvitationFields.groups] as Map<String, dynamic>?;
     final groupName =
         group?[AppGroupFields.name]?.toString() ?? S.groupInvitation;
-    final role = invitation[AppInvitationFields.role]?.toString() ?? 'member';
+    final role = invitation[AppInvitationFields.role]?.toString() ?? S.member;
 
     return Card(
       child: ListTile(
         leading: CircleAvatar(child: Icon(Icons.mail_outline)),
         title: Text(groupName),
-        subtitle: Text('Invited as $role'),
+        subtitle: Text(S.invitedAsRole(role)),
         trailing: ElevatedButton(
           onPressed: onAccept,
           child: Text(S.accept),

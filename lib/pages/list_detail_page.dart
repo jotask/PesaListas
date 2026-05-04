@@ -598,14 +598,14 @@ class _ListDetailPageState extends State<ListDetailPage> {
   Future<void> completeItem(String itemId) async {
     if (completingItem) return;
 
+    if (isShoppingList) {
+      await setShoppingItemChecked(shoppingItemId: itemId, checked: true);
+      return;
+    }
+
     setState(() => completingItem = true);
 
     try {
-      if (isShoppingList) {
-        await setShoppingItemChecked(shoppingItemId: itemId, checked: true);
-        return;
-      }
-
       await itemRepository.completeItem(itemId);
       await loadItems();
 
@@ -626,14 +626,14 @@ class _ListDetailPageState extends State<ListDetailPage> {
   Future<void> reopenItem(String itemId) async {
     if (completingItem) return;
 
+    if (isShoppingList) {
+      await setShoppingItemChecked(shoppingItemId: itemId, checked: false);
+      return;
+    }
+
     setState(() => completingItem = true);
 
     try {
-      if (isShoppingList) {
-        await setShoppingItemChecked(shoppingItemId: itemId, checked: false);
-        return;
-      }
-
       await itemRepository.reopenItem(itemId);
       await loadItems();
 
@@ -1099,8 +1099,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
           final confirmed = await showConfirmDeleteDialog(
             context: context,
             title: S.deleteIngredient2,
-            message:
-                'This will remove "${result.ingredientName ?? 'this ingredient'}" from the recipe.',
+            message: S.deleteIngredientMessage(
+              result.ingredientName ?? S.thisIngredient,
+            ),
           );
 
           if (!confirmed) {
@@ -1116,7 +1117,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
           if (!mounted) return;
 
-          showSuccessSnackBar(context, 'Ingredient deleted');
+          showSuccessSnackBar(context, S.ingredientDeleted);
           continue;
         }
       }

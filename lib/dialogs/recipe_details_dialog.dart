@@ -100,19 +100,19 @@ class RecipeDetailsDialog extends StatelessWidget {
                     icon: Icons.timer_outlined,
                     label: prepTime == null
                         ? S.prepNotSet
-                        : 'Prep $prepTime min',
+                        : S.prepMinutes(prepTime!),
                   ),
                   _RecipeInfoChip(
                     icon: Icons.local_fire_department_outlined,
                     label: cookTime == null
                         ? S.cookNotSet
-                        : 'Cook $cookTime min',
+                        : S.cookMinutes(cookTime!),
                   ),
                   _RecipeInfoChip(
                     icon: Icons.people_outline,
                     label: servings == null
                         ? S.servingsNotSet
-                        : '$servings servings',
+                        : S.servingsCount(servings!),
                   ),
                 ],
               ),
@@ -157,8 +157,8 @@ class RecipeDetailsDialog extends StatelessWidget {
                   ),
                   Text(
                     ingredients.length == 1
-                        ? '1 ingredient'
-                        : '${ingredients.length} ingredients',
+                        ? S.ingredientCountOne
+                        : S.ingredientCountMany(ingredients.length),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
+import 'package:pesalistas/l10n/app_strings.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class MealPlanItemsView extends StatefulWidget {
@@ -177,7 +177,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _GenerateShoppingCard(onGenerateShopping: widget.onGenerateShopping),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         if (widget.mealPlans.isNotEmpty) ...[
           _MealPlanSummaryCard(
             totalCount: widget.mealPlans.length,
@@ -186,7 +186,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
             pastCount: pastCount,
             recipeMealCount: recipeMealCount,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           _MealPlanFilterChips(
             selectedFilter: selectedFilter,
             totalCount: widget.mealPlans.length,
@@ -197,7 +197,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
               setState(() => selectedFilter = filter);
             },
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
         ],
         if (visibleMealPlans.isEmpty)
           EmptyItemsCard(
@@ -246,22 +246,22 @@ class _MealPlanFilterChips extends StatelessWidget {
       children: [
         FilterChip(
           selected: selectedFilter == MealPlanFilter.all,
-          label: Text('All $totalCount'),
+          label: Text(S.allCount(totalCount)),
           onSelected: (_) => onSelected(MealPlanFilter.all),
         ),
         FilterChip(
           selected: selectedFilter == MealPlanFilter.upcoming,
-          label: Text('Upcoming $upcomingCount'),
+          label: Text(S.upcomingCount(upcomingCount)),
           onSelected: (_) => onSelected(MealPlanFilter.upcoming),
         ),
         FilterChip(
           selected: selectedFilter == MealPlanFilter.thisWeek,
-          label: Text('This week $thisWeekCount'),
+          label: Text(S.thisWeekCount(thisWeekCount)),
           onSelected: (_) => onSelected(MealPlanFilter.thisWeek),
         ),
         FilterChip(
           selected: selectedFilter == MealPlanFilter.past,
-          label: Text('Past $pastCount'),
+          label: Text(S.pastCount(pastCount)),
           onSelected: (_) => onSelected(MealPlanFilter.past),
         ),
       ],
@@ -300,30 +300,33 @@ class _MealPlanSummaryCard extends StatelessWidget {
                 color: theme.colorScheme.onPrimaryContainer,
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
                   _SummaryPill(
-                    label: '$thisWeekCount this week',
+                    label: S.thisWeekSummary(thisWeekCount),
                     icon: Icons.today_outlined,
                   ),
                   _SummaryPill(
-                    label: '$upcomingCount upcoming',
+                    label: S.upcomingSummary(upcomingCount),
                     icon: Icons.event_available_outlined,
                   ),
                   _SummaryPill(
-                    label: '$recipeMealCount with recipes',
+                    label: S.withRecipesSummary(recipeMealCount),
                     icon: Icons.restaurant_menu,
                   ),
                   _SummaryPill(
-                    label: '$totalCount total',
+                    label: S.totalCountSummary(totalCount),
                     icon: Icons.list_alt_outlined,
                   ),
                   if (pastCount > 0)
-                    _SummaryPill(label: '$pastCount past', icon: Icons.history),
+                    _SummaryPill(
+                      label: S.pastSummary(pastCount),
+                      icon: Icons.history,
+                    ),
                 ],
               ),
             ),
@@ -354,7 +357,7 @@ class _SummaryPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(
@@ -393,27 +396,27 @@ class _GenerateShoppingCard extends StatelessWidget {
                   color: theme.colorScheme.onSecondaryContainer,
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       S.generateShoppingList,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(S.addIngredientsFromPlannedRecipeMeals),
                   ],
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: onGenerateShopping,
-                icon: Icon(Icons.shopping_cart_outlined),
+                icon: const Icon(Icons.shopping_cart_outlined),
                 label: Text(S.generate),
               ),
             ],
@@ -482,21 +485,21 @@ class _MealPlanDateSection extends StatelessWidget {
                 size: 18,
                 color: theme.colorScheme.primary,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                '$friendlyDateLabel (${mealPlans.length})',
+                S.sectionCount(friendlyDateLabel, mealPlans.length),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               if (shouldShowRawDate) ...[
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(dateLabel, style: theme.textTheme.bodySmall),
               ],
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           for (final mealPlan in mealPlans)
             _MealPlanCard(
               mealPlan: mealPlan,
@@ -614,7 +617,7 @@ class _MealPlanCard extends StatelessWidget {
                       : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -628,7 +631,7 @@ class _MealPlanCard extends StatelessWidget {
                         _MealSourcePill(hasRecipe: hasRecipe),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       title,
                       style: const TextStyle(
@@ -636,26 +639,26 @@ class _MealPlanCard extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(helperText, style: theme.textTheme.bodyMedium),
                     if (note != null) ...[
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       _MealNoteBox(note: note!),
                     ],
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: onEdit,
-                            icon: Icon(Icons.edit_outlined),
+                            icon: const Icon(Icons.edit_outlined),
                             label: Text(S.edit),
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         IconButton(
                           onPressed: onDelete,
-                          icon: Icon(Icons.delete_outline),
+                          icon: const Icon(Icons.delete_outline),
                           tooltip: S.deleteMealPlan,
                         ),
                       ],
@@ -702,7 +705,7 @@ class _MealSourcePill extends StatelessWidget {
             size: 14,
             color: foregroundColor,
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Text(
             hasRecipe ? S.recipe : S.custom,
             style: TextStyle(
@@ -743,7 +746,7 @@ class _MealNoteBox extends StatelessWidget {
             size: 16,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Expanded(child: Text(note, style: theme.textTheme.bodySmall)),
         ],
       ),
@@ -774,7 +777,7 @@ class _MealTypePill extends StatelessWidget {
             size: 14,
             color: theme.colorScheme.onSecondaryContainer,
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Text(
             config.label,
             style: TextStyle(
