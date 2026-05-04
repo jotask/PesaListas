@@ -16,6 +16,7 @@ class ShoppingItemsView extends StatelessWidget {
     required this.onReopen,
     required this.onEdit,
     required this.onDelete,
+    required this.onClearBought,
   });
 
   final List<Map<String, dynamic>> items;
@@ -25,6 +26,7 @@ class ShoppingItemsView extends StatelessWidget {
   final void Function(String itemId) onReopen;
   final void Function(Map<String, dynamic> item) onEdit;
   final void Function(String itemId) onDelete;
+  final VoidCallback onClearBought;
 
   List<Map<String, dynamic>> get toBuyItems {
     return items.where((item) {
@@ -83,6 +85,18 @@ class ShoppingItemsView extends StatelessWidget {
           boughtCount: boughtItems.length,
           generatedCount: generatedCount,
         ),
+        const SizedBox(height: 12),
+        if (boughtItems.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: onClearBought,
+              icon: const Icon(Icons.cleaning_services_outlined),
+              label: Text(context.l10n.clearBought),
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
         if (toBuyItems.isNotEmpty)
           _ShoppingSection(
@@ -460,10 +474,15 @@ class _ShoppingItemCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(subtitle(context), style: theme.textTheme.bodyMedium),
+                          Text(
+                            subtitle(context),
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           if (sourceContextText(context) != null) ...[
                             const SizedBox(height: 8),
-                            _SourceContextPill(text: sourceContextText(context)!),
+                            _SourceContextPill(
+                              text: sourceContextText(context)!,
+                            ),
                           ],
                         ],
                       ),
@@ -480,7 +499,9 @@ class _ShoppingItemCard extends StatelessWidget {
                           checked ? Icons.undo : Icons.check_circle_outline,
                         ),
                         label: Text(
-                          checked ? context.l10n.markAsNotBought : context.l10n.markAsBought,
+                          checked
+                              ? context.l10n.markAsNotBought
+                              : context.l10n.markAsBought,
                         ),
                       ),
                     ),

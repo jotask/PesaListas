@@ -2828,6 +2828,72 @@ abstract class AppLocalizations {
   /// **'Owner role cannot be changed'**
   String get ownerRoleCannotBeChanged;
 
+  /// No description provided for @clearBought.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear bought'**
+  String get clearBought;
+
+  /// No description provided for @clearBoughtItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear bought items'**
+  String get clearBoughtItems;
+
+  /// No description provided for @clearBoughtItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear bought items?'**
+  String get clearBoughtItemsTitle;
+
+  /// No description provided for @clearBoughtItemsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently remove all bought shopping items from this list.'**
+  String get clearBoughtItemsMessage;
+
+  /// No description provided for @boughtItemsCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Bought items cleared'**
+  String get boughtItemsCleared;
+
+  /// No description provided for @failedToClearBoughtItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clear bought items'**
+  String get failedToClearBoughtItems;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About PesaListas'**
+  String get aboutApp;
+
+  /// No description provided for @aboutAppSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared planning for groups and households.'**
+  String get aboutAppSubtitle;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get appVersion;
+
+  /// No description provided for @buildNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Build'**
+  String get buildNumber;
+
   /// No description provided for @deadlineDate.
   ///
   /// In en, this message translates to:

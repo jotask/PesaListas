@@ -432,45 +432,56 @@
   "failedToDeleteList": "No se pudo eliminar la lista",
   "dangerZone": "Zona de peligro",
   "archivedLists": "Listas archivadas",
-"archivedListsSubtitle": "Restaura listas archivadas o elimínalas permanentemente.",
-"noArchivedListsYet": "No hay listas archivadas",
-"noArchivedListsSubtitle": "Las listas archivadas aparecerán aquí.",
-"restore": "Restaurar",
-"restoreList": "Restaurar lista",
-"restoreListTitle": "¿Restaurar lista?",
-"restoreListMessage": "Esta lista volverá a aparecer en el grupo.",
-"listRestored": "Lista restaurada",
-"failedToLoadArchivedLists": "No se pudieron cargar las listas archivadas",
-"failedToRestoreList": "No se pudo restaurar la lista",
-"members": "Miembros",
-"removeMember": "Eliminar miembro",
-"removeMemberTitle": "¿Eliminar miembro?",
-"removeMemberMessage": "¿Eliminar a {memberName} de este grupo?",
-"memberRemoved": "Miembro eliminado",
-"failedToRemoveMember": "No se pudo eliminar el miembro",
-"cannotRemoveYourself": "No puedes eliminarte a ti mismo",
-"ownersCannotBeRemoved": "Los propietarios no se pueden eliminar",
-"roleLabel": "Rol: {role}",
-"manageMembers": "Gestionar miembros",
-"makeAdmin": "Hacer admin",
-"makeMember": "Hacer miembro",
-"changeRoleTitle": "¿Cambiar rol?",
-"changeRoleToAdminMessage": "¿Hacer admin de este grupo a {memberName}?",
-"changeRoleToMemberMessage": "¿Cambiar a {memberName} de nuevo a miembro?",
-"memberRoleUpdated": "Rol actualizado",
-"failedToUpdateMemberRole": "No se pudo actualizar el rol",
-"onlyOwnersCanChangeRoles": "Solo los propietarios pueden cambiar roles",
-"ownerRoleCannotBeChanged": "El rol de propietario no se puede cambiar",
-"@changeRoleToAdminMessage": {
-  "placeholders": {
-    "memberName": {}
-  }
-},
-"@changeRoleToMemberMessage": {
-  "placeholders": {
-    "memberName": {}
-  }
-},
+  "archivedListsSubtitle": "Restaura listas archivadas o elimínalas permanentemente.",
+  "noArchivedListsYet": "No hay listas archivadas",
+  "noArchivedListsSubtitle": "Las listas archivadas aparecerán aquí.",
+  "restore": "Restaurar",
+  "restoreList": "Restaurar lista",
+  "restoreListTitle": "¿Restaurar lista?",
+  "restoreListMessage": "Esta lista volverá a aparecer en el grupo.",
+  "listRestored": "Lista restaurada",
+  "failedToLoadArchivedLists": "No se pudieron cargar las listas archivadas",
+  "failedToRestoreList": "No se pudo restaurar la lista",
+  "members": "Miembros",
+  "removeMember": "Eliminar miembro",
+  "removeMemberTitle": "¿Eliminar miembro?",
+  "removeMemberMessage": "¿Eliminar a {memberName} de este grupo?",
+  "memberRemoved": "Miembro eliminado",
+  "failedToRemoveMember": "No se pudo eliminar el miembro",
+  "cannotRemoveYourself": "No puedes eliminarte a ti mismo",
+  "ownersCannotBeRemoved": "Los propietarios no se pueden eliminar",
+  "roleLabel": "Rol: {role}",
+  "manageMembers": "Gestionar miembros",
+  "makeAdmin": "Hacer admin",
+  "makeMember": "Hacer miembro",
+  "changeRoleTitle": "¿Cambiar rol?",
+  "changeRoleToAdminMessage": "¿Hacer admin de este grupo a {memberName}?",
+  "changeRoleToMemberMessage": "¿Cambiar a {memberName} de nuevo a miembro?",
+  "memberRoleUpdated": "Rol actualizado",
+  "failedToUpdateMemberRole": "No se pudo actualizar el rol",
+  "onlyOwnersCanChangeRoles": "Solo los propietarios pueden cambiar roles",
+  "ownerRoleCannotBeChanged": "El rol de propietario no se puede cambiar",
+  "clearBought": "Limpiar comprados",
+  "clearBoughtItems": "Limpiar artículos comprados",
+  "clearBoughtItemsTitle": "¿Limpiar artículos comprados?",
+  "clearBoughtItemsMessage": "Esto eliminará permanentemente todos los artículos comprados de esta lista.",
+  "boughtItemsCleared": "Artículos comprados eliminados",
+  "failedToClearBoughtItems": "No se pudieron limpiar los artículos comprados",
+  "about": "Acerca de",
+  "aboutApp": "Acerca de PesaListas",
+  "aboutAppSubtitle": "Planificación compartida para grupos y hogares.",
+  "appVersion": "Versión",
+  "buildNumber": "Compilación",
+  "@changeRoleToAdminMessage": {
+    "placeholders": {
+      "memberName": {}
+    }
+  },
+  "@changeRoleToMemberMessage": {
+    "placeholders": {
+      "memberName": {}
+    }
+  },
   "addListTypeItem": "Añadir elemento de {listType}",
   "@addListTypeItem": {
     "placeholders": {

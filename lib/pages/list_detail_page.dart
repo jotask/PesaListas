@@ -65,6 +65,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool generatingShopping = false;
   bool editingList = false;
   bool archivingList = false;
+  bool clearingBoughtItems = false;
   bool deletingList = false;
 
   List<Map<String, dynamic>> items = [];
@@ -111,6 +112,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
       deletingItem ||
       completingItem ||
       votingItem ||
+      clearingBoughtItems ||
       loadingVoteDetails ||
       loadingRecipeDetails ||
       deletingRecipe ||
@@ -285,6 +287,38 @@ class _ListDetailPageState extends State<ListDetailPage> {
     } finally {
       if (mounted) {
         setState(() => deletingList = false);
+      }
+    }
+  }
+
+  Future<void> clearBoughtShoppingItems() async {
+    if (clearingBoughtItems) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: context.l10n.clearBoughtItemsTitle,
+      message: context.l10n.clearBoughtItemsMessage,
+      deleteLabel: context.l10n.clearBought,
+    );
+
+    if (!confirmed) return;
+
+    setState(() => clearingBoughtItems = true);
+
+    try {
+      await shoppingRepository.clearBoughtItems(groupId);
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, context.l10n.boughtItemsCleared);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, context.l10n.failedToClearBoughtItems, error);
+    } finally {
+      if (mounted) {
+        setState(() => clearingBoughtItems = false);
       }
     }
   }
@@ -1341,6 +1375,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
                     onDeleteRecipe: deleteRecipe,
                     onGenerateShoppingFromMealPlans:
                         generateShoppingFromMealPlans,
+                    onClearBoughtShoppingItems: clearBoughtShoppingItems,
                   ),
                 ],
               ),

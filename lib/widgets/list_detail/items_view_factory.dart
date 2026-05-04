@@ -126,6 +126,7 @@ class ItemsViewFactory extends StatelessWidget {
         onReopen: onReopen,
         onEdit: onEdit,
         onDelete: onDelete,
+        onClearBought: onGenerateShoppingFromMealPlans,
       );
     }
 

@@ -1458,6 +1458,42 @@ class AppLocalizationsEs extends AppLocalizations {
       'El rol de propietario no se puede cambiar';
 
   @override
+  String get clearBought => 'Limpiar comprados';
+
+  @override
+  String get clearBoughtItems => 'Limpiar artículos comprados';
+
+  @override
+  String get clearBoughtItemsTitle => '¿Limpiar artículos comprados?';
+
+  @override
+  String get clearBoughtItemsMessage =>
+      'Esto eliminará permanentemente todos los artículos comprados de esta lista.';
+
+  @override
+  String get boughtItemsCleared => 'Artículos comprados eliminados';
+
+  @override
+  String get failedToClearBoughtItems =>
+      'No se pudieron limpiar los artículos comprados';
+
+  @override
+  String get about => 'Acerca de';
+
+  @override
+  String get aboutApp => 'Acerca de PesaListas';
+
+  @override
+  String get aboutAppSubtitle =>
+      'Planificación compartida para grupos y hogares.';
+
+  @override
+  String get appVersion => 'Versión';
+
+  @override
+  String get buildNumber => 'Compilación';
+
+  @override
   String deadlineDate(Object date) {
     return 'Fecha límite: $date';
   }

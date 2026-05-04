@@ -23,6 +23,7 @@ class ListItemsSection extends StatefulWidget {
     required this.onViewRecipeDetails,
     required this.onDeleteRecipe,
     required this.onGenerateShoppingFromMealPlans,
+    required this.onClearBoughtShoppingItems,
   });
 
   final String listType;
@@ -40,6 +41,7 @@ class ListItemsSection extends StatefulWidget {
   final void Function(Map<String, dynamic> recipe) onViewRecipeDetails;
   final void Function(String recipeId) onDeleteRecipe;
   final VoidCallback onGenerateShoppingFromMealPlans;
+  final VoidCallback onClearBoughtShoppingItems;
 
   @override
   State<ListItemsSection> createState() => _ListItemsSectionState();

@@ -1435,6 +1435,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ownerRoleCannotBeChanged => 'Owner role cannot be changed';
 
   @override
+  String get clearBought => 'Clear bought';
+
+  @override
+  String get clearBoughtItems => 'Clear bought items';
+
+  @override
+  String get clearBoughtItemsTitle => 'Clear bought items?';
+
+  @override
+  String get clearBoughtItemsMessage =>
+      'This will permanently remove all bought shopping items from this list.';
+
+  @override
+  String get boughtItemsCleared => 'Bought items cleared';
+
+  @override
+  String get failedToClearBoughtItems => 'Failed to clear bought items';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get aboutApp => 'About PesaListas';
+
+  @override
+  String get aboutAppSubtitle => 'Shared planning for groups and households.';
+
+  @override
+  String get appVersion => 'Version';
+
+  @override
+  String get buildNumber => 'Build';
+
+  @override
   String deadlineDate(Object date) {
     return 'Deadline: $date';
   }

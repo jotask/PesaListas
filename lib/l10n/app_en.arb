@@ -433,45 +433,56 @@
   "listTypeCannotBeChangedYet": "List type cannot be changed yet",
   "addListTypeItem": "Add {listType} item",
   "archivedLists": "Archived lists",
-"archivedListsSubtitle": "Restore archived lists or permanently delete them.",
-"noArchivedListsYet": "No archived lists yet",
-"noArchivedListsSubtitle": "Archived lists will appear here.",
-"restore": "Restore",
-"restoreList": "Restore list",
-"restoreListTitle": "Restore list?",
-"restoreListMessage": "This list will appear again in the group.",
-"listRestored": "List restored",
-"failedToLoadArchivedLists": "Failed to load archived lists",
-"failedToRestoreList": "Failed to restore list",
-"members": "Members",
-"removeMember": "Remove member",
-"removeMemberTitle": "Remove member?",
-"removeMemberMessage": "Remove {memberName} from this group?",
-"memberRemoved": "Member removed",
-"failedToRemoveMember": "Failed to remove member",
-"cannotRemoveYourself": "You cannot remove yourself",
-"ownersCannotBeRemoved": "Owners cannot be removed",
-"roleLabel": "Role: {role}",
-"manageMembers": "Manage members",
-"makeAdmin": "Make admin",
-"makeMember": "Make member",
-"changeRoleTitle": "Change role?",
-"changeRoleToAdminMessage": "Make {memberName} an admin of this group?",
-"changeRoleToMemberMessage": "Change {memberName} back to member?",
-"memberRoleUpdated": "Member role updated",
-"failedToUpdateMemberRole": "Failed to update member role",
-"onlyOwnersCanChangeRoles": "Only owners can change member roles",
-"ownerRoleCannotBeChanged": "Owner role cannot be changed",
-"@changeRoleToAdminMessage": {
-  "placeholders": {
-    "memberName": {}
-  }
-},
-"@changeRoleToMemberMessage": {
-  "placeholders": {
-    "memberName": {}
-  }
-},
+  "archivedListsSubtitle": "Restore archived lists or permanently delete them.",
+  "noArchivedListsYet": "No archived lists yet",
+  "noArchivedListsSubtitle": "Archived lists will appear here.",
+  "restore": "Restore",
+  "restoreList": "Restore list",
+  "restoreListTitle": "Restore list?",
+  "restoreListMessage": "This list will appear again in the group.",
+  "listRestored": "List restored",
+  "failedToLoadArchivedLists": "Failed to load archived lists",
+  "failedToRestoreList": "Failed to restore list",
+  "members": "Members",
+  "removeMember": "Remove member",
+  "removeMemberTitle": "Remove member?",
+  "removeMemberMessage": "Remove {memberName} from this group?",
+  "memberRemoved": "Member removed",
+  "failedToRemoveMember": "Failed to remove member",
+  "cannotRemoveYourself": "You cannot remove yourself",
+  "ownersCannotBeRemoved": "Owners cannot be removed",
+  "roleLabel": "Role: {role}",
+  "manageMembers": "Manage members",
+  "makeAdmin": "Make admin",
+  "makeMember": "Make member",
+  "changeRoleTitle": "Change role?",
+  "changeRoleToAdminMessage": "Make {memberName} an admin of this group?",
+  "changeRoleToMemberMessage": "Change {memberName} back to member?",
+  "memberRoleUpdated": "Member role updated",
+  "failedToUpdateMemberRole": "Failed to update member role",
+  "onlyOwnersCanChangeRoles": "Only owners can change member roles",
+  "ownerRoleCannotBeChanged": "Owner role cannot be changed",
+  "clearBought": "Clear bought",
+  "clearBoughtItems": "Clear bought items",
+  "clearBoughtItemsTitle": "Clear bought items?",
+  "clearBoughtItemsMessage": "This will permanently remove all bought shopping items from this list.",
+  "boughtItemsCleared": "Bought items cleared",
+  "failedToClearBoughtItems": "Failed to clear bought items",
+  "about": "About",
+  "aboutApp": "About PesaListas",
+  "aboutAppSubtitle": "Shared planning for groups and households.",
+  "appVersion": "Version",
+  "buildNumber": "Build",
+  "@changeRoleToAdminMessage": {
+    "placeholders": {
+      "memberName": {}
+    }
+  },
+  "@changeRoleToMemberMessage": {
+    "placeholders": {
+      "memberName": {}
+    }
+  },
   "@addListTypeItem": {
     "placeholders": {
       "listType": {}

@@ -67,6 +67,14 @@ class ShoppingRepository {
     return List<Map<String, dynamic>>.from(response);
   }
 
+  Future<void> clearBoughtItems(String groupId) async {
+    await _client
+        .from(AppTables.shoppingListItems)
+        .delete()
+        .eq(AppShoppingItemFields.groupId, groupId)
+        .eq(AppShoppingItemFields.checked, true);
+  }
+
   Future<List<Map<String, dynamic>>> _getRecipesForGroup(String groupId) async {
     final response = await _client
         .from(AppTables.recipes)

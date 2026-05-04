@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/app_theme_controller.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pesalistas/core/app_locale_controller.dart';
+import 'package:pesalistas/core/app_theme_controller.dart';
 import 'package:pesalistas/core/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/edit_profile_dialog.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/profile_repository.dart';
@@ -20,6 +21,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   late final AuthRepository authRepository;
   late final ProfileRepository profileRepository;
+  late final Future<PackageInfo> packageInfoFuture;
 
   bool loadingProfile = true;
   bool syncingProfile = false;
@@ -36,6 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     authRepository = AuthRepository(client);
     profileRepository = ProfileRepository(client);
+    packageInfoFuture = PackageInfo.fromPlatform();
 
     loadProfile();
   }
@@ -422,54 +425,54 @@ class _SettingsPageState extends State<SettingsPage> {
                     loading: loadingProfile,
                     onEdit: editingProfile ? null : editProfile,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _SettingsSection(
                     title: context.l10n.profileSectionTitle,
                     children: [
                       ListTile(
-                        leading: Icon(Icons.person_outline),
+                        leading: const Icon(Icons.person_outline),
                         title: Text(context.l10n.profileEditDisplayNameTitle),
                         subtitle: Text(
                           context.l10n.profileEditDisplayNameSubtitle,
                         ),
                         trailing: editingProfile
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: 22,
                                 height: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Icon(Icons.chevron_right),
+                            : const Icon(Icons.chevron_right),
                         onTap: editingProfile ? null : editProfile,
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: Icon(Icons.sync),
+                        leading: const Icon(Icons.sync),
                         title: Text(context.l10n.profileSyncTitle),
                         subtitle: Text(context.l10n.profileSyncSubtitle),
                         trailing: syncingProfile
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: 22,
                                 height: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Icon(Icons.chevron_right),
+                            : const Icon(Icons.chevron_right),
                         onTap: syncingProfile ? null : syncProfile,
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _SettingsSection(
                     title: context.l10n.preferencesSectionTitle,
                     children: [
                       ListTile(
-                        leading: Icon(Icons.language_outlined),
+                        leading: const Icon(Icons.language_outlined),
                         title: Text(context.l10n.languageTitle),
                         subtitle: Text(languageSubtitle),
-                        trailing: Icon(Icons.chevron_right),
+                        trailing: const Icon(Icons.chevron_right),
                         onTap: chooseLanguage,
                       ),
                       const Divider(height: 1),
@@ -482,7 +485,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: Icon(Icons.notifications_none_outlined),
+                        leading: const Icon(Icons.notifications_none_outlined),
                         title: Text(context.l10n.notificationsTitle),
                         subtitle: Text(context.l10n.notificationsSubtitle),
                         trailing: const _ComingSoonPill(),
@@ -492,23 +495,25 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
+                  _AboutSection(packageInfoFuture: packageInfoFuture),
+                  const SizedBox(height: 16),
                   _SettingsSection(
                     title: context.l10n.accountSectionTitle,
                     children: [
                       ListTile(
-                        leading: Icon(Icons.logout),
+                        leading: const Icon(Icons.logout),
                         title: Text(context.l10n.signOutTitle),
                         subtitle: Text(context.l10n.signOutSubtitle),
                         trailing: signingOut
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: 22,
                                 height: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Icon(Icons.chevron_right),
+                            : const Icon(Icons.chevron_right),
                         onTap: signingOut ? null : signOut,
                       ),
                     ],
@@ -565,7 +570,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                     )
                   : null,
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: loading
                   ? Text(context.l10n.profileLoading)
@@ -581,7 +586,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           email ?? context.l10n.profileNoEmail,
                           style: theme.textTheme.bodyMedium,
@@ -589,10 +594,10 @@ class _ProfileHeaderCard extends StatelessWidget {
                       ],
                     ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             IconButton(
               onPressed: onEdit,
-              icon: Icon(Icons.edit_outlined),
+              icon: const Icon(Icons.edit_outlined),
               tooltip: context.l10n.profileEditTooltip,
             ),
           ],
@@ -647,6 +652,45 @@ class _ComingSoonPill extends StatelessWidget {
           fontWeight: FontWeight.w800,
         ),
       ),
+    );
+  }
+}
+
+class _AboutSection extends StatelessWidget {
+  const _AboutSection({required this.packageInfoFuture});
+
+  final Future<PackageInfo> packageInfoFuture;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: packageInfoFuture,
+      builder: (context, snapshot) {
+        final packageInfo = snapshot.data;
+
+        return _SettingsSection(
+          title: context.l10n.about,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(context.l10n.aboutApp),
+              subtitle: Text(context.l10n.aboutAppSubtitle),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.tag_outlined),
+              title: Text(context.l10n.appVersion),
+              subtitle: Text(packageInfo?.version ?? '—'),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.numbers_outlined),
+              title: Text(context.l10n.buildNumber),
+              subtitle: Text(packageInfo?.buildNumber ?? '—'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
