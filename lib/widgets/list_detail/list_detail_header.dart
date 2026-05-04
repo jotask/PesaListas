@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/list_types.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class ListDetailHeader extends StatelessWidget {
   const ListDetailHeader({
@@ -8,11 +8,13 @@ class ListDetailHeader extends StatelessWidget {
     required this.listName,
     required this.config,
     required this.onBack,
+    required this.onEdit,
   });
 
   final String listName;
   final AppListTypeConfig config;
   final VoidCallback onBack;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +40,22 @@ class ListDetailHeader extends StatelessWidget {
             children: [
               SizedBox(
                 height: 40,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    onPressed: onBack,
-                    icon: Icon(Icons.arrow_back),
-                    tooltip: context.l10n.back,
-                    visualDensity: VisualDensity.compact,
-                  ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: onBack,
+                      icon: const Icon(Icons.arrow_back),
+                      tooltip: context.l10n.back,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: onEdit,
+                      icon: const Icon(Icons.edit_outlined),
+                      tooltip: context.l10n.editList,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
                 ),
               ),
               Padding(
@@ -62,7 +72,7 @@ class ListDetailHeader extends StatelessWidget {
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         listName,
@@ -77,15 +87,24 @@ class ListDetailHeader extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 8),
               Padding(
-                padding: const EdgeInsets.only(left: 8, top: 8),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+                padding: const EdgeInsets.only(left: 8),
+                child: Row(
                   children: [
-                    _ListTypePill(icon: config.icon, label: config.label(context)),
-                    Text(config.description(context), style: theme.textTheme.bodyMedium),
+                    _ListTypePill(
+                      icon: config.icon,
+                      label: config.label(context),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        config.description(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -108,22 +127,22 @@ class _ListTypePill extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: theme.colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 15, color: theme.colorScheme.onSurfaceVariant),
-          SizedBox(width: 6),
+          Icon(icon, size: 14, color: theme.colorScheme.onSecondaryContainer),
+          const SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSecondaryContainer,
             ),
           ),
         ],

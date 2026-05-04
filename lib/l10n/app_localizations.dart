@@ -2528,6 +2528,48 @@ abstract class AppLocalizations {
   /// **'Failed to cancel invitation'**
   String get failedToCancelInvitation;
 
+  /// No description provided for @editList.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit list'**
+  String get editList;
+
+  /// No description provided for @editListInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit list info'**
+  String get editListInfo;
+
+  /// No description provided for @updateListNameAndDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Update the list name and description.'**
+  String get updateListNameAndDescription;
+
+  /// No description provided for @listNameIsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'List name is required.'**
+  String get listNameIsRequired;
+
+  /// No description provided for @listUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'List updated'**
+  String get listUpdated;
+
+  /// No description provided for @failedToUpdateList.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update list'**
+  String get failedToUpdateList;
+
+  /// No description provided for @listTypeCannotBeChangedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'List type cannot be changed yet'**
+  String get listTypeCannotBeChangedYet;
+
   /// No description provided for @addListTypeItem.
   ///
   /// In en, this message translates to:

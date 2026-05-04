@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/dialogs/edit_list_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/list_fields.dart';
@@ -24,6 +25,7 @@ import 'package:pesalistas/dialogs/shopping_item_dialog.dart';
 import 'package:pesalistas/dialogs/vote_details_dialog.dart';
 import 'package:pesalistas/dialogs/vote_dialog.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
+import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/meal_plan_repository.dart';
 import 'package:pesalistas/repositories/recipe_ingredient_repository.dart';
 import 'package:pesalistas/repositories/recipe_repository.dart';
@@ -49,6 +51,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   late final RecipeIngredientRepository recipeIngredientRepository;
   late final MealPlanRepository mealPlanRepository;
   late final ShoppingRepository shoppingRepository;
+  late final ListRepository listRepository;
 
   bool loadingItems = true;
   bool creatingItem = false;
@@ -60,17 +63,20 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool loadingRecipeDetails = false;
   bool deletingRecipe = false;
   bool generatingShopping = false;
+  bool editingList = false;
 
   List<Map<String, dynamic>> items = [];
+  late Map<String, dynamic> currentList;
 
-  String get listId => widget.list[AppListFields.id].toString();
+  String get listId => currentList[AppListFields.id].toString();
 
-  String get groupId => widget.list[AppListFields.groupId].toString();
+  String get groupId => currentList[AppListFields.groupId].toString();
 
-  String get listName => widget.list[AppListFields.name]?.toString() ?? context.l10n.list;
+  String get listName =>
+      currentList[AppListFields.name]?.toString() ?? context.l10n.list;
 
   String get listType =>
-      widget.list[AppListFields.listType]?.toString() ??
+      currentList[AppListFields.listType]?.toString() ??
       AppListTypes.generic.value;
 
   AppListTypeConfig get listTypeConfig => AppListTypes.fromValue(listType);
@@ -106,12 +112,14 @@ class _ListDetailPageState extends State<ListDetailPage> {
       loadingVoteDetails ||
       loadingRecipeDetails ||
       deletingRecipe ||
-      generatingShopping;
+      generatingShopping ||
+      editingList;
 
   @override
   void initState() {
     super.initState();
 
+    currentList = Map<String, dynamic>.from(widget.list);
     final client = Supabase.instance.client;
 
     itemRepository = ItemRepository(client);
@@ -120,6 +128,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
     recipeIngredientRepository = RecipeIngredientRepository(client);
     mealPlanRepository = MealPlanRepository(client);
     shoppingRepository = ShoppingRepository(client);
+    listRepository = ListRepository(client);
 
     loadItems();
   }
@@ -212,6 +221,47 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
+  Future<void> editList() async {
+    if (editingList) return;
+
+    final result = await showDialog<EditListDialogResult>(
+      context: context,
+      builder: (_) => EditListDialog(list: currentList),
+    );
+
+    if (result == null) return;
+
+    setState(() => editingList = true);
+
+    try {
+      await listRepository.updateListInfo(
+        listId: listId,
+        name: result.name,
+        description: result.description,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        currentList = {
+          ...currentList,
+          AppListFields.name: result.name,
+          AppListFields.description: result.description,
+        };
+      });
+
+      showSuccessSnackBar(context, context.l10n.listUpdated);
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, context.l10n.failedToUpdateList, error);
+    } finally {
+      if (mounted) {
+        setState(() => editingList = false);
+      }
+    }
+  }
+
   Future<void> generateShoppingFromMealPlans() async {
     if (generatingShopping) return;
 
@@ -240,7 +290,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, context.l10n.failedToGenerateShoppingItems, error);
+      showErrorSnackBar(
+        context,
+        context.l10n.failedToGenerateShoppingItems,
+        error,
+      );
     } finally {
       if (mounted) {
         setState(() => generatingShopping = false);
@@ -356,7 +410,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, context.l10n.failedToCreateShoppingItem, error);
+      showErrorSnackBar(
+        context,
+        context.l10n.failedToCreateShoppingItem,
+        error,
+      );
     } finally {
       if (mounted) {
         setState(() => creatingItem = false);
@@ -532,7 +590,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, context.l10n.failedToUpdateShoppingItem, error);
+      showErrorSnackBar(
+        context,
+        context.l10n.failedToUpdateShoppingItem,
+        error,
+      );
     } finally {
       if (mounted) {
         setState(() => editingItem = false);
@@ -683,7 +745,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, context.l10n.failedToUpdateShoppingItem, error);
+      showErrorSnackBar(
+        context,
+        context.l10n.failedToUpdateShoppingItem,
+        error,
+      );
     } finally {
       if (mounted) {
         setState(() => completingItem = false);
@@ -755,7 +821,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, context.l10n.failedToDeleteShoppingItem, error);
+      showErrorSnackBar(
+        context,
+        context.l10n.failedToDeleteShoppingItem,
+        error,
+      );
     } finally {
       if (mounted) {
         setState(() => deletingItem = false);
@@ -800,7 +870,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
     final confirmed = await showConfirmDeleteDialog(
       context: context,
       title: context.l10n.deleteRecipe2,
-      message: context.l10n.thisWillPermanentlyDeleteThisRecipeAndItsIngredients,
+      message:
+          context.l10n.thisWillPermanentlyDeleteThisRecipeAndItsIngredients,
     );
 
     if (!confirmed) return;
@@ -1133,7 +1204,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   }
 
   void goBack() {
-    Navigator.of(context).maybePop();
+    Navigator.of(context).maybePop(currentList);
   }
 
   @override
@@ -1156,7 +1227,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
       ),
       body: Column(
         children: [
-          ListDetailHeader(listName: listName, config: config, onBack: goBack),
+          ListDetailHeader(
+            listName: listName,
+            config: config,
+            onBack: goBack,
+            onEdit: editList,
+          ),
           if (isBusy) const LinearProgressIndicator(),
           Expanded(
             child: RefreshIndicator(

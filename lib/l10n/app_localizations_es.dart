@@ -1289,6 +1289,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get failedToCancelInvitation => 'No se pudo cancelar la invitación';
 
   @override
+  String get editList => 'Editar lista';
+
+  @override
+  String get editListInfo => 'Editar información de la lista';
+
+  @override
+  String get updateListNameAndDescription =>
+      'Actualiza el nombre y la descripción de la lista.';
+
+  @override
+  String get listNameIsRequired => 'El nombre de la lista es obligatorio.';
+
+  @override
+  String get listUpdated => 'Lista actualizada';
+
+  @override
+  String get failedToUpdateList => 'No se pudo actualizar la lista';
+
+  @override
+  String get listTypeCannotBeChangedYet =>
+      'El tipo de lista todavía no se puede cambiar';
+
+  @override
   String addListTypeItem(Object listType) {
     return 'Añadir elemento de $listType';
   }

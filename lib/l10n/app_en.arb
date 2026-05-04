@@ -412,6 +412,13 @@
   "cancelInvitation": "Cancel invitation",
   "invitationCancelled": "Invitation cancelled",
   "failedToCancelInvitation": "Failed to cancel invitation",
+  "editList": "Edit list",
+  "editListInfo": "Edit list info",
+  "updateListNameAndDescription": "Update the list name and description.",
+  "listNameIsRequired": "List name is required.",
+  "listUpdated": "List updated",
+  "failedToUpdateList": "Failed to update list",
+  "listTypeCannotBeChangedYet": "List type cannot be changed yet",
   "addListTypeItem": "Add {listType} item",
   "@addListTypeItem": {
     "placeholders": {

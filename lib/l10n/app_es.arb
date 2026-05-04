@@ -412,6 +412,13 @@
   "cancelInvitation": "Cancelar invitación",
   "invitationCancelled": "Invitación cancelada",
   "failedToCancelInvitation": "No se pudo cancelar la invitación",
+  "editList": "Editar lista",
+  "editListInfo": "Editar información de la lista",
+  "updateListNameAndDescription": "Actualiza el nombre y la descripción de la lista.",
+  "listNameIsRequired": "El nombre de la lista es obligatorio.",
+  "listUpdated": "Lista actualizada",
+  "failedToUpdateList": "No se pudo actualizar la lista",
+  "listTypeCannotBeChangedYet": "El tipo de lista todavía no se puede cambiar",
   "addListTypeItem": "Añadir elemento de {listType}",
   "@addListTypeItem": {
     "placeholders": {

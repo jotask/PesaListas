@@ -17,6 +17,20 @@ class ListRepository {
     return List<Map<String, dynamic>>.from(response);
   }
 
+  Future<void> updateListInfo({
+    required String listId,
+    required String name,
+    String? description,
+  }) async {
+    await _client
+        .from(AppTables.lists)
+        .update({
+          AppListFields.name: name,
+          AppListFields.description: description,
+        })
+        .eq(AppListFields.id, listId);
+  }
+
   Future<void> createList({
     required String groupId,
     required String name,
