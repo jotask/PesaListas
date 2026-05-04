@@ -69,7 +69,7 @@ class VotableItemCard extends StatelessWidget {
 
   bool get hasVotes => voteCount > 0;
 
-  String get voteCountText {
+  String voteCountText(BuildContext context) {
     if (voteCount == 0) return context.l10n.noVotesYet;
     if (voteCount == 1) return context.l10n.voteCountOne;
     return context.l10n.voteCountMany(voteCount);
@@ -132,7 +132,7 @@ class VotableItemCard extends StatelessWidget {
                       children: [
                         _InfoChip(
                           icon: Icons.how_to_vote_outlined,
-                          label: voteCountText,
+                          label: voteCountText(context),
                         ),
                         if (hasVotes)
                           _InfoChip(

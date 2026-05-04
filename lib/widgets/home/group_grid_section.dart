@@ -95,7 +95,7 @@ class _GroupGridCard extends StatelessWidget {
     return members.length > 1;
   }
 
-  String get name {
+  String name(BuildContext context) {
     final value = group[AppGroupFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -105,7 +105,7 @@ class _GroupGridCard extends StatelessWidget {
     return value.trim();
   }
 
-  String get description {
+  String description(BuildContext context) {
     final value = group[AppGroupFields.description]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -117,7 +117,7 @@ class _GroupGridCard extends StatelessWidget {
     return value.trim();
   }
 
-  String get typeLabel {
+  String typeLabel(BuildContext context) {
     return isShared ? context.l10n.sharedGroup : context.l10n.individual;
   }
 
@@ -125,7 +125,7 @@ class _GroupGridCard extends StatelessWidget {
     return isShared ? Icons.groups_2_outlined : Icons.person_outline;
   }
 
-  String get memberCountLabel {
+  String memberCountLabel(BuildContext context) {
     final count = members.length;
 
     if (count == 0) return context.l10n.noMembersLoaded;
@@ -169,7 +169,7 @@ class _GroupGridCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            name,
+                            name(context),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -181,14 +181,14 @@ class _GroupGridCard extends StatelessWidget {
                         SizedBox(width: 8),
                         _GroupTypePill(
                           icon: typeIcon,
-                          label: typeLabel,
+                          label: typeLabel(context),
                           highlighted: isShared,
                         ),
                       ],
                     ),
                     SizedBox(height: 6),
                     Text(
-                      description,
+                      description(context),
                       softWrap: true,
                       style: theme.textTheme.bodyMedium,
                     ),
@@ -198,7 +198,7 @@ class _GroupGridCard extends StatelessWidget {
                         Expanded(child: _MemberPreview(members: members)),
                         SizedBox(width: 8),
                         Text(
-                          memberCountLabel,
+                          memberCountLabel(context),
                           style: theme.textTheme.bodySmall,
                         ),
                       ],
@@ -257,9 +257,9 @@ class _MemberPreview extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 5),
               child: Tooltip(
-                message: _MemberDisplay.nameFor(member),
+                message: _MemberDisplay.nameFor(context, member),
                 child: _TinyMemberAvatar(
-                  name: _MemberDisplay.nameFor(member),
+                  name: _MemberDisplay.nameFor(context, member),
                   avatarUrl: _MemberDisplay.avatarUrlFor(member),
                 ),
               ),
@@ -290,7 +290,7 @@ class _MemberDisplay {
     return null;
   }
 
-  static String nameFor(Map<String, dynamic> member) {
+  static String nameFor(BuildContext context, Map<String, dynamic> member) {
     final profile = profileFor(member);
 
     final displayName = profile?[AppProfileFields.displayName]?.toString();

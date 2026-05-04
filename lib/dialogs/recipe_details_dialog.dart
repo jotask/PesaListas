@@ -36,7 +36,7 @@ class RecipeDetailsDialog extends StatelessWidget {
   final Map<String, dynamic> recipe;
   final List<Map<String, dynamic>> ingredients;
 
-  String get name {
+  String name(BuildContext context) {
     final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -81,7 +81,7 @@ class RecipeDetailsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(name),
+      title: Text(name(context)),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
@@ -218,7 +218,7 @@ class _IngredientRow extends StatelessWidget {
     return ingredient[AppRecipeIngredientFields.id].toString();
   }
 
-  String get name {
+  String name(BuildContext context) {
     final value = ingredient[AppRecipeIngredientFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -264,7 +264,7 @@ class _IngredientRow extends StatelessWidget {
     return text;
   }
 
-  String get amountText {
+  String amountText(BuildContext context) {
     final parts = <String>[];
 
     if (quantityText != null) {
@@ -287,7 +287,7 @@ class _IngredientRow extends StatelessWidget {
       RecipeDetailsDialogResult(
         action: RecipeDetailsDialogAction.editIngredient,
         ingredientId: id,
-        ingredientName: name,
+        ingredientName: name(context),
         ingredient: ingredient,
       ),
     );
@@ -298,7 +298,7 @@ class _IngredientRow extends StatelessWidget {
       RecipeDetailsDialogResult(
         action: RecipeDetailsDialogAction.deleteIngredient,
         ingredientId: id,
-        ingredientName: name,
+        ingredientName: name(context),
       ),
     );
   }
@@ -309,8 +309,8 @@ class _IngredientRow extends StatelessWidget {
       child: ListTile(
         dense: true,
         leading: CircleAvatar(child: Icon(Icons.kitchen_outlined)),
-        title: Text(name),
-        subtitle: Text(note == null ? amountText : '$amountText • $note'),
+        title: Text(name(context)),
+        subtitle: Text(note == null ? amountText(context) : '${amountText(context)} • $note'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

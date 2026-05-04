@@ -23,7 +23,7 @@ class GroupOverviewCard extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onEdit;
 
-  String get groupName {
+  String groupName(BuildContext context) {
     final value = group[AppGroupFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -111,7 +111,7 @@ class GroupOverviewCard extends StatelessWidget {
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        groupName,
+                        groupName(context),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -199,9 +199,9 @@ class _PeoplePreview extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 6),
               child: Tooltip(
-                message: _MemberDisplay.nameFor(member),
+                message: _MemberDisplay.nameFor(context, member),
                 child: _TinyAvatar(
-                  name: _MemberDisplay.nameFor(member),
+                  name: _MemberDisplay.nameFor(context, member),
                   avatarUrl: _MemberDisplay.avatarUrlFor(member),
                 ),
               ),
@@ -213,7 +213,7 @@ class _PeoplePreview extends StatelessWidget {
             ),
           if (pendingInvitations.isNotEmpty)
             Tooltip(
-              message: _pendingTooltip,
+              message: _pendingTooltip(context),
               child: _PendingAvatar(count: pendingInvitations.length),
             ),
         ],
@@ -221,7 +221,7 @@ class _PeoplePreview extends StatelessWidget {
     );
   }
 
-  String get _pendingTooltip {
+  String _pendingTooltip(BuildContext context) {
     final emails = pendingInvitations
         .take(3)
         .map((invite) {
@@ -251,7 +251,7 @@ class _MemberDisplay {
     return null;
   }
 
-  static String nameFor(Map<String, dynamic> member) {
+  static String nameFor(BuildContext context, Map<String, dynamic> member) {
     final profile = profileFor(member);
 
     final displayName = profile?[AppProfileFields.displayName]?.toString();

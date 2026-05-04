@@ -20,7 +20,7 @@ class TaskItemCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  String get title {
+  String title(BuildContext context) {
     final value = item[AppItemFields.title]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -52,7 +52,7 @@ class TaskItemCard extends StatelessWidget {
     return priority > 0;
   }
 
-  String get priorityText {
+  String priorityText(BuildContext context) {
     return AppPriorityTypes.displayText(context, priority);
   }
 
@@ -72,7 +72,7 @@ class TaskItemCard extends StatelessWidget {
     return DateTime(now.year, now.month, now.day);
   }
 
-  String get deadlineText {
+  String deadlineText(BuildContext context) {
     final formatted = AppDateFormatting.yyyyMmDdFromValue(
       item[AppItemFields.deadlineAt],
     );
@@ -165,7 +165,7 @@ class TaskItemCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  title,
+                                  title(context),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -209,7 +209,7 @@ class TaskItemCard extends StatelessWidget {
                   children: [
                     _TaskInfoChip(
                       icon: priorityStyle.icon,
-                      label: hasPriority ? priorityText : context.l10n.noPriority,
+                      label: hasPriority ? priorityText(context) : context.l10n.noPriority,
                       filled: hasPriority,
                       backgroundColor: hasPriority
                           ? priorityStyle.chipBackground
@@ -220,7 +220,9 @@ class TaskItemCard extends StatelessWidget {
                     ),
                     _TaskInfoChip(
                       icon: deadlineStyle.dateIcon,
-                      label: hasDeadline ? 'Due $deadlineText' : deadlineText,
+                      label: hasDeadline
+                        ? context.l10n.deadlineDate(deadlineText(context))
+                        : deadlineText(context),
                       filled: hasDeadline,
                       backgroundColor: hasDeadline
                           ? deadlineStyle.chipBackground

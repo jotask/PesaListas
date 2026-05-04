@@ -189,7 +189,7 @@ class _MemberPersonCard extends StatelessWidget {
     return null;
   }
 
-  String get displayName {
+  String displayName(BuildContext context) {
     final displayName = profile?[AppProfileFields.displayName]?.toString();
     final username = profile?[AppProfileFields.username]?.toString();
 
@@ -218,8 +218,8 @@ class _MemberPersonCard extends StatelessWidget {
     return member[AppMemberFields.role]?.toString() ?? 'member';
   }
 
-  String get initials {
-    final name = displayName.trim();
+  String initials(BuildContext context) {
+    final name = displayName(context).trim();
 
     if (name.isEmpty || name == context.l10n.unknownUser) {
       return '?';
@@ -249,10 +249,10 @@ class _MemberPersonCard extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _ProfileAvatar(avatarUrl: avatarUrl, fallbackText: initials),
+                _ProfileAvatar(avatarUrl: avatarUrl, fallbackText: initials(context)),
                 SizedBox(height: 10),
                 Text(
-                  displayName,
+                  displayName(context),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
@@ -339,7 +339,7 @@ class _PendingInvitePersonCard extends StatelessWidget {
   final Map<String, dynamic> invitation;
   final VoidCallback onCancel;
 
-  String get email {
+  String email(BuildContext context) {
     return invitation[AppInvitationFields.invitedEmail]?.toString() ??
         invitation[AppInvitationFields.email]?.toString() ??
         context.l10n.unknownEmail;
@@ -374,7 +374,7 @@ class _PendingInvitePersonCard extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    email,
+                    email(context),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,

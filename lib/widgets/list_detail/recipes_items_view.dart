@@ -60,7 +60,7 @@ class _RecipeCard extends StatelessWidget {
   final VoidCallback onDetails;
   final VoidCallback onDelete;
 
-  String get title {
+  String title(BuildContext context) {
     final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -70,7 +70,7 @@ class _RecipeCard extends StatelessWidget {
     return value.trim();
   }
 
-  String get description {
+  String description(BuildContext context) {
     final value = recipe[AppRecipeFields.description]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -147,7 +147,7 @@ class _RecipeCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            title,
+                            title(context),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -164,7 +164,7 @@ class _RecipeCard extends StatelessWidget {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      description,
+                      description(context),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium,

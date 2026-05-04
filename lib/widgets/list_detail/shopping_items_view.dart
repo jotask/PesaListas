@@ -267,7 +267,7 @@ class _ShoppingItemCard extends StatelessWidget {
 
   bool get checked => item[AppShoppingItemFields.checked] == true;
 
-  String get name {
+  String name(BuildContext context) {
     final value = item[AppShoppingItemFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -322,7 +322,7 @@ class _ShoppingItemCard extends StatelessWidget {
     return value != null && value.isNotEmpty;
   }
 
-  String get amountText {
+  String amountText(BuildContext context) {
     final parts = <String>[];
 
     if (quantity != null) {
@@ -371,7 +371,7 @@ class _ShoppingItemCard extends StatelessWidget {
   }
 
   String subtitle(BuildContext context) {
-    final parts = <String>[amountText];
+    final parts = <String>[amountText(context)];
 
     if (recipeName != null) {
       parts.add(context.l10n.recipeSourceLabel(recipeName!));
@@ -446,7 +446,7 @@ class _ShoppingItemCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  name,
+                                  name(context),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,

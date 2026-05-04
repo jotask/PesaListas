@@ -448,7 +448,7 @@ class _MealPlanDateSection extends StatelessWidget {
     return DateTime(parsed.year, parsed.month, parsed.day);
   }
 
-  String get friendlyDateLabel {
+  String friendlyDateLabel(BuildContext context) {
     final date = parsedDate;
 
     if (date == null) return dateLabel;
@@ -465,8 +465,8 @@ class _MealPlanDateSection extends StatelessWidget {
     return dateLabel;
   }
 
-  bool get shouldShowRawDate {
-    return friendlyDateLabel != dateLabel;
+  bool shouldShowRawDate(BuildContext context) {
+    return friendlyDateLabel(context) != dateLabel;
   }
 
   @override
@@ -487,13 +487,16 @@ class _MealPlanDateSection extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                context.l10n.sectionCount(friendlyDateLabel, mealPlans.length),
+                context.l10n.sectionCount(
+                  friendlyDateLabel(context),
+                  mealPlans.length,
+                ),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              if (shouldShowRawDate) ...[
+              if (shouldShowRawDate(context)) ...[
                 const SizedBox(width: 8),
                 Text(dateLabel, style: theme.textTheme.bodySmall),
               ],
@@ -553,7 +556,7 @@ class _MealPlanCard extends StatelessWidget {
     return recipe != null;
   }
 
-  String get title {
+  String title(BuildContext context) {
     final recipeName = recipe?[AppRecipeFields.name]?.toString();
 
     if (recipeName != null && recipeName.trim().isNotEmpty) {
@@ -569,7 +572,7 @@ class _MealPlanCard extends StatelessWidget {
     return context.l10n.customMeal;
   }
 
-  String? get note {
+  String? note(BuildContext context) {
     final value = mealPlan[AppMealPlanFields.note]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -578,14 +581,14 @@ class _MealPlanCard extends StatelessWidget {
 
     final trimmed = value.trim();
 
-    if (trimmed == title) {
+    if (trimmed == title(context)) {
       return null;
     }
 
     return trimmed;
   }
 
-  String get helperText {
+  String helperText(BuildContext context) {
     if (hasRecipe) {
       return context.l10n.recipeMealCanGenerateShoppingItems;
     }
@@ -596,6 +599,7 @@ class _MealPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final noteText = note(context);
 
     return Card(
       child: InkWell(
@@ -633,17 +637,20 @@ class _MealPlanCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      title,
+                      title(context),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(helperText, style: theme.textTheme.bodyMedium),
-                    if (note != null) ...[
+                    Text(
+                      helperText(context),
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    if (noteText != null) ...[
                       const SizedBox(height: 8),
-                      _MealNoteBox(note: note!),
+                      _MealNoteBox(note: noteText),
                     ],
                     const SizedBox(height: 12),
                     Row(

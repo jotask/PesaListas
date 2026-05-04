@@ -133,7 +133,7 @@ class _InvitationTile extends StatelessWidget {
     return null;
   }
 
-  String get groupName {
+  String groupName(BuildContext context) {
     final value = group?[AppGroupFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -143,7 +143,7 @@ class _InvitationTile extends StatelessWidget {
     return value.trim();
   }
 
-  String get role {
+  String role(BuildContext context) {
     final value = invitation[AppInvitationFields.role]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -170,7 +170,7 @@ class _InvitationTile extends StatelessWidget {
         children: [
           CircleAvatar(
             child: Text(
-              groupName.characters.first.toUpperCase(),
+              groupName(context).characters.first.toUpperCase(),
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ),
@@ -180,13 +180,13 @@ class _InvitationTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  groupName,
+                  groupName(context),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
                 SizedBox(height: 2),
-                Text(context.l10n.invitedAsRole(role), style: theme.textTheme.bodySmall),
+                Text(context.l10n.invitedAsRole(role(context)), style: theme.textTheme.bodySmall),
               ],
             ),
           ),

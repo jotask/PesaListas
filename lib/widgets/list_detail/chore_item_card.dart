@@ -19,7 +19,7 @@ class ChoreItemCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  String get title {
+  String title(BuildContext context) {
     final value = item[AppItemFields.title]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -69,11 +69,15 @@ class ChoreItemCard extends StatelessWidget {
     return DateTime(now.year, now.month, now.day);
   }
 
-  String get recurrenceText {
-    return AppRecurrenceTypes.displayText(context, recurrenceType, recurrenceInterval);
+  String recurrenceText(BuildContext context) {
+    return AppRecurrenceTypes.displayText(
+      context,
+      recurrenceType,
+      recurrenceInterval,
+    );
   }
 
-  String get nextDueText {
+  String nextDueText(BuildContext context) {
     final formatted = AppDateFormatting.yyyyMmDdFromValue(
       item[AppItemFields.nextDueAt],
     );
@@ -158,7 +162,7 @@ class ChoreItemCard extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                title,
+                                title(context),
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
@@ -199,12 +203,14 @@ class ChoreItemCard extends StatelessWidget {
                 children: [
                   _ChoreInfoChip(
                     icon: Icons.repeat,
-                    label: hasRecurrence ? recurrenceText : context.l10n.doesNotRepeat,
+                    label: hasRecurrence ? recurrenceText(context) : context.l10n.doesNotRepeat,
                     filled: hasRecurrence,
                   ),
                   _ChoreInfoChip(
                     icon: dueStyle.dateIcon,
-                    label: hasNextDueDate ? 'Due $nextDueText' : nextDueText,
+                    label: hasNextDueDate
+                        ? context.l10n.nextDueDate(nextDueText(context))
+                        : nextDueText(context),
                     filled: hasNextDueDate,
                     backgroundColor: hasNextDueDate
                         ? dueStyle.chipBackground

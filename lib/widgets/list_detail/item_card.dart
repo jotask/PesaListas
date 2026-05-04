@@ -21,7 +21,7 @@ class ItemCard extends StatelessWidget {
     return AppItemStatus.isDone(item[AppItemFields.status]);
   }
 
-  String get title {
+  String title(BuildContext context) {
     final value = item[AppItemFields.title]?.toString();
 
     if (value == null || value.trim().isEmpty) {
@@ -31,7 +31,7 @@ class ItemCard extends StatelessWidget {
     return value.trim();
   }
 
-  String get subtitle {
+  String subtitle(BuildContext context) {
     final description = item[AppItemFields.description]?.toString();
 
     if (description != null && description.trim().isNotEmpty) {
@@ -41,7 +41,7 @@ class ItemCard extends StatelessWidget {
     return isDone ? context.l10n.done : context.l10n.open;
   }
 
-  String get stateLabel {
+  String stateLabel(BuildContext context) {
     return isDone ? context.l10n.done : context.l10n.open;
   }
 
@@ -85,7 +85,7 @@ class ItemCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  title,
+                                  title(context),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -95,12 +95,15 @@ class ItemCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              _ItemStatePill(isDone: isDone, label: stateLabel),
+                              _ItemStatePill(
+                                isDone: isDone,
+                                label: stateLabel(context),
+                              ),
                             ],
                           ),
                           SizedBox(height: 4),
                           Text(
-                            subtitle,
+                            subtitle(context),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium,
@@ -119,7 +122,11 @@ class ItemCard extends StatelessWidget {
                         icon: Icon(
                           isDone ? Icons.undo : Icons.check_circle_outline,
                         ),
-                        label: Text(isDone ? context.l10n.markAsOpen : context.l10n.markAsDone),
+                        label: Text(
+                          isDone
+                              ? context.l10n.markAsOpen
+                              : context.l10n.markAsDone,
+                        ),
                       ),
                     ),
                     SizedBox(width: 8),
