@@ -1,51 +1,46 @@
 # PesaListas
 
-PesaListas is a Flutter app for shared household planning. It helps groups manage shared lists, recipes, meal plans, shopping items, chores, tasks, ideas, movies, and activities.
+PesaListas is a shared household planning app built with Flutter and Supabase. It helps people organize groups, lists, chores, tasks, recipes, meal plans, shopping, ideas, movies, and activities in one shared space.
 
-The app uses Supabase for authentication, database storage, row-level security, and shared group data.
+The project is designed around collaborative living: families, couples, roommates, and small groups can plan together, vote on ideas, manage recurring work, and keep shared household information organized.
 
-## Current status
+## Overview
 
-The app currently supports:
+PesaListas provides shared spaces where members can create and manage different kinds of lists. Each list type is tailored to a specific use case, such as tasks, chores, recipes, shopping, or voting-based decisions.
 
-- Google/Supabase authentication
-- User profiles with display names and avatars
-- Shared groups and individual groups
-- Group invitations
-- Group member previews
-- Editable group name and description
-- Multiple list types
-- Tasks and chores
-- Votable lists for ideas, movies, and activities
-- Recipes with ingredients
-- Meal planning linked to recipes
-- Shopping lists backed by a dedicated `shopping_list_items` table
-- Shopping generation from meal plans
-- Duplicate prevention for generated shopping items
-- Settings/profile screen
-- English and Spanish localization foundation
-- In-app language selector with persistence
+The app currently supports English and Spanish, light and dark themes, persistent user preferences, and group-based collaboration.
 
-## Main flows
+## Current features
+
+### Authentication and profiles
+
+- Google sign-in
+- Supabase authentication
+- User profile creation
+- Display name editing
+- Avatar sync from authentication metadata
+- Settings screen
+- Persistent language preference
+- Persistent theme preference
 
 ### Groups
 
-Users can create shared spaces called groups. Groups can be used individually or shared with other members.
-
-Supported group features:
-
 - Create groups
-- View groups as cards
-- See whether a group is individual or shared
-- See member avatars
 - Edit group name and description
-- Invite members
-- View pending invitations
+- Use groups individually or as shared spaces
+- View member avatars
+- Invite members by email
 - Accept invitations
+- Decline invitations
+- Cancel pending invitations
 
 ### Lists
 
-Groups can contain different types of lists. Each list type has its own UI behavior.
+- Create lists inside groups
+- Edit list name and description
+- Archive lists
+- Delete lists
+- Dedicated layouts for different list types
 
 Supported list types include:
 
@@ -61,275 +56,134 @@ Supported list types include:
 
 ### Tasks and chores
 
-Task-like list types support completion and reopening.
+- Create, edit, and delete items
+- Complete and reopen items
+- Add deadlines to task-style items
+- Add priorities
+- Support recurring chores
+- Track next due dates
 
-Chore lists support recurring task behavior.
+### Voting lists
 
-### Voting
+Voting is available for list types where a group may want to choose together, such as movies, ideas, or activities.
 
-Some list types support voting, such as:
+Supported voting features:
 
-- Movies
-- Ideas
-- Activities
-
-Users can vote on items, update their vote, remove their vote, and view vote summaries.
+- Add a vote
+- Update a vote
+- Remove a vote
+- View vote summaries
+- View vote details
 
 ### Recipes
 
-Recipes are stored in the dedicated `recipes` table and ingredients are stored in `recipe_ingredients`.
-
-Supported recipe features:
-
 - Create recipes
-- Edit recipe info
-- Edit recipe instructions separately
+- Edit recipe information
+- Edit cooking instructions separately
+- Add ingredients
+- Edit ingredients
+- Delete ingredients
 - Delete recipes
-- Add recipe ingredients
-- Edit recipe ingredients
-- Delete recipe ingredients
-- View recipe detail dialogs
-- Recipe cards with useful metadata
+- View recipe details in a dedicated dialog
 
 ### Meal planning
 
-Meal plans are stored in the dedicated `meal_plans` table.
-
-Supported meal planning features:
-
 - Create meal plans
+- Link meals to recipes
+- Create custom meals without recipes
 - Edit meal plans
 - Delete meal plans
-- Link meal plans to recipes
-- Create custom meals without recipes
 - Filter meals by all, upcoming, this week, and past
-- Group meals by date
-- Show recipe/custom meal context
+- Group meal plans by date
+- Show whether a meal can generate shopping items
 
 ### Shopping
-
-Shopping lists are stored in the dedicated `shopping_list_items` table.
-
-Supported shopping features:
 
 - Create shopping items
 - Edit shopping items
 - Delete shopping items
 - Mark items as bought
 - Mark items as not bought
-- Group shopping items into To buy and Bought
-- Show generated source context
+- Group shopping items into “To buy” and “Bought”
+- Generate shopping items from recipe-based meal plans
 - Show recipe and meal-plan source information for generated items
+- Prevent duplicate generated shopping items
 
-### Shopping generation
+### Localization and appearance
 
-Meal planning can generate shopping items from planned recipe meals.
-
-This uses the Supabase RPC:
-
-```sql
-generate_shopping_from_meal_plans(target_group_id, from_date, to_date)
-```
-
-Generated items include:
-
-- Ingredient name
-- Quantity
-- Unit
-- Source recipe
-- Source meal plan
-
-Duplicate generated shopping items are prevented at the database level.
-
-## Settings and localization
-
-The Settings page currently supports:
-
-- Profile preview
-- Display name editing
-- Profile sync from Google/Auth metadata
-- Sign out
-- Preferences section
-- Language selector
-- English and Spanish localization
-- Persisted language choice
-
-The localization setup uses Flutter `gen-l10n` with ARB files.
-
-Localization files:
-
-```text
-lib/l10n/app_en.arb
-lib/l10n/app_es.arb
-```
-
-Generated localization files:
-
-```text
-lib/l10n/app_localizations.dart
-lib/l10n/app_localizations_en.dart
-lib/l10n/app_localizations_es.dart
-```
+- English interface
+- Spanish interface
+- In-app language selector
+- System, light, and dark theme options
+- Persisted language and theme choices
 
 ## Tech stack
 
 - Flutter
 - Dart
-- Supabase
 - Supabase Auth
 - Supabase Postgres
-- Row Level Security
+- Supabase Row Level Security
 - Google Sign-In
 - Flutter localization
-- Shared preferences for persisted language choice
+- Shared preferences
 
-## Project setup
+## Roadmap
 
-### 1. Install dependencies
+### Short term
 
-```bash
-flutter pub get
-```
+- Add an archived lists screen
+- Restore archived lists
+- Improve archived list management
+- Continue polishing list settings
+- Improve long-text handling across small screens
+- Complete a full smoke-test pass across all major flows
 
-### 2. Generate localization files
+### Group management
 
-```bash
-flutter gen-l10n
-```
+- Remove members from groups
+- Change member roles
+- Improve owner and admin controls
+- Show clearer group permissions
+- Improve invitation history and pending invitation management
 
-### 3. Analyze the project
+### Shopping and meal planning
 
-```bash
-flutter analyze
-```
+- Merge duplicate shopping ingredients across different meals
+- Group shopping items by recipe or source
+- Clear bought shopping items
+- Add a weekly meal planning view
+- Add faster meal duplication and meal moving
 
-### 4. Run the app
+### Recipes
 
-```bash
-flutter run
-```
+- Add recipe search
+- Add recipe filters
+- Add favorite recipes
+- Add recipe categories or tags
+- Add recipe duplication
 
-## Required Flutter configuration
+### Settings and preferences
 
-The project uses generated localization files. Make sure `pubspec.yaml` includes:
+- Add app version information
+- Add notification preferences
+- Add reminder preferences for chores, meals, and shopping
+- Improve profile customization
 
-```yaml
-flutter:
-  generate: true
-  uses-material-design: true
-```
+### Quality and maintainability
 
-The project also requires:
+- Add automated tests for core flows
+- Add widget tests for important screens and dialogs
+- Improve data parsing and validation
+- Continue simplifying repository and UI structure
+- Keep localization coverage complete as new features are added
 
-```yaml
-dependencies:
-  flutter_localizations:
-    sdk: flutter
-  shared_preferences: ^2.5.5
-  supabase_flutter: ^2.12.4
-  google_sign_in: ^7.2.0
-```
+## Project goals
 
-## Localization configuration
+PesaListas aims to be:
 
-The project expects a root-level `l10n.yaml` file similar to:
-
-```yaml
-arb-dir: lib/l10n
-template-arb-file: app_en.arb
-output-localization-file: app_localizations.dart
-output-dir: lib/l10n
-synthetic-package: false
-nullable-getter: false
-```
-
-After editing ARB files, regenerate localization files:
-
-```bash
-flutter gen-l10n
-```
-
-## Supabase setup
-
-The app assumes a Supabase project with tables similar to:
-
-- `profiles`
-- `groups`
-- `group_members`
-- `group_invitations`
-- `lists`
-- `items`
-- `item_votes`
-- `item_completions`
-- `recipes`
-- `recipe_ingredients`
-- `meal_plans`
-- `shopping_list_items`
-
-The app also expects row-level security policies and helper functions that allow group members to access shared group data.
-
-Important RPC functions include:
-
-- `sync_my_profile_from_auth`
-- `invite_group_member`
-- `accept_group_invitation`
-- `complete_item`
-- `generate_shopping_from_meal_plans`
-
-## Database notes
-
-Shopping generation depends on `shopping_list_items` having source columns:
-
-```text
-source_recipe_id
-source_meal_plan_id
-```
-
-Generated shopping duplicate prevention is handled by a unique generated-items index and an updated RPC that avoids inserting duplicate generated items for the same meal plan, recipe, name, and unit.
-
-## Development workflow
-
-Recommended workflow before each commit:
-
-```bash
-flutter pub get
-flutter gen-l10n
-flutter analyze
-flutter test
-```
-
-If localization strings were changed, always run:
-
-```bash
-flutter gen-l10n
-```
-
-## Current recommended next work
-
-Suggested next development areas:
-
-1. Continue replacing remaining user-facing hardcoded strings with localization keys.
-2. Add actual theme preference behavior.
-3. Add notification preferences.
-4. Persist more user app preferences.
-5. Improve invitation management, including decline/cancel flows.
-6. Add optional shopping deduplication and merging by ingredient.
-7. Add more robust onboarding for first-time users.
-
-## Notes for contributors
-
-When adding new UI text:
-
-- Add the English string to `lib/l10n/app_en.arb`
-- Add the Spanish string to `lib/l10n/app_es.arb`
-- Run `flutter gen-l10n`
-- Use `context.l10n.someKey` or the existing localization helper pattern
-
-Avoid localizing:
-
-- Supabase table names
-- Supabase column names
-- RPC names
-- Enum/storage values
-- Debug labels
-- Internal constants
+- Simple enough for everyday household use
+- Flexible enough for many kinds of shared lists
+- Collaborative by default
+- Friendly for multilingual households
+- Useful for planning, deciding, cooking, shopping, and keeping track of shared responsibilities
