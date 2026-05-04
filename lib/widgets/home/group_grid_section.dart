@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
 import 'package:pesalistas/core/profile_fields.dart';
@@ -29,8 +29,8 @@ class GroupGridSection extends StatelessWidget {
     if (groups.isEmpty) {
       return EmptyInfoCard(
         icon: Icons.groups_2_outlined,
-        title: S.noGroupsYet,
-        subtitle: S.createYourFirstSharedSpace,
+        title: context.l10n.noGroupsYet,
+        subtitle: context.l10n.createYourFirstSharedSpace,
         trailing: Icon(Icons.add_circle_outline),
         onTap: creatingGroup ? null : onCreateGroup,
       );
@@ -99,7 +99,7 @@ class _GroupGridCard extends StatelessWidget {
     final value = group[AppGroupFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.sharedSpace;
+      return context.l10n.sharedSpace;
     }
 
     return value.trim();
@@ -110,15 +110,15 @@ class _GroupGridCard extends StatelessWidget {
 
     if (value == null || value.trim().isEmpty) {
       return isShared
-          ? S.aSharedSpaceForListsRecipesChoresAndPlanning
-          : S.yourPersonalSpaceForListsRecipesChoresAndPlanning;
+          ? context.l10n.aSharedSpaceForListsRecipesChoresAndPlanning
+          : context.l10n.yourPersonalSpaceForListsRecipesChoresAndPlanning;
     }
 
     return value.trim();
   }
 
   String get typeLabel {
-    return isShared ? S.sharedGroup : S.individual;
+    return isShared ? context.l10n.sharedGroup : context.l10n.individual;
   }
 
   IconData get typeIcon {
@@ -128,7 +128,7 @@ class _GroupGridCard extends StatelessWidget {
   String get memberCountLabel {
     final count = members.length;
 
-    if (count == 0) return S.noMembersLoaded;
+    if (count == 0) return context.l10n.noMembersLoaded;
     if (count == 1) return '1 member';
 
     return '$count members';
@@ -214,7 +214,7 @@ class _GroupGridCard extends StatelessWidget {
                         ),
                         SizedBox(width: 4),
                         Text(
-                          S.open,
+                          context.l10n.open,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: theme.colorScheme.primary,
@@ -303,7 +303,7 @@ class _MemberDisplay {
       return username.trim();
     }
 
-    return S.member;
+    return context.l10n.member;
   }
 
   static String? avatarUrlFor(Map<String, dynamic> member) {

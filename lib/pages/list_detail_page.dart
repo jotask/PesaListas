@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
@@ -67,7 +67,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   String get groupId => widget.list[AppListFields.groupId].toString();
 
-  String get listName => widget.list[AppListFields.name]?.toString() ?? S.list;
+  String get listName => widget.list[AppListFields.name]?.toString() ?? context.l10n.list;
 
   String get listType =>
       widget.list[AppListFields.listType]?.toString() ??
@@ -208,7 +208,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
       if (!mounted) return;
 
       setState(() => loadingItems = false);
-      showErrorSnackBar(context, S.failedToLoadItems, error);
+      showErrorSnackBar(context, context.l10n.failedToLoadItems, error);
     }
   }
 
@@ -235,12 +235,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       showSuccessSnackBar(
         context,
-        S.shoppingItemsGeneratedOpenShoppingToReviewThem,
+        context.l10n.shoppingItemsGeneratedOpenShoppingToReviewThem,
       );
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToGenerateShoppingItems, error);
+      showErrorSnackBar(context, context.l10n.failedToGenerateShoppingItems, error);
     } finally {
       if (mounted) {
         setState(() => generatingShopping = false);
@@ -318,11 +318,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.itemCreated);
+      showSuccessSnackBar(context, context.l10n.itemCreated);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToCreateItem, error);
+      showErrorSnackBar(context, context.l10n.failedToCreateItem, error);
     } finally {
       if (mounted) {
         setState(() => creatingItem = false);
@@ -352,11 +352,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.shoppingItemCreated);
+      showSuccessSnackBar(context, context.l10n.shoppingItemCreated);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToCreateShoppingItem, error);
+      showErrorSnackBar(context, context.l10n.failedToCreateShoppingItem, error);
     } finally {
       if (mounted) {
         setState(() => creatingItem = false);
@@ -376,7 +376,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToLoadRecipes, error);
+      showErrorSnackBar(context, context.l10n.failedToLoadRecipes, error);
       setState(() => creatingItem = false);
       return;
     }
@@ -407,11 +407,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.mealPlanned);
+      showSuccessSnackBar(context, context.l10n.mealPlanned);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToCreateMealPlan, error);
+      showErrorSnackBar(context, context.l10n.failedToCreateMealPlan, error);
     } finally {
       if (mounted) {
         setState(() => creatingItem = false);
@@ -440,11 +440,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.recipeCreated);
+      showSuccessSnackBar(context, context.l10n.recipeCreated);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToCreateRecipe, error);
+      showErrorSnackBar(context, context.l10n.failedToCreateRecipe, error);
     } finally {
       if (mounted) {
         setState(() => creatingItem = false);
@@ -492,11 +492,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.itemUpdated);
+      showSuccessSnackBar(context, context.l10n.itemUpdated);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToUpdateItem, error);
+      showErrorSnackBar(context, context.l10n.failedToUpdateItem, error);
     } finally {
       if (mounted) {
         setState(() => editingItem = false);
@@ -528,11 +528,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.shoppingItemUpdated);
+      showSuccessSnackBar(context, context.l10n.shoppingItemUpdated);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToUpdateShoppingItem, error);
+      showErrorSnackBar(context, context.l10n.failedToUpdateShoppingItem, error);
     } finally {
       if (mounted) {
         setState(() => editingItem = false);
@@ -552,7 +552,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToLoadRecipes, error);
+      showErrorSnackBar(context, context.l10n.failedToLoadRecipes, error);
       setState(() => editingItem = false);
       return;
     }
@@ -583,11 +583,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.mealPlanUpdated);
+      showSuccessSnackBar(context, context.l10n.mealPlanUpdated);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToUpdateMealPlan, error);
+      showErrorSnackBar(context, context.l10n.failedToUpdateMealPlan, error);
     } finally {
       if (mounted) {
         setState(() => editingItem = false);
@@ -611,11 +611,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.itemCompleted);
+      showSuccessSnackBar(context, context.l10n.itemCompleted);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToCompleteItem, error);
+      showErrorSnackBar(context, context.l10n.failedToCompleteItem, error);
     } finally {
       if (mounted) {
         setState(() => completingItem = false);
@@ -642,15 +642,15 @@ class _ListDetailPageState extends State<ListDetailPage> {
       showSuccessSnackBar(
         context,
         listType == AppListTypes.shopping.value
-            ? S.shoppingItemReopened
+            ? context.l10n.shoppingItemReopened
             : listType == AppListTypes.generic.value
-            ? S.itemReopened
-            : S.taskReopened,
+            ? context.l10n.itemReopened
+            : context.l10n.taskReopened,
       );
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToReopenItem, error);
+      showErrorSnackBar(context, context.l10n.failedToReopenItem, error);
     } finally {
       if (mounted) {
         setState(() => completingItem = false);
@@ -678,12 +678,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       showSuccessSnackBar(
         context,
-        checked ? S.markedAsBought : S.markedAsNotBought,
+        checked ? context.l10n.markedAsBought : context.l10n.markedAsNotBought,
       );
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToUpdateShoppingItem, error);
+      showErrorSnackBar(context, context.l10n.failedToUpdateShoppingItem, error);
     } finally {
       if (mounted) {
         setState(() => completingItem = false);
@@ -706,8 +706,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
-      title: S.deleteItem2,
-      message: S.thisWillPermanentlyDeleteTheItemFromThisList,
+      title: context.l10n.deleteItem2,
+      message: context.l10n.thisWillPermanentlyDeleteTheItemFromThisList,
     );
 
     if (!confirmed) return;
@@ -720,11 +720,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.itemDeleted);
+      showSuccessSnackBar(context, context.l10n.itemDeleted);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToDeleteItem, error);
+      showErrorSnackBar(context, context.l10n.failedToDeleteItem, error);
     } finally {
       if (mounted) {
         setState(() => deletingItem = false);
@@ -737,8 +737,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
-      title: S.deleteShoppingItem,
-      message: S.thisWillRemoveThisItemFromYourShoppingList,
+      title: context.l10n.deleteShoppingItem,
+      message: context.l10n.thisWillRemoveThisItemFromYourShoppingList,
     );
 
     if (!confirmed) return;
@@ -751,11 +751,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.shoppingItemDeleted);
+      showSuccessSnackBar(context, context.l10n.shoppingItemDeleted);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToDeleteShoppingItem, error);
+      showErrorSnackBar(context, context.l10n.failedToDeleteShoppingItem, error);
     } finally {
       if (mounted) {
         setState(() => deletingItem = false);
@@ -768,8 +768,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
-      title: S.deleteMealPlan2,
-      message: S.thisWillRemoveThisMealFromYourPlan,
+      title: context.l10n.deleteMealPlan2,
+      message: context.l10n.thisWillRemoveThisMealFromYourPlan,
     );
 
     if (!confirmed) return;
@@ -782,11 +782,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.mealPlanDeleted);
+      showSuccessSnackBar(context, context.l10n.mealPlanDeleted);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToDeleteMealPlan, error);
+      showErrorSnackBar(context, context.l10n.failedToDeleteMealPlan, error);
     } finally {
       if (mounted) {
         setState(() => deletingItem = false);
@@ -799,8 +799,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
-      title: S.deleteRecipe2,
-      message: S.thisWillPermanentlyDeleteThisRecipeAndItsIngredients,
+      title: context.l10n.deleteRecipe2,
+      message: context.l10n.thisWillPermanentlyDeleteThisRecipeAndItsIngredients,
     );
 
     if (!confirmed) return;
@@ -813,11 +813,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.recipeDeleted);
+      showSuccessSnackBar(context, context.l10n.recipeDeleted);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToDeleteRecipe, error);
+      showErrorSnackBar(context, context.l10n.failedToDeleteRecipe, error);
     } finally {
       if (mounted) {
         setState(() => deletingRecipe = false);
@@ -869,12 +869,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       showSuccessSnackBar(
         context,
-        result.removeVote ? S.voteRemoved : S.voteSaved,
+        result.removeVote ? context.l10n.voteRemoved : context.l10n.voteSaved,
       );
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToSaveVote, error);
+      showErrorSnackBar(context, context.l10n.failedToSaveVote, error);
     } finally {
       if (mounted) {
         setState(() => votingItem = false);
@@ -903,7 +903,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToLoadVotes, error);
+      showErrorSnackBar(context, context.l10n.failedToLoadVotes, error);
     } finally {
       if (mounted) {
         setState(() => loadingVoteDetails = false);
@@ -977,7 +977,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
           if (!mounted) return;
 
-          showSuccessSnackBar(context, S.recipeInfoUpdated);
+          showSuccessSnackBar(context, context.l10n.recipeInfoUpdated);
           continue;
         }
 
@@ -1007,7 +1007,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
           if (!mounted) return;
 
-          showSuccessSnackBar(context, S.instructionsUpdated);
+          showSuccessSnackBar(context, context.l10n.instructionsUpdated);
           continue;
         }
 
@@ -1039,7 +1039,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
           if (!mounted) return;
 
-          showSuccessSnackBar(context, S.ingredientAdded);
+          showSuccessSnackBar(context, context.l10n.ingredientAdded);
           continue;
         }
 
@@ -1082,7 +1082,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
           if (!mounted) return;
 
-          showSuccessSnackBar(context, S.ingredientUpdated);
+          showSuccessSnackBar(context, context.l10n.ingredientUpdated);
           continue;
         }
 
@@ -1098,9 +1098,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
           final confirmed = await showConfirmDeleteDialog(
             context: context,
-            title: S.deleteIngredient2,
-            message: S.deleteIngredientMessage(
-              result.ingredientName ?? S.thisIngredient,
+            title: context.l10n.deleteIngredient2,
+            message: context.l10n.deleteIngredientMessage(
+              result.ingredientName ?? context.l10n.thisIngredient,
             ),
           );
 
@@ -1117,14 +1117,14 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
           if (!mounted) return;
 
-          showSuccessSnackBar(context, S.ingredientDeleted);
+          showSuccessSnackBar(context, context.l10n.ingredientDeleted);
           continue;
         }
       }
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToLoadRecipeDetails, error);
+      showErrorSnackBar(context, context.l10n.failedToLoadRecipeDetails, error);
     } finally {
       if (mounted) {
         setState(() => loadingRecipeDetails = false);
@@ -1146,12 +1146,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
         icon: Icon(Icons.add),
         label: Text(
           isRecipeList
-              ? S.addRecipe
+              ? context.l10n.addRecipe
               : isMealPlanList
-              ? S.addMeal
+              ? context.l10n.addMeal
               : isShoppingList
-              ? S.addItem
-              : S.addItem,
+              ? context.l10n.addItem
+              : context.l10n.addItem,
         ),
       ),
       body: Column(

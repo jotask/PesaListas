@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/animated_logo.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/pages/home_page.dart';
@@ -77,7 +77,7 @@ class _AuthPageState extends State<AuthPage> {
 
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.googleLoginFailed, error);
+      showErrorSnackBar(context, context.l10n.googleLoginFailed, error);
     } finally {
       if (mounted) {
         setState(() => loading = false);
@@ -92,7 +92,7 @@ class _AuthPageState extends State<AuthPage> {
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      showErrorSnackBar(context, S.emailAndPasswordAreRequired);
+      showErrorSnackBar(context, context.l10n.emailAndPasswordAreRequired);
       return;
     }
 
@@ -116,7 +116,7 @@ class _AuthPageState extends State<AuthPage> {
 
         if (!mounted) return;
 
-        showSuccessSnackBar(context, S.checkYourEmailToConfirmYourAccount);
+        showSuccessSnackBar(context, context.l10n.checkYourEmailToConfirmYourAccount);
       }
     } on AuthException catch (error) {
       if (!mounted) return;
@@ -125,7 +125,7 @@ class _AuthPageState extends State<AuthPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.unexpectedError, error);
+      showErrorSnackBar(context, context.l10n.unexpectedError, error);
     } finally {
       if (mounted) {
         setState(() => loading = false);
@@ -135,10 +135,10 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    final title = isLogin ? S.welcomeBack : S.createAccount;
+    final title = isLogin ? context.l10n.welcomeBack : context.l10n.createAccount;
     final subtitle = isLogin
-        ? S.logInToManageYourSharedListsPlansAndChores
-        : S.createASpaceForYourSharedLifeGroupsListsChoresIdeasMealsAndM;
+        ? context.l10n.logInToManageYourSharedListsPlansAndChores
+        : context.l10n.createASpaceForYourSharedLifeGroupsListsChoresIdeasMealsAndM;
 
     return Scaffold(
       body: Container(
@@ -184,7 +184,7 @@ class _AuthPageState extends State<AuthPage> {
                       ),
                       SizedBox(height: 20),
                       Text(
-                        S.pesaListas,
+                        context.l10n.pesaListas,
                         style: TextStyle(
                           fontSize: 16,
                           color: Color(0xFF1E3A5F),
@@ -214,7 +214,7 @@ class _AuthPageState extends State<AuthPage> {
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          labelText: S.email,
+                          labelText: context.l10n.email,
                           prefixIcon: Icon(Icons.email_outlined),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -226,7 +226,7 @@ class _AuthPageState extends State<AuthPage> {
                         controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
-                          labelText: S.password,
+                          labelText: context.l10n.password,
                           prefixIcon: Icon(Icons.lock_outline),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -255,7 +255,7 @@ class _AuthPageState extends State<AuthPage> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : Text(isLogin ? S.logIn : S.createAccount),
+                              : Text(isLogin ? context.l10n.logIn : context.l10n.createAccount),
                         ),
                       ),
                       SizedBox(height: 14),
@@ -267,7 +267,7 @@ class _AuthPageState extends State<AuthPage> {
                               ? null
                               : signInWithGoogleNativeInternal,
                           icon: Icon(Icons.login),
-                          label: Text(S.continueWithGoogle),
+                          label: Text(context.l10n.continueWithGoogle),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF1E3A5F),
                             side: const BorderSide(color: Color(0xFF1E3A5F)),
@@ -286,8 +286,8 @@ class _AuthPageState extends State<AuthPage> {
                               },
                         child: Text(
                           isLogin
-                              ? S.needAnAccountSignUp
-                              : S.alreadyHaveAnAccountLogIn,
+                              ? context.l10n.needAnAccountSignUp
+                              : context.l10n.alreadyHaveAnAccountLogIn,
                           style: const TextStyle(
                             color: Color(0xFF1E3A5F),
                             fontWeight: FontWeight.w600,

@@ -1240,4 +1240,192 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeSubtitleDark => 'Dark';
+
+  @override
+  String addListTypeItem(Object listType) {
+    return 'Add $listType item';
+  }
+
+  @override
+  String deadlineDate(Object date) {
+    return 'Deadline: $date';
+  }
+
+  @override
+  String nextDueDate(Object date) {
+    return 'Next due: $date';
+  }
+
+  @override
+  String fromDateLabel(Object date) {
+    return 'From $date';
+  }
+
+  @override
+  String toDateLabel(Object date) {
+    return 'To $date';
+  }
+
+  @override
+  String invitationSentTo(Object email) {
+    return 'Invitation sent to $email';
+  }
+
+  @override
+  String listCreatedWithName(Object name) {
+    return 'List \"$name\" created';
+  }
+
+  @override
+  String get thisIngredient => 'this ingredient';
+
+  @override
+  String deleteIngredientMessage(Object name) {
+    return 'This will remove \"$name\" from the recipe.';
+  }
+
+  @override
+  String get ingredientDeleted => 'Ingredient deleted';
+
+  @override
+  String invitedAsRole(Object role) {
+    return 'Invited as $role';
+  }
+
+  @override
+  String roleLabel(Object role) {
+    return 'Role: $role';
+  }
+
+  @override
+  String allCount(Object count) {
+    return 'All $count';
+  }
+
+  @override
+  String openCount(Object count) {
+    return 'Open $count';
+  }
+
+  @override
+  String doneCount(Object count) {
+    return 'Done $count';
+  }
+
+  @override
+  String upcomingCount(Object count) {
+    return 'Upcoming $count';
+  }
+
+  @override
+  String thisWeekCount(Object count) {
+    return 'This week $count';
+  }
+
+  @override
+  String pastCount(Object count) {
+    return 'Past $count';
+  }
+
+  @override
+  String thisWeekSummary(Object count) {
+    return '$count this week';
+  }
+
+  @override
+  String upcomingSummary(Object count) {
+    return '$count upcoming';
+  }
+
+  @override
+  String withRecipesSummary(Object count) {
+    return '$count with recipes';
+  }
+
+  @override
+  String totalCountSummary(Object count) {
+    return '$count total';
+  }
+
+  @override
+  String pastSummary(Object count) {
+    return '$count past';
+  }
+
+  @override
+  String toBuySummary(Object count) {
+    return '$count to buy';
+  }
+
+  @override
+  String boughtSummary(Object count) {
+    return '$count bought';
+  }
+
+  @override
+  String generatedSummary(Object count) {
+    return '$count generated';
+  }
+
+  @override
+  String sectionCount(Object title, Object count) {
+    return '$title ($count)';
+  }
+
+  @override
+  String recipeSourceLabel(Object name) {
+    return 'Recipe: $name';
+  }
+
+  @override
+  String minutesTotal(Object minutes) {
+    return '$minutes min total';
+  }
+
+  @override
+  String prepMinutes(Object minutes) {
+    return 'Prep $minutes min';
+  }
+
+  @override
+  String cookMinutes(Object minutes) {
+    return 'Cook $minutes min';
+  }
+
+  @override
+  String servingsCount(Object count) {
+    return '$count servings';
+  }
+
+  @override
+  String get voteCountOne => '1 vote';
+
+  @override
+  String voteCountMany(Object count) {
+    return '$count votes';
+  }
+
+  @override
+  String totalPointsLabel(Object points) {
+    return 'Total $points';
+  }
+
+  @override
+  String yourVoteLabel(Object points) {
+    return 'Your vote $points';
+  }
+
+  @override
+  String get averageShort => 'avg';
+
+  @override
+  String get ingredientCountOne => '1 ingredient';
+
+  @override
+  String ingredientCountMany(Object count) {
+    return '$count ingredients';
+  }
+
+  @override
+  String get decline => 'Decline';
 }

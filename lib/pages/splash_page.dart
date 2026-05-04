@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/animated_logo.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/home_page.dart';
@@ -83,7 +83,7 @@ class _SplashPageState extends State<SplashPage> {
               ),
               SizedBox(height: 24),
               Text(
-                S.pesaListas,
+                context.l10n.pesaListas,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 32,
@@ -93,7 +93,7 @@ class _SplashPageState extends State<SplashPage> {
               ),
               SizedBox(height: 8),
               Text(
-                S.organizeLifeTogether,
+                context.l10n.organizeLifeTogether,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.75),
                   fontSize: 16,

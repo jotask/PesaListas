@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 Future<bool> showConfirmDeleteDialog({
   required BuildContext context,
@@ -8,8 +8,8 @@ Future<bool> showConfirmDeleteDialog({
   String? cancelLabel,
   String? deleteLabel,
 }) async {
-  final resolvedCancelLabel = cancelLabel ?? S.cancel;
-  final resolvedDeleteLabel = deleteLabel ?? S.delete;
+  final resolvedCancelLabel = cancelLabel ?? context.l10n.cancel;
+  final resolvedDeleteLabel = deleteLabel ?? context.l10n.delete;
 
   final confirmed = await showDialog<bool>(
     context: context,

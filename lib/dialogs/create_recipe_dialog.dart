@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class CreateRecipeDialogResult {
   const CreateRecipeDialogResult({required this.name, this.description});
@@ -35,7 +35,7 @@ class _CreateRecipeDialogState extends State<CreateRecipeDialog> {
     setState(() => validationMessage = null);
 
     if (name.isEmpty) {
-      setState(() => validationMessage = S.recipeNameIsRequired);
+      setState(() => validationMessage = context.l10n.recipeNameIsRequired);
       return;
     }
 
@@ -50,7 +50,7 @@ class _CreateRecipeDialogState extends State<CreateRecipeDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(S.addRecipe),
+      title: Text(context.l10n.addRecipe),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -58,16 +58,16 @@ class _CreateRecipeDialogState extends State<CreateRecipeDialog> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.restaurant_menu)),
-              title: Text(S.recipe),
-              subtitle: Text(S.saveMealsYouCanPlanAndShopFromLater),
+              title: Text(context.l10n.recipe),
+              subtitle: Text(context.l10n.saveMealsYouCanPlanAndShopFromLater),
             ),
             SizedBox(height: 12),
             TextField(
               controller: nameController,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: S.recipeName,
-                hintText: S.spaghettiCarbonara,
+                labelText: context.l10n.recipeName,
+                hintText: context.l10n.spaghettiCarbonara,
               ),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
@@ -80,8 +80,8 @@ class _CreateRecipeDialogState extends State<CreateRecipeDialog> {
             TextField(
               controller: descriptionController,
               decoration: InputDecoration(
-                labelText: S.description,
-                hintText: S.optional,
+                labelText: context.l10n.description,
+                hintText: context.l10n.optional,
               ),
               minLines: 1,
               maxLines: 3,
@@ -109,9 +109,9 @@ class _CreateRecipeDialogState extends State<CreateRecipeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.cancel),
+          child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: Text(S.add)),
+        ElevatedButton(onPressed: submit, child: Text(context.l10n.add)),
       ],
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/invitation_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
@@ -27,7 +27,7 @@ class GroupOverviewCard extends StatelessWidget {
     final value = group[AppGroupFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.sharedSpace;
+      return context.l10n.sharedSpace;
     }
 
     return value.trim();
@@ -89,7 +89,7 @@ class GroupOverviewCard extends StatelessWidget {
                   child: IconButton(
                     onPressed: onBack,
                     icon: Icon(Icons.arrow_back),
-                    tooltip: S.back,
+                    tooltip: context.l10n.back,
                     visualDensity: VisualDensity.compact,
                   ),
                 ),
@@ -124,13 +124,13 @@ class GroupOverviewCard extends StatelessWidget {
                     IconButton(
                       onPressed: onEdit,
                       icon: Icon(Icons.edit_outlined),
-                      tooltip: S.editGroup,
+                      tooltip: context.l10n.editGroup,
                     ),
                     SizedBox(width: 4),
                     FilledButton.icon(
                       onPressed: onInvite,
                       icon: Icon(Icons.person_add_alt_1, size: 18),
-                      label: Text(S.invite),
+                      label: Text(context.l10n.invite),
                     ),
                   ],
                 ),
@@ -138,7 +138,7 @@ class GroupOverviewCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 8, top: 8),
                 child: Text(
-                  groupDescription ?? S.sharedSpaceForListsAndPlanning,
+                  groupDescription ?? context.l10n.sharedSpaceForListsAndPlanning,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium,
@@ -226,7 +226,7 @@ class _PeoplePreview extends StatelessWidget {
         .take(3)
         .map((invite) {
           return invite[AppInvitationFields.invitedEmail]?.toString() ??
-              S.pendingInvite;
+              context.l10n.pendingInvite;
         })
         .join('\n');
 
@@ -264,7 +264,7 @@ class _MemberDisplay {
       return username.trim();
     }
 
-    return S.member;
+    return context.l10n.member;
   }
 
   static String? avatarUrlFor(Map<String, dynamic> member) {

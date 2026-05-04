@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
@@ -45,8 +45,8 @@ class GenericItemsView extends StatelessWidget {
     if (items.isEmpty) {
       return EmptyItemsCard(
         icon: Icons.add_task,
-        title: S.noItemsYet,
-        subtitle: S.addYourFirstItem,
+        title: context.l10n.noItemsYet,
+        subtitle: context.l10n.addYourFirstItem,
         onCreate: onCreate,
       );
     }

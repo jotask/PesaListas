@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/group_fields.dart';
 
 class EditGroupDialogResult {
@@ -51,7 +51,7 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
     setState(() => validationMessage = null);
 
     if (name.isEmpty) {
-      setState(() => validationMessage = S.groupNameIsRequired);
+      setState(() => validationMessage = context.l10n.groupNameIsRequired);
       return;
     }
 
@@ -66,7 +66,7 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(S.editGroup),
+      title: Text(context.l10n.editGroup),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -74,14 +74,14 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.groups_2_outlined)),
-              title: Text(S.groupInfo),
-              subtitle: Text(S.updateTheSharedSpaceNameAndDescription),
+              title: Text(context.l10n.groupInfo),
+              subtitle: Text(context.l10n.updateTheSharedSpaceNameAndDescription),
             ),
             SizedBox(height: 12),
             TextField(
               controller: nameController,
               autofocus: true,
-              decoration: InputDecoration(labelText: S.groupName),
+              decoration: InputDecoration(labelText: context.l10n.groupName),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
                 if (validationMessage != null) {
@@ -93,8 +93,8 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
             TextField(
               controller: descriptionController,
               decoration: InputDecoration(
-                labelText: S.description,
-                hintText: S.optional,
+                labelText: context.l10n.description,
+                hintText: context.l10n.optional,
               ),
               minLines: 1,
               maxLines: 4,
@@ -122,9 +122,9 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.cancel),
+          child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: Text(S.save)),
+        ElevatedButton(onPressed: submit, child: Text(context.l10n.save)),
       ],
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/invitation_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
 import 'package:pesalistas/core/profile_fields.dart';
@@ -51,8 +51,8 @@ class GroupPeopleSection extends StatelessWidget {
         else if (totalPeopleItems == 0)
           EmptyInfoCard(
             icon: Icons.people_outline,
-            title: S.noPeopleYet,
-            subtitle: S.inviteSomeoneToShareThisGroup,
+            title: context.l10n.noPeopleYet,
+            subtitle: context.l10n.inviteSomeoneToShareThisGroup,
             trailing: Icon(Icons.person_add_alt_1),
             onTap: invitingMember ? null : onInvite,
           )
@@ -145,7 +145,7 @@ class _InviteIconButton extends StatelessWidget {
         IconButton(
           onPressed: invitingMember ? null : onPressed,
           icon: Icon(Icons.person_add_alt_1),
-          tooltip: S.inviteMember,
+          tooltip: context.l10n.inviteMember,
         ),
         if (pendingInviteCount > 0)
           Positioned(
@@ -201,7 +201,7 @@ class _MemberPersonCard extends StatelessWidget {
       return username;
     }
 
-    return S.unknownUser;
+    return context.l10n.unknownUser;
   }
 
   String? get avatarUrl {
@@ -221,7 +221,7 @@ class _MemberPersonCard extends StatelessWidget {
   String get initials {
     final name = displayName.trim();
 
-    if (name.isEmpty || name == S.unknownUser) {
+    if (name.isEmpty || name == context.l10n.unknownUser) {
       return '?';
     }
 
@@ -342,7 +342,7 @@ class _PendingInvitePersonCard extends StatelessWidget {
   String get email {
     return invitation[AppInvitationFields.invitedEmail]?.toString() ??
         invitation[AppInvitationFields.email]?.toString() ??
-        S.unknownEmail;
+        context.l10n.unknownEmail;
   }
 
   String get role {
@@ -395,7 +395,7 @@ class _PendingInvitePersonCard extends StatelessWidget {
               top: 2,
               child: IconButton(
                 icon: Icon(Icons.close, size: 18),
-                tooltip: S.cancelInvitation,
+                tooltip: context.l10n.cancelInvitation,
                 onPressed: onCancel,
               ),
             ),

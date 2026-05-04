@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class GroupDetailHeader extends StatelessWidget {
   const GroupDetailHeader({
@@ -14,7 +14,7 @@ class GroupDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitle = description == null || description!.trim().isEmpty
-        ? S.sharedSpace
+        ? context.l10n.sharedSpace
         : description!.trim();
 
     return Card(

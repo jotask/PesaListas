@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_theme_controller.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/app_locale_controller.dart';
 import 'package:pesalistas/core/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/edit_profile_dialog.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/profile_repository.dart';
@@ -62,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
       return metadataName.trim();
     }
 
-    return userEmail ?? S.user;
+    return userEmail ?? context.l10n.user;
   }
 
   String? get avatarUrl {
@@ -334,7 +333,7 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.profileUpdateFailed, error);
+      showErrorSnackBar(context, context.l10n.profileUpdateFailed, error);
     } finally {
       if (mounted) {
         setState(() => editingProfile = false);
@@ -425,12 +424,14 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   SizedBox(height: 16),
                   _SettingsSection(
-                    title: S.profileSectionTitle,
+                    title: context.l10n.profileSectionTitle,
                     children: [
                       ListTile(
                         leading: Icon(Icons.person_outline),
-                        title: Text(S.profileEditDisplayNameTitle),
-                        subtitle: Text(S.profileEditDisplayNameSubtitle),
+                        title: Text(context.l10n.profileEditDisplayNameTitle),
+                        subtitle: Text(
+                          context.l10n.profileEditDisplayNameSubtitle,
+                        ),
                         trailing: editingProfile
                             ? SizedBox(
                                 width: 22,
@@ -445,8 +446,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       const Divider(height: 1),
                       ListTile(
                         leading: Icon(Icons.sync),
-                        title: Text(S.profileSyncTitle),
-                        subtitle: Text(S.profileSyncSubtitle),
+                        title: Text(context.l10n.profileSyncTitle),
+                        subtitle: Text(context.l10n.profileSyncSubtitle),
                         trailing: syncingProfile
                             ? SizedBox(
                                 width: 22,
@@ -462,7 +463,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   SizedBox(height: 16),
                   _SettingsSection(
-                    title: S.preferencesSectionTitle,
+                    title: context.l10n.preferencesSectionTitle,
                     children: [
                       ListTile(
                         leading: Icon(Icons.language_outlined),
@@ -482,22 +483,23 @@ class _SettingsPageState extends State<SettingsPage> {
                       const Divider(height: 1),
                       ListTile(
                         leading: Icon(Icons.notifications_none_outlined),
-                        title: Text(S.notificationsTitle),
-                        subtitle: Text(S.notificationsSubtitle),
+                        title: Text(context.l10n.notificationsTitle),
+                        subtitle: Text(context.l10n.notificationsSubtitle),
                         trailing: const _ComingSoonPill(),
-                        onTap: () =>
-                            showComingSoon(S.notificationSettingsFeature),
+                        onTap: () => showComingSoon(
+                          context.l10n.notificationSettingsFeature,
+                        ),
                       ),
                     ],
                   ),
                   SizedBox(height: 16),
                   _SettingsSection(
-                    title: S.accountSectionTitle,
+                    title: context.l10n.accountSectionTitle,
                     children: [
                       ListTile(
                         leading: Icon(Icons.logout),
-                        title: Text(S.signOutTitle),
-                        subtitle: Text(S.signOutSubtitle),
+                        title: Text(context.l10n.signOutTitle),
+                        subtitle: Text(context.l10n.signOutSubtitle),
                         trailing: signingOut
                             ? SizedBox(
                                 width: 22,
@@ -566,7 +568,7 @@ class _ProfileHeaderCard extends StatelessWidget {
             SizedBox(width: 16),
             Expanded(
               child: loading
-                  ? Text(S.profileLoading)
+                  ? Text(context.l10n.profileLoading)
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -581,7 +583,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          email ?? S.profileNoEmail,
+                          email ?? context.l10n.profileNoEmail,
                           style: theme.textTheme.bodyMedium,
                         ),
                       ],
@@ -591,7 +593,7 @@ class _ProfileHeaderCard extends StatelessWidget {
             IconButton(
               onPressed: onEdit,
               icon: Icon(Icons.edit_outlined),
-              tooltip: S.profileEditTooltip,
+              tooltip: context.l10n.profileEditTooltip,
             ),
           ],
         ),
@@ -638,7 +640,7 @@ class _ComingSoonPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        S.comingSoon,
+        context.l10n.comingSoon,
         style: TextStyle(
           color: theme.colorScheme.onSurfaceVariant,
           fontSize: 11,

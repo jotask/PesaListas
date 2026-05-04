@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class MealPlanItemsView extends StatefulWidget {
@@ -122,7 +122,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
     for (final mealPlan in mealPlans) {
       final date = mealPlan[AppMealPlanFields.plannedFor]?.toString();
       final key = date == null || date.trim().isEmpty
-          ? S.noDate
+          ? context.l10n.noDate
           : date.split('T').first;
 
       grouped.putIfAbsent(key, () => []);
@@ -135,32 +135,32 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
   String emptyTitleForFilter() {
     switch (selectedFilter) {
       case MealPlanFilter.all:
-        return S.noMealPlansYet;
+        return context.l10n.noMealPlansYet;
 
       case MealPlanFilter.upcoming:
-        return S.noUpcomingMeals;
+        return context.l10n.noUpcomingMeals;
 
       case MealPlanFilter.thisWeek:
-        return S.noMealsThisWeek;
+        return context.l10n.noMealsThisWeek;
 
       case MealPlanFilter.past:
-        return S.noPastMeals;
+        return context.l10n.noPastMeals;
     }
   }
 
   String emptySubtitleForFilter() {
     switch (selectedFilter) {
       case MealPlanFilter.all:
-        return S.planYourFirstMeal;
+        return context.l10n.planYourFirstMeal;
 
       case MealPlanFilter.upcoming:
-        return S.planAMealForTodayOrLater;
+        return context.l10n.planAMealForTodayOrLater;
 
       case MealPlanFilter.thisWeek:
-        return S.nothingPlannedForTheNext7Days;
+        return context.l10n.nothingPlannedForTheNext7Days;
 
       case MealPlanFilter.past:
-        return S.pastMealsWillAppearHere;
+        return context.l10n.pastMealsWillAppearHere;
     }
   }
 
@@ -246,22 +246,22 @@ class _MealPlanFilterChips extends StatelessWidget {
       children: [
         FilterChip(
           selected: selectedFilter == MealPlanFilter.all,
-          label: Text(S.allCount(totalCount)),
+          label: Text(context.l10n.allCount(totalCount)),
           onSelected: (_) => onSelected(MealPlanFilter.all),
         ),
         FilterChip(
           selected: selectedFilter == MealPlanFilter.upcoming,
-          label: Text(S.upcomingCount(upcomingCount)),
+          label: Text(context.l10n.upcomingCount(upcomingCount)),
           onSelected: (_) => onSelected(MealPlanFilter.upcoming),
         ),
         FilterChip(
           selected: selectedFilter == MealPlanFilter.thisWeek,
-          label: Text(S.thisWeekCount(thisWeekCount)),
+          label: Text(context.l10n.thisWeekCount(thisWeekCount)),
           onSelected: (_) => onSelected(MealPlanFilter.thisWeek),
         ),
         FilterChip(
           selected: selectedFilter == MealPlanFilter.past,
-          label: Text(S.pastCount(pastCount)),
+          label: Text(context.l10n.pastCount(pastCount)),
           onSelected: (_) => onSelected(MealPlanFilter.past),
         ),
       ],
@@ -307,24 +307,24 @@ class _MealPlanSummaryCard extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   _SummaryPill(
-                    label: S.thisWeekSummary(thisWeekCount),
+                    label: context.l10n.thisWeekSummary(thisWeekCount),
                     icon: Icons.today_outlined,
                   ),
                   _SummaryPill(
-                    label: S.upcomingSummary(upcomingCount),
+                    label: context.l10n.upcomingSummary(upcomingCount),
                     icon: Icons.event_available_outlined,
                   ),
                   _SummaryPill(
-                    label: S.withRecipesSummary(recipeMealCount),
+                    label: context.l10n.withRecipesSummary(recipeMealCount),
                     icon: Icons.restaurant_menu,
                   ),
                   _SummaryPill(
-                    label: S.totalCountSummary(totalCount),
+                    label: context.l10n.totalCountSummary(totalCount),
                     icon: Icons.list_alt_outlined,
                   ),
                   if (pastCount > 0)
                     _SummaryPill(
-                      label: S.pastSummary(pastCount),
+                      label: context.l10n.pastSummary(pastCount),
                       icon: Icons.history,
                     ),
                 ],
@@ -402,14 +402,14 @@ class _GenerateShoppingCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      S.generateShoppingList,
+                      context.l10n.generateShoppingList,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(S.addIngredientsFromPlannedRecipeMeals),
+                    Text(context.l10n.addIngredientsFromPlannedRecipeMeals),
                   ],
                 ),
               ),
@@ -417,7 +417,7 @@ class _GenerateShoppingCard extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onGenerateShopping,
                 icon: const Icon(Icons.shopping_cart_outlined),
-                label: Text(S.generate),
+                label: Text(context.l10n.generate),
               ),
             ],
           ),
@@ -458,9 +458,9 @@ class _MealPlanDateSection extends StatelessWidget {
     final tomorrow = today.add(const Duration(days: 1));
     final yesterday = today.subtract(const Duration(days: 1));
 
-    if (date == today) return S.today;
-    if (date == tomorrow) return S.tomorrow;
-    if (date == yesterday) return S.yesterday;
+    if (date == today) return context.l10n.today;
+    if (date == tomorrow) return context.l10n.tomorrow;
+    if (date == yesterday) return context.l10n.yesterday;
 
     return dateLabel;
   }
@@ -487,7 +487,7 @@ class _MealPlanDateSection extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                S.sectionCount(friendlyDateLabel, mealPlans.length),
+                context.l10n.sectionCount(friendlyDateLabel, mealPlans.length),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -566,7 +566,7 @@ class _MealPlanCard extends StatelessWidget {
       return note.trim();
     }
 
-    return S.customMeal;
+    return context.l10n.customMeal;
   }
 
   String? get note {
@@ -587,10 +587,10 @@ class _MealPlanCard extends StatelessWidget {
 
   String get helperText {
     if (hasRecipe) {
-      return S.recipeMealCanGenerateShoppingItems;
+      return context.l10n.recipeMealCanGenerateShoppingItems;
     }
 
-    return S.customMealWillNotGenerateShoppingItems;
+    return context.l10n.customMealWillNotGenerateShoppingItems;
   }
 
   @override
@@ -652,14 +652,14 @@ class _MealPlanCard extends StatelessWidget {
                           child: OutlinedButton.icon(
                             onPressed: onEdit,
                             icon: const Icon(Icons.edit_outlined),
-                            label: Text(S.edit),
+                            label: Text(context.l10n.edit),
                           ),
                         ),
                         const SizedBox(width: 8),
                         IconButton(
                           onPressed: onDelete,
                           icon: const Icon(Icons.delete_outline),
-                          tooltip: S.deleteMealPlan,
+                          tooltip: context.l10n.deleteMealPlan,
                         ),
                       ],
                     ),
@@ -707,7 +707,7 @@ class _MealSourcePill extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            hasRecipe ? S.recipe : S.custom,
+            hasRecipe ? context.l10n.recipe : context.l10n.custom,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
@@ -779,7 +779,7 @@ class _MealTypePill extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            config.label,
+            config.label(context),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,

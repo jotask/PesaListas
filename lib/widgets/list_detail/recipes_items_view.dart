@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
@@ -29,8 +29,8 @@ class RecipesItemsView extends StatelessWidget {
     if (recipes.isEmpty) {
       return EmptyItemsCard(
         icon: Icons.restaurant_menu,
-        title: S.noRecipesYet,
-        subtitle: S.addYourFirstRecipe,
+        title: context.l10n.noRecipesYet,
+        subtitle: context.l10n.addYourFirstRecipe,
         onCreate: onCreate,
       );
     }
@@ -64,7 +64,7 @@ class _RecipeCard extends StatelessWidget {
     final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.untitledRecipe;
+      return context.l10n.untitledRecipe;
     }
 
     return value.trim();
@@ -74,7 +74,7 @@ class _RecipeCard extends StatelessWidget {
     final value = recipe[AppRecipeFields.description]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.recipeDetailsAndIngredients;
+      return context.l10n.recipeDetailsAndIngredients;
     }
 
     return value.trim();
@@ -157,7 +157,7 @@ class _RecipeCard extends StatelessWidget {
                         IconButton(
                           onPressed: onDelete,
                           icon: Icon(Icons.delete_outline),
-                          tooltip: S.deleteRecipe,
+                          tooltip: context.l10n.deleteRecipe,
                           visualDensity: VisualDensity.compact,
                         ),
                       ],
@@ -177,30 +177,30 @@ class _RecipeCard extends StatelessWidget {
                         if (totalTime != null)
                           _RecipeMetaPill(
                             icon: Icons.schedule_outlined,
-                            label: S.minutesTotal(totalTime!),
+                            label: context.l10n.minutesTotal(totalTime!),
                           ),
                         if (prepTime != null)
                           _RecipeMetaPill(
                             icon: Icons.timer_outlined,
-                            label: S.prepMinutes(prepTime!),
+                            label: context.l10n.prepMinutes(prepTime!),
                           ),
                         if (cookTime != null)
                           _RecipeMetaPill(
                             icon: Icons.local_fire_department_outlined,
-                            label: S.cookMinutes(cookTime!),
+                            label: context.l10n.cookMinutes(cookTime!),
                           ),
                         if (servings != null)
                           _RecipeMetaPill(
                             icon: Icons.people_outline,
-                            label: S.servingsCount(servings!),
+                            label: context.l10n.servingsCount(servings!),
                           ),
                         _RecipeMetaPill(
                           icon: hasInstructions
                               ? Icons.menu_book_outlined
                               : Icons.menu_book_outlined,
                           label: hasInstructions
-                              ? S.instructionsAdded
-                              : S.noInstructions,
+                              ? context.l10n.instructionsAdded
+                              : context.l10n.noInstructions,
                         ),
                       ],
                     ),
@@ -210,7 +210,7 @@ class _RecipeCard extends StatelessWidget {
                       child: FilledButton.icon(
                         onPressed: onDetails,
                         icon: Icon(Icons.menu_book_outlined),
-                        label: Text(S.openRecipe),
+                        label: Text(context.l10n.openRecipe),
                       ),
                     ),
                   ],

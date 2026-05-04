@@ -1,45 +1,76 @@
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:flutter/widgets.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class AppPriorityConfig {
   const AppPriorityConfig({
     required this.value,
-    required this.label,
-    required this.description,
+    required this.labelKey,
+    required this.descriptionKey,
   });
 
   final int value;
-  final String label;
-  final String description;
+  final String labelKey;
+  final String descriptionKey;
+
+  String label(BuildContext context) {
+    switch (labelKey) {
+      case 'none':
+        return context.l10n.none;
+      case 'low':
+        return context.l10n.low;
+      case 'medium':
+        return context.l10n.medium;
+      case 'high':
+        return context.l10n.high;
+      default:
+        return context.l10n.none;
+    }
+  }
+
+  String description(BuildContext context) {
+    switch (descriptionKey) {
+      case 'noPriority':
+        return context.l10n.noPriority;
+      case 'lowPriority':
+        return context.l10n.lowPriority;
+      case 'mediumPriority':
+        return context.l10n.mediumPriority;
+      case 'highPriority':
+        return context.l10n.highPriority;
+      default:
+        return context.l10n.noPriority;
+    }
+  }
 }
 
 class AppPriorityTypes {
   const AppPriorityTypes._();
 
-  static AppPriorityConfig get none => AppPriorityConfig(
-        value: 0,
-        label: S.none,
-        description: S.noPriority,
-      );
+  static const none = AppPriorityConfig(
+    value: 0,
+    labelKey: 'none',
+    descriptionKey: 'noPriority',
+  );
 
-  static AppPriorityConfig get low => AppPriorityConfig(
-        value: 1,
-        label: S.low,
-        description: S.lowPriority,
-      );
+  static const low = AppPriorityConfig(
+    value: 1,
+    labelKey: 'low',
+    descriptionKey: 'lowPriority',
+  );
 
-  static AppPriorityConfig get medium => AppPriorityConfig(
-        value: 2,
-        label: S.medium,
-        description: S.mediumPriority,
-      );
+  static const medium = AppPriorityConfig(
+    value: 2,
+    labelKey: 'medium',
+    descriptionKey: 'mediumPriority',
+  );
 
-  static AppPriorityConfig get high => AppPriorityConfig(
-        value: 3,
-        label: S.high,
-        description: S.highPriority,
-      );
+  static const high = AppPriorityConfig(
+    value: 3,
+    labelKey: 'high',
+    descriptionKey: 'highPriority',
+  );
 
-  static List<AppPriorityConfig> get all => [none, low, medium, high];
+  static const all = [none, low, medium, high];
 
   static AppPriorityConfig fromValue(int? value) {
     for (final config in all) {
@@ -49,13 +80,13 @@ class AppPriorityTypes {
     return none;
   }
 
-  static String displayText(int? value) {
+  static String displayText(BuildContext context, int? value) {
     final config = fromValue(value);
 
     if (config.value == 0) {
-      return S.noPriority;
+      return context.l10n.noPriority;
     }
 
-    return '${config.label} ${S.priority.toLowerCase()}';
+    return '${config.label(context)} ${context.l10n.priority.toLowerCase()}';
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
@@ -24,7 +24,7 @@ class TaskItemCard extends StatelessWidget {
     final value = item[AppItemFields.title]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.untitledTask;
+      return context.l10n.untitledTask;
     }
 
     return value.trim();
@@ -53,7 +53,7 @@ class TaskItemCard extends StatelessWidget {
   }
 
   String get priorityText {
-    return AppPriorityTypes.displayText(priority);
+    return AppPriorityTypes.displayText(context, priority);
   }
 
   DateTime? get deadlineDate {
@@ -78,7 +78,7 @@ class TaskItemCard extends StatelessWidget {
     );
 
     if (formatted.isEmpty) {
-      return S.noDeadline;
+      return context.l10n.noDeadline;
     }
 
     return formatted;
@@ -198,7 +198,7 @@ class TaskItemCard extends StatelessWidget {
                     IconButton(
                       onPressed: onDelete,
                       icon: Icon(Icons.delete_outline),
-                      tooltip: S.deleteTask,
+                      tooltip: context.l10n.deleteTask,
                     ),
                   ],
                 ),
@@ -209,7 +209,7 @@ class TaskItemCard extends StatelessWidget {
                   children: [
                     _TaskInfoChip(
                       icon: priorityStyle.icon,
-                      label: hasPriority ? priorityText : S.noPriority,
+                      label: hasPriority ? priorityText : context.l10n.noPriority,
                       filled: hasPriority,
                       backgroundColor: hasPriority
                           ? priorityStyle.chipBackground
@@ -244,10 +244,10 @@ class TaskItemCard extends StatelessWidget {
                         ),
                         label: Text(
                           isDone
-                              ? S.markAsOpen
+                              ? context.l10n.markAsOpen
                               : isOverdue || isDueToday
-                              ? S.completeNow
-                              : S.completeTask,
+                              ? context.l10n.completeNow
+                              : context.l10n.completeTask,
                         ),
                       ),
                     ),
@@ -255,7 +255,7 @@ class TaskItemCard extends StatelessWidget {
                     IconButton(
                       onPressed: onEdit,
                       icon: Icon(Icons.edit_outlined),
-                      tooltip: S.editTask,
+                      tooltip: context.l10n.editTask,
                     ),
                   ],
                 ),
@@ -304,7 +304,7 @@ class TaskDeadlineStyle {
         return TaskDeadlineStyle(
           icon: Icons.warning_amber_rounded,
           dateIcon: Icons.event_busy_outlined,
-          label: S.overdue,
+          label: context.l10n.overdue,
           avatarBackground: colors.errorContainer,
           avatarForeground: colors.onErrorContainer,
           pillBackground: colors.errorContainer,
@@ -317,7 +317,7 @@ class TaskDeadlineStyle {
         return TaskDeadlineStyle(
           icon: Icons.today_outlined,
           dateIcon: Icons.today_outlined,
-          label: S.today,
+          label: context.l10n.today,
           avatarBackground: colors.primaryContainer,
           avatarForeground: colors.onPrimaryContainer,
           pillBackground: colors.primaryContainer,
@@ -330,7 +330,7 @@ class TaskDeadlineStyle {
         return TaskDeadlineStyle(
           icon: Icons.checklist,
           dateIcon: Icons.event_outlined,
-          label: S.upcoming,
+          label: context.l10n.upcoming,
           avatarBackground: colors.secondaryContainer,
           avatarForeground: colors.onSecondaryContainer,
           pillBackground: colors.secondaryContainer,
@@ -343,7 +343,7 @@ class TaskDeadlineStyle {
         return TaskDeadlineStyle(
           icon: Icons.check_circle,
           dateIcon: Icons.event_available_outlined,
-          label: S.done,
+          label: context.l10n.done,
           avatarBackground: colors.surfaceContainerHighest,
           avatarForeground: colors.onSurfaceVariant,
           pillBackground: colors.surfaceContainerHighest,

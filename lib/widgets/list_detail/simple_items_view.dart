@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
@@ -141,13 +141,13 @@ class _SimpleItemCard extends StatelessWidget {
                         OutlinedButton.icon(
                           onPressed: onEdit,
                           icon: Icon(Icons.edit_outlined),
-                          label: Text(S.edit),
+                          label: Text(context.l10n.edit),
                         ),
                         SizedBox(width: 8),
                         IconButton(
                           onPressed: onDelete,
                           icon: Icon(Icons.delete_outline),
-                          tooltip: S.deleteItem,
+                          tooltip: context.l10n.deleteItem,
                         ),
                       ],
                     ),

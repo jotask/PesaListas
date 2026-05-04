@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/core/vote_fields.dart';
 
@@ -34,11 +34,11 @@ class VoteDetailsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(S.votes),
+      title: Text(context.l10n.votes),
       content: SizedBox(
         width: double.maxFinite,
         child: votes.isEmpty
-            ? Text(S.noVotesYet2)
+            ? Text(context.l10n.noVotesYet2)
             : SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -58,7 +58,7 @@ class VoteDetailsDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.close),
+          child: Text(context.l10n.close),
         ),
       ],
     );
@@ -87,19 +87,19 @@ class _VoteSummaryHeader extends StatelessWidget {
           children: [
             Expanded(
               child: _SummaryValue(
-                label: S.average,
+                label: context.l10n.average,
                 value: averagePoints.toStringAsFixed(1),
               ),
             ),
             Expanded(
               child: _SummaryValue(
-                label: S.votes,
+                label: context.l10n.votes,
                 value: '$voteCount $voteLabel',
               ),
             ),
             Expanded(
               child: _SummaryValue(
-                label: S.total,
+                label: context.l10n.total,
                 value: totalPoints.toString(),
               ),
             ),
@@ -170,8 +170,8 @@ class _VoteRow extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
-        title: Text(isMine ? S.you : S.member),
-        subtitle: Text(comment ?? S.noComment),
+        title: Text(isMine ? context.l10n.you : context.l10n.member),
+        subtitle: Text(comment ?? context.l10n.noComment),
       ),
     );
   }

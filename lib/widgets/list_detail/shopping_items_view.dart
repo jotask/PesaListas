@@ -3,7 +3,7 @@ import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class ShoppingItemsView extends StatelessWidget {
@@ -68,8 +68,8 @@ class ShoppingItemsView extends StatelessWidget {
     if (items.isEmpty) {
       return EmptyItemsCard(
         icon: Icons.shopping_cart_outlined,
-        title: S.noShoppingItemsYet,
-        subtitle: S.addYourFirstItem,
+        title: context.l10n.noShoppingItemsYet,
+        subtitle: context.l10n.addYourFirstItem,
         onCreate: onCreate,
       );
     }
@@ -86,7 +86,7 @@ class ShoppingItemsView extends StatelessWidget {
         const SizedBox(height: 12),
         if (toBuyItems.isNotEmpty)
           _ShoppingSection(
-            title: S.toBuy,
+            title: context.l10n.toBuy,
             icon: Icons.shopping_cart_outlined,
             items: toBuyItems,
             onToggle: toggleItem,
@@ -97,7 +97,7 @@ class ShoppingItemsView extends StatelessWidget {
           const SizedBox(height: 16),
         if (boughtItems.isNotEmpty)
           _ShoppingSection(
-            title: S.bought,
+            title: context.l10n.bought,
             icon: Icons.shopping_cart_checkout,
             items: boughtItems,
             onToggle: toggleItem,
@@ -145,19 +145,19 @@ class _ShoppingSummaryCard extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   _SummaryPill(
-                    label: S.toBuySummary(toBuyCount),
+                    label: context.l10n.toBuySummary(toBuyCount),
                     icon: Icons.shopping_cart_outlined,
                   ),
                   _SummaryPill(
-                    label: S.boughtSummary(boughtCount),
+                    label: context.l10n.boughtSummary(boughtCount),
                     icon: Icons.shopping_cart_checkout,
                   ),
                   _SummaryPill(
-                    label: S.generatedSummary(generatedCount),
+                    label: context.l10n.generatedSummary(generatedCount),
                     icon: Icons.auto_awesome_outlined,
                   ),
                   _SummaryPill(
-                    label: S.totalCountSummary(totalCount),
+                    label: context.l10n.totalCountSummary(totalCount),
                     icon: Icons.list_alt_outlined,
                   ),
                 ],
@@ -234,7 +234,7 @@ class _ShoppingSection extends StatelessWidget {
             Icon(icon, size: 18, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
-              S.sectionCount(title, items.length),
+              context.l10n.sectionCount(title, items.length),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
             ),
           ],
@@ -271,7 +271,7 @@ class _ShoppingItemCard extends StatelessWidget {
     final value = item[AppShoppingItemFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.unnamedItem;
+      return context.l10n.unnamedItem;
     }
 
     return value.trim();
@@ -334,7 +334,7 @@ class _ShoppingItemCard extends StatelessWidget {
     }
 
     if (parts.isEmpty) {
-      return checked ? S.bought : S.toBuy;
+      return checked ? context.l10n.bought : context.l10n.toBuy;
     }
 
     return parts.join(' ');
@@ -360,29 +360,29 @@ class _ShoppingItemCard extends StatelessWidget {
     return value.split('T').first;
   }
 
-  String? get mealTypeLabel {
+  String? mealTypeLabel(BuildContext context) {
     final value = sourceMealPlan?[AppMealPlanFields.mealType]?.toString();
 
     if (value == null || value.trim().isEmpty) {
       return null;
     }
 
-    return AppMealTypes.fromValue(value).label;
+    return AppMealTypes.fromValue(value).label(context);
   }
 
-  String get subtitle {
+  String subtitle(BuildContext context) {
     final parts = <String>[amountText];
 
     if (recipeName != null) {
-      parts.add(S.recipeSourceLabel(recipeName!));
+      parts.add(context.l10n.recipeSourceLabel(recipeName!));
     } else if (generatedFromMealPlan) {
-      parts.add(S.fromMealPlan);
+      parts.add(context.l10n.fromMealPlan);
     }
 
     return parts.join(' • ');
   }
 
-  String? get sourceContextText {
+  String? sourceContextText(BuildContext context) {
     if (!generatedFromMealPlan) {
       return null;
     }
@@ -393,8 +393,10 @@ class _ShoppingItemCard extends StatelessWidget {
       parts.add(plannedFor!);
     }
 
-    if (mealTypeLabel != null) {
-      parts.add(mealTypeLabel!);
+    final mealType = mealTypeLabel(context);
+
+    if (mealType != null) {
+      parts.add(mealType);
     }
 
     if (parts.isEmpty) {
@@ -458,10 +460,10 @@ class _ShoppingItemCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(subtitle, style: theme.textTheme.bodyMedium),
-                          if (sourceContextText != null) ...[
+                          Text(subtitle(context), style: theme.textTheme.bodyMedium),
+                          if (sourceContextText(context) != null) ...[
                             const SizedBox(height: 8),
-                            _SourceContextPill(text: sourceContextText!),
+                            _SourceContextPill(text: sourceContextText(context)!),
                           ],
                         ],
                       ),
@@ -478,7 +480,7 @@ class _ShoppingItemCard extends StatelessWidget {
                           checked ? Icons.undo : Icons.check_circle_outline,
                         ),
                         label: Text(
-                          checked ? S.markAsNotBought : S.markAsBought,
+                          checked ? context.l10n.markAsNotBought : context.l10n.markAsBought,
                         ),
                       ),
                     ),
@@ -486,12 +488,12 @@ class _ShoppingItemCard extends StatelessWidget {
                     IconButton(
                       onPressed: onEdit,
                       icon: const Icon(Icons.edit_outlined),
-                      tooltip: S.editItem,
+                      tooltip: context.l10n.editItem,
                     ),
                     IconButton(
                       onPressed: onDelete,
                       icon: const Icon(Icons.delete_outline),
-                      tooltip: S.deleteItem,
+                      tooltip: context.l10n.deleteItem,
                     ),
                   ],
                 ),
@@ -569,7 +571,7 @@ class _ShoppingStatePill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        checked ? S.bought : S.toBuy,
+        checked ? context.l10n.bought : context.l10n.toBuy,
         style: TextStyle(
           color: foregroundColor,
           fontSize: 11,

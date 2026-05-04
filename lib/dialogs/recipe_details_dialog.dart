@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
@@ -40,7 +40,7 @@ class RecipeDetailsDialog extends StatelessWidget {
     final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.untitledRecipe;
+      return context.l10n.untitledRecipe;
     }
 
     return value.trim();
@@ -99,20 +99,20 @@ class RecipeDetailsDialog extends StatelessWidget {
                   _RecipeInfoChip(
                     icon: Icons.timer_outlined,
                     label: prepTime == null
-                        ? S.prepNotSet
-                        : S.prepMinutes(prepTime!),
+                        ? context.l10n.prepNotSet
+                        : context.l10n.prepMinutes(prepTime!),
                   ),
                   _RecipeInfoChip(
                     icon: Icons.local_fire_department_outlined,
                     label: cookTime == null
-                        ? S.cookNotSet
-                        : S.cookMinutes(cookTime!),
+                        ? context.l10n.cookNotSet
+                        : context.l10n.cookMinutes(cookTime!),
                   ),
                   _RecipeInfoChip(
                     icon: Icons.people_outline,
                     label: servings == null
-                        ? S.servingsNotSet
-                        : S.servingsCount(servings!),
+                        ? context.l10n.servingsNotSet
+                        : context.l10n.servingsCount(servings!),
                   ),
                 ],
               ),
@@ -121,7 +121,7 @@ class RecipeDetailsDialog extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      S.instructions,
+                      context.l10n.instructions,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
@@ -138,17 +138,17 @@ class RecipeDetailsDialog extends StatelessWidget {
                       );
                     },
                     icon: Icon(Icons.edit_note_outlined),
-                    tooltip: S.editInstructions,
+                    tooltip: context.l10n.editInstructions,
                   ),
                 ],
               ),
-              Text(instructions ?? S.noInstructionsYet),
+              Text(instructions ?? context.l10n.noInstructionsYet),
               SizedBox(height: 18),
               Row(
                 children: [
                   Expanded(
                     child: Text(
-                      S.ingredients,
+                      context.l10n.ingredients,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
@@ -157,15 +157,15 @@ class RecipeDetailsDialog extends StatelessWidget {
                   ),
                   Text(
                     ingredients.length == 1
-                        ? S.ingredientCountOne
-                        : S.ingredientCountMany(ingredients.length),
+                        ? context.l10n.ingredientCountOne
+                        : context.l10n.ingredientCountMany(ingredients.length),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
               SizedBox(height: 8),
               if (ingredients.isEmpty)
-                Text(S.noIngredientsYet)
+                Text(context.l10n.noIngredientsYet)
               else
                 Column(
                   children: [
@@ -187,7 +187,7 @@ class RecipeDetailsDialog extends StatelessWidget {
             );
           },
           icon: Icon(Icons.tune_outlined),
-          label: Text(S.info),
+          label: Text(context.l10n.info),
         ),
         TextButton.icon(
           onPressed: () {
@@ -198,11 +198,11 @@ class RecipeDetailsDialog extends StatelessWidget {
             );
           },
           icon: Icon(Icons.add),
-          label: Text(S.ingredient),
+          label: Text(context.l10n.ingredient),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.close),
+          child: Text(context.l10n.close),
         ),
       ],
     );
@@ -222,7 +222,7 @@ class _IngredientRow extends StatelessWidget {
     final value = ingredient[AppRecipeIngredientFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.unnamedIngredient;
+      return context.l10n.unnamedIngredient;
     }
 
     return value.trim();
@@ -276,7 +276,7 @@ class _IngredientRow extends StatelessWidget {
     }
 
     if (parts.isEmpty) {
-      return S.amountNotSet;
+      return context.l10n.amountNotSet;
     }
 
     return parts.join(' ');
@@ -317,12 +317,12 @@ class _IngredientRow extends StatelessWidget {
             IconButton(
               onPressed: () => editIngredient(context),
               icon: Icon(Icons.edit_outlined),
-              tooltip: S.editIngredient,
+              tooltip: context.l10n.editIngredient,
             ),
             IconButton(
               onPressed: () => deleteIngredient(context),
               icon: Icon(Icons.delete_outline),
-              tooltip: S.deleteIngredient,
+              tooltip: context.l10n.deleteIngredient,
             ),
           ],
         ),

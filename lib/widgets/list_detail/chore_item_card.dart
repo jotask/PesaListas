@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
@@ -23,7 +23,7 @@ class ChoreItemCard extends StatelessWidget {
     final value = item[AppItemFields.title]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.untitledChore;
+      return context.l10n.untitledChore;
     }
 
     return value.trim();
@@ -70,7 +70,7 @@ class ChoreItemCard extends StatelessWidget {
   }
 
   String get recurrenceText {
-    return AppRecurrenceTypes.displayText(recurrenceType, recurrenceInterval);
+    return AppRecurrenceTypes.displayText(context, recurrenceType, recurrenceInterval);
   }
 
   String get nextDueText {
@@ -79,7 +79,7 @@ class ChoreItemCard extends StatelessWidget {
     );
 
     if (formatted.isEmpty) {
-      return S.noDueDate;
+      return context.l10n.noDueDate;
     }
 
     return formatted;
@@ -188,7 +188,7 @@ class ChoreItemCard extends StatelessWidget {
                   IconButton(
                     onPressed: onDelete,
                     icon: Icon(Icons.delete_outline),
-                    tooltip: S.deleteChore,
+                    tooltip: context.l10n.deleteChore,
                   ),
                 ],
               ),
@@ -199,7 +199,7 @@ class ChoreItemCard extends StatelessWidget {
                 children: [
                   _ChoreInfoChip(
                     icon: Icons.repeat,
-                    label: hasRecurrence ? recurrenceText : S.doesNotRepeat,
+                    label: hasRecurrence ? recurrenceText : context.l10n.doesNotRepeat,
                     filled: hasRecurrence,
                   ),
                   _ChoreInfoChip(
@@ -224,8 +224,8 @@ class ChoreItemCard extends StatelessWidget {
                       icon: Icon(Icons.check_circle_outline),
                       label: Text(
                         isOverdue || isDueToday
-                            ? S.completeNow
-                            : S.completeChore,
+                            ? context.l10n.completeNow
+                            : context.l10n.completeChore,
                       ),
                     ),
                   ),
@@ -233,7 +233,7 @@ class ChoreItemCard extends StatelessWidget {
                   IconButton(
                     onPressed: onEdit,
                     icon: Icon(Icons.edit_outlined),
-                    tooltip: S.editChore,
+                    tooltip: context.l10n.editChore,
                   ),
                 ],
               ),
@@ -279,7 +279,7 @@ class ChoreDueStyle {
         return ChoreDueStyle(
           icon: Icons.warning_amber_rounded,
           dateIcon: Icons.event_busy_outlined,
-          label: S.overdue,
+          label: context.l10n.overdue,
           avatarBackground: colors.errorContainer,
           avatarForeground: colors.onErrorContainer,
           pillBackground: colors.errorContainer,
@@ -292,7 +292,7 @@ class ChoreDueStyle {
         return ChoreDueStyle(
           icon: Icons.today_outlined,
           dateIcon: Icons.today_outlined,
-          label: S.today,
+          label: context.l10n.today,
           avatarBackground: colors.primaryContainer,
           avatarForeground: colors.onPrimaryContainer,
           pillBackground: colors.primaryContainer,
@@ -305,7 +305,7 @@ class ChoreDueStyle {
         return ChoreDueStyle(
           icon: Icons.cleaning_services,
           dateIcon: Icons.event_outlined,
-          label: S.upcoming,
+          label: context.l10n.upcoming,
           avatarBackground: colors.secondaryContainer,
           avatarForeground: colors.onSecondaryContainer,
           pillBackground: colors.secondaryContainer,

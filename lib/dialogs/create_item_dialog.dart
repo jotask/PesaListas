@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/priority_types.dart';
@@ -75,12 +75,12 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
     setState(() => validationMessage = null);
 
     if (title.isEmpty) {
-      setState(() => validationMessage = S.titleIsRequired);
+      setState(() => validationMessage = context.l10n.titleIsRequired);
       return;
     }
 
     if (isChoreList && usesCustomInterval && recurrenceInterval < 2) {
-      setState(() => validationMessage = S.customRecurrenceMustBeAtLeast2Days);
+      setState(() => validationMessage = context.l10n.customRecurrenceMustBeAtLeast2Days);
       return;
     }
 
@@ -179,11 +179,11 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
         SizedBox(height: 16),
         DropdownButtonFormField<int>(
           initialValue: priority,
-          decoration: InputDecoration(labelText: S.priority),
+          decoration: InputDecoration(labelText: context.l10n.priority),
           items: AppPriorityTypes.all.map((config) {
             return DropdownMenuItem<int>(
               value: config.value,
-              child: Text(config.label),
+              child: Text(config.label(context)),
             );
           }).toList(),
           onChanged: (value) {
@@ -200,8 +200,8 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
                 icon: Icon(Icons.calendar_today),
                 label: Text(
                   deadlineAt == null
-                      ? S.addDeadline
-                      : S.deadlineDate(AppDateFormatting.yyyyMmDd(deadlineAt!)),
+                      ? context.l10n.addDeadline
+                      : context.l10n.deadlineDate(AppDateFormatting.yyyyMmDd(deadlineAt!)),
                 ),
               ),
             ),
@@ -210,7 +210,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
               IconButton(
                 onPressed: () => setState(() => deadlineAt = null),
                 icon: Icon(Icons.close),
-                tooltip: S.removeDeadline,
+                tooltip: context.l10n.removeDeadline,
               ),
             ],
           ],
@@ -227,13 +227,13 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
         DropdownButtonFormField<String?>(
           initialValue: recurrenceType,
           decoration: InputDecoration(
-            labelText: S.recurrence,
-            helperText: S.chooseHowOftenThisChoreRepeats,
+            labelText: context.l10n.recurrence,
+            helperText: context.l10n.chooseHowOftenThisChoreRepeats,
           ),
           items: AppRecurrenceTypes.all.map((config) {
             return DropdownMenuItem<String?>(
               value: config.value,
-              child: Text(config.label),
+              child: Text(config.label(context)),
             );
           }).toList(),
           onChanged: updateRecurrenceType,
@@ -244,9 +244,9 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
             controller: recurrenceIntervalController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              labelText: S.repeatEvery,
-              suffixText: S.days,
-              helperText: S.minimum2Days,
+              labelText: context.l10n.repeatEvery,
+              suffixText: context.l10n.days,
+              helperText: context.l10n.minimum2Days,
             ),
             onChanged: updateRecurrenceInterval,
           ),
@@ -260,8 +260,8 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
                 icon: Icon(Icons.event_repeat),
                 label: Text(
                   nextDueAt == null
-                      ? S.setNextDueDate
-                      : S.nextDueDate(AppDateFormatting.yyyyMmDd(nextDueAt!)),
+                      ? context.l10n.setNextDueDate
+                      : context.l10n.nextDueDate(AppDateFormatting.yyyyMmDd(nextDueAt!)),
                 ),
               ),
             ),
@@ -270,7 +270,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
               IconButton(
                 onPressed: () => setState(() => nextDueAt = null),
                 icon: Icon(Icons.close),
-                tooltip: S.removeNextDueDate,
+                tooltip: context.l10n.removeNextDueDate,
               ),
             ],
           ],
@@ -278,8 +278,8 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
         SizedBox(height: 8),
         Text(
           hasRecurrence
-              ? S.whenYouCompleteThisChoreTheAppWillScheduleTheNextDueDate
-              : S.nonRecurringChoresCanStillBeCompletedManually,
+              ? context.l10n.whenYouCompleteThisChoreTheAppWillScheduleTheNextDueDate
+              : context.l10n.nonRecurringChoresCanStillBeCompletedManually,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -291,7 +291,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
     final config = listTypeConfig;
 
     return AlertDialog(
-      title: Text(S.addListTypeItem(config.label.toLowerCase())),
+      title: Text(context.l10n.addListTypeItem(config.label(context).toLowerCase())),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -299,16 +299,16 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(config.icon)),
-              title: Text(config.label),
-              subtitle: Text(config.description),
+              title: Text(config.label(context)),
+              subtitle: Text(config.description(context)),
             ),
             SizedBox(height: 12),
             TextField(
               controller: titleController,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: S.title,
-                hintText: S.buyMilkWatchMovieCleanKitchen,
+                labelText: context.l10n.title,
+                hintText: context.l10n.buyMilkWatchMovieCleanKitchen,
               ),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
@@ -321,7 +321,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
             TextField(
               controller: descriptionController,
               autofocus: false,
-              decoration: InputDecoration(labelText: S.description),
+              decoration: InputDecoration(labelText: context.l10n.description),
               minLines: 1,
               maxLines: 3,
             ),
@@ -334,9 +334,9 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.cancel),
+          child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: Text(S.add)),
+        ElevatedButton(onPressed: submit, child: Text(context.l10n.add)),
       ],
     );
   }

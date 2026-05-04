@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/create_list_dialog.dart';
@@ -86,7 +86,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
       if (!mounted) return;
 
       setState(() => loadingMembers = false);
-      showErrorSnackBar(context, S.failedToLoadMembers, error);
+      showErrorSnackBar(context, context.l10n.failedToLoadMembers, error);
     }
   }
 
@@ -110,7 +110,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
       if (!mounted) return;
 
       setState(() => loadingInvitations = false);
-      showErrorSnackBar(context, S.failedToLoadInvitations, error);
+      showErrorSnackBar(context, context.l10n.failedToLoadInvitations, error);
     }
   }
 
@@ -132,7 +132,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
       if (!mounted) return;
 
       setState(() => loadingLists = false);
-      showErrorSnackBar(context, S.failedToLoadLists, error);
+      showErrorSnackBar(context, context.l10n.failedToLoadLists, error);
     }
   }
 
@@ -165,11 +165,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         };
       });
 
-      showSuccessSnackBar(context, S.groupUpdated);
+      showSuccessSnackBar(context, context.l10n.groupUpdated);
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToUpdateGroup, error);
+      showErrorSnackBar(context, context.l10n.failedToUpdateGroup, error);
     } finally {
       if (mounted) {
         setState(() => editingGroup = false);
@@ -197,11 +197,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.invitationSentTo(email));
+      showSuccessSnackBar(context, context.l10n.invitationSentTo(email));
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToInviteMember, error);
+      showErrorSnackBar(context, context.l10n.failedToInviteMember, error);
     } finally {
       if (mounted) {
         setState(() => invitingMember = false);
@@ -232,11 +232,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
       if (!mounted) return;
 
-      showSuccessSnackBar(context, S.listCreatedWithName(result.name));
+      showSuccessSnackBar(context, context.l10n.listCreatedWithName(result.name));
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, S.failedToCreateList, error);
+      showErrorSnackBar(context, context.l10n.failedToCreateList, error);
     } finally {
       if (mounted) {
         setState(() => creatingList = false);
@@ -254,7 +254,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: creatingList ? null : createList,
         icon: Icon(Icons.add),
-        label: Text(S.newList),
+        label: Text(context.l10n.newList),
       ),
       body: Column(
         children: [

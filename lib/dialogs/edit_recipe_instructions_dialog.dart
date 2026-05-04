@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 
 class EditRecipeInstructionsDialogResult {
@@ -50,7 +50,7 @@ class _EditRecipeInstructionsDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(S.editInstructions),
+      title: Text(context.l10n.editInstructions),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -58,15 +58,15 @@ class _EditRecipeInstructionsDialogState
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.menu_book_outlined)),
-              title: Text(S.cookingInstructions),
-              subtitle: Text(S.addThePreparationStepsForThisRecipe),
+              title: Text(context.l10n.cookingInstructions),
+              subtitle: Text(context.l10n.addThePreparationStepsForThisRecipe),
             ),
             SizedBox(height: 12),
             TextField(
               controller: instructionsController,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: S.instructions,
+                labelText: context.l10n.instructions,
                 hintText:
                     '1. Chop vegetables\n2. Cook pasta\n3. Mix everything',
                 alignLabelWithHint: true,
@@ -82,9 +82,9 @@ class _EditRecipeInstructionsDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.cancel),
+          child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: Text(S.save)),
+        ElevatedButton(onPressed: submit, child: Text(context.l10n.save)),
       ],
     );
   }

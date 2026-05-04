@@ -3,7 +3,7 @@ import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/list_detail/items_view_factory.dart';
 
 class ListItemsSection extends StatefulWidget {
@@ -82,26 +82,26 @@ class _ListItemsSectionState extends State<ListItemsSection> {
   String get emptyFilteredTitle {
     switch (selectedFilter) {
       case ItemStatusFilter.all:
-        return S.noItemsYet;
+        return context.l10n.noItemsYet;
 
       case ItemStatusFilter.open:
-        return S.noOpenItems;
+        return context.l10n.noOpenItems;
 
       case ItemStatusFilter.done:
-        return S.noDoneItems;
+        return context.l10n.noDoneItems;
     }
   }
 
   String get emptyFilteredSubtitle {
     switch (selectedFilter) {
       case ItemStatusFilter.all:
-        return S.addYourFirstItem;
+        return context.l10n.addYourFirstItem;
 
       case ItemStatusFilter.open:
-        return S.everythingInThisListIsDone;
+        return context.l10n.everythingInThisListIsDone;
 
       case ItemStatusFilter.done:
-        return S.nothingHasBeenCompletedYet;
+        return context.l10n.nothingHasBeenCompletedYet;
     }
   }
 
@@ -194,17 +194,17 @@ class _StatusFilterChips extends StatelessWidget {
       children: [
         FilterChip(
           selected: selectedFilter == ItemStatusFilter.all,
-          label: Text(S.allCount(totalCount)),
+          label: Text(context.l10n.allCount(totalCount)),
           onSelected: (_) => onSelected(ItemStatusFilter.all),
         ),
         FilterChip(
           selected: selectedFilter == ItemStatusFilter.open,
-          label: Text(S.openCount(openCount)),
+          label: Text(context.l10n.openCount(openCount)),
           onSelected: (_) => onSelected(ItemStatusFilter.open),
         ),
         FilterChip(
           selected: selectedFilter == ItemStatusFilter.done,
-          label: Text(S.doneCount(doneCount)),
+          label: Text(context.l10n.doneCount(doneCount)),
           onSelected: (_) => onSelected(ItemStatusFilter.done),
         ),
       ],
@@ -258,7 +258,7 @@ class _NoFilteredItemsCard extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onClearFilter,
                     icon: const Icon(Icons.clear),
-                    label: Text(S.clearFilter),
+                    label: Text(context.l10n.clearFilter),
                   ),
                 ],
               ),

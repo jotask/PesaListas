@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/common/empty_info_card.dart';
 
 class NotImplementedItemsView extends StatelessWidget {
@@ -9,8 +9,8 @@ class NotImplementedItemsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyInfoCard(
       icon: Icons.construction_outlined,
-      title: S.unsupportedListType,
-      subtitle: S.thisListTypeIsNotSupportedByTheCurrentAppVersion,
+      title: context.l10n.unsupportedListType,
+      subtitle: context.l10n.thisListTypeIsNotSupportedByTheCurrentAppVersion,
     );
   }
 }

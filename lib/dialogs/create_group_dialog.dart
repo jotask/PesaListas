@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class CreateGroupDialog extends StatefulWidget {
   const CreateGroupDialog({super.key});
@@ -28,12 +28,12 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(S.createGroup),
+      title: Text(context.l10n.createGroup),
       content: TextField(
         controller: nameController,
         decoration: InputDecoration(
-          labelText: S.groupName,
-          hintText: S.meAndPartner,
+          labelText: context.l10n.groupName,
+          hintText: context.l10n.meAndPartner,
         ),
         autofocus: true,
         textInputAction: TextInputAction.done,
@@ -42,9 +42,9 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.cancel),
+          child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: Text(S.create)),
+        ElevatedButton(onPressed: submit, child: Text(context.l10n.create)),
       ],
     );
   }

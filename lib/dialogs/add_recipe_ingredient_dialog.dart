@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class AddRecipeIngredientDialogResult {
   const AddRecipeIngredientDialogResult({
@@ -49,7 +49,7 @@ class _AddRecipeIngredientDialogState extends State<AddRecipeIngredientDialog> {
     setState(() => validationMessage = null);
 
     if (name.isEmpty) {
-      setState(() => validationMessage = S.ingredientNameIsRequired);
+      setState(() => validationMessage = context.l10n.ingredientNameIsRequired);
       return;
     }
 
@@ -58,7 +58,7 @@ class _AddRecipeIngredientDialogState extends State<AddRecipeIngredientDialog> {
         : double.tryParse(quantityText.replaceAll(',', '.'));
 
     if (quantityText.isNotEmpty && quantity == null) {
-      setState(() => validationMessage = S.quantityMustBeANumber);
+      setState(() => validationMessage = context.l10n.quantityMustBeANumber);
       return;
     }
 
@@ -75,7 +75,7 @@ class _AddRecipeIngredientDialogState extends State<AddRecipeIngredientDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(S.addIngredient),
+      title: Text(context.l10n.addIngredient),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -83,16 +83,16 @@ class _AddRecipeIngredientDialogState extends State<AddRecipeIngredientDialog> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.kitchen_outlined)),
-              title: Text(S.ingredient),
-              subtitle: Text(S.addOneIngredientForThisRecipe),
+              title: Text(context.l10n.ingredient),
+              subtitle: Text(context.l10n.addOneIngredientForThisRecipe),
             ),
             SizedBox(height: 12),
             TextField(
               controller: nameController,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: S.name,
-                hintText: S.tomatoes,
+                labelText: context.l10n.name,
+                hintText: context.l10n.tomatoes,
               ),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
@@ -111,7 +111,7 @@ class _AddRecipeIngredientDialogState extends State<AddRecipeIngredientDialog> {
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      labelText: S.quantity,
+                      labelText: context.l10n.quantity,
                       hintText: '2',
                     ),
                   ),
@@ -121,8 +121,8 @@ class _AddRecipeIngredientDialogState extends State<AddRecipeIngredientDialog> {
                   child: TextField(
                     controller: unitController,
                     decoration: InputDecoration(
-                      labelText: S.unit,
-                      hintText: S.pcsGMl,
+                      labelText: context.l10n.unit,
+                      hintText: context.l10n.pcsGMl,
                     ),
                   ),
                 ),
@@ -132,8 +132,8 @@ class _AddRecipeIngredientDialogState extends State<AddRecipeIngredientDialog> {
             TextField(
               controller: noteController,
               decoration: InputDecoration(
-                labelText: S.note,
-                hintText: S.optional,
+                labelText: context.l10n.note,
+                hintText: context.l10n.optional,
               ),
               minLines: 1,
               maxLines: 3,
@@ -161,9 +161,9 @@ class _AddRecipeIngredientDialogState extends State<AddRecipeIngredientDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.cancel),
+          child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: Text(S.add)),
+        ElevatedButton(onPressed: submit, child: Text(context.l10n.add)),
       ],
     );
   }

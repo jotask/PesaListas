@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 
@@ -136,7 +136,7 @@ class CheckableItemCard extends StatelessWidget {
                           isDone ? Icons.undo : Icons.check_circle_outline,
                         ),
                         label: Text(
-                          isDone ? S.markAsNotBought : S.markAsBought,
+                          isDone ? context.l10n.markAsNotBought : context.l10n.markAsBought,
                         ),
                       ),
                     ),
@@ -144,7 +144,7 @@ class CheckableItemCard extends StatelessWidget {
                     IconButton(
                       onPressed: onEdit,
                       icon: Icon(Icons.edit_outlined),
-                      tooltip: S.editItem,
+                      tooltip: context.l10n.editItem,
                     ),
                     IconButton(
                       onPressed: onDelete,

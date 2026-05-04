@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
@@ -103,7 +103,7 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
     final value = recipe[AppRecipeFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.untitledRecipe;
+      return context.l10n.untitledRecipe;
     }
 
     return value.trim();
@@ -127,7 +127,7 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(S.editMealPlan),
+      title: Text(context.l10n.editMealPlan),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -135,8 +135,8 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.event_note_outlined)),
-              title: Text(S.mealPlan),
-              subtitle: Text(S.updateDateMealTypeRecipeOrNote),
+              title: Text(context.l10n.mealPlan),
+              subtitle: Text(context.l10n.updateDateMealTypeRecipeOrNote),
             ),
             SizedBox(height: 12),
             Row(
@@ -153,11 +153,11 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
             SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: mealType,
-              decoration: InputDecoration(labelText: S.mealType),
+              decoration: InputDecoration(labelText: context.l10n.mealType),
               items: AppMealTypes.all.map((config) {
                 return DropdownMenuItem<String>(
                   value: config.value,
-                  child: Text(config.label),
+                  child: Text(config.label(context)),
                 );
               }).toList(),
               onChanged: (value) {
@@ -169,13 +169,13 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
             DropdownButtonFormField<String>(
               initialValue: selectedRecipeValue,
               decoration: InputDecoration(
-                labelText: S.recipe,
-                helperText: S.optional2,
+                labelText: context.l10n.recipe,
+                helperText: context.l10n.optional2,
               ),
               items: [
                 DropdownMenuItem<String>(
                   value: noRecipeValue,
-                  child: Text(S.noRecipeCustomMeal),
+                  child: Text(context.l10n.noRecipeCustomMeal),
                 ),
                 for (final recipe in widget.recipes)
                   DropdownMenuItem<String>(
@@ -192,8 +192,8 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
             TextField(
               controller: noteController,
               decoration: InputDecoration(
-                labelText: S.note,
-                hintText: S.optional,
+                labelText: context.l10n.note,
+                hintText: context.l10n.optional,
               ),
               minLines: 1,
               maxLines: 3,
@@ -204,9 +204,9 @@ class _EditMealPlanDialogState extends State<EditMealPlanDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.cancel),
+          child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: Text(S.save)),
+        ElevatedButton(onPressed: submit, child: Text(context.l10n.save)),
       ],
     );
   }

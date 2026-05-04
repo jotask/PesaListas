@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/list_types.dart';
 
 class ListDetailHeader extends StatelessWidget {
@@ -43,7 +43,7 @@ class ListDetailHeader extends StatelessWidget {
                   child: IconButton(
                     onPressed: onBack,
                     icon: Icon(Icons.arrow_back),
-                    tooltip: S.back,
+                    tooltip: context.l10n.back,
                     visualDensity: VisualDensity.compact,
                   ),
                 ),
@@ -84,8 +84,8 @@ class ListDetailHeader extends StatelessWidget {
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _ListTypePill(icon: config.icon, label: config.label),
-                    Text(config.description, style: theme.textTheme.bodyMedium),
+                    _ListTypePill(icon: config.icon, label: config.label(context)),
+                    Text(config.description(context), style: theme.textTheme.bodyMedium),
                   ],
                 ),
               ),

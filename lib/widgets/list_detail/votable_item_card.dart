@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/core/vote_summary_fields.dart';
@@ -70,9 +70,9 @@ class VotableItemCard extends StatelessWidget {
   bool get hasVotes => voteCount > 0;
 
   String get voteCountText {
-    if (voteCount == 0) return S.noVotesYet;
-    if (voteCount == 1) return S.voteCountOne;
-    return S.voteCountMany(voteCount);
+    if (voteCount == 0) return context.l10n.noVotesYet;
+    if (voteCount == 1) return context.l10n.voteCountOne;
+    return context.l10n.voteCountMany(voteCount);
   }
 
   String get averageText {
@@ -137,12 +137,12 @@ class VotableItemCard extends StatelessWidget {
                         if (hasVotes)
                           _InfoChip(
                             icon: Icons.functions,
-                            label: S.totalPointsLabel(totalPoints),
+                            label: context.l10n.totalPointsLabel(totalPoints),
                           ),
                         if (ownVote != null)
                           _InfoChip(
                             icon: Icons.person,
-                            label: S.yourVoteLabel(ownVote),
+                            label: context.l10n.yourVoteLabel(ownVote),
                             filled: true,
                           ),
                       ],
@@ -157,22 +157,22 @@ class VotableItemCard extends StatelessWidget {
                           icon: Icon(
                             ownVote == null ? Icons.star_border : Icons.star,
                           ),
-                          label: Text(ownVote == null ? S.vote : S.changeVote),
+                          label: Text(ownVote == null ? context.l10n.vote : context.l10n.changeVote),
                         ),
                         OutlinedButton.icon(
                           onPressed: hasVotes ? onViewVotes : null,
                           icon: Icon(Icons.visibility_outlined),
-                          label: Text(S.votes),
+                          label: Text(context.l10n.votes),
                         ),
                         IconButton(
                           onPressed: onEdit,
                           icon: Icon(Icons.edit_outlined),
-                          tooltip: S.editItem,
+                          tooltip: context.l10n.editItem,
                         ),
                         IconButton(
                           onPressed: onDelete,
                           icon: Icon(Icons.delete_outline),
-                          tooltip: S.deleteItem,
+                          tooltip: context.l10n.deleteItem,
                         ),
                       ],
                     ),
@@ -227,7 +227,7 @@ class _ScoreBadge extends StatelessWidget {
             ),
           ),
           Text(
-            S.averageShort,
+            context.l10n.averageShort,
             style: TextStyle(
               fontSize: 11,
               color: hasVotes

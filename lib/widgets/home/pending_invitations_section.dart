@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/invitation_fields.dart';
 
@@ -33,7 +33,7 @@ class PendingInvitationsSection extends StatelessWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               SizedBox(width: 12),
-              Text(S.loadingInvitations),
+              Text(context.l10n.loadingInvitations),
             ],
           ),
         ),
@@ -137,7 +137,7 @@ class _InvitationTile extends StatelessWidget {
     final value = group?[AppGroupFields.name]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.sharedGroup;
+      return context.l10n.sharedGroup;
     }
 
     return value.trim();
@@ -147,7 +147,7 @@ class _InvitationTile extends StatelessWidget {
     final value = invitation[AppInvitationFields.role]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.member;
+      return context.l10n.member;
     }
 
     return value.trim();
@@ -186,19 +186,19 @@ class _InvitationTile extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
                 SizedBox(height: 2),
-                Text(S.invitedAsRole(role), style: theme.textTheme.bodySmall),
+                Text(context.l10n.invitedAsRole(role), style: theme.textTheme.bodySmall),
               ],
             ),
           ),
           SizedBox(width: 8),
           TextButton(
             onPressed: acceptingInvitation ? null : onDecline,
-            child: Text(S.decline),
+            child: Text(context.l10n.decline),
           ),
           SizedBox(width: 4),
           FilledButton(
             onPressed: acceptingInvitation ? null : onAccept,
-            child: Text(S.accept),
+            child: Text(context.l10n.accept),
           ),
         ],
       ),

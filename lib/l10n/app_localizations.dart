@@ -2473,6 +2473,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark'**
   String get themeSubtitleDark;
+
+  /// No description provided for @addListTypeItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {listType} item'**
+  String addListTypeItem(Object listType);
+
+  /// No description provided for @deadlineDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline: {date}'**
+  String deadlineDate(Object date);
+
+  /// No description provided for @nextDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next due: {date}'**
+  String nextDueDate(Object date);
+
+  /// No description provided for @fromDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'From {date}'**
+  String fromDateLabel(Object date);
+
+  /// No description provided for @toDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'To {date}'**
+  String toDateLabel(Object date);
+
+  /// No description provided for @invitationSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent to {email}'**
+  String invitationSentTo(Object email);
+
+  /// No description provided for @listCreatedWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'List \"{name}\" created'**
+  String listCreatedWithName(Object name);
+
+  /// No description provided for @thisIngredient.
+  ///
+  /// In en, this message translates to:
+  /// **'this ingredient'**
+  String get thisIngredient;
+
+  /// No description provided for @deleteIngredientMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove \"{name}\" from the recipe.'**
+  String deleteIngredientMessage(Object name);
+
+  /// No description provided for @ingredientDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient deleted'**
+  String get ingredientDeleted;
+
+  /// No description provided for @invitedAsRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited as {role}'**
+  String invitedAsRole(Object role);
+
+  /// No description provided for @roleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role: {role}'**
+  String roleLabel(Object role);
+
+  /// No description provided for @allCount.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String allCount(Object count);
+
+  /// No description provided for @openCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {count}'**
+  String openCount(Object count);
+
+  /// No description provided for @doneCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Done {count}'**
+  String doneCount(Object count);
+
+  /// No description provided for @upcomingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming {count}'**
+  String upcomingCount(Object count);
+
+  /// No description provided for @thisWeekCount.
+  ///
+  /// In en, this message translates to:
+  /// **'This week {count}'**
+  String thisWeekCount(Object count);
+
+  /// No description provided for @pastCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Past {count}'**
+  String pastCount(Object count);
+
+  /// No description provided for @thisWeekSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} this week'**
+  String thisWeekSummary(Object count);
+
+  /// No description provided for @upcomingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} upcoming'**
+  String upcomingSummary(Object count);
+
+  /// No description provided for @withRecipesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} with recipes'**
+  String withRecipesSummary(Object count);
+
+  /// No description provided for @totalCountSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} total'**
+  String totalCountSummary(Object count);
+
+  /// No description provided for @pastSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} past'**
+  String pastSummary(Object count);
+
+  /// No description provided for @toBuySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to buy'**
+  String toBuySummary(Object count);
+
+  /// No description provided for @boughtSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} bought'**
+  String boughtSummary(Object count);
+
+  /// No description provided for @generatedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} generated'**
+  String generatedSummary(Object count);
+
+  /// No description provided for @sectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ({count})'**
+  String sectionCount(Object title, Object count);
+
+  /// No description provided for @recipeSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe: {name}'**
+  String recipeSourceLabel(Object name);
+
+  /// No description provided for @minutesTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min total'**
+  String minutesTotal(Object minutes);
+
+  /// No description provided for @prepMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep {minutes} min'**
+  String prepMinutes(Object minutes);
+
+  /// No description provided for @cookMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook {minutes} min'**
+  String cookMinutes(Object minutes);
+
+  /// No description provided for @servingsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} servings'**
+  String servingsCount(Object count);
+
+  /// No description provided for @voteCountOne.
+  ///
+  /// In en, this message translates to:
+  /// **'1 vote'**
+  String get voteCountOne;
+
+  /// No description provided for @voteCountMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} votes'**
+  String voteCountMany(Object count);
+
+  /// No description provided for @totalPointsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {points}'**
+  String totalPointsLabel(Object points);
+
+  /// No description provided for @yourVoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vote {points}'**
+  String yourVoteLabel(Object points);
+
+  /// No description provided for @averageShort.
+  ///
+  /// In en, this message translates to:
+  /// **'avg'**
+  String get averageShort;
+
+  /// No description provided for @ingredientCountOne.
+  ///
+  /// In en, this message translates to:
+  /// **'1 ingredient'**
+  String get ingredientCountOne;
+
+  /// No description provided for @ingredientCountMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} ingredients'**
+  String ingredientCountMany(Object count);
+
+  /// No description provided for @decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline;
 }
 
 class _AppLocalizationsDelegate

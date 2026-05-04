@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/list_detail/votable_items_view.dart';
 
 class IdeasItemsView extends StatelessWidget {
@@ -30,10 +30,10 @@ class IdeasItemsView extends StatelessWidget {
       items: items,
       loading: loading,
       emptyIcon: Icons.lightbulb_outline,
-      emptyTitle: S.noIdeasYet,
-      emptySubtitle: S.addYourFirstIdea,
+      emptyTitle: context.l10n.noIdeasYet,
+      emptySubtitle: context.l10n.addYourFirstIdea,
       cardIcon: Icons.lightbulb_outline,
-      fallbackTitle: S.untitledIdea,
+      fallbackTitle: context.l10n.untitledIdea,
       onCreate: onCreate,
       onEdit: onEdit,
       onDelete: onDelete,

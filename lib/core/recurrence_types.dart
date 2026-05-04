@@ -1,57 +1,92 @@
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:flutter/widgets.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class AppRecurrenceConfig {
   const AppRecurrenceConfig({
     required this.value,
-    required this.label,
-    required this.description,
+    required this.labelKey,
+    required this.descriptionKey,
   });
 
   final String? value;
-  final String label;
-  final String description;
+  final String labelKey;
+  final String descriptionKey;
+
+  String label(BuildContext context) {
+    switch (labelKey) {
+      case 'none':
+        return context.l10n.none;
+      case 'daily':
+        return context.l10n.daily;
+      case 'weekly':
+        return context.l10n.weekly;
+      case 'monthly':
+        return context.l10n.monthly;
+      case 'everyNDays':
+        return context.l10n.everyNDays;
+      default:
+        return context.l10n.none;
+    }
+  }
+
+  String description(BuildContext context) {
+    switch (descriptionKey) {
+      case 'doesNotRepeat2':
+        return context.l10n.doesNotRepeat2;
+      case 'repeatsEveryDay':
+        return context.l10n.repeatsEveryDay;
+      case 'repeatsEveryWeek':
+        return context.l10n.repeatsEveryWeek;
+      case 'repeatsEveryMonth':
+        return context.l10n.repeatsEveryMonth;
+      case 'repeatsAfterACustomNumberOfDays':
+        return context.l10n.repeatsAfterACustomNumberOfDays;
+      default:
+        return context.l10n.doesNotRepeat2;
+    }
+  }
 }
 
 class AppRecurrenceTypes {
   const AppRecurrenceTypes._();
 
-  static AppRecurrenceConfig get none => AppRecurrenceConfig(
-        value: null,
-        label: S.none,
-        description: S.doesNotRepeat2,
-      );
+  static const none = AppRecurrenceConfig(
+    value: null,
+    labelKey: 'none',
+    descriptionKey: 'doesNotRepeat2',
+  );
 
-  static AppRecurrenceConfig get daily => AppRecurrenceConfig(
-        value: 'daily',
-        label: S.daily,
-        description: S.repeatsEveryDay,
-      );
+  static const daily = AppRecurrenceConfig(
+    value: 'daily',
+    labelKey: 'daily',
+    descriptionKey: 'repeatsEveryDay',
+  );
 
-  static AppRecurrenceConfig get weekly => AppRecurrenceConfig(
-        value: 'weekly',
-        label: S.weekly,
-        description: S.repeatsEveryWeek,
-      );
+  static const weekly = AppRecurrenceConfig(
+    value: 'weekly',
+    labelKey: 'weekly',
+    descriptionKey: 'repeatsEveryWeek',
+  );
 
-  static AppRecurrenceConfig get monthly => AppRecurrenceConfig(
-        value: 'monthly',
-        label: S.monthly,
-        description: S.repeatsEveryMonth,
-      );
+  static const monthly = AppRecurrenceConfig(
+    value: 'monthly',
+    labelKey: 'monthly',
+    descriptionKey: 'repeatsEveryMonth',
+  );
 
-  static AppRecurrenceConfig get everyNDays => AppRecurrenceConfig(
-        value: 'every_n_days',
-        label: S.everyNDays,
-        description: S.repeatsAfterACustomNumberOfDays,
-      );
+  static const everyNDays = AppRecurrenceConfig(
+    value: 'every_n_days',
+    labelKey: 'everyNDays',
+    descriptionKey: 'repeatsAfterACustomNumberOfDays',
+  );
 
-  static List<AppRecurrenceConfig> get all => [
-        none,
-        daily,
-        weekly,
-        monthly,
-        everyNDays,
-      ];
+  static const all = [
+    none,
+    daily,
+    weekly,
+    monthly,
+    everyNDays,
+  ];
 
   static AppRecurrenceConfig fromValue(String? value) {
     for (final config in all) {
@@ -61,13 +96,17 @@ class AppRecurrenceTypes {
     return none;
   }
 
-  static String displayText(String? value, int? interval) {
-    if (value == null) return S.doesNotRepeat;
+  static String displayText(
+    BuildContext context,
+    String? value,
+    int? interval,
+  ) {
+    if (value == null) return context.l10n.doesNotRepeat;
 
     if (value == 'every_n_days') {
-      return '${S.repeatEvery} ${interval ?? 1} ${S.days}';
+      return '${context.l10n.repeatEvery} ${interval ?? 1} ${context.l10n.days}';
     }
 
-    return fromValue(value).label;
+    return fromValue(value).label(context);
   }
 }

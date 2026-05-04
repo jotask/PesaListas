@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 
 class EditRecipeIngredientDialogResult {
@@ -76,7 +76,7 @@ class _EditRecipeIngredientDialogState
     setState(() => validationMessage = null);
 
     if (name.isEmpty) {
-      setState(() => validationMessage = S.ingredientNameIsRequired);
+      setState(() => validationMessage = context.l10n.ingredientNameIsRequired);
       return;
     }
 
@@ -85,7 +85,7 @@ class _EditRecipeIngredientDialogState
         : double.tryParse(quantityText.replaceAll(',', '.'));
 
     if (quantityText.isNotEmpty && quantity == null) {
-      setState(() => validationMessage = S.quantityMustBeANumber);
+      setState(() => validationMessage = context.l10n.quantityMustBeANumber);
       return;
     }
 
@@ -102,7 +102,7 @@ class _EditRecipeIngredientDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(S.editIngredient),
+      title: Text(context.l10n.editIngredient),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -110,16 +110,16 @@ class _EditRecipeIngredientDialogState
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(child: Icon(Icons.kitchen_outlined)),
-              title: Text(S.ingredient),
-              subtitle: Text(S.updateThisRecipeIngredient),
+              title: Text(context.l10n.ingredient),
+              subtitle: Text(context.l10n.updateThisRecipeIngredient),
             ),
             SizedBox(height: 12),
             TextField(
               controller: nameController,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: S.name,
-                hintText: S.tomatoes,
+                labelText: context.l10n.name,
+                hintText: context.l10n.tomatoes,
               ),
               textInputAction: TextInputAction.next,
               onChanged: (_) {
@@ -138,7 +138,7 @@ class _EditRecipeIngredientDialogState
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      labelText: S.quantity,
+                      labelText: context.l10n.quantity,
                       hintText: '2',
                     ),
                   ),
@@ -148,8 +148,8 @@ class _EditRecipeIngredientDialogState
                   child: TextField(
                     controller: unitController,
                     decoration: InputDecoration(
-                      labelText: S.unit,
-                      hintText: S.pcsGMl,
+                      labelText: context.l10n.unit,
+                      hintText: context.l10n.pcsGMl,
                     ),
                   ),
                 ),
@@ -159,8 +159,8 @@ class _EditRecipeIngredientDialogState
             TextField(
               controller: noteController,
               decoration: InputDecoration(
-                labelText: S.note,
-                hintText: S.optional,
+                labelText: context.l10n.note,
+                hintText: context.l10n.optional,
               ),
               minLines: 1,
               maxLines: 3,
@@ -188,9 +188,9 @@ class _EditRecipeIngredientDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(S.cancel),
+          child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: Text(S.save)),
+        ElevatedButton(onPressed: submit, child: Text(context.l10n.save)),
       ],
     );
   }

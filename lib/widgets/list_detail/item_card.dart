@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/l10n/app_strings.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 
@@ -25,7 +25,7 @@ class ItemCard extends StatelessWidget {
     final value = item[AppItemFields.title]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return S.untitledItem;
+      return context.l10n.untitledItem;
     }
 
     return value.trim();
@@ -38,11 +38,11 @@ class ItemCard extends StatelessWidget {
       return description.trim();
     }
 
-    return isDone ? S.done : S.open;
+    return isDone ? context.l10n.done : context.l10n.open;
   }
 
   String get stateLabel {
-    return isDone ? S.done : S.open;
+    return isDone ? context.l10n.done : context.l10n.open;
   }
 
   @override
@@ -119,19 +119,19 @@ class ItemCard extends StatelessWidget {
                         icon: Icon(
                           isDone ? Icons.undo : Icons.check_circle_outline,
                         ),
-                        label: Text(isDone ? S.markAsOpen : S.markAsDone),
+                        label: Text(isDone ? context.l10n.markAsOpen : context.l10n.markAsDone),
                       ),
                     ),
                     SizedBox(width: 8),
                     IconButton(
                       onPressed: onEdit,
                       icon: Icon(Icons.edit_outlined),
-                      tooltip: S.editItem,
+                      tooltip: context.l10n.editItem,
                     ),
                     IconButton(
                       onPressed: onDelete,
                       icon: Icon(Icons.delete_outline),
-                      tooltip: S.deleteItem,
+                      tooltip: context.l10n.deleteItem,
                     ),
                   ],
                 ),
