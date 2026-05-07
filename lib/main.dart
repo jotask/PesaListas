@@ -27,13 +27,15 @@ Future<void> main() async {
     FlutterError.presentError(details);
   };
 
+  await AppLocaleController.loadSavedLocale();
+  await AppThemeController.loadSavedThemeMode();
+  await AppNotificationController.initialize();
+  await AppNotificationController.initialize();
+
   await Supabase.initialize(
     url: '***REMOVED***',
     anonKey: '***REMOVED***',
   );
-  await AppLocaleController.loadSavedLocale();
-  await AppThemeController.loadSavedThemeMode();
-  await AppNotificationController.initialize();
 
   runApp(const PesaListas());
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:pesalistas/core/app_local_notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppNotificationPreferences {
@@ -50,6 +51,8 @@ class AppNotificationController {
       );
 
   static Future<void> initialize() async {
+    await AppLocalNotificationService.initialize();
+
     final prefs = await SharedPreferences.getInstance();
 
     preferences.value = AppNotificationPreferences(
@@ -68,8 +71,21 @@ class AppNotificationController {
     );
   }
 
-  static Future<void> setEnabled(bool value) async {
-    await _save(preferences.value.copyWith(enabled: value));
+  static Future<bool> setEnabled(bool value) async {
+    if (!value) {
+      await _save(preferences.value.copyWith(enabled: false));
+      return true;
+    }
+
+    final granted = await AppLocalNotificationService.requestPermission();
+
+    if (!granted) {
+      await _save(preferences.value.copyWith(enabled: false));
+      return false;
+    }
+
+    await _save(preferences.value.copyWith(enabled: true));
+    return true;
   }
 
   static Future<void> setChoreReminders(bool value) async {

@@ -3092,6 +3092,12 @@ abstract class AppLocalizations {
   /// **'Notification preferences are stored on this device.'**
   String get notificationPreferencesStoredOnDevice;
 
+  /// No description provided for @notificationPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission was not granted.'**
+  String get notificationPermissionDenied;
+
   /// No description provided for @owner.
   ///
   /// In en, this message translates to:

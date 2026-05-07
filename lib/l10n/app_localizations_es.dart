@@ -1604,6 +1604,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Las preferencias de notificaciones se guardan en este dispositivo.';
 
   @override
+  String get notificationPermissionDenied =>
+      'No se concedió el permiso de notificaciones.';
+
+  @override
   String get owner => 'Propietario';
 
   @override

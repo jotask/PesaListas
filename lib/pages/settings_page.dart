@@ -680,7 +680,18 @@ class _NotificationsSection extends StatelessWidget {
               title: Text(context.l10n.enableNotifications),
               subtitle: Text(context.l10n.enableNotificationsSubtitle),
               value: preferences.enabled,
-              onChanged: AppNotificationController.setEnabled,
+              onChanged: (value) async {
+                final granted = await AppNotificationController.setEnabled(
+                  value,
+                );
+
+                if (!granted && context.mounted) {
+                  showInfoSnackBar(
+                    context,
+                    context.l10n.notificationPermissionDenied,
+                  );
+                }
+              },
             ),
             const Divider(height: 1),
             SwitchListTile(

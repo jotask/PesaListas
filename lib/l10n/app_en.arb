@@ -506,6 +506,7 @@
   "shoppingReminderNotifications": "Shopping reminders",
   "shoppingReminderNotificationsSubtitle": "Remind me about shopping list activity.",
   "notificationPreferencesStoredOnDevice": "Notification preferences are stored on this device.",
+  "notificationPermissionDenied": "Notification permission was not granted.",
   "owner": "Owner",
   "admin": "Admin",
   "memberRole": "Member",
