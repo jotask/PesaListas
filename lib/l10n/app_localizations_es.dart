@@ -1608,6 +1608,67 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se concedió el permiso de notificaciones.';
 
   @override
+  String get productScannerTitle => 'Escáner de productos';
+
+  @override
+  String get scanBarcode => 'Escanear código';
+
+  @override
+  String get scanAgain => 'Escanear de nuevo';
+
+  @override
+  String get noBarcodeScannedYet => 'Todavía no se ha escaneado ningún código';
+
+  @override
+  String get scanBarcodeToReadProductCode =>
+      'Abre la cámara para leer el código de barras de un producto.';
+
+  @override
+  String get barcodeScanned => 'Código escaneado';
+
+  @override
+  String get openFoodFactsLookupWillBeAddedLater =>
+      'La búsqueda del producto se añadirá más adelante.';
+
+  @override
+  String get toolsSectionTitle => 'Herramientas';
+
+  @override
+  String get productScannerToolTitle => 'Escáner de productos';
+
+  @override
+  String get productScannerToolSubtitle =>
+      'Escanea el código de barras de un producto.';
+
+  @override
+  String get loadingProductInfo => 'Cargando información del producto...';
+
+  @override
+  String get productNotFound => 'Producto no encontrado';
+
+  @override
+  String productNotFoundSubtitle(String barcode) {
+    return 'No se encontró ningún producto para el código $barcode.';
+  }
+
+  @override
+  String get failedToLoadProductInfo =>
+      'No se pudo cargar la información del producto';
+
+  @override
+  String get retry => 'Reintentar';
+
+  @override
+  String get requestAgain => 'Consultar de nuevo';
+
+  @override
+  String get rawProductInfo => 'Información completa del producto';
+
+  @override
+  String get rawProductInfoSubtitle =>
+      'Respuesta completa del producto desde OpenFoodFacts.';
+
+  @override
   String get owner => 'Propietario';
 
   @override

@@ -1581,6 +1581,65 @@ class AppLocalizationsEn extends AppLocalizations {
       'Notification permission was not granted.';
 
   @override
+  String get productScannerTitle => 'Product scanner';
+
+  @override
+  String get scanBarcode => 'Scan barcode';
+
+  @override
+  String get scanAgain => 'Scan again';
+
+  @override
+  String get noBarcodeScannedYet => 'No barcode scanned yet';
+
+  @override
+  String get scanBarcodeToReadProductCode =>
+      'Open the camera to read a product barcode.';
+
+  @override
+  String get barcodeScanned => 'Barcode scanned';
+
+  @override
+  String get openFoodFactsLookupWillBeAddedLater =>
+      'Product lookup will be added later.';
+
+  @override
+  String get toolsSectionTitle => 'Tools';
+
+  @override
+  String get productScannerToolTitle => 'Product scanner';
+
+  @override
+  String get productScannerToolSubtitle =>
+      'Scan a product barcode and read its code.';
+
+  @override
+  String get loadingProductInfo => 'Loading product information...';
+
+  @override
+  String get productNotFound => 'Product not found';
+
+  @override
+  String productNotFoundSubtitle(String barcode) {
+    return 'No product was found for barcode $barcode.';
+  }
+
+  @override
+  String get failedToLoadProductInfo => 'Failed to load product information';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get requestAgain => 'Request again';
+
+  @override
+  String get rawProductInfo => 'Raw product information';
+
+  @override
+  String get rawProductInfoSubtitle => 'Full OpenFoodFacts product payload.';
+
+  @override
   String get owner => 'Owner';
 
   @override

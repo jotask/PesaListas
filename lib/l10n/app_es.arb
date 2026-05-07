@@ -508,9 +508,34 @@
   "shoppingReminderNotificationsSubtitle": "Recordarme actividad de la lista de la compra.",
   "notificationPreferencesStoredOnDevice": "Las preferencias de notificaciones se guardan en este dispositivo.",
   "notificationPermissionDenied": "No se concedió el permiso de notificaciones.",
+  "productScannerTitle": "Escáner de productos",
+  "scanBarcode": "Escanear código",
+  "scanAgain": "Escanear de nuevo",
+  "noBarcodeScannedYet": "Todavía no se ha escaneado ningún código",
+  "scanBarcodeToReadProductCode": "Abre la cámara para leer el código de barras de un producto.",
+  "barcodeScanned": "Código escaneado",
+  "openFoodFactsLookupWillBeAddedLater": "La búsqueda del producto se añadirá más adelante.",
+  "toolsSectionTitle": "Herramientas",
+  "productScannerToolTitle": "Escáner de productos",
+  "productScannerToolSubtitle": "Escanea el código de barras de un producto.",
   "owner": "Propietario",
   "admin": "Admin",
   "memberRole": "Miembro",
+  "loadingProductInfo": "Cargando información del producto...",
+  "productNotFound": "Producto no encontrado",
+  "productNotFoundSubtitle": "No se encontró ningún producto para el código {barcode}.",
+  "failedToLoadProductInfo": "No se pudo cargar la información del producto",
+  "retry": "Reintentar",
+  "requestAgain": "Consultar de nuevo",
+  "rawProductInfo": "Información completa del producto",
+  "rawProductInfoSubtitle": "Respuesta completa del producto desde OpenFoodFacts.",
+  "@productNotFoundSubtitle": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
   "@changeRoleToAdminMessage": {
     "placeholders": {
       "memberName": {}

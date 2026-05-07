@@ -3098,6 +3098,114 @@ abstract class AppLocalizations {
   /// **'Notification permission was not granted.'**
   String get notificationPermissionDenied;
 
+  /// No description provided for @productScannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product scanner'**
+  String get productScannerTitle;
+
+  /// No description provided for @scanBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcode'**
+  String get scanBarcode;
+
+  /// No description provided for @scanAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan again'**
+  String get scanAgain;
+
+  /// No description provided for @noBarcodeScannedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No barcode scanned yet'**
+  String get noBarcodeScannedYet;
+
+  /// No description provided for @scanBarcodeToReadProductCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the camera to read a product barcode.'**
+  String get scanBarcodeToReadProductCode;
+
+  /// No description provided for @barcodeScanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode scanned'**
+  String get barcodeScanned;
+
+  /// No description provided for @openFoodFactsLookupWillBeAddedLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Product lookup will be added later.'**
+  String get openFoodFactsLookupWillBeAddedLater;
+
+  /// No description provided for @toolsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get toolsSectionTitle;
+
+  /// No description provided for @productScannerToolTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product scanner'**
+  String get productScannerToolTitle;
+
+  /// No description provided for @productScannerToolSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a product barcode and read its code.'**
+  String get productScannerToolSubtitle;
+
+  /// No description provided for @loadingProductInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading product information...'**
+  String get loadingProductInfo;
+
+  /// No description provided for @productNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Product not found'**
+  String get productNotFound;
+
+  /// No description provided for @productNotFoundSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No product was found for barcode {barcode}.'**
+  String productNotFoundSubtitle(String barcode);
+
+  /// No description provided for @failedToLoadProductInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load product information'**
+  String get failedToLoadProductInfo;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @requestAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Request again'**
+  String get requestAgain;
+
+  /// No description provided for @rawProductInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw product information'**
+  String get rawProductInfo;
+
+  /// No description provided for @rawProductInfoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Full OpenFoodFacts product payload.'**
+  String get rawProductInfoSubtitle;
+
   /// No description provided for @owner.
   ///
   /// In en, this message translates to:

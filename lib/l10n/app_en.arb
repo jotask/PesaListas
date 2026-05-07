@@ -507,6 +507,31 @@
   "shoppingReminderNotificationsSubtitle": "Remind me about shopping list activity.",
   "notificationPreferencesStoredOnDevice": "Notification preferences are stored on this device.",
   "notificationPermissionDenied": "Notification permission was not granted.",
+  "productScannerTitle": "Product scanner",
+  "scanBarcode": "Scan barcode",
+  "scanAgain": "Scan again",
+  "noBarcodeScannedYet": "No barcode scanned yet",
+  "scanBarcodeToReadProductCode": "Open the camera to read a product barcode.",
+  "barcodeScanned": "Barcode scanned",
+  "openFoodFactsLookupWillBeAddedLater": "Product lookup will be added later.",
+  "toolsSectionTitle": "Tools",
+  "productScannerToolTitle": "Product scanner",
+  "productScannerToolSubtitle": "Scan a product barcode and read its code.",
+  "loadingProductInfo": "Loading product information...",
+  "productNotFound": "Product not found",
+  "productNotFoundSubtitle": "No product was found for barcode {barcode}.",
+  "failedToLoadProductInfo": "Failed to load product information",
+  "retry": "Retry",
+  "requestAgain": "Request again",
+  "rawProductInfo": "Raw product information",
+  "rawProductInfoSubtitle": "Full OpenFoodFacts product payload.",
+  "@productNotFoundSubtitle": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
   "owner": "Owner",
   "admin": "Admin",
   "memberRole": "Member",

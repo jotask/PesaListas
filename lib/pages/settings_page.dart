@@ -8,6 +8,7 @@ import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/edit_profile_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
+import 'package:pesalistas/pages/product_scanner_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -398,6 +399,12 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> openProductScanner() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ProductScannerPage()));
+  }
+
   @override
   Widget build(BuildContext context) {
     final busy =
@@ -484,6 +491,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 16),
+                    _ToolsSection(onOpenProductScanner: openProductScanner),
                     const SizedBox(height: 16),
                     const _NotificationsSection(),
                     const SizedBox(height: 16),
@@ -735,6 +744,28 @@ class _NotificationsSection extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _ToolsSection extends StatelessWidget {
+  const _ToolsSection({required this.onOpenProductScanner});
+
+  final VoidCallback onOpenProductScanner;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SettingsSection(
+      title: context.l10n.toolsSectionTitle,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.qr_code_scanner),
+          title: Text(context.l10n.productScannerToolTitle),
+          subtitle: Text(context.l10n.productScannerToolSubtitle),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: onOpenProductScanner,
+        ),
+      ],
     );
   }
 }
