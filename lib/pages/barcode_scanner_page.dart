@@ -19,7 +19,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
       BarcodeFormat.code128,
       BarcodeFormat.code39,
       BarcodeFormat.code93,
-      BarcodeFormat.itf,
+      BarcodeFormat.itf14,
       BarcodeFormat.codabar,
     ],
   );
