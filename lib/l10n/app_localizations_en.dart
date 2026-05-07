@@ -1640,6 +1640,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rawProductInfoSubtitle => 'Full OpenFoodFacts product payload.';
 
   @override
+  String get productBrand => 'Brand';
+
+  @override
+  String get productQuantity => 'Quantity';
+
+  @override
+  String get productCategories => 'Categories';
+
+  @override
+  String get productIngredients => 'Ingredients';
+
+  @override
+  String get productAllergens => 'Allergens';
+
+  @override
+  String nutriscoreLabel(String grade) {
+    return 'Nutri-Score $grade';
+  }
+
+  @override
+  String novaGroupLabel(String group) {
+    return 'NOVA $group';
+  }
+
+  @override
+  String get basicNutrition => 'Basic nutrition';
+
+  @override
+  String get energy => 'Energy';
+
+  @override
+  String get fat => 'Fat';
+
+  @override
+  String get saturatedFat => 'Saturated fat';
+
+  @override
+  String get carbohydrates => 'Carbohydrates';
+
+  @override
+  String get sugars => 'Sugars';
+
+  @override
+  String get proteins => 'Proteins';
+
+  @override
+  String get salt => 'Salt';
+
+  @override
+  String get fiber => 'Fiber';
+
+  @override
   String get owner => 'Owner';
 
   @override

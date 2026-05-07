@@ -1669,6 +1669,58 @@ class AppLocalizationsEs extends AppLocalizations {
       'Respuesta completa del producto desde OpenFoodFacts.';
 
   @override
+  String get productBrand => 'Marca';
+
+  @override
+  String get productQuantity => 'Cantidad';
+
+  @override
+  String get productCategories => 'Categorías';
+
+  @override
+  String get productIngredients => 'Ingredientes';
+
+  @override
+  String get productAllergens => 'Alérgenos';
+
+  @override
+  String nutriscoreLabel(String grade) {
+    return 'Nutri-Score $grade';
+  }
+
+  @override
+  String novaGroupLabel(String group) {
+    return 'NOVA $group';
+  }
+
+  @override
+  String get basicNutrition => 'Nutrición básica';
+
+  @override
+  String get energy => 'Energía';
+
+  @override
+  String get fat => 'Grasas';
+
+  @override
+  String get saturatedFat => 'Grasas saturadas';
+
+  @override
+  String get carbohydrates => 'Carbohidratos';
+
+  @override
+  String get sugars => 'Azúcares';
+
+  @override
+  String get proteins => 'Proteínas';
+
+  @override
+  String get salt => 'Sal';
+
+  @override
+  String get fiber => 'Fibra';
+
+  @override
   String get owner => 'Propietario';
 
   @override

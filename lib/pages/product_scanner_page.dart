@@ -389,66 +389,113 @@ class _ProductCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(18),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (imageUrl == null)
-              CircleAvatar(
-                radius: 34,
-                backgroundColor: theme.colorScheme.primaryContainer,
-                child: Icon(
-                  Icons.inventory_2_outlined,
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
-              )
-            else
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: Image.network(
-                  imageUrl,
-                  width: 72,
-                  height: 72,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) {
-                    return CircleAvatar(
-                      radius: 34,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      child: Icon(
-                        Icons.inventory_2_outlined,
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (imageUrl == null)
+                  CircleAvatar(
+                    radius: 34,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    child: Icon(
+                      Icons.inventory_2_outlined,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  )
+                else
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.network(
+                      imageUrl,
+                      width: 72,
+                      height: 72,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) {
+                        return CircleAvatar(
+                          radius: 34,
+                          backgroundColor: theme.colorScheme.primaryContainer,
+                          child: Icon(
+                            Icons.inventory_2_outlined,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  SelectableText(product.barcode),
-                  if (product.brand != null) ...[
-                    const SizedBox(height: 8),
-                    Text(product.brand!, style: theme.textTheme.bodyMedium),
-                  ],
-                  if (product.quantity != null) ...[
-                    const SizedBox(height: 4),
-                    Text(product.quantity!, style: theme.textTheme.bodySmall),
-                  ],
-                  const SizedBox(height: 16),
-                  const SizedBox(height: 16),
-                  _ProductFieldsCard(data: product.rawProduct),
-                ],
-              ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      SelectableText(product.barcode),
+                      if (product.brand != null) ...[
+                        const SizedBox(height: 8),
+                        _ProductInfoLine(
+                          icon: Icons.business_outlined,
+                          label: context.l10n.productBrand,
+                          value: product.brand!,
+                        ),
+                      ],
+                      if (product.quantity != null)
+                        _ProductInfoLine(
+                          icon: Icons.scale_outlined,
+                          label: context.l10n.productQuantity,
+                          value: product.quantity!,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 16),
+            if (product.categories != null)
+              _ProductInfoBlock(
+                icon: Icons.category_outlined,
+                label: context.l10n.productCategories,
+                value: product.categories!,
+              ),
+            if (product.ingredients != null)
+              _ProductInfoBlock(
+                icon: Icons.receipt_long_outlined,
+                label: context.l10n.productIngredients,
+                value: product.ingredients!,
+              ),
+            if (product.allergens != null)
+              _ProductInfoBlock(
+                icon: Icons.warning_amber_outlined,
+                label: context.l10n.productAllergens,
+                value: product.allergens!,
+              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (product.nutriscoreGrade != null)
+                  _ProductPill(
+                    icon: Icons.health_and_safety_outlined,
+                    label: context.l10n.nutriscoreLabel(
+                      product.nutriscoreGrade!.toUpperCase(),
+                    ),
+                  ),
+                if (product.novaGroup != null)
+                  _ProductPill(
+                    icon: Icons.science_outlined,
+                    label: context.l10n.novaGroupLabel(product.novaGroup!),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _NutritionSection(product: product),
           ],
         ),
       ),
@@ -456,27 +503,194 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-class _ProductFieldsCard extends StatelessWidget {
-  const _ProductFieldsCard({required this.data});
+class _NutritionSection extends StatelessWidget {
+  const _NutritionSection({required this.product});
 
-  final Map<String, dynamic> data;
+  final OpenFoodFactsProduct product;
 
   @override
   Widget build(BuildContext context) {
-    final sortedEntries = data.entries.toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
+    final items = <_NutritionItem>[
+      _NutritionItem(context.l10n.energy, product.energyKcal100g),
+      _NutritionItem(context.l10n.fat, product.fat100g),
+      _NutritionItem(context.l10n.saturatedFat, product.saturatedFat100g),
+      _NutritionItem(context.l10n.carbohydrates, product.carbohydrates100g),
+      _NutritionItem(context.l10n.sugars, product.sugars100g),
+      _NutritionItem(context.l10n.proteins, product.proteins100g),
+      _NutritionItem(context.l10n.salt, product.salt100g),
+      _NutritionItem(context.l10n.fiber, product.fiber100g),
+    ].where((item) => item.value != null).toList();
+
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.data_object_outlined),
-      title: Text(context.l10n.rawProductInfo),
-      subtitle: Text(context.l10n.rawProductInfoSubtitle),
+      leading: const Icon(Icons.monitor_heart_outlined),
+      title: Text(context.l10n.basicNutrition),
       children: [
         const SizedBox(height: 8),
-        for (final entry in sortedEntries)
-          _ProductFieldNode(name: entry.key, value: entry.value, depth: 0),
+        for (final item in items)
+          _NutritionRow(label: item.label, value: item.value!),
       ],
+    );
+  }
+}
+
+class _NutritionItem {
+  const _NutritionItem(this.label, this.value);
+
+  final String label;
+  final String? value;
+}
+
+class _NutritionRow extends StatelessWidget {
+  const _NutritionRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.45,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(value),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductInfoLine extends StatelessWidget {
+  const _ProductInfoLine({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text('$label: $value', style: theme.textTheme.bodyMedium),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductInfoBlock extends StatelessWidget {
+  const _ProductInfoBlock({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.45,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 4),
+                SelectableText(value),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductPill extends StatelessWidget {
+  const _ProductPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: theme.colorScheme.onPrimaryContainer),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: theme.colorScheme.onPrimaryContainer,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

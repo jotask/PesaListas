@@ -529,6 +529,36 @@
   "requestAgain": "Consultar de nuevo",
   "rawProductInfo": "Información completa del producto",
   "rawProductInfoSubtitle": "Respuesta completa del producto desde OpenFoodFacts.",
+  "productBrand": "Marca",
+"productQuantity": "Cantidad",
+"productCategories": "Categorías",
+"productIngredients": "Ingredientes",
+"productAllergens": "Alérgenos",
+"nutriscoreLabel": "Nutri-Score {grade}",
+"novaGroupLabel": "NOVA {group}",
+"basicNutrition": "Nutrición básica",
+"energy": "Energía",
+"fat": "Grasas",
+"saturatedFat": "Grasas saturadas",
+"carbohydrates": "Carbohidratos",
+"sugars": "Azúcares",
+"proteins": "Proteínas",
+"salt": "Sal",
+"fiber": "Fibra",
+"@nutriscoreLabel": {
+  "placeholders": {
+    "grade": {
+      "type": "String"
+    }
+  }
+},
+"@novaGroupLabel": {
+  "placeholders": {
+    "group": {
+      "type": "String"
+    }
+  }
+},
   "@productNotFoundSubtitle": {
     "placeholders": {
       "barcode": {

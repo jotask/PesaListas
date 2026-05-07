@@ -3206,6 +3206,102 @@ abstract class AppLocalizations {
   /// **'Full OpenFoodFacts product payload.'**
   String get rawProductInfoSubtitle;
 
+  /// No description provided for @productBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand'**
+  String get productBrand;
+
+  /// No description provided for @productQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get productQuantity;
+
+  /// No description provided for @productCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get productCategories;
+
+  /// No description provided for @productIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get productIngredients;
+
+  /// No description provided for @productAllergens.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergens'**
+  String get productAllergens;
+
+  /// No description provided for @nutriscoreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutri-Score {grade}'**
+  String nutriscoreLabel(String grade);
+
+  /// No description provided for @novaGroupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'NOVA {group}'**
+  String novaGroupLabel(String group);
+
+  /// No description provided for @basicNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic nutrition'**
+  String get basicNutrition;
+
+  /// No description provided for @energy.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy'**
+  String get energy;
+
+  /// No description provided for @fat.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat'**
+  String get fat;
+
+  /// No description provided for @saturatedFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturated fat'**
+  String get saturatedFat;
+
+  /// No description provided for @carbohydrates.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbohydrates'**
+  String get carbohydrates;
+
+  /// No description provided for @sugars.
+  ///
+  /// In en, this message translates to:
+  /// **'Sugars'**
+  String get sugars;
+
+  /// No description provided for @proteins.
+  ///
+  /// In en, this message translates to:
+  /// **'Proteins'**
+  String get proteins;
+
+  /// No description provided for @salt.
+  ///
+  /// In en, this message translates to:
+  /// **'Salt'**
+  String get salt;
+
+  /// No description provided for @fiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber'**
+  String get fiber;
+
   /// No description provided for @owner.
   ///
   /// In en, this message translates to:
