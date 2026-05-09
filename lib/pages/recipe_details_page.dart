@@ -78,6 +78,68 @@ class RecipeDetailsPage extends StatelessWidget {
     return AppValueParsing.intOrNull(recipe[AppRecipeFields.servings]);
   }
 
+  String get priceCurrency {
+    for (final ingredient in ingredients) {
+      final value = ingredient[AppRecipeIngredientFields.priceCurrency]
+          ?.toString()
+          .trim();
+
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+    }
+
+    return 'EUR';
+  }
+
+  double get estimatedRecipeCost {
+    return ingredients.fold<double>(0, (total, ingredient) {
+      return total + (estimatedIngredientTotal(ingredient) ?? 0);
+    });
+  }
+
+  bool get hasEstimatedIngredientPrices {
+    return ingredients.any((ingredient) {
+      return estimatedIngredientTotal(ingredient) != null;
+    });
+  }
+
+  double? estimatedIngredientTotal(Map<String, dynamic> ingredient) {
+    final explicitTotal = doubleOrNull(
+      ingredient[AppRecipeIngredientFields.estimatedTotalPrice],
+    );
+
+    if (explicitTotal != null) {
+      return explicitTotal;
+    }
+
+    final unitPrice = doubleOrNull(
+      ingredient[AppRecipeIngredientFields.estimatedUnitPrice],
+    );
+
+    if (unitPrice == null) {
+      return null;
+    }
+
+    final quantity = doubleOrNull(
+      ingredient[AppRecipeIngredientFields.quantity],
+    );
+
+    if (quantity == null) {
+      return unitPrice;
+    }
+
+    return unitPrice * quantity;
+  }
+
+  double? doubleOrNull(dynamic value) {
+    if (value == null) return null;
+
+    if (value is num) return value.toDouble();
+
+    return double.tryParse(value.toString().replaceAll(',', '.'));
+  }
+
   void editInfo(BuildContext context) {
     Navigator.of(context).pop(
       const RecipeDetailsPageResult(
@@ -137,6 +199,9 @@ class RecipeDetailsPage extends StatelessWidget {
               prepTime: prepTime,
               cookTime: cookTime,
               servings: servings,
+              hasEstimatedCost: hasEstimatedIngredientPrices,
+              estimatedCost: estimatedRecipeCost,
+              currency: priceCurrency,
             ),
             const SizedBox(height: 16),
             _InstructionsCard(
@@ -222,11 +287,17 @@ class _RecipeStatsWrap extends StatelessWidget {
     required this.prepTime,
     required this.cookTime,
     required this.servings,
+    required this.hasEstimatedCost,
+    required this.estimatedCost,
+    required this.currency,
   });
 
   final int? prepTime;
   final int? cookTime;
   final int? servings;
+  final bool hasEstimatedCost;
+  final double estimatedCost;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -252,6 +323,11 @@ class _RecipeStatsWrap extends StatelessWidget {
               ? context.l10n.servingsNotSet
               : context.l10n.servingsCount(servings!),
         ),
+        if (hasEstimatedCost)
+          _RecipeInfoChip(
+            icon: Icons.euro_outlined,
+            label: 'Est. ${estimatedCost.toStringAsFixed(2)} $currency',
+          ),
       ],
     );
   }
@@ -371,7 +447,7 @@ class _RecipeSectionCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (trailing != null) trailing!,
+                ?trailing,
               ],
             ),
             const SizedBox(height: 14),
@@ -438,6 +514,78 @@ class _IngredientCard extends StatelessWidget {
     return text;
   }
 
+  String get priceCurrency {
+    final value = ingredient[AppRecipeIngredientFields.priceCurrency]
+        ?.toString()
+        .trim();
+
+    if (value == null || value.isEmpty) {
+      return 'EUR';
+    }
+
+    return value;
+  }
+
+  double? get estimatedUnitPrice {
+    return doubleOrNull(
+      ingredient[AppRecipeIngredientFields.estimatedUnitPrice],
+    );
+  }
+
+  double? get estimatedTotalPrice {
+    final explicitTotal = doubleOrNull(
+      ingredient[AppRecipeIngredientFields.estimatedTotalPrice],
+    );
+
+    if (explicitTotal != null) {
+      return explicitTotal;
+    }
+
+    final unitPrice = estimatedUnitPrice;
+
+    if (unitPrice == null) {
+      return null;
+    }
+
+    final quantity = doubleOrNull(
+      ingredient[AppRecipeIngredientFields.quantity],
+    );
+
+    if (quantity == null) {
+      return unitPrice;
+    }
+
+    return unitPrice * quantity;
+  }
+
+  double? doubleOrNull(dynamic value) {
+    if (value == null) return null;
+
+    if (value is num) return value.toDouble();
+
+    return double.tryParse(value.toString().replaceAll(',', '.'));
+  }
+
+  String? priceText() {
+    final unitPrice = estimatedUnitPrice;
+    final totalPrice = estimatedTotalPrice;
+
+    if (unitPrice == null && totalPrice == null) {
+      return null;
+    }
+
+    if (unitPrice != null && totalPrice != null) {
+      return '${totalPrice.toStringAsFixed(2)} $priceCurrency total · '
+          '${unitPrice.toStringAsFixed(2)} $priceCurrency each';
+    }
+
+    if (totalPrice != null) {
+      return '${totalPrice.toStringAsFixed(2)} $priceCurrency total';
+    }
+
+    return '${unitPrice!.toStringAsFixed(2)} $priceCurrency each';
+  }
+
   String amountText(BuildContext context) {
     final parts = <String>[];
 
@@ -481,9 +629,19 @@ class _IngredientCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final subtitle = note == null
-        ? amountText(context)
-        : '${amountText(context)} • $note';
+    final parts = <String>[amountText(context)];
+
+    final price = priceText();
+
+    if (price != null) {
+      parts.add(price);
+    }
+
+    if (note != null) {
+      parts.add(note!);
+    }
+
+    final subtitle = parts.join(' • ');
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),

@@ -1,239 +1,604 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/ui_feedback.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
-import 'package:pesalistas/models/open_food_facts_product.dart';
-import 'package:pesalistas/pages/barcode_scanner_page.dart';
-import 'package:pesalistas/repositories/open_food_facts_repository.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:pesalistas/core/product_fields.dart';
+import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/repositories/product_repository.dart';
+import 'package:pesalistas/repositories/shopping_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductScannerPage extends StatefulWidget {
-  const ProductScannerPage({super.key});
+  const ProductScannerPage({super.key, this.groupId});
+
+  final String? groupId;
 
   @override
   State<ProductScannerPage> createState() => _ProductScannerPageState();
 }
 
 class _ProductScannerPageState extends State<ProductScannerPage> {
-  static const repository = OpenFoodFactsRepository(useStaging: false);
+  late final MobileScannerController scannerController;
+  late final ProductRepository productRepository;
+
+  final TextEditingController barcodeController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
+  final TextEditingController storeNameController = TextEditingController();
+  final TextEditingController priceNoteController = TextEditingController();
+  late final ShoppingRepository shoppingRepository;
+
+  final TextEditingController shoppingNameController = TextEditingController();
+  final TextEditingController shoppingQuantityController =
+      TextEditingController(text: '1');
+  final TextEditingController shoppingUnitController = TextEditingController();
+
+  bool addingToShoppingList = false;
+  String? shoppingValidationMessage;
+
+  bool lookingUpProduct = false;
+  bool savingPrice = false;
+  bool cameraPaused = false;
 
   String? scannedBarcode;
-  OpenFoodFactsProduct? product;
-  bool loadingProduct = false;
-  bool productNotFound = false;
-  Object? lookupError;
+  String? errorMessage;
+  String? priceValidationMessage;
 
-  Future<void> scanBarcode() async {
-    final code = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const BarcodeScannerPage()),
-    );
+  Map<String, dynamic>? product;
+  Map<String, dynamic>? latestPrice;
 
-    if (code == null || code.trim().isEmpty) return;
-
-    await lookupBarcode(code.trim());
+  bool get hasGroupContext {
+    final value = widget.groupId;
+    return value != null && value.trim().isNotEmpty;
   }
 
-  Future<void> lookupBarcode(String barcode) async {
+  bool get productWasFound {
+    return product?[AppProductFields.status] == AppProductStatus.found;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    shoppingRepository = ShoppingRepository(Supabase.instance.client);
+
+    scannerController = MobileScannerController();
+
+    productRepository = ProductRepository(
+      Supabase.instance.client,
+
+      // Development staging.
+      // Change to false later for production.
+      useStaging: true,
+    );
+  }
+
+  @override
+  void dispose() {
+    barcodeController.dispose();
+    priceController.dispose();
+    storeNameController.dispose();
+    priceNoteController.dispose();
+    scannerController.dispose();
+    shoppingNameController.dispose();
+    shoppingQuantityController.dispose();
+    shoppingUnitController.dispose();
+    super.dispose();
+  }
+
+  void handleDetection(BarcodeCapture capture) {
+    if (lookingUpProduct || savingPrice || cameraPaused) return;
+    if (capture.barcodes.isEmpty) return;
+
+    final barcode = capture.barcodes.first.rawValue?.trim();
+
+    if (barcode == null || barcode.isEmpty) return;
+    if (barcode == scannedBarcode) return;
+
+    lookupBarcode(barcode);
+  }
+
+  double? doubleOrNull(dynamic value) {
+    if (value == null) return null;
+
+    if (value is num) return value.toDouble();
+
+    return double.tryParse(value.toString().replaceAll(',', '.'));
+  }
+
+  String? nullableText(dynamic value) {
+    final text = value?.toString().trim();
+
+    if (text == null || text.isEmpty) return null;
+
+    return text;
+  }
+
+  void prefillShoppingFields(Map<String, dynamic>? loadedProduct) {
+    final name = nullableText(loadedProduct?[AppProductFields.name]);
+    final barcode = nullableText(loadedProduct?[AppProductFields.barcode]);
+
+    shoppingNameController.text = name ?? barcode ?? '';
+    shoppingQuantityController.text = '1';
+    shoppingUnitController.clear();
+  }
+
+  Future<void> lookupBarcode(
+    String barcode, {
+    bool forceRefresh = false,
+  }) async {
+    final cleanBarcode = barcode.trim();
+
+    if (cleanBarcode.isEmpty) return;
+
+    FocusScope.of(context).unfocus();
+
     setState(() {
-      scannedBarcode = barcode;
+      lookingUpProduct = true;
+      cameraPaused = true;
+      scannedBarcode = cleanBarcode;
+      barcodeController.text = cleanBarcode;
       product = null;
-      productNotFound = false;
-      lookupError = null;
-      loadingProduct = true;
+      latestPrice = null;
+      errorMessage = null;
+      priceValidationMessage = null;
+      priceController.clear();
+      storeNameController.clear();
+      priceNoteController.clear();
+
+      shoppingValidationMessage = null;
+      shoppingNameController.clear();
+      shoppingQuantityController.text = '1';
+      shoppingUnitController.clear();
     });
 
+    await scannerController.stop();
+
     try {
-      final result = await repository.getProductByBarcode(barcode);
+      final loadedProduct = await productRepository.getProductByBarcode(
+        cleanBarcode,
+        forceRefresh: forceRefresh,
+      );
+
+      Map<String, dynamic>? loadedPrice;
+
+      if (hasGroupContext && loadedProduct != null) {
+        loadedPrice = await productRepository.getLatestPrice(
+          groupId: widget.groupId!,
+          barcode: cleanBarcode,
+        );
+      }
 
       if (!mounted) return;
 
       setState(() {
-        product = result;
-        productNotFound = result == null;
-        loadingProduct = false;
+        product = loadedProduct;
+        latestPrice = loadedPrice;
+
+        prefillShoppingFields(loadedProduct);
+
+        if (loadedPrice != null) {
+          priceController.text =
+              loadedPrice[AppProductPriceFields.price]?.toString() ?? '';
+
+          storeNameController.text =
+              loadedPrice[AppProductPriceFields.storeName]?.toString() ?? '';
+
+          priceNoteController.text =
+              loadedPrice[AppProductPriceFields.note]?.toString() ?? '';
+        }
       });
     } catch (error) {
       if (!mounted) return;
 
-      showErrorSnackBar(context, context.l10n.failedToLoadProductInfo, error);
-
       setState(() {
-        lookupError = error;
-        loadingProduct = false;
+        errorMessage = error.toString();
       });
+    } finally {
+      if (mounted) {
+        setState(() {
+          lookingUpProduct = false;
+        });
+      }
     }
   }
 
+  Future<void> addToShoppingList() async {
+    final groupId = widget.groupId;
+    final currentProduct = product;
+
+    setState(() => shoppingValidationMessage = null);
+
+    if (groupId == null || groupId.isEmpty) {
+      setState(() {
+        shoppingValidationMessage =
+            'Open the scanner from a shopping list to add products.';
+      });
+      return;
+    }
+
+    if (currentProduct == null || !productWasFound) {
+      setState(() {
+        shoppingValidationMessage = 'Scan or load a known product first.';
+      });
+      return;
+    }
+
+    final name = shoppingNameController.text.trim();
+
+    if (name.isEmpty) {
+      setState(() {
+        shoppingValidationMessage = 'Shopping item name is required.';
+      });
+      return;
+    }
+
+    final quantityText = shoppingQuantityController.text.trim();
+    final quantity = quantityText.isEmpty
+        ? null
+        : double.tryParse(quantityText.replaceAll(',', '.'));
+
+    if (quantityText.isNotEmpty && quantity == null) {
+      setState(() {
+        shoppingValidationMessage = 'Quantity must be a valid number.';
+      });
+      return;
+    }
+
+    final unit = shoppingUnitController.text.trim();
+    final price = doubleOrNull(priceController.text);
+    final barcode = currentProduct[AppProductFields.barcode]?.toString();
+    final productName = currentProduct[AppProductFields.name]?.toString();
+    final productImageUrl = currentProduct[AppProductFields.imageUrl]
+        ?.toString();
+
+    FocusScope.of(context).unfocus();
+
+    setState(() => addingToShoppingList = true);
+
+    try {
+      await shoppingRepository.createShoppingItemFromProduct(
+        groupId: groupId,
+        name: name,
+        quantity: quantity,
+        unit: unit.isEmpty ? null : unit,
+        barcode: barcode,
+        productName: productName,
+        productImageUrl: productImageUrl,
+        estimatedUnitPrice: price,
+        priceCurrency: 'EUR',
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Added to shopping list.')));
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        shoppingValidationMessage = error.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() => addingToShoppingList = false);
+      }
+    }
+  }
+
+  Future<void> resumeScanner() async {
+    setState(() {
+      cameraPaused = false;
+      errorMessage = null;
+      priceValidationMessage = null;
+    });
+
+    await scannerController.start();
+  }
+
+  Future<void> refreshCurrentBarcode() async {
+    final barcode = scannedBarcode ?? barcodeController.text.trim();
+
+    if (barcode.isEmpty) return;
+
+    await lookupBarcode(barcode, forceRefresh: true);
+  }
+
+  Future<void> savePrice() async {
+    final groupId = widget.groupId;
+    final barcode = scannedBarcode ?? barcodeController.text.trim();
+    final priceText = priceController.text.trim().replaceAll(',', '.');
+
+    setState(() => priceValidationMessage = null);
+
+    if (groupId == null || groupId.isEmpty) {
+      setState(() {
+        priceValidationMessage =
+            'Open the scanner from a group or shopping list to save prices.';
+      });
+      return;
+    }
+
+    if (product == null || barcode.isEmpty) {
+      setState(() {
+        priceValidationMessage = 'Scan or load a product first.';
+      });
+      return;
+    }
+
+    if (!productWasFound) {
+      setState(() {
+        priceValidationMessage = 'Cannot save a price for an unknown product.';
+      });
+      return;
+    }
+
+    final price = double.tryParse(priceText);
+
+    if (price == null) {
+      setState(() {
+        priceValidationMessage = 'Price must be a valid number.';
+      });
+      return;
+    }
+
+    if (price < 0) {
+      setState(() {
+        priceValidationMessage = 'Price cannot be negative.';
+      });
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+
+    setState(() => savingPrice = true);
+
+    try {
+      await productRepository.savePrice(
+        groupId: groupId,
+        barcode: barcode,
+        price: price,
+        storeName: storeNameController.text,
+        note: priceNoteController.text,
+      );
+
+      final refreshedPrice = await productRepository.getLatestPrice(
+        groupId: groupId,
+        barcode: barcode,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        latestPrice = refreshedPrice;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Price saved.')));
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        priceValidationMessage = error.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() => savingPrice = false);
+      }
+    }
+  }
+
+  String text(dynamic value, {String fallback = '—'}) {
+    final result = value?.toString().trim();
+
+    if (result == null || result.isEmpty) {
+      return fallback;
+    }
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final barcode = scannedBarcode;
+    final currentProduct = product;
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.productScannerTitle)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: loadingProduct ? null : scanBarcode,
-        icon: const Icon(Icons.qr_code_scanner),
-        label: Text(context.l10n.scanBarcode),
+      appBar: AppBar(
+        title: const Text('Product scanner'),
+        actions: [
+          IconButton(
+            onPressed: lookingUpProduct || savingPrice
+                ? null
+                : refreshCurrentBarcode,
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Request again',
+          ),
+        ],
       ),
-      body: SafeArea(
-        top: false,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (barcode == null)
-              _ScannerEmptyCard(onScan: scanBarcode)
-            else ...[
-              _ScannedBarcodeCard(
-                barcode: barcode,
-                onScanAgain: loadingProduct ? null : scanBarcode,
-                onLookupAgain: loadingProduct
-                    ? null
-                    : () => lookupBarcode(barcode),
-              ),
-              const SizedBox(height: 12),
-              if (loadingProduct)
-                const _ProductLoadingCard()
-              else if (lookupError != null)
-                _ProductErrorCard(
-                  error: lookupError!,
-                  onRetry: () => lookupBarcode(barcode),
-                )
-              else if (productNotFound)
-                _ProductNotFoundCard(
-                  barcode: barcode,
-                  onRetry: () => lookupBarcode(barcode),
-                )
-              else if (product != null)
-                _ProductCard(product: product!),
-            ],
-            const SizedBox(height: 96),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ScannerEmptyCard extends StatelessWidget {
-  const _ScannerEmptyCard({required this.onScan});
-
-  final VoidCallback onScan;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: theme.colorScheme.primaryContainer,
-              child: Icon(
-                Icons.qr_code_scanner,
-                color: theme.colorScheme.onPrimaryContainer,
-              ),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 5,
+            child: Stack(
+              children: [
+                MobileScanner(
+                  controller: scannerController,
+                  onDetect: handleDetection,
+                ),
+                _ScannerOverlay(
+                  lookingUpProduct: lookingUpProduct,
+                  cameraPaused: cameraPaused,
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          Expanded(
+            flex: 7,
+            child: SafeArea(
+              top: false,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
                 children: [
-                  Text(
-                    context.l10n.noBarcodeScannedYet,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    context.l10n.scanBarcodeToReadProductCode,
-                    style: theme.textTheme.bodyMedium,
+                  _ManualLookupCard(
+                    controller: barcodeController,
+                    loading: lookingUpProduct || savingPrice,
+                    onLookup: () => lookupBarcode(barcodeController.text),
+                    onRefresh: refreshCurrentBarcode,
+                    onResumeScanner: resumeScanner,
                   ),
                   const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: onScan,
-                    icon: const Icon(Icons.qr_code_scanner),
-                    label: Text(context.l10n.scanBarcode),
-                  ),
+                  if (lookingUpProduct)
+                    const _LoadingProductCard()
+                  else if (errorMessage != null)
+                    _ErrorCard(message: errorMessage!)
+                  else if (currentProduct != null) ...[
+                    _ProductCard(
+                      product: currentProduct,
+                      latestPrice: latestPrice,
+                      productWasFound: productWasFound,
+                    ),
+                    const SizedBox(height: 12),
+                    _ProductPriceCard(
+                      hasGroupContext: hasGroupContext,
+                      productWasFound: productWasFound,
+                      latestPrice: latestPrice,
+                      priceController: priceController,
+                      storeNameController: storeNameController,
+                      noteController: priceNoteController,
+                      savingPrice: savingPrice,
+                      validationMessage: priceValidationMessage,
+                      onSave: savePrice,
+                    ),
+                    const SizedBox(height: 12),
+                    _AddToShoppingListCard(
+                      hasGroupContext: hasGroupContext,
+                      productWasFound: productWasFound,
+                      loading: addingToShoppingList,
+                      nameController: shoppingNameController,
+                      quantityController: shoppingQuantityController,
+                      unitController: shoppingUnitController,
+                      validationMessage: shoppingValidationMessage,
+                      onAdd: addToShoppingList,
+                    ),
+                  ] else
+                    const _EmptyProductCard(),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _ScannedBarcodeCard extends StatelessWidget {
-  const _ScannedBarcodeCard({
-    required this.barcode,
-    required this.onScanAgain,
-    required this.onLookupAgain,
+class _ScannerOverlay extends StatelessWidget {
+  const _ScannerOverlay({
+    required this.lookingUpProduct,
+    required this.cameraPaused,
   });
 
-  final String barcode;
-  final VoidCallback? onScanAgain;
-  final VoidCallback? onLookupAgain;
+  final bool lookingUpProduct;
+  final bool cameraPaused;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.75),
+              width: 3,
+            ),
+          ),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                lookingUpProduct
+                    ? 'Looking up product...'
+                    : cameraPaused
+                    ? 'Scanner paused'
+                    : 'Point camera at barcode',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ManualLookupCard extends StatelessWidget {
+  const _ManualLookupCard({
+    required this.controller,
+    required this.loading,
+    required this.onLookup,
+    required this.onRefresh,
+    required this.onResumeScanner,
+  });
+
+  final TextEditingController controller;
+  final bool loading;
+  final VoidCallback onLookup;
+  final VoidCallback onRefresh;
+  final VoidCallback onResumeScanner;
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(18),
-        child: Row(
+        child: Column(
           children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: theme.colorScheme.secondaryContainer,
-              child: Icon(
-                Icons.check_circle_outline,
-                color: theme.colorScheme.onSecondaryContainer,
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Barcode',
+                hintText: '3274080005003',
+                prefixIcon: Icon(Icons.qr_code_2_outlined),
               ),
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => onLookup(),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.barcodeScanned,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: loading ? null : onResumeScanner,
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    label: const Text('Scan again'),
                   ),
-                  const SizedBox(height: 8),
-                  SelectableText(
-                    barcode,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5,
-                    ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: loading ? null : onLookup,
+                    icon: const Icon(Icons.search),
+                    label: const Text('Lookup'),
                   ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: onLookupAgain,
-                        icon: const Icon(Icons.cloud_download_outlined),
-                        label: Text(context.l10n.requestAgain),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: onScanAgain,
-                        icon: const Icon(Icons.qr_code_scanner),
-                        label: Text(context.l10n.scanAgain),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton.icon(
+                onPressed: loading ? null : onRefresh,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Request this barcode again'),
               ),
             ),
           ],
@@ -243,23 +608,23 @@ class _ScannedBarcodeCard extends StatelessWidget {
   }
 }
 
-class _ProductLoadingCard extends StatelessWidget {
-  const _ProductLoadingCard();
+class _LoadingProductCard extends StatelessWidget {
+  const _LoadingProductCard();
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return const Card(
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: EdgeInsets.all(18),
         child: Row(
           children: [
-            const SizedBox(
-              width: 28,
-              height: 28,
+            SizedBox(
+              width: 22,
+              height: 22,
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
-            const SizedBox(width: 16),
-            Expanded(child: Text(context.l10n.loadingProductInfo)),
+            SizedBox(width: 12),
+            Expanded(child: Text('Loading product information...')),
           ],
         ),
       ),
@@ -267,54 +632,20 @@ class _ProductLoadingCard extends StatelessWidget {
   }
 }
 
-class _ProductNotFoundCard extends StatelessWidget {
-  const _ProductNotFoundCard({required this.barcode, required this.onRetry});
-
-  final String barcode;
-  final VoidCallback onRetry;
+class _EmptyProductCard extends StatelessWidget {
+  const _EmptyProductCard();
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
+    return const Card(
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: EdgeInsets.all(18),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              child: Icon(
-                Icons.search_off_outlined,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(width: 16),
+            CircleAvatar(child: Icon(Icons.inventory_2_outlined)),
+            SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.productNotFound,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    context.l10n.productNotFoundSubtitle(barcode),
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: onRetry,
-                    icon: const Icon(Icons.refresh),
-                    label: Text(context.l10n.retry),
-                  ),
-                ],
-              ),
+              child: Text('Scan or enter a barcode to load product data.'),
             ),
           ],
         ),
@@ -323,11 +654,10 @@ class _ProductNotFoundCard extends StatelessWidget {
   }
 }
 
-class _ProductErrorCard extends StatelessWidget {
-  const _ProductErrorCard({required this.error, required this.onRetry});
+class _ErrorCard extends StatelessWidget {
+  const _ErrorCard({required this.message});
 
-  final Object error;
-  final VoidCallback onRetry;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -337,38 +667,17 @@ class _ProductErrorCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              radius: 28,
               backgroundColor: theme.colorScheme.errorContainer,
               child: Icon(
                 Icons.error_outline,
                 color: theme.colorScheme.onErrorContainer,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.failedToLoadProductInfo,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(error.toString(), style: theme.textTheme.bodyMedium),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: onRetry,
-                    icon: const Icon(Icons.refresh),
-                    label: Text(context.l10n.retry),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
           ],
         ),
       ),
@@ -377,125 +686,96 @@ class _ProductErrorCard extends StatelessWidget {
 }
 
 class _ProductCard extends StatelessWidget {
-  const _ProductCard({required this.product});
+  const _ProductCard({
+    required this.product,
+    required this.latestPrice,
+    required this.productWasFound,
+  });
 
-  final OpenFoodFactsProduct product;
+  final Map<String, dynamic> product;
+  final Map<String, dynamic>? latestPrice;
+  final bool productWasFound;
+
+  String text(dynamic value, {String fallback = '—'}) {
+    final result = value?.toString().trim();
+
+    if (result == null || result.isEmpty) {
+      return fallback;
+    }
+
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final imageUrl = product.imageUrl;
+
+    final imageUrl = text(product[AppProductFields.imageUrl], fallback: '');
+    final name = text(
+      product[AppProductFields.name],
+      fallback: 'Unknown product',
+    );
+    final brand = text(product[AppProductFields.brand]);
+    final quantity = text(product[AppProductFields.quantity]);
+    final status = text(product[AppProductFields.status]);
+    final barcode = text(product[AppProductFields.barcode]);
+    final categories = text(product[AppProductFields.categories]);
+    final nutriscore = text(product[AppProductFields.nutriscore]);
+    final novaGroup = text(product[AppProductFields.novaGroup]);
+    final ecoscore = text(product[AppProductFields.ecoscore]);
+    final fetchedAt = text(product[AppProductFields.fetchedAt]);
+
+    final latestPriceText = latestPrice == null
+        ? 'No price saved yet'
+        : '${latestPrice?[AppProductPriceFields.price]} '
+              '${latestPrice?[AppProductPriceFields.currency] ?? 'EUR'}';
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (imageUrl == null)
-                  CircleAvatar(
-                    radius: 34,
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    child: Icon(
-                      Icons.inventory_2_outlined,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                  )
-                else
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.network(
-                      imageUrl,
-                      width: 72,
-                      height: 72,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) {
-                        return CircleAvatar(
-                          radius: 34,
-                          backgroundColor: theme.colorScheme.primaryContainer,
-                          child: Icon(
-                            Icons.inventory_2_outlined,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                const SizedBox(width: 16),
+                _ProductImage(imageUrl: imageUrl),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product.name,
+                        name,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      SelectableText(product.barcode),
-                      if (product.brand != null) ...[
-                        const SizedBox(height: 8),
-                        _ProductInfoLine(
-                          icon: Icons.business_outlined,
-                          label: context.l10n.productBrand,
-                          value: product.brand!,
-                        ),
-                      ],
-                      if (product.quantity != null)
-                        _ProductInfoLine(
-                          icon: Icons.scale_outlined,
-                          label: context.l10n.productQuantity,
-                          value: product.quantity!,
-                        ),
+                      const SizedBox(height: 4),
+                      Text(brand, style: theme.textTheme.bodyMedium),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          _ProductChip(label: status),
+                          if (productWasFound) _ProductChip(label: quantity),
+                        ],
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            if (product.categories != null)
-              _ProductInfoBlock(
-                icon: Icons.category_outlined,
-                label: context.l10n.productCategories,
-                value: product.categories!,
-              ),
-            if (product.ingredients != null)
-              _ProductInfoBlock(
-                icon: Icons.receipt_long_outlined,
-                label: context.l10n.productIngredients,
-                value: product.ingredients!,
-              ),
-            if (product.allergens != null)
-              _ProductInfoBlock(
-                icon: Icons.warning_amber_outlined,
-                label: context.l10n.productAllergens,
-                value: product.allergens!,
-              ),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if (product.nutriscoreGrade != null)
-                  _ProductPill(
-                    icon: Icons.health_and_safety_outlined,
-                    label: context.l10n.nutriscoreLabel(
-                      product.nutriscoreGrade!.toUpperCase(),
-                    ),
-                  ),
-                if (product.novaGroup != null)
-                  _ProductPill(
-                    icon: Icons.science_outlined,
-                    label: context.l10n.novaGroupLabel(product.novaGroup!),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _NutritionSection(product: product),
+            _ProductInfoRow(label: 'Barcode', value: barcode),
+            _ProductInfoRow(label: 'Latest price', value: latestPriceText),
+            _ProductInfoRow(label: 'Categories', value: categories),
+            _ProductInfoRow(label: 'Nutriscore', value: nutriscore),
+            _ProductInfoRow(label: 'Nova group', value: novaGroup),
+            _ProductInfoRow(label: 'Ecoscore', value: ecoscore),
+            _ProductInfoRow(label: 'Fetched at', value: fetchedAt),
           ],
         ),
       ),
@@ -503,156 +783,195 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-class _NutritionSection extends StatelessWidget {
-  const _NutritionSection({required this.product});
+class _ProductPriceCard extends StatelessWidget {
+  const _ProductPriceCard({
+    required this.hasGroupContext,
+    required this.productWasFound,
+    required this.latestPrice,
+    required this.priceController,
+    required this.storeNameController,
+    required this.noteController,
+    required this.savingPrice,
+    required this.validationMessage,
+    required this.onSave,
+  });
 
-  final OpenFoodFactsProduct product;
+  final bool hasGroupContext;
+  final bool productWasFound;
+  final Map<String, dynamic>? latestPrice;
+  final TextEditingController priceController;
+  final TextEditingController storeNameController;
+  final TextEditingController noteController;
+  final bool savingPrice;
+  final String? validationMessage;
+  final VoidCallback onSave;
 
-  @override
-  Widget build(BuildContext context) {
-    final items = <_NutritionItem>[
-      _NutritionItem(context.l10n.energy, product.energyKcal100g),
-      _NutritionItem(context.l10n.fat, product.fat100g),
-      _NutritionItem(context.l10n.saturatedFat, product.saturatedFat100g),
-      _NutritionItem(context.l10n.carbohydrates, product.carbohydrates100g),
-      _NutritionItem(context.l10n.sugars, product.sugars100g),
-      _NutritionItem(context.l10n.proteins, product.proteins100g),
-      _NutritionItem(context.l10n.salt, product.salt100g),
-      _NutritionItem(context.l10n.fiber, product.fiber100g),
-    ].where((item) => item.value != null).toList();
+  String latestPriceText() {
+    final price = latestPrice?[AppProductPriceFields.price];
+    final currency = latestPrice?[AppProductPriceFields.currency] ?? 'EUR';
+    final store = latestPrice?[AppProductPriceFields.storeName]?.toString();
 
-    if (items.isEmpty) {
-      return const SizedBox.shrink();
+    if (price == null) {
+      return 'No saved price for this group yet.';
     }
 
-    return ExpansionTile(
-      tilePadding: EdgeInsets.zero,
-      childrenPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.monitor_heart_outlined),
-      title: Text(context.l10n.basicNutrition),
-      children: [
-        const SizedBox(height: 8),
-        for (final item in items)
-          _NutritionRow(label: item.label, value: item.value!),
-      ],
-    );
+    if (store == null || store.trim().isEmpty) {
+      return '$price $currency';
+    }
+
+    return '$price $currency · $store';
   }
-}
-
-class _NutritionItem {
-  const _NutritionItem(this.label, this.value);
-
-  final String label;
-  final String? value;
-}
-
-class _NutritionRow extends StatelessWidget {
-  const _NutritionRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(
-          alpha: 0.45,
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(value),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProductInfoLine extends StatelessWidget {
-  const _ProductInfoLine({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text('$label: $value', style: theme.textTheme.bodyMedium),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProductInfoBlock extends StatelessWidget {
-  const _ProductInfoBlock({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(
-          alpha: 0.45,
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(fontWeight: FontWeight.w900),
+    if (!hasGroupContext) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.info_outline,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: 4),
-                SelectableText(value),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Product lookup works here. To save prices, open this scanner from a group or shopping list.',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.euro_outlined,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Group price',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(latestPriceText(), style: theme.textTheme.bodySmall),
+                    ],
+                  ),
+                ),
               ],
             ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: priceController,
+              enabled: productWasFound && !savingPrice,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Price',
+                hintText: '2.49',
+                prefixIcon: Icon(Icons.euro_outlined),
+                suffixText: 'EUR',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: storeNameController,
+              enabled: productWasFound && !savingPrice,
+              decoration: const InputDecoration(
+                labelText: 'Store',
+                hintText: 'Mercadona',
+                prefixIcon: Icon(Icons.store_outlined),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: noteController,
+              enabled: productWasFound && !savingPrice,
+              decoration: const InputDecoration(
+                labelText: 'Note',
+                hintText: 'Optional',
+                prefixIcon: Icon(Icons.notes_outlined),
+              ),
+              minLines: 2,
+              maxLines: 4,
+            ),
+            if (validationMessage != null) ...[
+              const SizedBox(height: 12),
+              _InlineErrorMessage(message: validationMessage!),
+            ],
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: productWasFound && !savingPrice ? onSave : null,
+              icon: savingPrice
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save_outlined),
+              label: Text(savingPrice ? 'Saving...' : 'Save price'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InlineErrorMessage extends StatelessWidget {
+  const _InlineErrorMessage({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.errorContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: theme.colorScheme.onErrorContainer,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -660,10 +979,51 @@ class _ProductInfoBlock extends StatelessWidget {
   }
 }
 
-class _ProductPill extends StatelessWidget {
-  const _ProductPill({required this.icon, required this.label});
+class _ProductImage extends StatelessWidget {
+  const _ProductImage({required this.imageUrl});
 
-  final IconData icon;
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (imageUrl.isEmpty) {
+      return CircleAvatar(
+        radius: 34,
+        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+        child: Icon(
+          Icons.image_not_supported_outlined,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.network(
+        imageUrl,
+        width: 72,
+        height: 72,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) {
+          return CircleAvatar(
+            radius: 34,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+            child: Icon(
+              Icons.broken_image_outlined,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ProductChip extends StatelessWidget {
+  const _ProductChip({required this.label});
+
   final String label;
 
   @override
@@ -673,23 +1033,196 @@ class _ProductPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(999),
       ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProductInfoRow extends StatelessWidget {
+  const _ProductInfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onPrimaryContainer),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              color: theme.colorScheme.onPrimaryContainer,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
+          SizedBox(
+            width: 105,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
+          Expanded(child: SelectableText(value)),
         ],
+      ),
+    );
+  }
+}
+
+class _AddToShoppingListCard extends StatelessWidget {
+  const _AddToShoppingListCard({
+    required this.hasGroupContext,
+    required this.productWasFound,
+    required this.loading,
+    required this.nameController,
+    required this.quantityController,
+    required this.unitController,
+    required this.validationMessage,
+    required this.onAdd,
+  });
+
+  final bool hasGroupContext;
+  final bool productWasFound;
+  final bool loading;
+  final TextEditingController nameController;
+  final TextEditingController quantityController;
+  final TextEditingController unitController;
+  final String? validationMessage;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (!hasGroupContext) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.shopping_cart_outlined,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Open this scanner from a shopping list to add products directly.',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.add_shopping_cart_outlined,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Add to shopping list',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text('Create a shopping item from this product.'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nameController,
+              enabled: productWasFound && !loading,
+              decoration: const InputDecoration(
+                labelText: 'Name',
+                prefixIcon: Icon(Icons.shopping_basket_outlined),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: quantityController,
+                    enabled: productWasFound && !loading,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Quantity',
+                      hintText: '1',
+                      prefixIcon: Icon(Icons.numbers_outlined),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: unitController,
+                    enabled: productWasFound && !loading,
+                    decoration: const InputDecoration(
+                      labelText: 'Unit',
+                      hintText: 'pcs',
+                      prefixIcon: Icon(Icons.scale_outlined),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (validationMessage != null) ...[
+              const SizedBox(height: 12),
+              _InlineErrorMessage(message: validationMessage!),
+            ],
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: productWasFound && !loading ? onAdd : null,
+              icon: loading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.add_shopping_cart_outlined),
+              label: Text(loading ? 'Adding...' : 'Add to shopping list'),
+            ),
+          ],
+        ),
       ),
     );
   }

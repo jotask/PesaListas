@@ -25,13 +25,22 @@ class RecipeIngredientRepository {
     double? quantity,
     String? unit,
     String? note,
+    double? estimatedUnitPrice,
+    String priceCurrency = 'EUR',
   }) async {
+    final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
+        ? quantity * estimatedUnitPrice
+        : estimatedUnitPrice;
+
     await _client.from(AppTables.recipeIngredients).insert({
       AppRecipeIngredientFields.recipeId: recipeId,
       AppRecipeIngredientFields.name: name,
       AppRecipeIngredientFields.quantity: quantity,
       AppRecipeIngredientFields.unit: unit,
       AppRecipeIngredientFields.note: note,
+      AppRecipeIngredientFields.estimatedUnitPrice: estimatedUnitPrice,
+      AppRecipeIngredientFields.estimatedTotalPrice: estimatedTotalPrice,
+      AppRecipeIngredientFields.priceCurrency: priceCurrency,
     });
   }
 
@@ -41,7 +50,13 @@ class RecipeIngredientRepository {
     double? quantity,
     String? unit,
     String? note,
+    double? estimatedUnitPrice,
+    String priceCurrency = 'EUR',
   }) async {
+    final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
+        ? quantity * estimatedUnitPrice
+        : estimatedUnitPrice;
+
     await _client
         .from(AppTables.recipeIngredients)
         .update({
@@ -49,6 +64,9 @@ class RecipeIngredientRepository {
           AppRecipeIngredientFields.quantity: quantity,
           AppRecipeIngredientFields.unit: unit,
           AppRecipeIngredientFields.note: note,
+          AppRecipeIngredientFields.estimatedUnitPrice: estimatedUnitPrice,
+          AppRecipeIngredientFields.estimatedTotalPrice: estimatedTotalPrice,
+          AppRecipeIngredientFields.priceCurrency: priceCurrency,
         })
         .eq(AppRecipeIngredientFields.id, ingredientId);
   }

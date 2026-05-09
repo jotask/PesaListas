@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/meal_plan_cost_fields.dart';
+import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/list_fields.dart';
@@ -18,6 +20,7 @@ import 'package:pesalistas/dialogs/vote_dialog.dart';
 import 'package:pesalistas/pages/create_recipe_page.dart';
 import 'package:pesalistas/pages/edit_list_page.dart';
 import 'package:pesalistas/pages/item_form_page.dart';
+import 'package:pesalistas/pages/product_scanner_page.dart';
 import 'package:pesalistas/pages/recipe_details_page.dart';
 import 'package:pesalistas/pages/recipe_ingredient_form_page.dart';
 import 'package:pesalistas/pages/shopping_item_form_page.dart';
@@ -170,20 +173,43 @@ class _ListDetailPageState extends State<ListDetailPage> {
             recipe[AppRecipeFields.id].toString(): recipe,
         };
 
+        final recipeIds = mealPlans
+            .map((mealPlan) => mealPlan[AppMealPlanFields.recipeId]?.toString())
+            .whereType<String>()
+            .where((recipeId) => recipeId.isNotEmpty)
+            .toSet()
+            .toList();
+
+        final ingredientsByRecipeId = <String, List<Map<String, dynamic>>>{};
+
+        for (final recipeId in recipeIds) {
+          ingredientsByRecipeId[recipeId] = await recipeIngredientRepository
+              .getIngredientsForRecipe(recipeId);
+        }
+
         final enrichedMealPlans = mealPlans.map((mealPlan) {
           final recipeId = mealPlan[AppMealPlanFields.recipeId]?.toString();
 
           if (recipeId == null || recipeId.isEmpty) {
-            return mealPlan;
+            return enrichMealPlanWithEstimatedCost(
+              mealPlan: mealPlan,
+              ingredients: const [],
+            );
           }
 
           final recipe = recipesById[recipeId];
+          final ingredients = ingredientsByRecipeId[recipeId] ?? const [];
+
+          final mealPlanWithCost = enrichMealPlanWithEstimatedCost(
+            mealPlan: mealPlan,
+            ingredients: ingredients,
+          );
 
           if (recipe == null) {
-            return mealPlan;
+            return mealPlanWithCost;
           }
 
-          return {...mealPlan, AppMealPlanFields.recipes: recipe};
+          return {...mealPlanWithCost, AppMealPlanFields.recipes: recipe};
         }).toList();
 
         if (!mounted) return;
@@ -427,18 +453,26 @@ class _ListDetailPageState extends State<ListDetailPage> {
     setState(() => generatingShopping = true);
 
     try {
-      await mealPlanRepository.generateShoppingFromMealPlans(
-        groupId: groupId,
-        fromDate: result.fromDate,
-        toDate: result.toDate,
-      );
+      final createdCount = await mealPlanRepository
+          .generateShoppingFromMealPlans(
+            groupId: groupId,
+            fromDate: result.fromDate,
+            toDate: result.toDate,
+          );
 
       if (!mounted) return;
 
-      showSuccessSnackBar(
-        context,
-        context.l10n.shoppingItemsGeneratedOpenShoppingToReviewThem,
-      );
+      if (createdCount == 0) {
+        showInfoSnackBar(
+          context,
+          'No new shopping items were generated. They may already exist for this range.',
+        );
+      } else {
+        showSuccessSnackBar(
+          context,
+          '$createdCount shopping items generated. Open Shopping to review them.',
+        );
+      }
     } catch (error) {
       if (!mounted) return;
 
@@ -452,6 +486,83 @@ class _ListDetailPageState extends State<ListDetailPage> {
         setState(() => generatingShopping = false);
       }
     }
+  }
+
+  double? doubleOrNull(dynamic value) {
+    if (value == null) return null;
+
+    if (value is num) return value.toDouble();
+
+    return double.tryParse(value.toString().replaceAll(',', '.'));
+  }
+
+  String? nullableText(dynamic value) {
+    final text = value?.toString().trim();
+
+    if (text == null || text.isEmpty) return null;
+
+    return text;
+  }
+
+  double? estimatedIngredientTotal(Map<String, dynamic> ingredient) {
+    final explicitTotal = doubleOrNull(
+      ingredient[AppRecipeIngredientFields.estimatedTotalPrice],
+    );
+
+    if (explicitTotal != null) {
+      return explicitTotal;
+    }
+
+    final unitPrice = doubleOrNull(
+      ingredient[AppRecipeIngredientFields.estimatedUnitPrice],
+    );
+
+    if (unitPrice == null) {
+      return null;
+    }
+
+    final quantity = doubleOrNull(
+      ingredient[AppRecipeIngredientFields.quantity],
+    );
+
+    if (quantity == null) {
+      return unitPrice;
+    }
+
+    return unitPrice * quantity;
+  }
+
+  String ingredientCurrency(Map<String, dynamic> ingredient) {
+    return nullableText(ingredient[AppRecipeIngredientFields.priceCurrency]) ??
+        'EUR';
+  }
+
+  Map<String, dynamic> enrichMealPlanWithEstimatedCost({
+    required Map<String, dynamic> mealPlan,
+    required List<Map<String, dynamic>> ingredients,
+  }) {
+    var total = 0.0;
+    var hasEstimatedCost = false;
+    var currency = 'EUR';
+
+    for (final ingredient in ingredients) {
+      final ingredientTotal = estimatedIngredientTotal(ingredient);
+
+      if (ingredientTotal == null) {
+        continue;
+      }
+
+      hasEstimatedCost = true;
+      total += ingredientTotal;
+      currency = ingredientCurrency(ingredient);
+    }
+
+    return {
+      ...mealPlan,
+      AppMealPlanCostFields.hasEstimatedCost: hasEstimatedCost,
+      AppMealPlanCostFields.estimatedCost: total,
+      AppMealPlanCostFields.priceCurrency: currency,
+    };
   }
 
   Future<List<Map<String, dynamic>>> enrichItemsWithVoteSummaries(
@@ -550,6 +661,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
         name: result.name,
         quantity: result.quantity,
         unit: result.unit,
+        estimatedUnitPrice: result.estimatedUnitPrice,
+        priceCurrency: result.priceCurrency,
       );
 
       await loadItems();
@@ -569,6 +682,18 @@ class _ListDetailPageState extends State<ListDetailPage> {
       if (mounted) {
         setState(() => creatingItem = false);
       }
+    }
+  }
+
+  Future<void> openProductScanner() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ProductScannerPage(groupId: groupId)),
+    );
+
+    if (!mounted) return;
+
+    if (isShoppingList) {
+      await loadItems();
     }
   }
 
@@ -728,6 +853,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
         name: result.name,
         quantity: result.quantity,
         unit: result.unit,
+        estimatedUnitPrice: result.estimatedUnitPrice,
+        priceCurrency: result.priceCurrency,
       );
 
       await loadItems();
@@ -1261,6 +1388,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
             quantity: ingredientResult.quantity,
             unit: ingredientResult.unit,
             note: ingredientResult.note,
+            estimatedUnitPrice: ingredientResult.estimatedUnitPrice,
+            priceCurrency: ingredientResult.priceCurrency,
           );
 
           if (!mounted) return;
@@ -1305,6 +1434,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
             quantity: editIngredientResult.quantity,
             unit: editIngredientResult.unit,
             note: editIngredientResult.note,
+            estimatedUnitPrice: editIngredientResult.estimatedUnitPrice,
+            priceCurrency: editIngredientResult.priceCurrency,
           );
 
           if (!mounted) return;
@@ -1398,6 +1529,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
+                    if (isShoppingList) ...[
+                      _ProductScannerShortcutCard(onTap: openProductScanner),
+                      const SizedBox(height: 12),
+                    ],
                     ListItemsSection(
                       listType: listType,
                       items: items,
@@ -1424,6 +1559,38 @@ class _ListDetailPageState extends State<ListDetailPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProductScannerShortcutCard extends StatelessWidget {
+  const _ProductScannerShortcutCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: theme.colorScheme.primaryContainer,
+          child: Icon(
+            Icons.qr_code_scanner_outlined,
+            color: theme.colorScheme.onPrimaryContainer,
+          ),
+        ),
+        title: const Text(
+          'Product scanner',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        subtitle: const Text(
+          'Scan a product, fetch product data and save group prices.',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }

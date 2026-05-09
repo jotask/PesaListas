@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/meal_plan_cost_fields.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/meal_types.dart';
@@ -141,6 +142,42 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
     }).length;
   }
 
+  bool get hasEstimatedCosts {
+    return widget.mealPlans.any(mealPlanHasEstimatedCost);
+  }
+
+  double get totalEstimatedCost {
+    return widget.mealPlans.fold<double>(0, (total, mealPlan) {
+      return total + (mealPlanEstimatedCost(mealPlan) ?? 0);
+    });
+  }
+
+  String get priceCurrency {
+    for (final mealPlan in widget.mealPlans) {
+      final value = mealPlan[AppMealPlanCostFields.priceCurrency]?.toString();
+
+      if (value != null && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+
+    return 'EUR';
+  }
+
+  bool mealPlanHasEstimatedCost(Map<String, dynamic> mealPlan) {
+    return mealPlan[AppMealPlanCostFields.hasEstimatedCost] == true;
+  }
+
+  double? mealPlanEstimatedCost(Map<String, dynamic> mealPlan) {
+    final value = mealPlan[AppMealPlanCostFields.estimatedCost];
+
+    if (value == null) return null;
+
+    if (value is num) return value.toDouble();
+
+    return double.tryParse(value.toString().replaceAll(',', '.'));
+  }
+
   int countForMealType(String mealType) {
     return widget.mealPlans.where((mealPlan) {
       return mealTypeFor(mealPlan) == mealType;
@@ -245,6 +282,9 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
             thisWeekCount: thisWeekCount,
             pastCount: pastCount,
             recipeMealCount: recipeMealCount,
+            hasEstimatedCosts: hasEstimatedCosts,
+            totalEstimatedCost: totalEstimatedCost,
+            currency: priceCurrency,
           ),
           const SizedBox(height: 12),
           _MealPlanFilterChips(
@@ -379,6 +419,9 @@ class _MealPlanSummaryCard extends StatelessWidget {
     required this.thisWeekCount,
     required this.pastCount,
     required this.recipeMealCount,
+    required this.hasEstimatedCosts,
+    required this.totalEstimatedCost,
+    required this.currency,
   });
 
   final int totalCount;
@@ -386,6 +429,9 @@ class _MealPlanSummaryCard extends StatelessWidget {
   final int thisWeekCount;
   final int pastCount;
   final int recipeMealCount;
+  final bool hasEstimatedCosts;
+  final double totalEstimatedCost;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -395,6 +441,7 @@ class _MealPlanSummaryCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
               backgroundColor: theme.colorScheme.primaryContainer,
@@ -425,6 +472,12 @@ class _MealPlanSummaryCard extends StatelessWidget {
                     label: context.l10n.totalCountSummary(totalCount),
                     icon: Icons.list_alt_outlined,
                   ),
+                  if (hasEstimatedCosts)
+                    _SummaryPill(
+                      label:
+                          'Est. ${totalEstimatedCost.toStringAsFixed(2)} $currency',
+                      icon: Icons.euro_outlined,
+                    ),
                   if (pastCount > 0)
                     _SummaryPill(
                       label: context.l10n.pastSummary(pastCount),
@@ -659,6 +712,30 @@ class _MealPlanCard extends StatelessWidget {
     return recipe != null;
   }
 
+  bool get hasEstimatedCost {
+    return mealPlan[AppMealPlanCostFields.hasEstimatedCost] == true;
+  }
+
+  double? get estimatedCost {
+    final value = mealPlan[AppMealPlanCostFields.estimatedCost];
+
+    if (value == null) return null;
+
+    if (value is num) return value.toDouble();
+
+    return double.tryParse(value.toString().replaceAll(',', '.'));
+  }
+
+  String get priceCurrency {
+    final value = mealPlan[AppMealPlanCostFields.priceCurrency]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return 'EUR';
+    }
+
+    return value.trim();
+  }
+
   String title(BuildContext context) {
     final recipeName = recipe?[AppRecipeFields.name]?.toString();
 
@@ -736,6 +813,11 @@ class _MealPlanCard extends StatelessWidget {
                       children: [
                         _MealTypePill(config: mealTypeConfig),
                         _MealSourcePill(hasRecipe: hasRecipe),
+                        if (hasEstimatedCost && estimatedCost != null)
+                          _MealEstimatedCostPill(
+                            amount: estimatedCost!,
+                            currency: priceCurrency,
+                          ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -894,6 +976,45 @@ class _MealTypePill extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w800,
               color: theme.colorScheme.onSecondaryContainer,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MealEstimatedCostPill extends StatelessWidget {
+  const _MealEstimatedCostPill({required this.amount, required this.currency});
+
+  final double amount;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.euro_outlined,
+            size: 14,
+            color: theme.colorScheme.onTertiaryContainer,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            'Est. ${amount.toStringAsFixed(2)} $currency',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onTertiaryContainer,
             ),
           ),
         ],

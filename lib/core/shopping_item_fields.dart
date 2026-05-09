@@ -1,6 +1,8 @@
 class AppShoppingItemFields {
   const AppShoppingItemFields._();
 
+  static const sourceRecipeIngredientId = 'source_recipe_ingredient_id';
+
   static const id = 'id';
   static const groupId = 'group_id';
   static const name = 'name';
@@ -15,4 +17,11 @@ class AppShoppingItemFields {
   // App-side enriched source data.
   static const sourceRecipe = 'source_recipe';
   static const sourceMealPlan = 'source_meal_plan';
+
+  static const barcode = 'barcode';
+  static const productName = 'product_name';
+  static const productImageUrl = 'product_image_url';
+  static const estimatedUnitPrice = 'estimated_unit_price';
+  static const estimatedTotalPrice = 'estimated_total_price';
+  static const priceCurrency = 'price_currency';
 }

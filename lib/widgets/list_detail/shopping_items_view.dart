@@ -76,8 +76,34 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
     }).length;
   }
 
-  bool get hasActiveFilter {
-    return selectedSourceFilter != ShoppingSourceFilter.all;
+  String get priceCurrency {
+    for (final item in widget.items) {
+      final value = item[AppShoppingItemFields.priceCurrency]?.toString();
+
+      if (value != null && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+
+    return 'EUR';
+  }
+
+  double get totalEstimatedCost {
+    return widget.items.fold<double>(0, (total, item) {
+      return total + (_estimatedItemTotal(item) ?? 0);
+    });
+  }
+
+  double get toBuyEstimatedCost {
+    return widget.items
+        .where((item) => item[AppShoppingItemFields.checked] != true)
+        .fold<double>(0, (total, item) {
+          return total + (_estimatedItemTotal(item) ?? 0);
+        });
+  }
+
+  bool get hasEstimatedPrices {
+    return widget.items.any((item) => _estimatedItemTotal(item) != null);
   }
 
   bool isGeneratedItem(Map<String, dynamic> item) {
@@ -130,6 +156,10 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
           toBuyCount: widget.items.length - boughtCountForAllItems,
           boughtCount: boughtCountForAllItems,
           generatedCount: generatedCount,
+          hasEstimatedPrices: hasEstimatedPrices,
+          totalEstimatedCost: totalEstimatedCost,
+          toBuyEstimatedCost: toBuyEstimatedCost,
+          currency: priceCurrency,
         ),
         const SizedBox(height: 12),
         Row(
@@ -294,12 +324,20 @@ class _ShoppingSummaryCard extends StatelessWidget {
     required this.toBuyCount,
     required this.boughtCount,
     required this.generatedCount,
+    required this.hasEstimatedPrices,
+    required this.totalEstimatedCost,
+    required this.toBuyEstimatedCost,
+    required this.currency,
   });
 
   final int totalCount;
   final int toBuyCount;
   final int boughtCount;
   final int generatedCount;
+  final bool hasEstimatedPrices;
+  final double totalEstimatedCost;
+  final double toBuyEstimatedCost;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -309,6 +347,7 @@ class _ShoppingSummaryCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
               backgroundColor: theme.colorScheme.primaryContainer,
@@ -339,6 +378,18 @@ class _ShoppingSummaryCard extends StatelessWidget {
                     label: context.l10n.totalCountSummary(totalCount),
                     icon: Icons.list_alt_outlined,
                   ),
+                  if (hasEstimatedPrices)
+                    _SummaryPill(
+                      label:
+                          'To buy est. ${_formatMoney(toBuyEstimatedCost, currency)}',
+                      icon: Icons.euro_outlined,
+                    ),
+                  if (hasEstimatedPrices)
+                    _SummaryPill(
+                      label:
+                          'Total est. ${_formatMoney(totalEstimatedCost, currency)}',
+                      icon: Icons.receipt_long_outlined,
+                    ),
                 ],
               ),
             ),
@@ -567,6 +618,30 @@ class _ShoppingItemCard extends StatelessWidget {
     return value.trim();
   }
 
+  String? get barcode {
+    return _textOrNull(item[AppShoppingItemFields.barcode]);
+  }
+
+  String? get productName {
+    return _textOrNull(item[AppShoppingItemFields.productName]);
+  }
+
+  String? get productImageUrl {
+    return _textOrNull(item[AppShoppingItemFields.productImageUrl]);
+  }
+
+  String get priceCurrency {
+    return _textOrNull(item[AppShoppingItemFields.priceCurrency]) ?? 'EUR';
+  }
+
+  double? get estimatedUnitPrice {
+    return _doubleOrNull(item[AppShoppingItemFields.estimatedUnitPrice]);
+  }
+
+  double? get estimatedTotalPrice {
+    return _estimatedItemTotal(item);
+  }
+
   Map<String, dynamic>? get sourceRecipe {
     final value = item[AppShoppingItemFields.sourceRecipe];
 
@@ -590,6 +665,10 @@ class _ShoppingItemCard extends StatelessWidget {
   bool get generatedFromMealPlan {
     final value = item[AppShoppingItemFields.sourceMealPlanId]?.toString();
     return value != null && value.isNotEmpty;
+  }
+
+  bool get hasProductData {
+    return barcode != null || productImageUrl != null || productName != null;
   }
 
   String amountText(BuildContext context) {
@@ -676,10 +755,31 @@ class _ShoppingItemCard extends StatelessWidget {
     return parts.join(' • ');
   }
 
+  String? priceSummaryText() {
+    final total = estimatedTotalPrice;
+    final unitPrice = estimatedUnitPrice;
+
+    if (total == null && unitPrice == null) {
+      return null;
+    }
+
+    if (total != null && unitPrice != null) {
+      return '${_formatMoney(total, priceCurrency)} total · '
+          '${_formatMoney(unitPrice, priceCurrency)} each';
+    }
+
+    if (total != null) {
+      return '${_formatMoney(total, priceCurrency)} total';
+    }
+
+    return '${_formatMoney(unitPrice!, priceCurrency)} each';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final sourceText = sourceContextText(context);
+    final priceText = priceSummaryText();
 
     return Card(
       child: InkWell(
@@ -695,18 +795,10 @@ class _ShoppingItemCard extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      backgroundColor: checked
-                          ? theme.colorScheme.secondaryContainer
-                          : theme.colorScheme.primaryContainer,
-                      child: Icon(
-                        checked
-                            ? Icons.shopping_cart_checkout
-                            : Icons.shopping_cart_outlined,
-                        color: checked
-                            ? theme.colorScheme.onSecondaryContainer
-                            : theme.colorScheme.onPrimaryContainer,
-                      ),
+                    _ShoppingProductAvatar(
+                      imageUrl: productImageUrl,
+                      checked: checked,
+                      hasProductData: hasProductData,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -737,13 +829,40 @@ class _ShoppingItemCard extends StatelessWidget {
                           ),
                           if (sourceText != null) ...[
                             const SizedBox(height: 8),
-                            _SourceContextPill(text: sourceText),
+                            _ShoppingMetaPill(
+                              text: sourceText,
+                              icon: Icons.event_note_outlined,
+                            ),
                           ],
                         ],
                       ),
                     ),
                   ],
                 ),
+                if (hasProductData || priceText != null) ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      if (productName != null && productName != name(context))
+                        _ShoppingMetaPill(
+                          text: productName!,
+                          icon: Icons.inventory_2_outlined,
+                        ),
+                      if (barcode != null)
+                        _ShoppingMetaPill(
+                          text: barcode!,
+                          icon: Icons.qr_code_2_outlined,
+                        ),
+                      if (priceText != null)
+                        _ShoppingMetaPill(
+                          text: priceText,
+                          icon: Icons.euro_outlined,
+                        ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 14),
                 Row(
                   children: [
@@ -782,10 +901,75 @@ class _ShoppingItemCard extends StatelessWidget {
   }
 }
 
-class _SourceContextPill extends StatelessWidget {
-  const _SourceContextPill({required this.text});
+class _ShoppingProductAvatar extends StatelessWidget {
+  const _ShoppingProductAvatar({
+    required this.imageUrl,
+    required this.checked,
+    required this.hasProductData,
+  });
+
+  final String? imageUrl;
+  final bool checked;
+  final bool hasProductData;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final backgroundColor = checked
+        ? theme.colorScheme.secondaryContainer
+        : theme.colorScheme.primaryContainer;
+
+    final iconColor = checked
+        ? theme.colorScheme.onSecondaryContainer
+        : theme.colorScheme.onPrimaryContainer;
+
+    final url = imageUrl;
+
+    if (url != null && url.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(999),
+        child: Image.network(
+          url,
+          width: 42,
+          height: 42,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) {
+            return CircleAvatar(
+              backgroundColor: backgroundColor,
+              child: Icon(
+                hasProductData
+                    ? Icons.inventory_2_outlined
+                    : checked
+                    ? Icons.shopping_cart_checkout
+                    : Icons.shopping_cart_outlined,
+                color: iconColor,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    return CircleAvatar(
+      backgroundColor: backgroundColor,
+      child: Icon(
+        hasProductData
+            ? Icons.inventory_2_outlined
+            : checked
+            ? Icons.shopping_cart_checkout
+            : Icons.shopping_cart_outlined,
+        color: iconColor,
+      ),
+    );
+  }
+}
+
+class _ShoppingMetaPill extends StatelessWidget {
+  const _ShoppingMetaPill({required this.text, required this.icon});
 
   final String text;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -800,11 +984,7 @@ class _SourceContextPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.event_note_outlined,
-            size: 14,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 5),
           Flexible(
             child: Text(
@@ -856,4 +1036,52 @@ class _ShoppingStatePill extends StatelessWidget {
       ),
     );
   }
+}
+
+String? _textOrNull(dynamic value) {
+  final text = value?.toString().trim();
+
+  if (text == null || text.isEmpty) {
+    return null;
+  }
+
+  return text;
+}
+
+double? _doubleOrNull(dynamic value) {
+  if (value == null) return null;
+
+  if (value is num) return value.toDouble();
+
+  return double.tryParse(value.toString().replaceAll(',', '.'));
+}
+
+double? _estimatedItemTotal(Map<String, dynamic> item) {
+  final explicitTotal = _doubleOrNull(
+    item[AppShoppingItemFields.estimatedTotalPrice],
+  );
+
+  if (explicitTotal != null) {
+    return explicitTotal;
+  }
+
+  final unitPrice = _doubleOrNull(
+    item[AppShoppingItemFields.estimatedUnitPrice],
+  );
+
+  if (unitPrice == null) {
+    return null;
+  }
+
+  final quantity = _doubleOrNull(item[AppShoppingItemFields.quantity]);
+
+  if (quantity == null) {
+    return unitPrice;
+  }
+
+  return unitPrice * quantity;
+}
+
+String _formatMoney(double value, String currency) {
+  return '${value.toStringAsFixed(2)} $currency';
 }

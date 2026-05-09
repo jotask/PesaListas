@@ -9,12 +9,16 @@ class RecipeIngredientFormPageResult {
     this.quantity,
     this.unit,
     this.note,
+    this.estimatedUnitPrice,
+    this.priceCurrency = 'EUR',
   });
 
   final String name;
   final double? quantity;
   final String? unit;
   final String? note;
+  final double? estimatedUnitPrice;
+  final String priceCurrency;
 }
 
 class RecipeIngredientFormPage extends StatefulWidget {
@@ -32,10 +36,18 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
   late final TextEditingController quantityController;
   late final TextEditingController unitController;
   late final TextEditingController noteController;
+  late final TextEditingController priceController;
 
   String? validationMessage;
 
   bool get isEditing => widget.ingredient != null;
+
+  String get priceCurrency {
+    return textOrNull(
+          widget.ingredient?[AppRecipeIngredientFields.priceCurrency],
+        ) ??
+        'EUR';
+  }
 
   @override
   void initState() {
@@ -58,6 +70,13 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
     noteController = TextEditingController(
       text: ingredient?[AppRecipeIngredientFields.note]?.toString() ?? '',
     );
+
+    priceController = TextEditingController(
+      text:
+          ingredient?[AppRecipeIngredientFields.estimatedUnitPrice]
+              ?.toString() ??
+          '',
+    );
   }
 
   @override
@@ -66,6 +85,7 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
     quantityController.dispose();
     unitController.dispose();
     noteController.dispose();
+    priceController.dispose();
     super.dispose();
   }
 
@@ -75,11 +95,46 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
     setState(() => validationMessage = null);
   }
 
+  double? parseOptionalDouble(String value) {
+    final text = value.trim();
+
+    if (text.isEmpty) {
+      return null;
+    }
+
+    return double.tryParse(text.replaceAll(',', '.'));
+  }
+
+  double? currentQuantity() {
+    return parseOptionalDouble(quantityController.text);
+  }
+
+  double? currentPrice() {
+    return parseOptionalDouble(priceController.text);
+  }
+
+  double? currentEstimatedTotal() {
+    final price = currentPrice();
+
+    if (price == null) {
+      return null;
+    }
+
+    final quantity = currentQuantity();
+
+    if (quantity == null) {
+      return price;
+    }
+
+    return quantity * price;
+  }
+
   void submit() {
     final name = nameController.text.trim();
     final quantityText = quantityController.text.trim();
     final unit = unitController.text.trim();
     final note = noteController.text.trim();
+    final priceText = priceController.text.trim();
 
     setState(() => validationMessage = null);
 
@@ -88,12 +143,22 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
       return;
     }
 
-    final quantity = quantityText.isEmpty
-        ? null
-        : double.tryParse(quantityText.replaceAll(',', '.'));
+    final quantity = parseOptionalDouble(quantityText);
 
     if (quantityText.isNotEmpty && quantity == null) {
       setState(() => validationMessage = context.l10n.quantityMustBeANumber);
+      return;
+    }
+
+    final estimatedUnitPrice = parseOptionalDouble(priceText);
+
+    if (priceText.isNotEmpty && estimatedUnitPrice == null) {
+      setState(() => validationMessage = 'Price must be a valid number.');
+      return;
+    }
+
+    if (estimatedUnitPrice != null && estimatedUnitPrice < 0) {
+      setState(() => validationMessage = 'Price cannot be negative.');
       return;
     }
 
@@ -103,12 +168,16 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
         quantity: quantity,
         unit: unit.isEmpty ? null : unit,
         note: note.isEmpty ? null : note,
+        estimatedUnitPrice: estimatedUnitPrice,
+        priceCurrency: priceCurrency,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final estimatedTotal = currentEstimatedTotal();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -163,7 +232,10 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
                           prefixIcon: const Icon(Icons.numbers_outlined),
                         ),
                         textInputAction: TextInputAction.next,
-                        onChanged: (_) => clearValidation(),
+                        onChanged: (_) {
+                          clearValidation();
+                          setState(() {});
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -181,6 +253,31 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: priceController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Estimated unit price',
+                    hintText: '0.50',
+                    prefixIcon: const Icon(Icons.euro_outlined),
+                    suffixText: priceCurrency,
+                  ),
+                  textInputAction: TextInputAction.next,
+                  onChanged: (_) {
+                    clearValidation();
+                    setState(() {});
+                  },
+                ),
+                if (estimatedTotal != null) ...[
+                  const SizedBox(height: 12),
+                  _EstimatedTotalCard(
+                    total: estimatedTotal,
+                    currency: priceCurrency,
+                  ),
+                ],
                 const SizedBox(height: 16),
                 TextField(
                   controller: noteController,
@@ -205,4 +302,53 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
       ),
     );
   }
+}
+
+class _EstimatedTotalCard extends StatelessWidget {
+  const _EstimatedTotalCard({required this.total, required this.currency});
+
+  final double total;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.receipt_long_outlined,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Estimated ingredient total: ${total.toStringAsFixed(2)} $currency',
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String? textOrNull(dynamic value) {
+  final text = value?.toString().trim();
+
+  if (text == null || text.isEmpty) {
+    return null;
+  }
+
+  return text;
 }

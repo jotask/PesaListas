@@ -82,6 +82,43 @@ class ShoppingRepository {
         .eq(AppShoppingItemFields.checked, true);
   }
 
+  Future<Map<String, dynamic>> createShoppingItemFromProduct({
+    required String groupId,
+    required String name,
+    double? quantity,
+    String? unit,
+    String? barcode,
+    String? productName,
+    String? productImageUrl,
+    double? estimatedUnitPrice,
+    String priceCurrency = 'EUR',
+  }) async {
+    final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
+        ? quantity * estimatedUnitPrice
+        : estimatedUnitPrice;
+
+    final row = {
+      AppShoppingItemFields.groupId: groupId,
+      AppShoppingItemFields.name: name,
+      AppShoppingItemFields.quantity: quantity,
+      AppShoppingItemFields.unit: unit,
+      AppShoppingItemFields.barcode: barcode,
+      AppShoppingItemFields.productName: productName,
+      AppShoppingItemFields.productImageUrl: productImageUrl,
+      AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
+      AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
+      AppShoppingItemFields.priceCurrency: priceCurrency,
+    };
+
+    final result = await _client
+        .from(AppTables.shoppingListItems)
+        .insert(row)
+        .select()
+        .single();
+
+    return result;
+  }
+
   Future<List<Map<String, dynamic>>> _getRecipesForGroup(String groupId) async {
     final response = await _client
         .from(AppTables.recipes)
@@ -107,12 +144,21 @@ class ShoppingRepository {
     required String name,
     double? quantity,
     String? unit,
+    double? estimatedUnitPrice,
+    String priceCurrency = 'EUR',
   }) async {
+    final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
+        ? quantity * estimatedUnitPrice
+        : estimatedUnitPrice;
+
     await _client.from(AppTables.shoppingListItems).insert({
       AppShoppingItemFields.groupId: groupId,
       AppShoppingItemFields.name: name,
       AppShoppingItemFields.quantity: quantity,
       AppShoppingItemFields.unit: unit,
+      AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
+      AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
+      AppShoppingItemFields.priceCurrency: priceCurrency,
       AppShoppingItemFields.createdBy: _client.auth.currentUser!.id,
     });
   }
@@ -122,13 +168,22 @@ class ShoppingRepository {
     required String name,
     double? quantity,
     String? unit,
+    double? estimatedUnitPrice,
+    String priceCurrency = 'EUR',
   }) async {
+    final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
+        ? quantity * estimatedUnitPrice
+        : estimatedUnitPrice;
+
     await _client
         .from(AppTables.shoppingListItems)
         .update({
           AppShoppingItemFields.name: name,
           AppShoppingItemFields.quantity: quantity,
           AppShoppingItemFields.unit: unit,
+          AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
+          AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
+          AppShoppingItemFields.priceCurrency: priceCurrency,
         })
         .eq(AppShoppingItemFields.id, shoppingItemId);
   }
