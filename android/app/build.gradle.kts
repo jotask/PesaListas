@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.pesalistas"
+    namespace = "com.josevives.pesalistas"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID.
-        applicationId = "com.example.pesalistas"
+        applicationId = "com.josevives.pesalistas"
 
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
