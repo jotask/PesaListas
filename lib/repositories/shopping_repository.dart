@@ -146,6 +146,9 @@ class ShoppingRepository {
     String? unit,
     double? estimatedUnitPrice,
     String priceCurrency = 'EUR',
+    String? barcode,
+    String? productName,
+    String? productImageUrl,
   }) async {
     final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
         ? quantity * estimatedUnitPrice
@@ -159,6 +162,9 @@ class ShoppingRepository {
       AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
       AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
       AppShoppingItemFields.priceCurrency: priceCurrency,
+      AppShoppingItemFields.barcode: barcode,
+      AppShoppingItemFields.productName: productName,
+      AppShoppingItemFields.productImageUrl: productImageUrl,
       AppShoppingItemFields.createdBy: _client.auth.currentUser!.id,
     });
   }
@@ -170,6 +176,9 @@ class ShoppingRepository {
     String? unit,
     double? estimatedUnitPrice,
     String priceCurrency = 'EUR',
+    String? barcode,
+    String? productName,
+    String? productImageUrl,
   }) async {
     final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
         ? quantity * estimatedUnitPrice
@@ -184,6 +193,9 @@ class ShoppingRepository {
           AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
           AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
           AppShoppingItemFields.priceCurrency: priceCurrency,
+          AppShoppingItemFields.barcode: barcode,
+          AppShoppingItemFields.productName: productName,
+          AppShoppingItemFields.productImageUrl: productImageUrl,
         })
         .eq(AppShoppingItemFields.id, shoppingItemId);
   }

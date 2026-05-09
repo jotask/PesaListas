@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/product_fields.dart';
+import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/pages/product_catalog_page.dart';
+import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ShoppingItemFormPageResult {
   const ShoppingItemFormPageResult({
@@ -10,6 +15,9 @@ class ShoppingItemFormPageResult {
     this.unit,
     this.estimatedUnitPrice,
     this.priceCurrency = 'EUR',
+    this.barcode,
+    this.productName,
+    this.productImageUrl,
   });
 
   final String name;
@@ -17,11 +25,15 @@ class ShoppingItemFormPageResult {
   final String? unit;
   final double? estimatedUnitPrice;
   final String priceCurrency;
+  final String? barcode;
+  final String? productName;
+  final String? productImageUrl;
 }
 
 class ShoppingItemFormPage extends StatefulWidget {
-  const ShoppingItemFormPage({super.key, this.item});
+  const ShoppingItemFormPage({super.key, required this.groupId, this.item});
 
+  final String groupId;
   final Map<String, dynamic>? item;
 
   @override
@@ -29,26 +41,23 @@ class ShoppingItemFormPage extends StatefulWidget {
 }
 
 class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
+  late final ProductRepository productRepository;
+
   late final TextEditingController nameController;
   late final TextEditingController quantityController;
   late final TextEditingController unitController;
   late final TextEditingController priceController;
 
   String? validationMessage;
+  String? productLinkMessage;
+
+  String? linkedBarcode;
+  String? linkedProductName;
+  String? linkedProductImageUrl;
+
+  bool loadingProductPrice = false;
 
   bool get isEditing => widget.item != null;
-
-  String? get barcode {
-    return textOrNull(widget.item?[AppShoppingItemFields.barcode]);
-  }
-
-  String? get productName {
-    return textOrNull(widget.item?[AppShoppingItemFields.productName]);
-  }
-
-  String? get productImageUrl {
-    return textOrNull(widget.item?[AppShoppingItemFields.productImageUrl]);
-  }
 
   String get priceCurrency {
     return textOrNull(widget.item?[AppShoppingItemFields.priceCurrency]) ??
@@ -56,14 +65,27 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
   }
 
   bool get hasProductData {
-    return barcode != null || productName != null || productImageUrl != null;
+    return linkedBarcode != null ||
+        linkedProductName != null ||
+        linkedProductImageUrl != null;
   }
 
   @override
   void initState() {
     super.initState();
 
+    productRepository = ProductRepository(
+      Supabase.instance.client,
+      useStaging: true,
+    );
+
     final item = widget.item;
+
+    linkedBarcode = textOrNull(item?[AppShoppingItemFields.barcode]);
+    linkedProductName = textOrNull(item?[AppShoppingItemFields.productName]);
+    linkedProductImageUrl = textOrNull(
+      item?[AppShoppingItemFields.productImageUrl],
+    );
 
     nameController = TextEditingController(
       text: item?[AppShoppingItemFields.name]?.toString() ?? '',
@@ -92,9 +114,12 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
   }
 
   void clearValidation() {
-    if (validationMessage == null) return;
+    if (validationMessage == null && productLinkMessage == null) return;
 
-    setState(() => validationMessage = null);
+    setState(() {
+      validationMessage = null;
+      productLinkMessage = null;
+    });
   }
 
   double? parseOptionalDouble(String value) {
@@ -129,6 +154,90 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     }
 
     return quantity * price;
+  }
+
+  Future<void> selectProduct() async {
+    final product = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        builder: (_) =>
+            ProductCatalogPage(groupId: widget.groupId, selectionMode: true),
+      ),
+    );
+
+    if (product == null) return;
+
+    final barcode = textOrNull(product[AppProductFields.barcode]);
+    final productName = textOrNull(product[AppProductFields.name]);
+    final productImageUrl = textOrNull(product[AppProductFields.imageUrl]);
+
+    setState(() {
+      linkedBarcode = barcode;
+      linkedProductName = productName;
+      linkedProductImageUrl = productImageUrl;
+      productLinkMessage = null;
+      validationMessage = null;
+
+      if (productName != null) {
+        nameController.text = productName;
+      } else if (barcode != null && nameController.text.trim().isEmpty) {
+        nameController.text = barcode;
+      }
+    });
+
+    await loadLatestProductPrice();
+  }
+
+  Future<void> loadLatestProductPrice() async {
+    final barcode = linkedBarcode;
+
+    if (barcode == null || barcode.isEmpty) return;
+
+    setState(() {
+      loadingProductPrice = true;
+      productLinkMessage = null;
+    });
+
+    try {
+      final latestPrice = await productRepository.getLatestPrice(
+        groupId: widget.groupId,
+        barcode: barcode,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        if (latestPrice != null) {
+          final price = latestPrice[AppProductPriceFields.price];
+
+          if (price != null) {
+            priceController.text = price.toString();
+          }
+
+          productLinkMessage = 'Product linked. Latest group price loaded.';
+        } else {
+          productLinkMessage = 'Product linked. No group price saved yet.';
+        }
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        productLinkMessage = error.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() => loadingProductPrice = false);
+      }
+    }
+  }
+
+  void clearProductLink() {
+    setState(() {
+      linkedBarcode = null;
+      linkedProductName = null;
+      linkedProductImageUrl = null;
+      productLinkMessage = 'Product link removed.';
+    });
   }
 
   void submit() {
@@ -170,6 +279,9 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
         unit: unit.isEmpty ? null : unit,
         estimatedUnitPrice: estimatedUnitPrice,
         priceCurrency: priceCurrency,
+        barcode: linkedBarcode,
+        productName: linkedProductName,
+        productImageUrl: linkedProductImageUrl,
       ),
     );
   }
@@ -202,17 +314,19 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
               icon: Icons.shopping_cart_outlined,
               title: context.l10n.shoppingItem,
               subtitle: hasProductData
-                  ? 'This item is linked to a scanned product.'
+                  ? 'This item is linked to a cached product.'
                   : context.l10n.addAnItemQuantityAndUnit,
             ),
-            if (hasProductData) ...[
-              const SizedBox(height: 16),
-              _LinkedProductCard(
-                barcode: barcode,
-                productName: productName,
-                productImageUrl: productImageUrl,
-              ),
-            ],
+            const SizedBox(height: 16),
+            _LinkedProductActionsCard(
+              barcode: linkedBarcode,
+              productName: linkedProductName,
+              productImageUrl: linkedProductImageUrl,
+              loading: loadingProductPrice,
+              message: productLinkMessage,
+              onSelectProduct: selectProduct,
+              onClearProduct: hasProductData ? clearProductLink : null,
+            ),
             const SizedBox(height: 16),
             AppFormSectionCard(
               children: [
@@ -303,16 +417,28 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
   }
 }
 
-class _LinkedProductCard extends StatelessWidget {
-  const _LinkedProductCard({
+class _LinkedProductActionsCard extends StatelessWidget {
+  const _LinkedProductActionsCard({
     required this.barcode,
     required this.productName,
     required this.productImageUrl,
+    required this.loading,
+    required this.message,
+    required this.onSelectProduct,
+    required this.onClearProduct,
   });
 
   final String? barcode;
   final String? productName;
   final String? productImageUrl;
+  final bool loading;
+  final String? message;
+  final VoidCallback onSelectProduct;
+  final VoidCallback? onClearProduct;
+
+  bool get hasProductData {
+    return barcode != null || productName != null || productImageUrl != null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -322,47 +448,90 @@ class _LinkedProductCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(18),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (imageUrl != null && imageUrl.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: Image.network(
-                  imageUrl,
-                  width: 58,
-                  height: 58,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) {
-                    return _ProductFallbackAvatar(theme: theme);
-                  },
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (imageUrl != null && imageUrl.isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.network(
+                      imageUrl,
+                      width: 58,
+                      height: 58,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) {
+                        return _ProductFallbackAvatar(theme: theme);
+                      },
+                    ),
+                  )
+                else
+                  _ProductFallbackAvatar(theme: theme),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        productName ??
+                            (hasProductData
+                                ? 'Linked product'
+                                : 'No product linked'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (barcode != null) ...[
+                        const SizedBox(height: 4),
+                        SelectableText(
+                          barcode!,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Text(
+                        hasProductData
+                            ? 'Barcode, image and product name will be saved with this item.'
+                            : 'Link a cached product from Product database.',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
                 ),
-              )
-            else
-              _ProductFallbackAvatar(theme: theme),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    productName ?? 'Linked product',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
+              ],
+            ),
+            if (message != null) ...[
+              const SizedBox(height: 12),
+              _InfoMessage(message: message!),
+            ],
+            if (loading) ...[
+              const SizedBox(height: 12),
+              const LinearProgressIndicator(),
+            ],
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: loading ? null : onSelectProduct,
+                    icon: const Icon(Icons.inventory_2_outlined),
+                    label: Text(
+                      hasProductData ? 'Change product' : 'Link product',
                     ),
                   ),
-                  if (barcode != null) ...[
-                    const SizedBox(height: 4),
-                    SelectableText(barcode!, style: theme.textTheme.bodySmall),
-                  ],
-                  const SizedBox(height: 8),
-                  Text(
-                    'Product link is kept when editing this item.',
-                    style: theme.textTheme.bodySmall,
+                ),
+                if (onClearProduct != null) ...[
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: loading ? null : onClearProduct,
+                    icon: const Icon(Icons.link_off_outlined),
+                    tooltip: 'Remove product link',
                   ),
                 ],
-              ),
+              ],
             ),
           ],
         ),
@@ -419,6 +588,41 @@ class _EstimatedTotalCard extends StatelessWidget {
               style: TextStyle(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoMessage extends StatelessWidget {
+  const _InfoMessage({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

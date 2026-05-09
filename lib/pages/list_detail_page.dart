@@ -661,7 +661,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   Future<void> createShoppingItemDialog() async {
     final result = await Navigator.of(context).push<ShoppingItemFormPageResult>(
-      MaterialPageRoute(builder: (_) => const ShoppingItemFormPage()),
+      MaterialPageRoute(builder: (_) => ShoppingItemFormPage(groupId: groupId)),
     );
 
     if (result == null) return;
@@ -676,6 +676,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
         unit: result.unit,
         estimatedUnitPrice: result.estimatedUnitPrice,
         priceCurrency: result.priceCurrency,
+        barcode: result.barcode,
+        productName: result.productName,
+        productImageUrl: result.productImageUrl,
       );
 
       await loadItems();
@@ -853,7 +856,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
     if (editingItem) return;
 
     final result = await Navigator.of(context).push<ShoppingItemFormPageResult>(
-      MaterialPageRoute(builder: (_) => ShoppingItemFormPage(item: item)),
+      MaterialPageRoute(
+        builder: (_) => ShoppingItemFormPage(groupId: groupId, item: item),
+      ),
     );
 
     if (result == null) return;
@@ -868,6 +873,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
         unit: result.unit,
         estimatedUnitPrice: result.estimatedUnitPrice,
         priceCurrency: result.priceCurrency,
+        barcode: result.barcode,
+        productName: result.productName,
+        productImageUrl: result.productImageUrl,
       );
 
       await loadItems();

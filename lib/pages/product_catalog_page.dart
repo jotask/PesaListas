@@ -5,9 +5,14 @@ import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductCatalogPage extends StatefulWidget {
-  const ProductCatalogPage({super.key, this.groupId});
+  const ProductCatalogPage({
+    super.key,
+    this.groupId,
+    this.selectionMode = false,
+  });
 
   final String? groupId;
+  final bool selectionMode;
 
   @override
   State<ProductCatalogPage> createState() => _ProductCatalogPageState();
@@ -88,6 +93,11 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
   }
 
   Future<void> openProductDetail(Map<String, dynamic> product) async {
+    if (widget.selectionMode) {
+      Navigator.of(context).pop(product);
+      return;
+    }
+
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) =>
@@ -125,7 +135,9 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product database'),
+        title: Text(
+          widget.selectionMode ? 'Select product' : 'Product database',
+        ),
         actions: [
           IconButton(
             onPressed: loading ? null : loadProducts,
@@ -174,6 +186,7 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
                 for (final product in visibleProducts)
                   _ProductCatalogCard(
                     product: product,
+                    selectionMode: widget.selectionMode,
                     onTap: () => openProductDetail(product),
                   ),
               const SizedBox(height: 32),
@@ -330,9 +343,14 @@ class _EmptyProductCatalogCard extends StatelessWidget {
 }
 
 class _ProductCatalogCard extends StatelessWidget {
-  const _ProductCatalogCard({required this.product, required this.onTap});
+  const _ProductCatalogCard({
+    required this.product,
+    required this.selectionMode,
+    required this.onTap,
+  });
 
   final Map<String, dynamic> product;
+  final bool selectionMode;
   final VoidCallback onTap;
 
   String text(dynamic value, {String fallback = '—'}) {
@@ -413,7 +431,11 @@ class _ProductCatalogCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.chevron_right),
+              Icon(
+                selectionMode
+                    ? Icons.check_circle_outline
+                    : Icons.chevron_right,
+              ),
             ],
           ),
         ),
