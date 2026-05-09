@@ -5,9 +5,9 @@ import 'package:pesalistas/core/app_notification_controller.dart';
 import 'package:pesalistas/core/app_theme_controller.dart';
 import 'package:pesalistas/core/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
-import 'package:pesalistas/dialogs/edit_profile_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
+import 'package:pesalistas/pages/edit_profile_page.dart';
 import 'package:pesalistas/pages/product_scanner_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/profile_repository.dart';
@@ -316,10 +316,11 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> editProfile() async {
     if (editingProfile) return;
 
-    final result = await showDialog<EditProfileDialogResult>(
-      context: context,
-      builder: (_) =>
-          EditProfileDialog(profile: profile, fallbackDisplayName: displayName),
+    final result = await Navigator.of(context).push<EditProfilePageResult>(
+      MaterialPageRoute(
+        builder: (_) =>
+            EditProfilePage(profile: profile, fallbackDisplayName: displayName),
+      ),
     );
 
     if (result == null) return;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/dialogs/edit_list_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/list_fields.dart';
@@ -9,21 +8,19 @@ import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/core/vote_fields.dart';
-import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
-import 'package:pesalistas/dialogs/add_recipe_ingredient_dialog.dart';
+import 'package:pesalistas/pages/edit_recipe_info_page.dart';
+import 'package:pesalistas/pages/edit_recipe_instructions_page.dart';
+import 'package:pesalistas/pages/generate_shopping_page.dart';
+import 'package:pesalistas/pages/meal_plan_form_page.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
-import 'package:pesalistas/dialogs/create_item_dialog.dart';
-import 'package:pesalistas/dialogs/create_recipe_dialog.dart';
-import 'package:pesalistas/dialogs/edit_item_dialog.dart';
-import 'package:pesalistas/dialogs/edit_meal_plan_dialog.dart';
-import 'package:pesalistas/dialogs/edit_recipe_dialog.dart';
-import 'package:pesalistas/dialogs/edit_recipe_ingredient_dialog.dart';
-import 'package:pesalistas/dialogs/edit_recipe_instructions_dialog.dart';
-import 'package:pesalistas/dialogs/generate_shopping_dialog.dart';
-import 'package:pesalistas/dialogs/recipe_details_dialog.dart';
-import 'package:pesalistas/dialogs/shopping_item_dialog.dart';
 import 'package:pesalistas/dialogs/vote_details_dialog.dart';
 import 'package:pesalistas/dialogs/vote_dialog.dart';
+import 'package:pesalistas/pages/create_recipe_page.dart';
+import 'package:pesalistas/pages/edit_list_page.dart';
+import 'package:pesalistas/pages/item_form_page.dart';
+import 'package:pesalistas/pages/recipe_details_page.dart';
+import 'package:pesalistas/pages/recipe_ingredient_form_page.dart';
+import 'package:pesalistas/pages/shopping_item_form_page.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/meal_plan_repository.dart';
@@ -364,23 +361,22 @@ class _ListDetailPageState extends State<ListDetailPage> {
   Future<void> editList() async {
     if (editingList || archivingList || deletingList) return;
 
-    final result = await showDialog<EditListDialogResult>(
-      context: context,
-      builder: (_) => EditListDialog(list: currentList),
+    final result = await Navigator.of(context).push<EditListPageResult>(
+      MaterialPageRoute(builder: (_) => EditListPage(list: currentList)),
     );
 
     if (result == null) return;
 
     switch (result.action) {
-      case EditListDialogAction.archive:
+      case EditListPageAction.archive:
         await archiveList();
         return;
 
-      case EditListDialogAction.delete:
+      case EditListPageAction.delete:
         await deleteList();
         return;
 
-      case EditListDialogAction.save:
+      case EditListPageAction.save:
         break;
     }
 
@@ -422,9 +418,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
   Future<void> generateShoppingFromMealPlans() async {
     if (generatingShopping) return;
 
-    final result = await showDialog<GenerateShoppingDialogResult>(
-      context: context,
-      builder: (_) => const GenerateShoppingDialog(),
+    final result = await Navigator.of(context).push<GenerateShoppingPageResult>(
+      MaterialPageRoute(builder: (_) => const GenerateShoppingPage()),
     );
 
     if (result == null) return;
@@ -504,9 +499,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
       return;
     }
 
-    final result = await showDialog<CreateItemDialogResult>(
-      context: context,
-      builder: (_) => CreateItemDialog(listType: listType),
+    final result = await Navigator.of(context).push<ItemFormPageResult>(
+      MaterialPageRoute(builder: (_) => ItemFormPage(listType: listType)),
     );
 
     if (result == null) return;
@@ -542,9 +536,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
   }
 
   Future<void> createShoppingItemDialog() async {
-    final result = await showDialog<ShoppingItemDialogResult>(
-      context: context,
-      builder: (_) => const ShoppingItemDialog(),
+    final result = await Navigator.of(context).push<ShoppingItemFormPageResult>(
+      MaterialPageRoute(builder: (_) => const ShoppingItemFormPage()),
     );
 
     if (result == null) return;
@@ -600,9 +593,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     setState(() => creatingItem = false);
 
-    final result = await showDialog<AddMealPlanDialogResult>(
-      context: context,
-      builder: (_) => AddMealPlanDialog(recipes: recipes),
+    final result = await Navigator.of(context).push<MealPlanFormPageResult>(
+      MaterialPageRoute(builder: (_) => MealPlanFormPage(recipes: recipes)),
     );
 
     if (result == null) return;
@@ -635,9 +627,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
   }
 
   Future<void> createRecipeDialog() async {
-    final result = await showDialog<CreateRecipeDialogResult>(
-      context: context,
-      builder: (_) => const CreateRecipeDialog(),
+    final result = await Navigator.of(context).push<CreateRecipePageResult>(
+      MaterialPageRoute(builder: (_) => const CreateRecipePage()),
     );
 
     if (result == null) return;
@@ -680,9 +671,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
       return;
     }
 
-    final result = await showDialog<EditItemDialogResult>(
-      context: context,
-      builder: (_) => EditItemDialog(item: item, listType: listType),
+    final result = await Navigator.of(context).push<ItemFormPageResult>(
+      MaterialPageRoute(
+        builder: (_) => ItemFormPage(item: item, listType: listType),
+      ),
     );
 
     if (result == null) return;
@@ -722,9 +714,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
   Future<void> editShoppingItem(Map<String, dynamic> item) async {
     if (editingItem) return;
 
-    final result = await showDialog<ShoppingItemDialogResult>(
-      context: context,
-      builder: (_) => ShoppingItemDialog(item: item),
+    final result = await Navigator.of(context).push<ShoppingItemFormPageResult>(
+      MaterialPageRoute(builder: (_) => ShoppingItemFormPage(item: item)),
     );
 
     if (result == null) return;
@@ -780,9 +771,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     setState(() => editingItem = false);
 
-    final result = await showDialog<EditMealPlanDialogResult>(
-      context: context,
-      builder: (_) => EditMealPlanDialog(mealPlan: mealPlan, recipes: recipes),
+    final result = await Navigator.of(context).push<MealPlanFormPageResult>(
+      MaterialPageRoute(
+        builder: (_) => MealPlanFormPage(mealPlan: mealPlan, recipes: recipes),
+      ),
     );
 
     if (result == null) return;
@@ -1160,26 +1152,30 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
         setState(() => loadingRecipeDetails = false);
 
-        final result = await showDialog<RecipeDetailsDialogResult>(
-          context: context,
-          builder: (_) => RecipeDetailsDialog(
-            recipe: currentRecipe,
-            ingredients: ingredients,
-          ),
-        );
+        final result = await Navigator.of(context)
+            .push<RecipeDetailsPageResult>(
+              MaterialPageRoute(
+                builder: (_) => RecipeDetailsPage(
+                  recipe: currentRecipe,
+                  ingredients: ingredients,
+                ),
+              ),
+            );
 
         if (result == null) {
           keepDetailsOpen = false;
           break;
         }
 
-        if (result.action == RecipeDetailsDialogAction.editRecipeInfo) {
+        if (result.action == RecipeDetailsPageAction.editRecipeInfo) {
           if (!mounted) return;
 
-          final editResult = await showDialog<EditRecipeDialogResult>(
-            context: context,
-            builder: (_) => EditRecipeDialog(recipe: currentRecipe),
-          );
+          final editResult = await Navigator.of(context)
+              .push<EditRecipeInfoPageResult>(
+                MaterialPageRoute(
+                  builder: (_) => EditRecipeInfoPage(recipe: currentRecipe),
+                ),
+              );
 
           if (editResult == null) {
             keepDetailsOpen = true;
@@ -1209,14 +1205,15 @@ class _ListDetailPageState extends State<ListDetailPage> {
           continue;
         }
 
-        if (result.action == RecipeDetailsDialogAction.editRecipeInstructions) {
+        if (result.action == RecipeDetailsPageAction.editRecipeInstructions) {
           if (!mounted) return;
 
-          final instructionsResult =
-              await showDialog<EditRecipeInstructionsDialogResult>(
-                context: context,
-                builder: (_) =>
-                    EditRecipeInstructionsDialog(recipe: currentRecipe),
+          final instructionsResult = await Navigator.of(context)
+              .push<EditRecipeInstructionsPageResult>(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      EditRecipeInstructionsPage(recipe: currentRecipe),
+                ),
               );
 
           if (instructionsResult == null) {
@@ -1239,13 +1236,14 @@ class _ListDetailPageState extends State<ListDetailPage> {
           continue;
         }
 
-        if (result.action == RecipeDetailsDialogAction.addIngredient) {
+        if (result.action == RecipeDetailsPageAction.addIngredient) {
           if (!mounted) return;
 
-          final ingredientResult =
-              await showDialog<AddRecipeIngredientDialogResult>(
-                context: context,
-                builder: (_) => const AddRecipeIngredientDialog(),
+          final ingredientResult = await Navigator.of(context)
+              .push<RecipeIngredientFormPageResult>(
+                MaterialPageRoute(
+                  builder: (_) => const RecipeIngredientFormPage(),
+                ),
               );
 
           if (ingredientResult == null) {
@@ -1271,7 +1269,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
           continue;
         }
 
-        if (result.action == RecipeDetailsDialogAction.editIngredient) {
+        if (result.action == RecipeDetailsPageAction.editIngredient) {
           final ingredientId = result.ingredientId;
           final ingredient = result.ingredient;
 
@@ -1284,11 +1282,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
           if (!mounted) return;
 
-          final editIngredientResult =
-              await showDialog<EditRecipeIngredientDialogResult>(
-                context: context,
-                builder: (_) =>
-                    EditRecipeIngredientDialog(ingredient: ingredient),
+          final editIngredientResult = await Navigator.of(context)
+              .push<RecipeIngredientFormPageResult>(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      RecipeIngredientFormPage(ingredient: ingredient),
+                ),
               );
 
           if (editIngredientResult == null) {
@@ -1314,7 +1313,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
           continue;
         }
 
-        if (result.action == RecipeDetailsDialogAction.deleteIngredient) {
+        if (result.action == RecipeDetailsPageAction.deleteIngredient) {
           final ingredientId = result.ingredientId;
 
           if (ingredientId == null || ingredientId.isEmpty) {

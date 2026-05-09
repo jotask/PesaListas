@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
-import 'package:pesalistas/dialogs/create_group_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
+import 'package:pesalistas/pages/create_group_page.dart';
 import 'package:pesalistas/pages/settings_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/group_repository.dart';
@@ -143,17 +143,20 @@ class _HomePageState extends State<HomePage> {
   Future<void> createGroupDialog() async {
     if (creatingGroup) return;
 
-    final name = await showDialog<String>(
-      context: context,
-      builder: (_) => const CreateGroupDialog(),
+    final result = await Navigator.of(context).push<CreateGroupPageResult>(
+      MaterialPageRoute(builder: (_) => const CreateGroupPage()),
     );
 
-    if (name == null || name.isEmpty) return;
+    if (result == null) return;
 
     setState(() => creatingGroup = true);
 
     try {
-      await groupRepository.createGroup(name: name);
+      await groupRepository.createGroup(
+        name: result.name,
+        description: result.description,
+      );
+
       await loadHomeData();
 
       if (!mounted) return;

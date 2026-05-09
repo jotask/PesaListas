@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
-import 'package:pesalistas/dialogs/add_meal_plan_dialog.dart';
+import 'package:pesalistas/core/meal_types.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 

@@ -3290,6 +3290,24 @@ abstract class AppLocalizations {
   /// **'Proteins'**
   String get proteins;
 
+  /// No description provided for @emailIsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required.'**
+  String get emailIsRequired;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get invalidEmail;
+
+  /// No description provided for @inviteMemberPageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite someone to join this shared group.'**
+  String get inviteMemberPageSubtitle;
+
   /// No description provided for @salt.
   ///
   /// In en, this message translates to:

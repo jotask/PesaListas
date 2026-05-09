@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/group_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
-import 'package:pesalistas/dialogs/create_list_dialog.dart';
-import 'package:pesalistas/dialogs/edit_group_dialog.dart';
-import 'package:pesalistas/dialogs/invite_member_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/pages/create_list_page.dart';
+import 'package:pesalistas/pages/edit_group_page.dart';
+import 'package:pesalistas/pages/invite_member_page.dart';
 import 'package:pesalistas/repositories/group_repository.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
@@ -322,9 +322,8 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   Future<void> editGroup() async {
     if (editingGroup) return;
 
-    final result = await showDialog<EditGroupDialogResult>(
-      context: context,
-      builder: (_) => EditGroupDialog(group: currentGroup),
+    final result = await Navigator.of(context).push<EditGroupPageResult>(
+      MaterialPageRoute(builder: (_) => EditGroupPage(group: currentGroup)),
     );
 
     if (result == null) return;
@@ -363,11 +362,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   Future<void> inviteMember() async {
     if (invitingMember) return;
 
-    final email = await showDialog<String>(
-      context: context,
-      barrierDismissible: true,
-      builder: (_) => const InviteMemberDialog(),
-    );
+    final email = await Navigator.of(
+      context,
+    ).push<String>(MaterialPageRoute(builder: (_) => const InviteMemberPage()));
 
     if (email == null || email.isEmpty) return;
 
@@ -427,9 +424,8 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   Future<void> createList() async {
     if (creatingList) return;
 
-    final result = await showDialog<CreateListDialogResult>(
-      context: context,
-      builder: (_) => const CreateListDialog(),
+    final result = await Navigator.of(context).push<CreateListPageResult>(
+      MaterialPageRoute(builder: (_) => const CreateListPage()),
     );
 
     if (result == null) return;

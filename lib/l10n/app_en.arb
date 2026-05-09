@@ -539,6 +539,9 @@
 "carbohydrates": "Carbohydrates",
 "sugars": "Sugars",
 "proteins": "Proteins",
+"emailIsRequired": "Email is required.",
+"invalidEmail": "Enter a valid email address.",
+"inviteMemberPageSubtitle": "Invite someone to join this shared group.",
 "salt": "Salt",
 "fiber": "Fiber",
 "@nutriscoreLabel": {

@@ -1715,6 +1715,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get proteins => 'Proteínas';
 
   @override
+  String get emailIsRequired => 'El email es obligatorio.';
+
+  @override
+  String get invalidEmail => 'Introduce un email válido.';
+
+  @override
+  String get inviteMemberPageSubtitle =>
+      'Invita a alguien a unirse a este grupo compartido.';
+
+  @override
   String get salt => 'Sal';
 
   @override
