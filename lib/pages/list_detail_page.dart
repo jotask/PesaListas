@@ -20,6 +20,7 @@ import 'package:pesalistas/dialogs/vote_dialog.dart';
 import 'package:pesalistas/pages/create_recipe_page.dart';
 import 'package:pesalistas/pages/edit_list_page.dart';
 import 'package:pesalistas/pages/item_form_page.dart';
+import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/pages/product_scanner_page.dart';
 import 'package:pesalistas/pages/recipe_details_page.dart';
 import 'package:pesalistas/pages/recipe_ingredient_form_page.dart';
@@ -249,6 +250,18 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       setState(() => loadingItems = false);
       showErrorSnackBar(context, context.l10n.failedToLoadItems, error);
+    }
+  }
+
+  Future<void> openProductCatalog() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ProductCatalogPage(groupId: groupId)),
+    );
+
+    if (!mounted) return;
+
+    if (isShoppingList) {
+      await loadItems();
     }
   }
 
@@ -1532,6 +1545,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
                     if (isShoppingList) ...[
                       _ProductScannerShortcutCard(onTap: openProductScanner),
                       const SizedBox(height: 12),
+                      _ProductCatalogShortcutCard(onTap: openProductCatalog),
+                      const SizedBox(height: 12),
                     ],
                     ListItemsSection(
                       listType: listType,
@@ -1588,6 +1603,38 @@ class _ProductScannerShortcutCard extends StatelessWidget {
         ),
         subtitle: const Text(
           'Scan a product, fetch product data and save group prices.',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+class _ProductCatalogShortcutCard extends StatelessWidget {
+  const _ProductCatalogShortcutCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: theme.colorScheme.primaryContainer,
+          child: Icon(
+            Icons.inventory_2_outlined,
+            color: theme.colorScheme.onPrimaryContainer,
+          ),
+        ),
+        title: const Text(
+          'Product database',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        subtitle: const Text(
+          'Pick a cached product and add it to this shopping list.',
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,

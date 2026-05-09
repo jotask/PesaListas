@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/product_fields.dart';
+import 'package:pesalistas/pages/product_detail_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductCatalogPage extends StatefulWidget {
-  const ProductCatalogPage({super.key});
+  const ProductCatalogPage({super.key, this.groupId});
+
+  final String? groupId;
 
   @override
   State<ProductCatalogPage> createState() => _ProductCatalogPageState();
@@ -84,6 +87,19 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
     }
   }
 
+  Future<void> openProductDetail(Map<String, dynamic> product) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            ProductDetailPage(product: product, groupId: widget.groupId),
+      ),
+    );
+
+    if (!mounted) return;
+
+    await loadProducts();
+  }
+
   void updateSearch(String value) {
     setState(() => searchQuery = value);
   }
@@ -156,7 +172,10 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
                 )
               else
                 for (final product in visibleProducts)
-                  _ProductCatalogCard(product: product),
+                  _ProductCatalogCard(
+                    product: product,
+                    onTap: () => openProductDetail(product),
+                  ),
               const SizedBox(height: 32),
             ],
           ),
@@ -311,9 +330,10 @@ class _EmptyProductCatalogCard extends StatelessWidget {
 }
 
 class _ProductCatalogCard extends StatelessWidget {
-  const _ProductCatalogCard({required this.product});
+  const _ProductCatalogCard({required this.product, required this.onTap});
 
   final Map<String, dynamic> product;
+  final VoidCallback onTap;
 
   String text(dynamic value, {String fallback = '—'}) {
     final result = value?.toString().trim();
@@ -341,52 +361,61 @@ class _ProductCatalogCard extends StatelessWidget {
     final imageUrl = text(product[AppProductFields.imageUrl], fallback: '');
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _ProductCatalogImage(imageUrl: imageUrl),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _ProductCatalogImage(imageUrl: imageUrl),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(brand, style: theme.textTheme.bodyMedium),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      _ProductCatalogPill(
-                        icon: Icons.qr_code_2_outlined,
-                        label: barcode,
-                      ),
-                      _ProductCatalogPill(
-                        icon: Icons.info_outline,
-                        label: status,
-                      ),
-                      if (quantity != '—')
+                    const SizedBox(height: 4),
+                    Text(brand, style: theme.textTheme.bodyMedium),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
                         _ProductCatalogPill(
-                          icon: Icons.scale_outlined,
-                          label: quantity,
+                          icon: Icons.qr_code_2_outlined,
+                          label: barcode,
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text('Fetched: $fetchedAt', style: theme.textTheme.bodySmall),
-                ],
+                        _ProductCatalogPill(
+                          icon: Icons.info_outline,
+                          label: status,
+                        ),
+                        if (quantity != '—')
+                          _ProductCatalogPill(
+                            icon: Icons.scale_outlined,
+                            label: quantity,
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Fetched: $fetchedAt',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
         ),
       ),
     );

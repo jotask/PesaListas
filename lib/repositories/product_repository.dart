@@ -85,6 +85,20 @@ class ProductRepository {
     return List<Map<String, dynamic>>.from(response);
   }
 
+  Future<List<Map<String, dynamic>>> getPricesForProduct({
+    required String barcode,
+    int limit = 50,
+  }) async {
+    final response = await client
+        .from(productPricesTable)
+        .select()
+        .eq(AppProductPriceFields.barcode, barcode)
+        .order(AppProductPriceFields.observedAt, ascending: false)
+        .limit(limit);
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
   bool isFresh(Map<String, dynamic> product, Duration maxCacheAge) {
     final fetchedAtValue = product[AppProductFields.fetchedAt]?.toString();
 
