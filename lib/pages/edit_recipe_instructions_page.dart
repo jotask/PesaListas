@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/form_page_layout.dart';
 
 class EditRecipeInstructionsPageResult {
   const EditRecipeInstructionsPageResult({this.instructions});
@@ -49,80 +50,29 @@ class _EditRecipeInstructionsPageState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.editInstructions)),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(context.l10n.cancel),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: submit,
-                  child: Text(context.l10n.save),
-                ),
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: AppFormBottomActions(
+        cancelLabel: context.l10n.cancel,
+        primaryLabel: context.l10n.save,
+        primaryIcon: Icons.save_outlined,
+        onCancel: () => Navigator.of(context).pop(),
+        onPrimary: submit,
       ),
       body: SafeArea(
         top: false,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      child: Icon(
-                        Icons.menu_book_outlined,
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.cookingInstructions,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            context.l10n.addThePreparationStepsForThisRecipe,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            AppFormPageHeaderCard(
+              icon: Icons.menu_book_outlined,
+              title: context.l10n.cookingInstructions,
+              subtitle: context.l10n.addThePreparationStepsForThisRecipe,
             ),
             const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: TextField(
+            AppFormSectionCard(
+              children: [
+                TextField(
                   controller: instructionsController,
                   autofocus: true,
                   decoration: InputDecoration(
@@ -137,7 +87,7 @@ class _EditRecipeInstructionsPageState
                   textInputAction: TextInputAction.newline,
                   keyboardType: TextInputType.multiline,
                 ),
-              ),
+              ],
             ),
             const SizedBox(height: 96),
           ],

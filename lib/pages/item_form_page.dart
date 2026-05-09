@@ -6,6 +6,7 @@ import 'package:pesalistas/core/priority_types.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/form_page_layout.dart';
 
 class ItemFormPageResult {
   const ItemFormPageResult({
@@ -203,7 +204,6 @@ class _ItemFormPageState extends State<ItemFormPage> {
   @override
   Widget build(BuildContext context) {
     final config = listTypeConfig;
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -215,137 +215,84 @@ class _ItemFormPageState extends State<ItemFormPage> {
                 ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(context.l10n.cancel),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: submit,
-                  child: Text(isEditing ? context.l10n.save : context.l10n.add),
-                ),
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: AppFormBottomActions(
+        cancelLabel: context.l10n.cancel,
+        primaryLabel: isEditing ? context.l10n.save : context.l10n.add,
+        primaryIcon: isEditing ? Icons.save_outlined : Icons.add,
+        onCancel: () => Navigator.of(context).pop(),
+        onPrimary: submit,
       ),
       body: SafeArea(
         top: false,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      child: Icon(
-                        config.icon,
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            config.label(context),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            config.description(context),
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            AppFormPageHeaderCard(
+              icon: config.icon,
+              title: config.label(context),
+              subtitle: config.description(context),
             ),
             const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: titleController,
-                      autofocus: !isEditing,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.title,
-                        hintText: context.l10n.buyMilkWatchMovieCleanKitchen,
-                        prefixIcon: const Icon(Icons.title_outlined),
-                      ),
-                      textInputAction: TextInputAction.next,
-                      onChanged: (_) => clearValidation(),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: descriptionController,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.description,
-                        prefixIcon: const Icon(Icons.notes_outlined),
-                      ),
-                      minLines: 3,
-                      maxLines: 6,
-                      textInputAction: TextInputAction.newline,
-                    ),
-                    if (isTaskList) ...[
-                      const SizedBox(height: 16),
-                      _TaskFieldsSection(
-                        priority: priority,
-                        deadlineAt: deadlineAt,
-                        onPriorityChanged: (value) {
-                          setState(() => priority = value);
-                        },
-                        onPickDeadline: pickDeadline,
-                        onRemoveDeadline: () {
-                          setState(() => deadlineAt = null);
-                        },
-                      ),
-                    ],
-                    if (isChoreList) ...[
-                      const SizedBox(height: 16),
-                      _ChoreFieldsSection(
-                        recurrenceType: recurrenceType,
-                        recurrenceIntervalController:
-                            recurrenceIntervalController,
-                        usesCustomInterval: usesCustomInterval,
-                        hasRecurrence: hasRecurrence,
-                        nextDueAt: nextDueAt,
-                        onRecurrenceTypeChanged: updateRecurrenceType,
-                        onRecurrenceIntervalChanged: updateRecurrenceInterval,
-                        onPickNextDueDate: pickNextDueDate,
-                        onRemoveNextDueDate: () {
-                          setState(() => nextDueAt = null);
-                        },
-                      ),
-                    ],
-                    if (validationMessage != null) ...[
-                      const SizedBox(height: 16),
-                      _ValidationMessage(message: validationMessage!),
-                    ],
-                  ],
+            AppFormSectionCard(
+              children: [
+                TextField(
+                  controller: titleController,
+                  autofocus: !isEditing,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.title,
+                    hintText: context.l10n.buyMilkWatchMovieCleanKitchen,
+                    prefixIcon: const Icon(Icons.title_outlined),
+                  ),
+                  textInputAction: TextInputAction.next,
+                  onChanged: (_) => clearValidation(),
                 ),
-              ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descriptionController,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.description,
+                    hintText: context.l10n.optional,
+                    prefixIcon: const Icon(Icons.notes_outlined),
+                  ),
+                  minLines: 3,
+                  maxLines: 6,
+                  textInputAction: TextInputAction.newline,
+                ),
+                if (isTaskList) ...[
+                  const SizedBox(height: 16),
+                  _TaskFieldsSection(
+                    priority: priority,
+                    deadlineAt: deadlineAt,
+                    onPriorityChanged: (value) {
+                      setState(() => priority = value);
+                    },
+                    onPickDeadline: pickDeadline,
+                    onRemoveDeadline: () {
+                      setState(() => deadlineAt = null);
+                    },
+                  ),
+                ],
+                if (isChoreList) ...[
+                  const SizedBox(height: 16),
+                  _ChoreFieldsSection(
+                    recurrenceType: recurrenceType,
+                    recurrenceIntervalController: recurrenceIntervalController,
+                    usesCustomInterval: usesCustomInterval,
+                    hasRecurrence: hasRecurrence,
+                    nextDueAt: nextDueAt,
+                    onRecurrenceTypeChanged: updateRecurrenceType,
+                    onRecurrenceIntervalChanged: updateRecurrenceInterval,
+                    onPickNextDueDate: pickNextDueDate,
+                    onRemoveNextDueDate: () {
+                      setState(() => nextDueAt = null);
+                    },
+                  ),
+                ],
+                if (validationMessage != null) ...[
+                  const SizedBox(height: 16),
+                  AppFormValidationMessage(message: validationMessage!),
+                ],
+              ],
             ),
             const SizedBox(height: 96),
           ],
@@ -516,41 +463,6 @@ class _ChoreFieldsSection extends StatelessWidget {
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
-    );
-  }
-}
-
-class _ValidationMessage extends StatelessWidget {
-  const _ValidationMessage({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: theme.colorScheme.onErrorContainer,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

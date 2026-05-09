@@ -104,7 +104,6 @@ class RecipeDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final recipeName = name(context);
 
     return Scaffold(
@@ -115,11 +114,6 @@ class RecipeDetailsPage extends StatelessWidget {
             onPressed: () => editInfo(context),
             icon: const Icon(Icons.tune_outlined),
             tooltip: context.l10n.info,
-          ),
-          IconButton(
-            onPressed: () => addIngredient(context),
-            icon: const Icon(Icons.add),
-            tooltip: context.l10n.ingredient,
           ),
         ],
       ),
@@ -133,69 +127,16 @@ class RecipeDetailsPage extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      child: Icon(
-                        Icons.restaurant_menu,
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            recipeName,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          if (description != null) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              description!,
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            _RecipeHeaderCard(
+              recipeName: recipeName,
+              description: description,
+              onEdit: () => editInfo(context),
             ),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _RecipeInfoChip(
-                  icon: Icons.timer_outlined,
-                  label: prepTime == null
-                      ? context.l10n.prepNotSet
-                      : context.l10n.prepMinutes(prepTime!),
-                ),
-                _RecipeInfoChip(
-                  icon: Icons.local_fire_department_outlined,
-                  label: cookTime == null
-                      ? context.l10n.cookNotSet
-                      : context.l10n.cookMinutes(cookTime!),
-                ),
-                _RecipeInfoChip(
-                  icon: Icons.people_outline,
-                  label: servings == null
-                      ? context.l10n.servingsNotSet
-                      : context.l10n.servingsCount(servings!),
-                ),
-              ],
+            _RecipeStatsWrap(
+              prepTime: prepTime,
+              cookTime: cookTime,
+              servings: servings,
             ),
             const SizedBox(height: 16),
             _InstructionsCard(
@@ -203,11 +144,115 @@ class RecipeDetailsPage extends StatelessWidget {
               onEdit: () => editInstructions(context),
             ),
             const SizedBox(height: 16),
-            _IngredientsSection(ingredients: ingredients),
+            _IngredientsSection(
+              ingredients: ingredients,
+              onAdd: () => addIngredient(context),
+            ),
             const SizedBox(height: 96),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _RecipeHeaderCard extends StatelessWidget {
+  const _RecipeHeaderCard({
+    required this.recipeName,
+    required this.description,
+    required this.onEdit,
+  });
+
+  final String recipeName;
+  final String? description;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: Icon(
+                Icons.restaurant_menu,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    recipeName,
+                    style: const TextStyle(
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  if (description != null) ...[
+                    const SizedBox(height: 6),
+                    Text(description!, style: theme.textTheme.bodyMedium),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: onEdit,
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: context.l10n.info,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecipeStatsWrap extends StatelessWidget {
+  const _RecipeStatsWrap({
+    required this.prepTime,
+    required this.cookTime,
+    required this.servings,
+  });
+
+  final int? prepTime;
+  final int? cookTime;
+  final int? servings;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _RecipeInfoChip(
+          icon: Icons.timer_outlined,
+          label: prepTime == null
+              ? context.l10n.prepNotSet
+              : context.l10n.prepMinutes(prepTime!),
+        ),
+        _RecipeInfoChip(
+          icon: Icons.local_fire_department_outlined,
+          label: cookTime == null
+              ? context.l10n.cookNotSet
+              : context.l10n.cookMinutes(cookTime!),
+        ),
+        _RecipeInfoChip(
+          icon: Icons.people_outline,
+          label: servings == null
+              ? context.l10n.servingsNotSet
+              : context.l10n.servingsCount(servings!),
+        ),
+      ],
     );
   }
 }
@@ -222,54 +267,74 @@ class _InstructionsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: theme.colorScheme.secondaryContainer,
-                  child: Icon(
-                    Icons.menu_book_outlined,
-                    color: theme.colorScheme.onSecondaryContainer,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    context.l10n.instructions,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit_note_outlined),
-                  tooltip: context.l10n.editInstructions,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            SelectableText(
-              instructions ?? context.l10n.noInstructionsYet,
-              style: theme.textTheme.bodyMedium,
-            ),
-          ],
-        ),
+    return _RecipeSectionCard(
+      icon: Icons.menu_book_outlined,
+      title: context.l10n.instructions,
+      trailing: IconButton(
+        onPressed: onEdit,
+        icon: const Icon(Icons.edit_note_outlined),
+        tooltip: context.l10n.editInstructions,
+      ),
+      child: SelectableText(
+        instructions ?? context.l10n.noInstructionsYet,
+        style: theme.textTheme.bodyMedium,
       ),
     );
   }
 }
 
 class _IngredientsSection extends StatelessWidget {
-  const _IngredientsSection({required this.ingredients});
+  const _IngredientsSection({required this.ingredients, required this.onAdd});
 
   final List<Map<String, dynamic>> ingredients;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final countLabel = ingredients.length == 1
+        ? context.l10n.ingredientCountOne
+        : context.l10n.ingredientCountMany(ingredients.length);
+
+    return _RecipeSectionCard(
+      icon: Icons.kitchen_outlined,
+      title: context.l10n.ingredients,
+      subtitle: countLabel,
+      trailing: IconButton(
+        onPressed: onAdd,
+        icon: const Icon(Icons.add),
+        tooltip: context.l10n.addIngredient,
+      ),
+      child: ingredients.isEmpty
+          ? Text(
+              context.l10n.noIngredientsYet,
+              style: theme.textTheme.bodyMedium,
+            )
+          : Column(
+              children: [
+                for (final ingredient in ingredients)
+                  _IngredientCard(ingredient: ingredient),
+              ],
+            ),
+    );
+  }
+}
+
+class _RecipeSectionCard extends StatelessWidget {
+  const _RecipeSectionCard({
+    required this.icon,
+    required this.title,
+    required this.child,
+    this.subtitle,
+    this.trailing,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -279,44 +344,38 @@ class _IngredientsSection extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: theme.colorScheme.tertiaryContainer,
-                  child: Icon(
-                    Icons.kitchen_outlined,
-                    color: theme.colorScheme.onTertiaryContainer,
-                  ),
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  child: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    context.l10n.ingredients,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(subtitle!, style: theme.textTheme.bodySmall),
+                      ],
+                    ],
                   ),
                 ),
-                Text(
-                  ingredients.length == 1
-                      ? context.l10n.ingredientCountOne
-                      : context.l10n.ingredientCountMany(ingredients.length),
-                  style: theme.textTheme.bodySmall,
-                ),
+                if (trailing != null) trailing!,
               ],
             ),
-            const SizedBox(height: 12),
-            if (ingredients.isEmpty)
-              Text(
-                context.l10n.noIngredientsYet,
-                style: theme.textTheme.bodyMedium,
-              )
-            else
-              for (final ingredient in ingredients)
-                _IngredientCard(ingredient: ingredient),
+            const SizedBox(height: 14),
+            child,
           ],
         ),
       ),
@@ -422,6 +481,10 @@ class _IngredientCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final subtitle = note == null
+        ? amountText(context)
+        : '${amountText(context)} • $note';
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -438,28 +501,49 @@ class _IngredientCard extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: Text(
-          note == null ? amountText(context) : '${amountText(context)} • $note',
-        ),
-        trailing: Wrap(
-          spacing: 0,
-          children: [
-            IconButton(
-              onPressed: () => editIngredient(context),
-              icon: const Icon(Icons.edit_outlined),
-              tooltip: context.l10n.editIngredient,
-            ),
-            IconButton(
-              onPressed: () => deleteIngredient(context),
-              icon: const Icon(Icons.delete_outline),
-              tooltip: context.l10n.deleteIngredient,
-            ),
-          ],
+        subtitle: Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
+        trailing: PopupMenuButton<_IngredientAction>(
+          onSelected: (action) {
+            switch (action) {
+              case _IngredientAction.edit:
+                editIngredient(context);
+                break;
+              case _IngredientAction.delete:
+                deleteIngredient(context);
+                break;
+            }
+          },
+          itemBuilder: (context) {
+            return [
+              PopupMenuItem(
+                value: _IngredientAction.edit,
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit_outlined),
+                    const SizedBox(width: 8),
+                    Text(context.l10n.editIngredient),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: _IngredientAction.delete,
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_outline),
+                    const SizedBox(width: 8),
+                    Text(context.l10n.deleteIngredient),
+                  ],
+                ),
+              ),
+            ];
+          },
         ),
       ),
     );
   }
 }
+
+enum _IngredientAction { edit, delete }
 
 class _RecipeInfoChip extends StatelessWidget {
   const _RecipeInfoChip({required this.icon, required this.label});

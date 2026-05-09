@@ -3,6 +3,7 @@ import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/meal_types.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/form_page_layout.dart';
 
 class MealPlanFormPageResult {
   const MealPlanFormPageResult({
@@ -168,7 +169,6 @@ class _MealPlanFormPageState extends State<MealPlanFormPage> {
   @override
   Widget build(BuildContext context) {
     final recipes = filteredRecipes;
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -176,118 +176,63 @@ class _MealPlanFormPageState extends State<MealPlanFormPage> {
           isEditing ? context.l10n.editMealPlan : context.l10n.addMealPlan,
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(context.l10n.cancel),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: submit,
-                  child: Text(isEditing ? context.l10n.save : context.l10n.add),
-                ),
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: AppFormBottomActions(
+        cancelLabel: context.l10n.cancel,
+        primaryLabel: isEditing ? context.l10n.save : context.l10n.add,
+        primaryIcon: isEditing ? Icons.save_outlined : Icons.add,
+        onCancel: () => Navigator.of(context).pop(),
+        onPrimary: submit,
       ),
       body: SafeArea(
         top: false,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      child: Icon(
-                        Icons.calendar_month_outlined,
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.mealPlan,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            isEditing
-                                ? context.l10n.updateDateMealTypeRecipeOrNote
-                                : context
-                                      .l10n
-                                      .planAMealForADateAndOptionallyChooseARecipe,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            AppFormPageHeaderCard(
+              icon: Icons.calendar_month_outlined,
+              title: context.l10n.mealPlan,
+              subtitle: isEditing
+                  ? context.l10n.updateDateMealTypeRecipeOrNote
+                  : context.l10n.planAMealForADateAndOptionallyChooseARecipe,
             ),
             const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.event_outlined),
-                      title: Text(formatDate(context, plannedFor)),
-                      subtitle: Text(context.l10n.mealPlan),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: pickDate,
-                    ),
-                    const Divider(height: 1),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      initialValue: mealType,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.mealType,
-                        prefixIcon: const Icon(Icons.restaurant_menu_outlined),
-                      ),
-                      items: AppMealTypes.all.map((config) {
-                        return DropdownMenuItem(
-                          value: config.value,
-                          child: Row(
-                            children: [
-                              Icon(config.icon, size: 18),
-                              const SizedBox(width: 8),
-                              Text(config.label(context)),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value == null) return;
-
-                        setState(() => mealType = value);
-                      },
-                    ),
-                  ],
+            AppFormSectionCard(
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.event_outlined),
+                  title: Text(formatDate(context, plannedFor)),
+                  subtitle: Text(context.l10n.mealPlan),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: pickDate,
                 ),
-              ),
+                const Divider(height: 1),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: mealType,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.mealType,
+                    prefixIcon: const Icon(Icons.restaurant_menu_outlined),
+                  ),
+                  items: AppMealTypes.all.map((config) {
+                    return DropdownMenuItem(
+                      value: config.value,
+                      child: Row(
+                        children: [
+                          Icon(config.icon, size: 18),
+                          const SizedBox(width: 8),
+                          Text(config.label(context)),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value == null) return;
+
+                    setState(() => mealType = value);
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             _RecipePickerCard(
@@ -305,10 +250,9 @@ class _MealPlanFormPageState extends State<MealPlanFormPage> {
               },
             ),
             const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: TextField(
+            AppFormSectionCard(
+              children: [
+                TextField(
                   controller: noteController,
                   decoration: InputDecoration(
                     labelText: context.l10n.note,
@@ -321,7 +265,7 @@ class _MealPlanFormPageState extends State<MealPlanFormPage> {
                   maxLines: 6,
                   textInputAction: TextInputAction.newline,
                 ),
-              ),
+              ],
             ),
             const SizedBox(height: 96),
           ],
@@ -360,10 +304,9 @@ class _RecipePickerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: RadioGroup<String>(
+    return AppFormSectionCard(
+      children: [
+        RadioGroup<String>(
           groupValue: selectedRecipeId ?? noRecipeValue,
           onChanged: (value) {
             if (value == null) return;
@@ -430,7 +373,7 @@ class _RecipePickerCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

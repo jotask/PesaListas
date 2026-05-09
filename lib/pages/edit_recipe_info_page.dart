@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/form_page_layout.dart';
 
 class EditRecipeInfoPageResult {
   const EditRecipeInfoPageResult({
@@ -158,197 +159,107 @@ class _EditRecipeInfoPageState extends State<EditRecipeInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.editRecipeInfo)),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(context.l10n.cancel),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: submit,
-                  child: Text(context.l10n.save),
-                ),
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: AppFormBottomActions(
+        cancelLabel: context.l10n.cancel,
+        primaryLabel: context.l10n.save,
+        primaryIcon: Icons.save_outlined,
+        onCancel: () => Navigator.of(context).pop(),
+        onPrimary: submit,
       ),
       body: SafeArea(
         top: false,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      child: Icon(
-                        Icons.restaurant_menu,
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.recipeInfo,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            context.l10n.updateNameDescriptionTimeAndServings,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            AppFormPageHeaderCard(
+              icon: Icons.restaurant_menu,
+              title: context.l10n.recipeInfo,
+              subtitle: context.l10n.updateNameDescriptionTimeAndServings,
             ),
             const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
+            AppFormSectionCard(
+              children: [
+                TextField(
+                  controller: nameController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.recipeName,
+                    prefixIcon: const Icon(Icons.restaurant_menu),
+                  ),
+                  textInputAction: TextInputAction.next,
+                  onChanged: (_) => clearValidation(),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descriptionController,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.description,
+                    hintText: context.l10n.optional,
+                    prefixIcon: const Icon(Icons.notes_outlined),
+                  ),
+                  minLines: 3,
+                  maxLines: 6,
+                  textInputAction: TextInputAction.newline,
+                  onChanged: (_) => clearValidation(),
+                ),
+                const SizedBox(height: 16),
+                Row(
                   children: [
-                    TextField(
-                      controller: nameController,
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.recipeName,
-                        prefixIcon: const Icon(Icons.restaurant_menu),
+                    Expanded(
+                      child: TextField(
+                        controller: prepTimeController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.prep,
+                          suffixText: 'min',
+                          prefixIcon: const Icon(Icons.timer_outlined),
+                        ),
+                        textInputAction: TextInputAction.next,
+                        onChanged: (_) => clearValidation(),
                       ),
-                      textInputAction: TextInputAction.next,
-                      onChanged: (_) => clearValidation(),
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: descriptionController,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.description,
-                        hintText: context.l10n.optional,
-                        prefixIcon: const Icon(Icons.notes_outlined),
-                      ),
-                      minLines: 3,
-                      maxLines: 6,
-                      textInputAction: TextInputAction.newline,
-                      onChanged: (_) => clearValidation(),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: prepTimeController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: context.l10n.prep,
-                              suffixText: 'min',
-                              prefixIcon: const Icon(Icons.timer_outlined),
-                            ),
-                            textInputAction: TextInputAction.next,
-                            onChanged: (_) => clearValidation(),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: cookTimeController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.cook,
+                          suffixText: 'min',
+                          prefixIcon: const Icon(
+                            Icons.local_fire_department_outlined,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextField(
-                            controller: cookTimeController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: context.l10n.cook,
-                              suffixText: 'min',
-                              prefixIcon: const Icon(
-                                Icons.local_fire_department_outlined,
-                              ),
-                            ),
-                            textInputAction: TextInputAction.next,
-                            onChanged: (_) => clearValidation(),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: servingsController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.servings,
-                        hintText: context.l10n.optional,
-                        prefixIcon: const Icon(Icons.people_outline),
+                        textInputAction: TextInputAction.next,
+                        onChanged: (_) => clearValidation(),
                       ),
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => submit(),
-                      onChanged: (_) => clearValidation(),
                     ),
-                    if (validationMessage != null) ...[
-                      const SizedBox(height: 16),
-                      _ValidationMessage(message: validationMessage!),
-                    ],
                   ],
                 ),
-              ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: servingsController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.servings,
+                    hintText: context.l10n.optional,
+                    prefixIcon: const Icon(Icons.people_outline),
+                  ),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => submit(),
+                  onChanged: (_) => clearValidation(),
+                ),
+                if (validationMessage != null) ...[
+                  const SizedBox(height: 16),
+                  AppFormValidationMessage(message: validationMessage!),
+                ],
+              ],
             ),
             const SizedBox(height: 96),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ValidationMessage extends StatelessWidget {
-  const _ValidationMessage({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: theme.colorScheme.onErrorContainer,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
