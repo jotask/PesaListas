@@ -8,6 +8,7 @@ import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/edit_profile_page.dart';
+import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/pages/product_scanner_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/profile_repository.dart';
@@ -207,6 +208,12 @@ class _SettingsPageState extends State<SettingsPage> {
     if (!mounted) return;
 
     setState(() {});
+  }
+
+  Future<void> openProductCatalog() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ProductCatalogPage()));
   }
 
   Future<void> chooseTheme() async {
@@ -493,7 +500,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    _ToolsSection(onOpenProductScanner: openProductScanner),
+                    _ToolsSection(
+                      onOpenProductScanner: openProductScanner,
+                      onOpenProductCatalog: openProductCatalog,
+                    ),
                     const SizedBox(height: 16),
                     const _NotificationsSection(),
                     const SizedBox(height: 16),
@@ -750,9 +760,13 @@ class _NotificationsSection extends StatelessWidget {
 }
 
 class _ToolsSection extends StatelessWidget {
-  const _ToolsSection({required this.onOpenProductScanner});
+  const _ToolsSection({
+    required this.onOpenProductScanner,
+    required this.onOpenProductCatalog,
+  });
 
   final VoidCallback onOpenProductScanner;
+  final VoidCallback onOpenProductCatalog;
 
   @override
   Widget build(BuildContext context) {
@@ -765,6 +779,14 @@ class _ToolsSection extends StatelessWidget {
           subtitle: Text(context.l10n.productScannerToolSubtitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: onOpenProductScanner,
+        ),
+        const Divider(height: 1),
+        ListTile(
+          leading: const Icon(Icons.inventory_2_outlined),
+          title: const Text('Product database'),
+          subtitle: const Text('View cached products stored in Supabase'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: onOpenProductCatalog,
         ),
       ],
     );

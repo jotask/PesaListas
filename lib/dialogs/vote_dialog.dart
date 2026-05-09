@@ -71,7 +71,9 @@ class _VoteDialogState extends State<VoteDialog> {
     final roundedPoints = points.round();
 
     return AlertDialog(
-      title: Text(widget.canRemove ? context.l10n.changeVote : context.l10n.vote),
+      title: Text(
+        widget.canRemove ? context.l10n.changeVote : context.l10n.vote,
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -105,7 +107,10 @@ class _VoteDialogState extends State<VoteDialog> {
       ),
       actions: [
         if (widget.canRemove)
-          TextButton(onPressed: removeVote, child: Text(context.l10n.removeVote)),
+          TextButton(
+            onPressed: removeVote,
+            child: Text(context.l10n.removeVote),
+          ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(context.l10n.cancel),

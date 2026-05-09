@@ -203,7 +203,9 @@ class ChoreItemCard extends StatelessWidget {
                 children: [
                   _ChoreInfoChip(
                     icon: Icons.repeat,
-                    label: hasRecurrence ? recurrenceText(context) : context.l10n.doesNotRepeat,
+                    label: hasRecurrence
+                        ? recurrenceText(context)
+                        : context.l10n.doesNotRepeat,
                     filled: hasRecurrence,
                   ),
                   _ChoreInfoChip(

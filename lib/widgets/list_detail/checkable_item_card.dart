@@ -136,7 +136,9 @@ class CheckableItemCard extends StatelessWidget {
                           isDone ? Icons.undo : Icons.check_circle_outline,
                         ),
                         label: Text(
-                          isDone ? context.l10n.markAsNotBought : context.l10n.markAsBought,
+                          isDone
+                              ? context.l10n.markAsNotBought
+                              : context.l10n.markAsBought,
                         ),
                       ),
                     ),

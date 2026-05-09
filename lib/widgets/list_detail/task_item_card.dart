@@ -209,7 +209,9 @@ class TaskItemCard extends StatelessWidget {
                   children: [
                     _TaskInfoChip(
                       icon: priorityStyle.icon,
-                      label: hasPriority ? priorityText(context) : context.l10n.noPriority,
+                      label: hasPriority
+                          ? priorityText(context)
+                          : context.l10n.noPriority,
                       filled: hasPriority,
                       backgroundColor: hasPriority
                           ? priorityStyle.chipBackground
@@ -221,8 +223,8 @@ class TaskItemCard extends StatelessWidget {
                     _TaskInfoChip(
                       icon: deadlineStyle.dateIcon,
                       label: hasDeadline
-                        ? context.l10n.deadlineDate(deadlineText(context))
-                        : deadlineText(context),
+                          ? context.l10n.deadlineDate(deadlineText(context))
+                          : deadlineText(context),
                       filled: hasDeadline,
                       backgroundColor: hasDeadline
                           ? deadlineStyle.chipBackground

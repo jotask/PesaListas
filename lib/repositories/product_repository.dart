@@ -73,6 +73,18 @@ class ProductRepository {
     return fetchAndCacheProduct(cleanBarcode);
   }
 
+  Future<List<Map<String, dynamic>>> getRecentProducts({
+    int limit = 500,
+  }) async {
+    final response = await client
+        .from(productsTable)
+        .select()
+        .order(AppProductFields.fetchedAt, ascending: false)
+        .limit(limit);
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
   bool isFresh(Map<String, dynamic> product, Duration maxCacheAge) {
     final fetchedAtValue = product[AppProductFields.fetchedAt]?.toString();
 

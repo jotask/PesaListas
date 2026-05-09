@@ -157,7 +157,11 @@ class VotableItemCard extends StatelessWidget {
                           icon: Icon(
                             ownVote == null ? Icons.star_border : Icons.star,
                           ),
-                          label: Text(ownVote == null ? context.l10n.vote : context.l10n.changeVote),
+                          label: Text(
+                            ownVote == null
+                                ? context.l10n.vote
+                                : context.l10n.changeVote,
+                          ),
                         ),
                         OutlinedButton.icon(
                           onPressed: hasVotes ? onViewVotes : null,

@@ -11,7 +11,8 @@ class ListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = list[AppListFields.name]?.toString() ?? context.l10n.untitledList;
+    final name =
+        list[AppListFields.name]?.toString() ?? context.l10n.untitledList;
     final listType = list[AppListFields.listType]?.toString();
 
     final config = AppListTypes.fromValue(listType);

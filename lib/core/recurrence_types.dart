@@ -80,13 +80,7 @@ class AppRecurrenceTypes {
     descriptionKey: 'repeatsAfterACustomNumberOfDays',
   );
 
-  static const all = [
-    none,
-    daily,
-    weekly,
-    monthly,
-    everyNDays,
-  ];
+  static const all = [none, daily, weekly, monthly, everyNDays];
 
   static AppRecurrenceConfig fromValue(String? value) {
     for (final config in all) {

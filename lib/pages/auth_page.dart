@@ -116,7 +116,10 @@ class _AuthPageState extends State<AuthPage> {
 
         if (!mounted) return;
 
-        showSuccessSnackBar(context, context.l10n.checkYourEmailToConfirmYourAccount);
+        showSuccessSnackBar(
+          context,
+          context.l10n.checkYourEmailToConfirmYourAccount,
+        );
       }
     } on AuthException catch (error) {
       if (!mounted) return;
@@ -135,10 +138,14 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    final title = isLogin ? context.l10n.welcomeBack : context.l10n.createAccount;
+    final title = isLogin
+        ? context.l10n.welcomeBack
+        : context.l10n.createAccount;
     final subtitle = isLogin
         ? context.l10n.logInToManageYourSharedListsPlansAndChores
-        : context.l10n.createASpaceForYourSharedLifeGroupsListsChoresIdeasMealsAndM;
+        : context
+              .l10n
+              .createASpaceForYourSharedLifeGroupsListsChoresIdeasMealsAndM;
 
     return Scaffold(
       body: Container(
@@ -255,7 +262,11 @@ class _AuthPageState extends State<AuthPage> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : Text(isLogin ? context.l10n.logIn : context.l10n.createAccount),
+                              : Text(
+                                  isLogin
+                                      ? context.l10n.logIn
+                                      : context.l10n.createAccount,
+                                ),
                         ),
                       ),
                       SizedBox(height: 14),

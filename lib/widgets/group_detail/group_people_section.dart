@@ -249,7 +249,10 @@ class _MemberPersonCard extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _ProfileAvatar(avatarUrl: avatarUrl, fallbackText: initials(context)),
+                _ProfileAvatar(
+                  avatarUrl: avatarUrl,
+                  fallbackText: initials(context),
+                ),
                 SizedBox(height: 10),
                 Text(
                   displayName(context),
