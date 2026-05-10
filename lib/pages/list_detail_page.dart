@@ -1390,7 +1390,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
           final ingredientResult = await Navigator.of(context)
               .push<RecipeIngredientFormPageResult>(
                 MaterialPageRoute(
-                  builder: (_) => const RecipeIngredientFormPage(),
+                  builder: (_) => RecipeIngredientFormPage(groupId: groupId),
                 ),
               );
 
@@ -1411,6 +1411,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
             note: ingredientResult.note,
             estimatedUnitPrice: ingredientResult.estimatedUnitPrice,
             priceCurrency: ingredientResult.priceCurrency,
+            barcode: ingredientResult.barcode,
+            productName: ingredientResult.productName,
+            productImageUrl: ingredientResult.productImageUrl,
           );
 
           if (!mounted) return;
@@ -1435,8 +1438,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
           final editIngredientResult = await Navigator.of(context)
               .push<RecipeIngredientFormPageResult>(
                 MaterialPageRoute(
-                  builder: (_) =>
-                      RecipeIngredientFormPage(ingredient: ingredient),
+                  builder: (_) => RecipeIngredientFormPage(
+                    groupId: groupId,
+                    ingredient: ingredient,
+                  ),
                 ),
               );
 
@@ -1457,6 +1462,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
             note: editIngredientResult.note,
             estimatedUnitPrice: editIngredientResult.estimatedUnitPrice,
             priceCurrency: editIngredientResult.priceCurrency,
+            barcode: editIngredientResult.barcode,
+            productName: editIngredientResult.productName,
+            productImageUrl: editIngredientResult.productImageUrl,
           );
 
           if (!mounted) return;
