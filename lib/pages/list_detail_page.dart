@@ -476,14 +476,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
       if (!mounted) return;
 
       if (createdCount == 0) {
-        showInfoSnackBar(
-          context,
-          'No new shopping items were generated. They may already exist for this range.',
-        );
+        showInfoSnackBar(context, context.l10n.noNewShoppingItemsGenerated);
       } else {
         showSuccessSnackBar(
           context,
-          '$createdCount shopping items generated. Open Shopping to review them.',
+          context.l10n.shoppingItemsGeneratedCount(createdCount),
         );
       }
     } catch (error) {
@@ -1613,13 +1610,11 @@ class _ProductScannerShortcutCard extends StatelessWidget {
             color: theme.colorScheme.onPrimaryContainer,
           ),
         ),
-        title: const Text(
-          'Product scanner',
+        title: Text(
+          context.l10n.productScannerTitle,
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
-        subtitle: const Text(
-          'Scan a product, fetch product data and save group prices.',
-        ),
+        subtitle: Text(context.l10n.productScannerShortcutSubtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),
@@ -1645,13 +1640,11 @@ class _ProductCatalogShortcutCard extends StatelessWidget {
             color: theme.colorScheme.onPrimaryContainer,
           ),
         ),
-        title: const Text(
-          'Product database',
+        title: Text(
+          context.l10n.productDatabaseTitle,
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
-        subtitle: const Text(
-          'Pick a cached product and add it to this shopping list.',
-        ),
+        subtitle: Text(context.l10n.productCatalogShortcutSubtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),

@@ -783,8 +783,8 @@ class _ToolsSection extends StatelessWidget {
         const Divider(height: 1),
         ListTile(
           leading: const Icon(Icons.inventory_2_outlined),
-          title: const Text('Product database'),
-          subtitle: const Text('View cached products stored in Supabase'),
+          title: Text(context.l10n.productDatabaseTitle),
+          subtitle: Text(context.l10n.productDatabaseSubtitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: onOpenProductCatalog,
         ),

@@ -213,9 +213,9 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
             priceController.text = price.toString();
           }
 
-          productLinkMessage = 'Product linked. Latest group price loaded.';
+          productLinkMessage = context.l10n.productLinkedLatestGroupPriceLoaded;
         } else {
-          productLinkMessage = 'Product linked. No group price saved yet.';
+          productLinkMessage = context.l10n.productLinkedNoGroupPriceSavedYet;
         }
       });
     } catch (error) {
@@ -236,7 +236,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       linkedBarcode = null;
       linkedProductName = null;
       linkedProductImageUrl = null;
-      productLinkMessage = 'Product link removed.';
+      productLinkMessage = context.l10n.productLinkRemoved;
     });
   }
 
@@ -263,12 +263,12 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     final estimatedUnitPrice = parseOptionalDouble(priceText);
 
     if (priceText.isNotEmpty && estimatedUnitPrice == null) {
-      setState(() => validationMessage = 'Price must be a valid number.');
+      setState(() => validationMessage = context.l10n.priceMustBeValidNumber);
       return;
     }
 
     if (estimatedUnitPrice != null && estimatedUnitPrice < 0) {
-      setState(() => validationMessage = 'Price cannot be negative.');
+      setState(() => validationMessage = context.l10n.priceCannotBeNegative);
       return;
     }
 
@@ -314,7 +314,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
               icon: Icons.shopping_cart_outlined,
               title: context.l10n.shoppingItem,
               subtitle: hasProductData
-                  ? 'This item is linked to a cached product.'
+                  ? context.l10n.itemLinkedToCachedProduct
                   : context.l10n.addAnItemQuantityAndUnit,
             ),
             const SizedBox(height: 16),
@@ -384,7 +384,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
                     decimal: true,
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Estimated unit price',
+                    labelText: context.l10n.estimatedUnitPrice,
                     hintText: '2.49',
                     prefixIcon: const Icon(Icons.euro_outlined),
                     suffixText: priceCurrency,
@@ -477,8 +477,8 @@ class _LinkedProductActionsCard extends StatelessWidget {
                       Text(
                         productName ??
                             (hasProductData
-                                ? 'Linked product'
-                                : 'No product linked'),
+                                ? context.l10n.linkedProduct
+                                : context.l10n.noProductLinked),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
@@ -494,8 +494,8 @@ class _LinkedProductActionsCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         hasProductData
-                            ? 'Barcode, image and product name will be saved with this item.'
-                            : 'Link a cached product from Product database.',
+                            ? context.l10n.itemProductLinkSaved
+                            : context.l10n.linkCachedProductFromDatabase,
                         style: theme.textTheme.bodySmall,
                       ),
                     ],
@@ -519,7 +519,9 @@ class _LinkedProductActionsCard extends StatelessWidget {
                     onPressed: loading ? null : onSelectProduct,
                     icon: const Icon(Icons.inventory_2_outlined),
                     label: Text(
-                      hasProductData ? 'Change product' : 'Link product',
+                      hasProductData
+                          ? context.l10n.changeProduct
+                          : context.l10n.linkProduct,
                     ),
                   ),
                 ),
@@ -528,7 +530,7 @@ class _LinkedProductActionsCard extends StatelessWidget {
                   IconButton(
                     onPressed: loading ? null : onClearProduct,
                     icon: const Icon(Icons.link_off_outlined),
-                    tooltip: 'Remove product link',
+                    tooltip: context.l10n.removeProductLink,
                   ),
                 ],
               ],
@@ -584,7 +586,7 @@ class _EstimatedTotalCard extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Estimated total: ${total.toStringAsFixed(2)} $currency',
+              context.l10n.estimatedTotal(total.toStringAsFixed(2), currency),
               style: TextStyle(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w800,

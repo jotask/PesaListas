@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pesalistas/core/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/repositories/shopping_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -403,14 +404,14 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product scanner'),
+        title: Text(context.l10n.productScannerTitle),
         actions: [
           IconButton(
             onPressed: lookingUpProduct || savingPrice
                 ? null
                 : refreshCurrentBarcode,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Request again',
+            tooltip: context.l10n.requestAgain,
           ),
         ],
       ),
@@ -522,10 +523,10 @@ class _ScannerOverlay extends StatelessWidget {
               ),
               child: Text(
                 lookingUpProduct
-                    ? 'Looking up product...'
+                    ? context.l10n.lookingUpProduct
                     : cameraPaused
-                    ? 'Scanner paused'
-                    : 'Point camera at barcode',
+                    ? context.l10n.scannerPaused
+                    : context.l10n.pointCameraAtBarcode,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
@@ -564,8 +565,8 @@ class _ManualLookupCard extends StatelessWidget {
             TextField(
               controller: controller,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Barcode',
+              decoration: InputDecoration(
+                labelText: context.l10n.barcode,
                 hintText: '3274080005003',
                 prefixIcon: Icon(Icons.qr_code_2_outlined),
               ),
@@ -579,7 +580,7 @@ class _ManualLookupCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: loading ? null : onResumeScanner,
                     icon: const Icon(Icons.camera_alt_outlined),
-                    label: const Text('Scan again'),
+                    label: Text(context.l10n.scanAgain),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -587,7 +588,7 @@ class _ManualLookupCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: loading ? null : onLookup,
                     icon: const Icon(Icons.search),
-                    label: const Text('Lookup'),
+                    label: Text(context.l10n.lookup),
                   ),
                 ),
               ],
@@ -598,7 +599,7 @@ class _ManualLookupCard extends StatelessWidget {
               child: TextButton.icon(
                 onPressed: loading ? null : onRefresh,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Request this barcode again'),
+                label: Text(context.l10n.requestThisBarcodeAgain),
               ),
             ),
           ],
@@ -613,18 +614,18 @@ class _LoadingProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
+    return Card(
       child: Padding(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         child: Row(
           children: [
-            SizedBox(
+            const SizedBox(
               width: 22,
               height: 22,
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
-            SizedBox(width: 12),
-            Expanded(child: Text('Loading product information...')),
+            const SizedBox(width: 12),
+            Expanded(child: Text(context.l10n.loadingProductInfo)),
           ],
         ),
       ),
@@ -637,15 +638,15 @@ class _EmptyProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
+    return Card(
       child: Padding(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         child: Row(
           children: [
-            CircleAvatar(child: Icon(Icons.inventory_2_outlined)),
-            SizedBox(width: 12),
+            const CircleAvatar(child: Icon(Icons.inventory_2_outlined)),
+            const SizedBox(width: 12),
             Expanded(
-              child: Text('Scan or enter a barcode to load product data.'),
+              child: Text(context.l10n.scanOrEnterBarcodeToLoadProductData),
             ),
           ],
         ),
@@ -713,7 +714,7 @@ class _ProductCard extends StatelessWidget {
     final imageUrl = text(product[AppProductFields.imageUrl], fallback: '');
     final name = text(
       product[AppProductFields.name],
-      fallback: 'Unknown product',
+      fallback: context.l10n.unknownProduct,
     );
     final brand = text(product[AppProductFields.brand]);
     final quantity = text(product[AppProductFields.quantity]);
@@ -726,7 +727,7 @@ class _ProductCard extends StatelessWidget {
     final fetchedAt = text(product[AppProductFields.fetchedAt]);
 
     final latestPriceText = latestPrice == null
-        ? 'No price saved yet'
+        ? context.l10n.noPriceSavedYet
         : '${latestPrice?[AppProductPriceFields.price]} '
               '${latestPrice?[AppProductPriceFields.currency] ?? 'EUR'}';
 
@@ -769,13 +770,19 @@ class _ProductCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _ProductInfoRow(label: 'Barcode', value: barcode),
-            _ProductInfoRow(label: 'Latest price', value: latestPriceText),
-            _ProductInfoRow(label: 'Categories', value: categories),
-            _ProductInfoRow(label: 'Nutriscore', value: nutriscore),
-            _ProductInfoRow(label: 'Nova group', value: novaGroup),
-            _ProductInfoRow(label: 'Ecoscore', value: ecoscore),
-            _ProductInfoRow(label: 'Fetched at', value: fetchedAt),
+            _ProductInfoRow(label: context.l10n.barcode, value: barcode),
+            _ProductInfoRow(
+              label: context.l10n.latestPrice,
+              value: latestPriceText,
+            ),
+            _ProductInfoRow(
+              label: context.l10n.productCategories,
+              value: categories,
+            ),
+            _ProductInfoRow(label: context.l10n.nutriscore, value: nutriscore),
+            _ProductInfoRow(label: context.l10n.novaGroup, value: novaGroup),
+            _ProductInfoRow(label: context.l10n.ecoscore, value: ecoscore),
+            _ProductInfoRow(label: context.l10n.fetchedAt, value: fetchedAt),
           ],
         ),
       ),

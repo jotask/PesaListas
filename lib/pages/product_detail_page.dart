@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/repositories/shopping_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -165,7 +166,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   String get name {
-    return text(product[AppProductFields.name], fallback: 'Unknown product');
+    return text(
+      product[AppProductFields.name],
+      fallback: context.l10n.unknownProduct,
+    );
   }
 
   String get imageUrl {
@@ -176,7 +180,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final rawJson = product[AppProductFields.rawJson];
 
     if (rawJson == null) {
-      return 'No raw_json stored.';
+      return context.l10n.noRawJsonStored;
     }
 
     try {
@@ -325,7 +329,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           IconButton(
             onPressed: refreshing ? null : refreshProduct,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Request again',
+            tooltip: context.l10n.requestAgain,
           ),
         ],
       ),
@@ -674,10 +678,13 @@ class _RawJsonCardState extends State<_RawJsonCard> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Raw JSON',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                    context.l10n.rawJson,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 if (rawJson.length > 1200)
@@ -685,7 +692,9 @@ class _RawJsonCardState extends State<_RawJsonCard> {
                     onPressed: () {
                       setState(() => expanded = !expanded);
                     },
-                    child: Text(expanded ? 'Collapse' : 'Expand'),
+                    child: Text(
+                      expanded ? context.l10n.collapse : context.l10n.expand,
+                    ),
                   ),
               ],
             ),
@@ -784,37 +793,37 @@ class _ProductPriceHistoryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Price history',
+                    context.l10n.priceHistory,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                   ),
                 ),
                 IconButton(
                   onPressed: loading ? null : onRefresh,
                   icon: const Icon(Icons.refresh),
-                  tooltip: 'Refresh prices',
+                  tooltip: context.l10n.refreshPrices,
                 ),
               ],
             ),
             const SizedBox(height: 12),
             if (loading)
-              const Row(
+              Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                  SizedBox(width: 12),
-                  Expanded(child: Text('Loading prices...')),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(context.l10n.loadingPrices)),
                 ],
               )
             else if (errorMessage != null)
               _ProductDetailInlineError(message: errorMessage!)
             else if (prices.isEmpty)
               Text(
-                'No prices saved yet for this product.',
+                context.l10n.noPricesSavedForProduct,
                 style: theme.textTheme.bodyMedium,
               )
             else
@@ -892,7 +901,7 @@ class _ProductPriceHistoryTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  store == '—' ? 'Unknown store' : store,
+                  store == '—' ? context.l10n.unknownStore : store,
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 3),
@@ -986,19 +995,19 @@ class _AddProductToShoppingCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Add to shopping list',
-                        style: TextStyle(
+                        context.l10n.addToShoppingList,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                      SizedBox(height: 3),
-                      Text('Create a shopping item from this cached product.'),
+                      const SizedBox(height: 3),
+                      Text(context.l10n.createShoppingItemFromCachedProduct),
                     ],
                   ),
                 ),
@@ -1051,10 +1060,10 @@ class _AddProductToShoppingCard extends StatelessWidget {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
-                labelText: 'Estimated unit price',
+              decoration: InputDecoration(
+                labelText: context.l10n.estimatedUnitPrice,
                 hintText: '2.49',
-                prefixIcon: Icon(Icons.euro_outlined),
+                prefixIcon: const Icon(Icons.euro_outlined),
                 suffixText: 'EUR',
               ),
             ),

@@ -140,6 +140,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editProfileDisplayNameRequired => 'Display name is required.';
 
   @override
+  String get nutriscore => 'Nutriscore';
+
+  @override
+  String get novaGroup => 'Nova group';
+
+  @override
+  String get ecoscore => 'Ecoscore';
+
+  @override
+  String get fetchedAt => 'Fetched at';
+
+  @override
   String get cancel => 'Cancel';
 
   @override
@@ -1094,6 +1106,302 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToLoadRecipeDetails => 'Failed to load recipe details';
 
   @override
+  String get productDatabaseTitle => 'Product database';
+
+  @override
+  String get productDatabaseSubtitle =>
+      'View cached products stored in Supabase';
+
+  @override
+  String get selectProductTitle => 'Select product';
+
+  @override
+  String get cachedProductsTitle => 'Cached products';
+
+  @override
+  String productCatalogLoadedSummary(Object visibleCount, Object totalCount) {
+    return '$visibleCount visible · $totalCount loaded from Supabase';
+  }
+
+  @override
+  String get searchProductsHint => 'Search barcode, name, brand or status';
+
+  @override
+  String get loadingProducts => 'Loading products...';
+
+  @override
+  String get noProductsMatchSearch => 'No products match this search.';
+
+  @override
+  String get noCachedProductsYet =>
+      'No cached products yet. Scan a product first.';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get requestAgain => 'Request again';
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get barcode => 'Barcode';
+
+  @override
+  String get unknownProduct => 'Unknown product';
+
+  @override
+  String fetchedAtSummary(Object date) {
+    return 'Fetched: $date';
+  }
+
+  @override
+  String get lookingUpProduct => 'Looking up product...';
+
+  @override
+  String get scannerPaused => 'Scanner paused';
+
+  @override
+  String get pointCameraAtBarcode => 'Point camera at barcode';
+
+  @override
+  String get lookup => 'Lookup';
+
+  @override
+  String get requestThisBarcodeAgain => 'Request this barcode again';
+
+  @override
+  String get scanOrEnterBarcodeToLoadProductData =>
+      'Scan or enter a barcode to load product data.';
+
+  @override
+  String get latestPrice => 'Latest price';
+
+  @override
+  String get noPriceSavedYet => 'No price saved yet';
+
+  @override
+  String get noSavedPriceForGroupYet => 'No saved price for this group yet.';
+
+  @override
+  String get openScannerFromShoppingListToAddProducts =>
+      'Open the scanner from a shopping list to add products.';
+
+  @override
+  String get scanOrLoadKnownProductFirst =>
+      'Scan or load a known product first.';
+
+  @override
+  String get shoppingItemNameRequired => 'Shopping item name is required.';
+
+  @override
+  String get openScannerFromGroupToSavePrices =>
+      'Open the scanner from a group or shopping list to save prices.';
+
+  @override
+  String get scanOrLoadProductFirst => 'Scan or load a product first.';
+
+  @override
+  String get cannotSavePriceForUnknownProduct =>
+      'Cannot save a price for an unknown product.';
+
+  @override
+  String get priceMustBeValidNumber => 'Price must be a valid number.';
+
+  @override
+  String get priceCannotBeNegative => 'Price cannot be negative.';
+
+  @override
+  String get priceSaved => 'Price saved.';
+
+  @override
+  String get addedToShoppingList => 'Added to shopping list.';
+
+  @override
+  String get productLookupOnlyOpenFromGroupToSavePrices =>
+      'Product lookup works here. To save prices, open this scanner from a group or shopping list.';
+
+  @override
+  String get groupPrice => 'Group price';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get store => 'Store';
+
+  @override
+  String get savePrice => 'Save price';
+
+  @override
+  String get saving => 'Saving...';
+
+  @override
+  String get openScannerFromShoppingListToAddDirectly =>
+      'Open this scanner from a shopping list to add products directly.';
+
+  @override
+  String get addToShoppingList => 'Add to shopping list';
+
+  @override
+  String get createShoppingItemFromProduct =>
+      'Create a shopping item from this product.';
+
+  @override
+  String get adding => 'Adding...';
+
+  @override
+  String get unitPcsHint => 'pcs';
+
+  @override
+  String get rawJson => 'Raw JSON';
+
+  @override
+  String get noRawJsonStored => 'No raw_json stored.';
+
+  @override
+  String get collapse => 'Collapse';
+
+  @override
+  String get expand => 'Expand';
+
+  @override
+  String get priceHistory => 'Price history';
+
+  @override
+  String get refreshPrices => 'Refresh prices';
+
+  @override
+  String get loadingPrices => 'Loading prices...';
+
+  @override
+  String get noPricesSavedForProduct => 'No prices saved yet for this product.';
+
+  @override
+  String get unknownStore => 'Unknown store';
+
+  @override
+  String get openProductFromShoppingListToAddIt =>
+      'Open this product from a shopping list to add it.';
+
+  @override
+  String get cannotAddUnknownProduct => 'Cannot add an unknown product.';
+
+  @override
+  String get createShoppingItemFromCachedProduct =>
+      'Create a shopping item from this cached product.';
+
+  @override
+  String get estimatedUnitPrice => 'Estimated unit price';
+
+  @override
+  String get productLinkedLatestGroupPriceLoaded =>
+      'Product linked. Latest group price loaded.';
+
+  @override
+  String get productLinkedNoGroupPriceSavedYet =>
+      'Product linked. No group price saved yet.';
+
+  @override
+  String get productLinkRemoved => 'Product link removed.';
+
+  @override
+  String get itemLinkedToCachedProduct =>
+      'This item is linked to a cached product.';
+
+  @override
+  String get ingredientLinkedToCachedProduct =>
+      'This ingredient is linked to a cached product.';
+
+  @override
+  String get linkedProduct => 'Linked product';
+
+  @override
+  String get noProductLinked => 'No product linked';
+
+  @override
+  String get itemProductLinkSaved =>
+      'Barcode, image and product name will be saved with this item.';
+
+  @override
+  String get ingredientProductLinkSaved =>
+      'Barcode, image and product name will be saved with this ingredient.';
+
+  @override
+  String get linkCachedProductFromDatabase =>
+      'Link a cached product from Product database.';
+
+  @override
+  String get changeProduct => 'Change product';
+
+  @override
+  String get linkProduct => 'Link product';
+
+  @override
+  String get removeProductLink => 'Remove product link';
+
+  @override
+  String estimatedTotal(Object amount, Object currency) {
+    return 'Estimated total: $amount $currency';
+  }
+
+  @override
+  String estimatedIngredientTotal(Object amount, Object currency) {
+    return 'Estimated ingredient total: $amount $currency';
+  }
+
+  @override
+  String toBuyEstimated(Object amount) {
+    return 'To buy est. $amount';
+  }
+
+  @override
+  String totalEstimated(Object amount) {
+    return 'Total est. $amount';
+  }
+
+  @override
+  String priceTotalEach(Object total, Object unit) {
+    return '$total total · $unit each';
+  }
+
+  @override
+  String priceTotal(Object total) {
+    return '$total total';
+  }
+
+  @override
+  String priceEach(Object unit) {
+    return '$unit each';
+  }
+
+  @override
+  String estimatedAmount(Object amount, Object currency) {
+    return 'Est. $amount $currency';
+  }
+
+  @override
+  String get noNewShoppingItemsGenerated =>
+      'No new shopping items were generated. They may already exist for this range.';
+
+  @override
+  String shoppingItemsGeneratedCount(Object count) {
+    return '$count shopping items generated. Open Shopping to review them.';
+  }
+
+  @override
+  String get productScannerShortcutSubtitle =>
+      'Scan a product, fetch product data and save group prices.';
+
+  @override
+  String get productCatalogShortcutSubtitle =>
+      'Pick a cached product and add it to this shopping list.';
+
+  @override
   String get addMeal => 'Add meal';
 
   @override
@@ -1629,9 +1937,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
-
-  @override
-  String get requestAgain => 'Request again';
 
   @override
   String get rawProductInfo => 'Raw product information';

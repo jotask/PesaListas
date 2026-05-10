@@ -530,38 +530,190 @@
   "rawProductInfo": "Información completa del producto",
   "rawProductInfoSubtitle": "Respuesta completa del producto desde OpenFoodFacts.",
   "productBrand": "Marca",
-"productQuantity": "Cantidad",
-"productCategories": "Categorías",
-"productIngredients": "Ingredientes",
-"productAllergens": "Alérgenos",
-"nutriscoreLabel": "Nutri-Score {grade}",
-"novaGroupLabel": "NOVA {group}",
-"basicNutrition": "Nutrición básica",
-"energy": "Energía",
-"fat": "Grasas",
-"saturatedFat": "Grasas saturadas",
-"carbohydrates": "Carbohidratos",
-"sugars": "Azúcares",
-"proteins": "Proteínas",
-"emailIsRequired": "El email es obligatorio.",
-"invalidEmail": "Introduce un email válido.",
-"inviteMemberPageSubtitle": "Invita a alguien a unirse a este grupo compartido.",
-"salt": "Sal",
-"fiber": "Fibra",
-"@nutriscoreLabel": {
-  "placeholders": {
-    "grade": {
-      "type": "String"
+  "productQuantity": "Cantidad",
+  "productCategories": "Categorías",
+  "productIngredients": "Ingredientes",
+  "productAllergens": "Alérgenos",
+  "nutriscoreLabel": "Nutri-Score {grade}",
+  "novaGroupLabel": "NOVA {group}",
+  "basicNutrition": "Nutrición básica",
+  "energy": "Energía",
+  "nutriscore": "Nutriscore",
+  "novaGroup": "Grupo NOVA",
+  "ecoscore": "Ecoscore",
+  "fetchedAt": "Obtenido el",
+  "fat": "Grasas",
+  "saturatedFat": "Grasas saturadas",
+  "carbohydrates": "Carbohidratos",
+  "sugars": "Azúcares",
+  "proteins": "Proteínas",
+  "emailIsRequired": "El email es obligatorio.",
+  "invalidEmail": "Introduce un email válido.",
+  "inviteMemberPageSubtitle": "Invita a alguien a unirse a este grupo compartido.",
+  "productDatabaseTitle": "Base de datos de productos",
+  "productDatabaseSubtitle": "Ver productos cacheados guardados en Supabase",
+  "selectProductTitle": "Seleccionar producto",
+  "cachedProductsTitle": "Productos cacheados",
+  "productCatalogLoadedSummary": "{visibleCount} visibles · {totalCount} cargados desde Supabase",
+  "@productCatalogLoadedSummary": {
+    "placeholders": {
+      "visibleCount": {},
+      "totalCount": {}
     }
-  }
-},
-"@novaGroupLabel": {
-  "placeholders": {
-    "group": {
-      "type": "String"
+  },
+  "searchProductsHint": "Buscar por código, nombre, marca o estado",
+  "loadingProducts": "Cargando productos...",
+  "noProductsMatchSearch": "Ningún producto coincide con esta búsqueda.",
+  "noCachedProductsYet": "Todavía no hay productos cacheados. Escanea un producto primero.",
+  "clear": "Limpiar",
+  "refresh": "Actualizar",
+  "requestAgain": "Solicitar otra vez",
+  "clearSearch": "Limpiar búsqueda",
+  "barcode": "Código de barras",
+  "unknownProduct": "Producto desconocido",
+  "fetchedAtSummary": "Obtenido: {date}",
+  "@fetchedAtSummary": {
+    "placeholders": {
+      "date": {}
     }
-  }
-},
+  },
+
+  "lookingUpProduct": "Buscando producto...",
+  "scannerPaused": "Escáner pausado",
+  "pointCameraAtBarcode": "Apunta la cámara al código de barras",
+  "lookup": "Buscar",
+  "requestThisBarcodeAgain": "Solicitar este código otra vez",
+  "scanOrEnterBarcodeToLoadProductData": "Escanea o introduce un código de barras para cargar datos del producto.",
+  "latestPrice": "Último precio",
+  "noPriceSavedYet": "Todavía no hay precio guardado",
+  "noSavedPriceForGroupYet": "Todavía no hay precio guardado para este grupo.",
+  "openScannerFromShoppingListToAddProducts": "Abre el escáner desde una lista de la compra para añadir productos.",
+  "scanOrLoadKnownProductFirst": "Escanea o carga primero un producto conocido.",
+  "shoppingItemNameRequired": "El nombre del item de compra es obligatorio.",
+  "openScannerFromGroupToSavePrices": "Abre el escáner desde un grupo o lista de compra para guardar precios.",
+  "scanOrLoadProductFirst": "Escanea o carga primero un producto.",
+  "cannotSavePriceForUnknownProduct": "No se puede guardar precio para un producto desconocido.",
+  "priceMustBeValidNumber": "El precio debe ser un número válido.",
+  "priceCannotBeNegative": "El precio no puede ser negativo.",
+  "priceSaved": "Precio guardado.",
+  "addedToShoppingList": "Añadido a la lista de la compra.",
+  "productLookupOnlyOpenFromGroupToSavePrices": "Aquí puedes consultar productos. Para guardar precios, abre este escáner desde un grupo o lista de la compra.",
+  "groupPrice": "Precio del grupo",
+  "price": "Precio",
+  "store": "Tienda",
+  "savePrice": "Guardar precio",
+  "saving": "Guardando...",
+  "openScannerFromShoppingListToAddDirectly": "Abre este escáner desde una lista de la compra para añadir productos directamente.",
+  "addToShoppingList": "Añadir a la lista",
+  "createShoppingItemFromProduct": "Crear un item de compra desde este producto.",
+  "adding": "Añadiendo...",
+  "unitPcsHint": "uds",
+  "rawJson": "JSON original",
+  "noRawJsonStored": "No hay raw_json guardado.",
+  "collapse": "Contraer",
+  "expand": "Expandir",
+  "priceHistory": "Historial de precios",
+  "refreshPrices": "Actualizar precios",
+  "loadingPrices": "Cargando precios...",
+  "noPricesSavedForProduct": "Todavía no hay precios guardados para este producto.",
+  "unknownStore": "Tienda desconocida",
+  "openProductFromShoppingListToAddIt": "Abre este producto desde una lista de la compra para añadirlo.",
+  "cannotAddUnknownProduct": "No se puede añadir un producto desconocido.",
+  "createShoppingItemFromCachedProduct": "Crear un item de compra desde este producto cacheado.",
+  "estimatedUnitPrice": "Precio unitario estimado",
+
+  "productLinkedLatestGroupPriceLoaded": "Producto enlazado. Se ha cargado el último precio del grupo.",
+  "productLinkedNoGroupPriceSavedYet": "Producto enlazado. Todavía no hay precio guardado para este grupo.",
+  "productLinkRemoved": "Enlace de producto eliminado.",
+  "itemLinkedToCachedProduct": "Este item está enlazado a un producto cacheado.",
+  "ingredientLinkedToCachedProduct": "Este ingrediente está enlazado a un producto cacheado.",
+  "linkedProduct": "Producto enlazado",
+  "noProductLinked": "Sin producto enlazado",
+  "itemProductLinkSaved": "El código, imagen y nombre del producto se guardarán con este item.",
+  "ingredientProductLinkSaved": "El código, imagen y nombre del producto se guardarán con este ingrediente.",
+  "linkCachedProductFromDatabase": "Enlaza un producto cacheado desde la base de datos de productos.",
+  "changeProduct": "Cambiar producto",
+  "linkProduct": "Enlazar producto",
+  "removeProductLink": "Quitar enlace de producto",
+  "estimatedTotal": "Total estimado: {amount} {currency}",
+  "@estimatedTotal": {
+    "placeholders": {
+      "amount": {},
+      "currency": {}
+    }
+  },
+  "estimatedIngredientTotal": "Total estimado del ingrediente: {amount} {currency}",
+  "@estimatedIngredientTotal": {
+    "placeholders": {
+      "amount": {},
+      "currency": {}
+    }
+  },
+
+  "toBuyEstimated": "Por comprar est. {amount}",
+  "@toBuyEstimated": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "totalEstimated": "Total est. {amount}",
+  "@totalEstimated": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "priceTotalEach": "{total} total · {unit} unidad",
+  "@priceTotalEach": {
+    "placeholders": {
+      "total": {},
+      "unit": {}
+    }
+  },
+  "priceTotal": "{total} total",
+  "@priceTotal": {
+    "placeholders": {
+      "total": {}
+    }
+  },
+  "priceEach": "{unit} unidad",
+  "@priceEach": {
+    "placeholders": {
+      "unit": {}
+    }
+  },
+  "estimatedAmount": "Est. {amount} {currency}",
+  "@estimatedAmount": {
+    "placeholders": {
+      "amount": {},
+      "currency": {}
+    }
+  },
+
+  "noNewShoppingItemsGenerated": "No se han generado nuevos items de compra. Puede que ya existan para este rango.",
+  "shoppingItemsGeneratedCount": "Se han generado {count} items de compra. Abre Compra para revisarlos.",
+  "@shoppingItemsGeneratedCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "productScannerShortcutSubtitle": "Escanea un producto, carga sus datos y guarda precios del grupo.",
+  "productCatalogShortcutSubtitle": "Elige un producto cacheado y añádelo a esta lista de compra.",
+  "salt": "Sal",
+  "fiber": "Fibra",
+  "@nutriscoreLabel": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "@novaGroupLabel": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
   "@productNotFoundSubtitle": {
     "placeholders": {
       "barcode": {

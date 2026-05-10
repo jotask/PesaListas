@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/product_fields.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/product_detail_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -136,13 +137,15 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.selectionMode ? 'Select product' : 'Product database',
+          widget.selectionMode
+              ? context.l10n.selectProductTitle
+              : context.l10n.productDatabaseTitle,
         ),
         actions: [
           IconButton(
             onPressed: loading ? null : loadProducts,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
+            tooltip: context.l10n.refresh,
           ),
         ],
       ),
@@ -161,14 +164,14 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
               SearchBar(
                 controller: searchController,
                 leading: const Icon(Icons.search),
-                hintText: 'Search barcode, name, brand or status',
+                hintText: context.l10n.searchProductsHint,
                 onChanged: updateSearch,
                 trailing: [
                   if (searchQuery.isNotEmpty)
                     IconButton(
                       onPressed: clearSearch,
                       icon: const Icon(Icons.close),
-                      tooltip: 'Clear search',
+                      tooltip: context.l10n.clearSearch,
                     ),
                 ],
               ),
@@ -229,13 +232,16 @@ class _ProductCatalogHeaderCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Cached products',
+                  Text(
+                    context.l10n.cachedProductsTitle,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '$visibleCount visible · $totalCount loaded from Supabase',
+                    context.l10n.productCatalogLoadedSummary(
+                      visibleCount,
+                      totalCount,
+                    ),
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],
@@ -253,18 +259,18 @@ class _LoadingProductsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
+    return Card(
       child: Padding(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         child: Row(
           children: [
-            SizedBox(
+            const SizedBox(
               width: 22,
               height: 22,
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
-            SizedBox(width: 12),
-            Expanded(child: Text('Loading products...')),
+            const SizedBox(width: 12),
+            Expanded(child: Text(context.l10n.loadingProducts)),
           ],
         ),
       ),
@@ -324,15 +330,15 @@ class _EmptyProductCatalogCard extends StatelessWidget {
             Expanded(
               child: Text(
                 hasSearch
-                    ? 'No products match this search.'
-                    : 'No cached products yet. Scan a product first.',
+                    ? context.l10n.noProductsMatchSearch
+                    : context.l10n.noCachedProductsYet,
               ),
             ),
             if (hasSearch) ...[
               const SizedBox(width: 8),
               OutlinedButton(
                 onPressed: onClearSearch,
-                child: const Text('Clear'),
+                child: Text(context.l10n.clear),
               ),
             ],
           ],
@@ -370,7 +376,7 @@ class _ProductCatalogCard extends StatelessWidget {
     final barcode = text(product[AppProductFields.barcode]);
     final name = text(
       product[AppProductFields.name],
-      fallback: 'Unknown product',
+      fallback: context.l10n.unknownProduct,
     );
     final brand = text(product[AppProductFields.brand]);
     final quantity = text(product[AppProductFields.quantity]);
@@ -424,7 +430,7 @@ class _ProductCatalogCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Fetched: $fetchedAt',
+                      context.l10n.fetchedAtSummary(fetchedAt),
                       style: theme.textTheme.bodySmall,
                     ),
                   ],

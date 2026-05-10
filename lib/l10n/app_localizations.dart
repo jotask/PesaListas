@@ -350,6 +350,30 @@ abstract class AppLocalizations {
   /// **'Display name is required.'**
   String get editProfileDisplayNameRequired;
 
+  /// No description provided for @nutriscore.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutriscore'**
+  String get nutriscore;
+
+  /// No description provided for @novaGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Nova group'**
+  String get novaGroup;
+
+  /// No description provided for @ecoscore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ecoscore'**
+  String get ecoscore;
+
+  /// No description provided for @fetchedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetched at'**
+  String get fetchedAt;
+
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
@@ -2180,6 +2204,510 @@ abstract class AppLocalizations {
   /// **'Failed to load recipe details'**
   String get failedToLoadRecipeDetails;
 
+  /// No description provided for @productDatabaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product database'**
+  String get productDatabaseTitle;
+
+  /// No description provided for @productDatabaseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View cached products stored in Supabase'**
+  String get productDatabaseSubtitle;
+
+  /// No description provided for @selectProductTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select product'**
+  String get selectProductTitle;
+
+  /// No description provided for @cachedProductsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached products'**
+  String get cachedProductsTitle;
+
+  /// No description provided for @productCatalogLoadedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{visibleCount} visible · {totalCount} loaded from Supabase'**
+  String productCatalogLoadedSummary(Object visibleCount, Object totalCount);
+
+  /// No description provided for @searchProductsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search barcode, name, brand or status'**
+  String get searchProductsHint;
+
+  /// No description provided for @loadingProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading products...'**
+  String get loadingProducts;
+
+  /// No description provided for @noProductsMatchSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No products match this search.'**
+  String get noProductsMatchSearch;
+
+  /// No description provided for @noCachedProductsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No cached products yet. Scan a product first.'**
+  String get noCachedProductsYet;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @requestAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Request again'**
+  String get requestAgain;
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearch;
+
+  /// No description provided for @barcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get barcode;
+
+  /// No description provided for @unknownProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown product'**
+  String get unknownProduct;
+
+  /// No description provided for @fetchedAtSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetched: {date}'**
+  String fetchedAtSummary(Object date);
+
+  /// No description provided for @lookingUpProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking up product...'**
+  String get lookingUpProduct;
+
+  /// No description provided for @scannerPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanner paused'**
+  String get scannerPaused;
+
+  /// No description provided for @pointCameraAtBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Point camera at barcode'**
+  String get pointCameraAtBarcode;
+
+  /// No description provided for @lookup.
+  ///
+  /// In en, this message translates to:
+  /// **'Lookup'**
+  String get lookup;
+
+  /// No description provided for @requestThisBarcodeAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Request this barcode again'**
+  String get requestThisBarcodeAgain;
+
+  /// No description provided for @scanOrEnterBarcodeToLoadProductData.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan or enter a barcode to load product data.'**
+  String get scanOrEnterBarcodeToLoadProductData;
+
+  /// No description provided for @latestPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest price'**
+  String get latestPrice;
+
+  /// No description provided for @noPriceSavedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No price saved yet'**
+  String get noPriceSavedYet;
+
+  /// No description provided for @noSavedPriceForGroupYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved price for this group yet.'**
+  String get noSavedPriceForGroupYet;
+
+  /// No description provided for @openScannerFromShoppingListToAddProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the scanner from a shopping list to add products.'**
+  String get openScannerFromShoppingListToAddProducts;
+
+  /// No description provided for @scanOrLoadKnownProductFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan or load a known product first.'**
+  String get scanOrLoadKnownProductFirst;
+
+  /// No description provided for @shoppingItemNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping item name is required.'**
+  String get shoppingItemNameRequired;
+
+  /// No description provided for @openScannerFromGroupToSavePrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the scanner from a group or shopping list to save prices.'**
+  String get openScannerFromGroupToSavePrices;
+
+  /// No description provided for @scanOrLoadProductFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan or load a product first.'**
+  String get scanOrLoadProductFirst;
+
+  /// No description provided for @cannotSavePriceForUnknownProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot save a price for an unknown product.'**
+  String get cannotSavePriceForUnknownProduct;
+
+  /// No description provided for @priceMustBeValidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Price must be a valid number.'**
+  String get priceMustBeValidNumber;
+
+  /// No description provided for @priceCannotBeNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Price cannot be negative.'**
+  String get priceCannotBeNegative;
+
+  /// No description provided for @priceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Price saved.'**
+  String get priceSaved;
+
+  /// No description provided for @addedToShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to shopping list.'**
+  String get addedToShoppingList;
+
+  /// No description provided for @productLookupOnlyOpenFromGroupToSavePrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Product lookup works here. To save prices, open this scanner from a group or shopping list.'**
+  String get productLookupOnlyOpenFromGroupToSavePrices;
+
+  /// No description provided for @groupPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Group price'**
+  String get groupPrice;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get price;
+
+  /// No description provided for @store.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get store;
+
+  /// No description provided for @savePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Save price'**
+  String get savePrice;
+
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get saving;
+
+  /// No description provided for @openScannerFromShoppingListToAddDirectly.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this scanner from a shopping list to add products directly.'**
+  String get openScannerFromShoppingListToAddDirectly;
+
+  /// No description provided for @addToShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to shopping list'**
+  String get addToShoppingList;
+
+  /// No description provided for @createShoppingItemFromProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a shopping item from this product.'**
+  String get createShoppingItemFromProduct;
+
+  /// No description provided for @adding.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding...'**
+  String get adding;
+
+  /// No description provided for @unitPcsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'pcs'**
+  String get unitPcsHint;
+
+  /// No description provided for @rawJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw JSON'**
+  String get rawJson;
+
+  /// No description provided for @noRawJsonStored.
+  ///
+  /// In en, this message translates to:
+  /// **'No raw_json stored.'**
+  String get noRawJsonStored;
+
+  /// No description provided for @collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get collapse;
+
+  /// No description provided for @expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get expand;
+
+  /// No description provided for @priceHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Price history'**
+  String get priceHistory;
+
+  /// No description provided for @refreshPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh prices'**
+  String get refreshPrices;
+
+  /// No description provided for @loadingPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading prices...'**
+  String get loadingPrices;
+
+  /// No description provided for @noPricesSavedForProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'No prices saved yet for this product.'**
+  String get noPricesSavedForProduct;
+
+  /// No description provided for @unknownStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown store'**
+  String get unknownStore;
+
+  /// No description provided for @openProductFromShoppingListToAddIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this product from a shopping list to add it.'**
+  String get openProductFromShoppingListToAddIt;
+
+  /// No description provided for @cannotAddUnknownProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot add an unknown product.'**
+  String get cannotAddUnknownProduct;
+
+  /// No description provided for @createShoppingItemFromCachedProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a shopping item from this cached product.'**
+  String get createShoppingItemFromCachedProduct;
+
+  /// No description provided for @estimatedUnitPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated unit price'**
+  String get estimatedUnitPrice;
+
+  /// No description provided for @productLinkedLatestGroupPriceLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Product linked. Latest group price loaded.'**
+  String get productLinkedLatestGroupPriceLoaded;
+
+  /// No description provided for @productLinkedNoGroupPriceSavedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Product linked. No group price saved yet.'**
+  String get productLinkedNoGroupPriceSavedYet;
+
+  /// No description provided for @productLinkRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Product link removed.'**
+  String get productLinkRemoved;
+
+  /// No description provided for @itemLinkedToCachedProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'This item is linked to a cached product.'**
+  String get itemLinkedToCachedProduct;
+
+  /// No description provided for @ingredientLinkedToCachedProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'This ingredient is linked to a cached product.'**
+  String get ingredientLinkedToCachedProduct;
+
+  /// No description provided for @linkedProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked product'**
+  String get linkedProduct;
+
+  /// No description provided for @noProductLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'No product linked'**
+  String get noProductLinked;
+
+  /// No description provided for @itemProductLinkSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode, image and product name will be saved with this item.'**
+  String get itemProductLinkSaved;
+
+  /// No description provided for @ingredientProductLinkSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode, image and product name will be saved with this ingredient.'**
+  String get ingredientProductLinkSaved;
+
+  /// No description provided for @linkCachedProductFromDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Link a cached product from Product database.'**
+  String get linkCachedProductFromDatabase;
+
+  /// No description provided for @changeProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Change product'**
+  String get changeProduct;
+
+  /// No description provided for @linkProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Link product'**
+  String get linkProduct;
+
+  /// No description provided for @removeProductLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove product link'**
+  String get removeProductLink;
+
+  /// No description provided for @estimatedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated total: {amount} {currency}'**
+  String estimatedTotal(Object amount, Object currency);
+
+  /// No description provided for @estimatedIngredientTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated ingredient total: {amount} {currency}'**
+  String estimatedIngredientTotal(Object amount, Object currency);
+
+  /// No description provided for @toBuyEstimated.
+  ///
+  /// In en, this message translates to:
+  /// **'To buy est. {amount}'**
+  String toBuyEstimated(Object amount);
+
+  /// No description provided for @totalEstimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Total est. {amount}'**
+  String totalEstimated(Object amount);
+
+  /// No description provided for @priceTotalEach.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} total · {unit} each'**
+  String priceTotalEach(Object total, Object unit);
+
+  /// No description provided for @priceTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} total'**
+  String priceTotal(Object total);
+
+  /// No description provided for @priceEach.
+  ///
+  /// In en, this message translates to:
+  /// **'{unit} each'**
+  String priceEach(Object unit);
+
+  /// No description provided for @estimatedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Est. {amount} {currency}'**
+  String estimatedAmount(Object amount, Object currency);
+
+  /// No description provided for @noNewShoppingItemsGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'No new shopping items were generated. They may already exist for this range.'**
+  String get noNewShoppingItemsGenerated;
+
+  /// No description provided for @shoppingItemsGeneratedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} shopping items generated. Open Shopping to review them.'**
+  String shoppingItemsGeneratedCount(Object count);
+
+  /// No description provided for @productScannerShortcutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a product, fetch product data and save group prices.'**
+  String get productScannerShortcutSubtitle;
+
+  /// No description provided for @productCatalogShortcutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cached product and add it to this shopping list.'**
+  String get productCatalogShortcutSubtitle;
+
   /// No description provided for @addMeal.
   ///
   /// In en, this message translates to:
@@ -3187,12 +3715,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
-
-  /// No description provided for @requestAgain.
-  ///
-  /// In en, this message translates to:
-  /// **'Request again'**
-  String get requestAgain;
 
   /// No description provided for @rawProductInfo.
   ///

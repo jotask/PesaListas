@@ -334,7 +334,7 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
               icon: Icons.kitchen_outlined,
               title: context.l10n.ingredient,
               subtitle: hasProductData
-                  ? 'This ingredient is linked to a cached product.'
+                  ? context.l10n.ingredientLinkedToCachedProduct
                   : isEditing
                   ? context.l10n.updateThisRecipeIngredient
                   : context.l10n.addOneIngredientForThisRecipe,
@@ -510,8 +510,8 @@ class _LinkedProductActionsCard extends StatelessWidget {
                       Text(
                         productName ??
                             (hasProductData
-                                ? 'Linked product'
-                                : 'No product linked'),
+                                ? context.l10n.linkedProduct
+                                : context.l10n.noProductLinked),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
@@ -527,8 +527,8 @@ class _LinkedProductActionsCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         hasProductData
-                            ? 'Barcode, image and product name will be saved with this ingredient.'
-                            : 'Link a cached product from Product database.',
+                            ? context.l10n.ingredientProductLinkSaved
+                            : context.l10n.linkCachedProductFromDatabase,
                         style: theme.textTheme.bodySmall,
                       ),
                     ],
@@ -552,7 +552,9 @@ class _LinkedProductActionsCard extends StatelessWidget {
                     onPressed: loading ? null : onSelectProduct,
                     icon: const Icon(Icons.inventory_2_outlined),
                     label: Text(
-                      hasProductData ? 'Change product' : 'Link product',
+                      hasProductData
+                          ? context.l10n.changeProduct
+                          : context.l10n.linkProduct,
                     ),
                   ),
                 ),
@@ -561,7 +563,7 @@ class _LinkedProductActionsCard extends StatelessWidget {
                   IconButton(
                     onPressed: loading ? null : onClearProduct,
                     icon: const Icon(Icons.link_off_outlined),
-                    tooltip: 'Remove product link',
+                    tooltip: context.l10n.removeProductLink,
                   ),
                 ],
               ],
@@ -617,7 +619,7 @@ class _EstimatedTotalCard extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Estimated ingredient total: ${total.toStringAsFixed(2)} $currency',
+              context.l10n.estimatedTotal(total.toStringAsFixed(2), currency),
               style: TextStyle(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w800,

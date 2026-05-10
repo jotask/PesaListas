@@ -380,14 +380,16 @@ class _ShoppingSummaryCard extends StatelessWidget {
                   ),
                   if (hasEstimatedPrices)
                     _SummaryPill(
-                      label:
-                          'To buy est. ${_formatMoney(toBuyEstimatedCost, currency)}',
+                      label: context.l10n.toBuyEstimated(
+                        _formatMoney(toBuyEstimatedCost, currency),
+                      ),
                       icon: Icons.euro_outlined,
                     ),
                   if (hasEstimatedPrices)
                     _SummaryPill(
-                      label:
-                          'Total est. ${_formatMoney(totalEstimatedCost, currency)}',
+                      label: context.l10n.totalEstimated(
+                        _formatMoney(totalEstimatedCost, currency),
+                      ),
                       icon: Icons.receipt_long_outlined,
                     ),
                 ],
@@ -755,7 +757,7 @@ class _ShoppingItemCard extends StatelessWidget {
     return parts.join(' • ');
   }
 
-  String? priceSummaryText() {
+  String? priceSummaryText(BuildContext context) {
     final total = estimatedTotalPrice;
     final unitPrice = estimatedUnitPrice;
 
@@ -764,8 +766,10 @@ class _ShoppingItemCard extends StatelessWidget {
     }
 
     if (total != null && unitPrice != null) {
-      return '${_formatMoney(total, priceCurrency)} total · '
-          '${_formatMoney(unitPrice, priceCurrency)} each';
+      return context.l10n.priceTotalEach(
+        _formatMoney(total, priceCurrency),
+        _formatMoney(unitPrice, priceCurrency),
+      );
     }
 
     if (total != null) {
@@ -779,7 +783,7 @@ class _ShoppingItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final sourceText = sourceContextText(context);
-    final priceText = priceSummaryText();
+    final priceText = priceSummaryText(context);
 
     return Card(
       child: InkWell(

@@ -142,6 +142,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'El nombre visible es obligatorio.';
 
   @override
+  String get nutriscore => 'Nutriscore';
+
+  @override
+  String get novaGroup => 'Grupo NOVA';
+
+  @override
+  String get ecoscore => 'Ecoscore';
+
+  @override
+  String get fetchedAt => 'Obtenido el';
+
+  @override
   String get cancel => 'Cancelar';
 
   @override
@@ -1110,6 +1122,307 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudieron cargar los detalles de la receta';
 
   @override
+  String get productDatabaseTitle => 'Base de datos de productos';
+
+  @override
+  String get productDatabaseSubtitle =>
+      'Ver productos cacheados guardados en Supabase';
+
+  @override
+  String get selectProductTitle => 'Seleccionar producto';
+
+  @override
+  String get cachedProductsTitle => 'Productos cacheados';
+
+  @override
+  String productCatalogLoadedSummary(Object visibleCount, Object totalCount) {
+    return '$visibleCount visibles · $totalCount cargados desde Supabase';
+  }
+
+  @override
+  String get searchProductsHint => 'Buscar por código, nombre, marca o estado';
+
+  @override
+  String get loadingProducts => 'Cargando productos...';
+
+  @override
+  String get noProductsMatchSearch =>
+      'Ningún producto coincide con esta búsqueda.';
+
+  @override
+  String get noCachedProductsYet =>
+      'Todavía no hay productos cacheados. Escanea un producto primero.';
+
+  @override
+  String get clear => 'Limpiar';
+
+  @override
+  String get refresh => 'Actualizar';
+
+  @override
+  String get requestAgain => 'Solicitar otra vez';
+
+  @override
+  String get clearSearch => 'Limpiar búsqueda';
+
+  @override
+  String get barcode => 'Código de barras';
+
+  @override
+  String get unknownProduct => 'Producto desconocido';
+
+  @override
+  String fetchedAtSummary(Object date) {
+    return 'Obtenido: $date';
+  }
+
+  @override
+  String get lookingUpProduct => 'Buscando producto...';
+
+  @override
+  String get scannerPaused => 'Escáner pausado';
+
+  @override
+  String get pointCameraAtBarcode => 'Apunta la cámara al código de barras';
+
+  @override
+  String get lookup => 'Buscar';
+
+  @override
+  String get requestThisBarcodeAgain => 'Solicitar este código otra vez';
+
+  @override
+  String get scanOrEnterBarcodeToLoadProductData =>
+      'Escanea o introduce un código de barras para cargar datos del producto.';
+
+  @override
+  String get latestPrice => 'Último precio';
+
+  @override
+  String get noPriceSavedYet => 'Todavía no hay precio guardado';
+
+  @override
+  String get noSavedPriceForGroupYet =>
+      'Todavía no hay precio guardado para este grupo.';
+
+  @override
+  String get openScannerFromShoppingListToAddProducts =>
+      'Abre el escáner desde una lista de la compra para añadir productos.';
+
+  @override
+  String get scanOrLoadKnownProductFirst =>
+      'Escanea o carga primero un producto conocido.';
+
+  @override
+  String get shoppingItemNameRequired =>
+      'El nombre del item de compra es obligatorio.';
+
+  @override
+  String get openScannerFromGroupToSavePrices =>
+      'Abre el escáner desde un grupo o lista de compra para guardar precios.';
+
+  @override
+  String get scanOrLoadProductFirst => 'Escanea o carga primero un producto.';
+
+  @override
+  String get cannotSavePriceForUnknownProduct =>
+      'No se puede guardar precio para un producto desconocido.';
+
+  @override
+  String get priceMustBeValidNumber => 'El precio debe ser un número válido.';
+
+  @override
+  String get priceCannotBeNegative => 'El precio no puede ser negativo.';
+
+  @override
+  String get priceSaved => 'Precio guardado.';
+
+  @override
+  String get addedToShoppingList => 'Añadido a la lista de la compra.';
+
+  @override
+  String get productLookupOnlyOpenFromGroupToSavePrices =>
+      'Aquí puedes consultar productos. Para guardar precios, abre este escáner desde un grupo o lista de la compra.';
+
+  @override
+  String get groupPrice => 'Precio del grupo';
+
+  @override
+  String get price => 'Precio';
+
+  @override
+  String get store => 'Tienda';
+
+  @override
+  String get savePrice => 'Guardar precio';
+
+  @override
+  String get saving => 'Guardando...';
+
+  @override
+  String get openScannerFromShoppingListToAddDirectly =>
+      'Abre este escáner desde una lista de la compra para añadir productos directamente.';
+
+  @override
+  String get addToShoppingList => 'Añadir a la lista';
+
+  @override
+  String get createShoppingItemFromProduct =>
+      'Crear un item de compra desde este producto.';
+
+  @override
+  String get adding => 'Añadiendo...';
+
+  @override
+  String get unitPcsHint => 'uds';
+
+  @override
+  String get rawJson => 'JSON original';
+
+  @override
+  String get noRawJsonStored => 'No hay raw_json guardado.';
+
+  @override
+  String get collapse => 'Contraer';
+
+  @override
+  String get expand => 'Expandir';
+
+  @override
+  String get priceHistory => 'Historial de precios';
+
+  @override
+  String get refreshPrices => 'Actualizar precios';
+
+  @override
+  String get loadingPrices => 'Cargando precios...';
+
+  @override
+  String get noPricesSavedForProduct =>
+      'Todavía no hay precios guardados para este producto.';
+
+  @override
+  String get unknownStore => 'Tienda desconocida';
+
+  @override
+  String get openProductFromShoppingListToAddIt =>
+      'Abre este producto desde una lista de la compra para añadirlo.';
+
+  @override
+  String get cannotAddUnknownProduct =>
+      'No se puede añadir un producto desconocido.';
+
+  @override
+  String get createShoppingItemFromCachedProduct =>
+      'Crear un item de compra desde este producto cacheado.';
+
+  @override
+  String get estimatedUnitPrice => 'Precio unitario estimado';
+
+  @override
+  String get productLinkedLatestGroupPriceLoaded =>
+      'Producto enlazado. Se ha cargado el último precio del grupo.';
+
+  @override
+  String get productLinkedNoGroupPriceSavedYet =>
+      'Producto enlazado. Todavía no hay precio guardado para este grupo.';
+
+  @override
+  String get productLinkRemoved => 'Enlace de producto eliminado.';
+
+  @override
+  String get itemLinkedToCachedProduct =>
+      'Este item está enlazado a un producto cacheado.';
+
+  @override
+  String get ingredientLinkedToCachedProduct =>
+      'Este ingrediente está enlazado a un producto cacheado.';
+
+  @override
+  String get linkedProduct => 'Producto enlazado';
+
+  @override
+  String get noProductLinked => 'Sin producto enlazado';
+
+  @override
+  String get itemProductLinkSaved =>
+      'El código, imagen y nombre del producto se guardarán con este item.';
+
+  @override
+  String get ingredientProductLinkSaved =>
+      'El código, imagen y nombre del producto se guardarán con este ingrediente.';
+
+  @override
+  String get linkCachedProductFromDatabase =>
+      'Enlaza un producto cacheado desde la base de datos de productos.';
+
+  @override
+  String get changeProduct => 'Cambiar producto';
+
+  @override
+  String get linkProduct => 'Enlazar producto';
+
+  @override
+  String get removeProductLink => 'Quitar enlace de producto';
+
+  @override
+  String estimatedTotal(Object amount, Object currency) {
+    return 'Total estimado: $amount $currency';
+  }
+
+  @override
+  String estimatedIngredientTotal(Object amount, Object currency) {
+    return 'Total estimado del ingrediente: $amount $currency';
+  }
+
+  @override
+  String toBuyEstimated(Object amount) {
+    return 'Por comprar est. $amount';
+  }
+
+  @override
+  String totalEstimated(Object amount) {
+    return 'Total est. $amount';
+  }
+
+  @override
+  String priceTotalEach(Object total, Object unit) {
+    return '$total total · $unit unidad';
+  }
+
+  @override
+  String priceTotal(Object total) {
+    return '$total total';
+  }
+
+  @override
+  String priceEach(Object unit) {
+    return '$unit unidad';
+  }
+
+  @override
+  String estimatedAmount(Object amount, Object currency) {
+    return 'Est. $amount $currency';
+  }
+
+  @override
+  String get noNewShoppingItemsGenerated =>
+      'No se han generado nuevos items de compra. Puede que ya existan para este rango.';
+
+  @override
+  String shoppingItemsGeneratedCount(Object count) {
+    return 'Se han generado $count items de compra. Abre Compra para revisarlos.';
+  }
+
+  @override
+  String get productScannerShortcutSubtitle =>
+      'Escanea un producto, carga sus datos y guarda precios del grupo.';
+
+  @override
+  String get productCatalogShortcutSubtitle =>
+      'Elige un producto cacheado y añádelo a esta lista de compra.';
+
+  @override
   String get addMeal => 'Añadir comida';
 
   @override
@@ -1657,9 +1970,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get retry => 'Reintentar';
-
-  @override
-  String get requestAgain => 'Consultar de nuevo';
 
   @override
   String get rawProductInfo => 'Información completa del producto';

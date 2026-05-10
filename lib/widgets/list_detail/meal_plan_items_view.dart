@@ -474,8 +474,10 @@ class _MealPlanSummaryCard extends StatelessWidget {
                   ),
                   if (hasEstimatedCosts)
                     _SummaryPill(
-                      label:
-                          'Est. ${totalEstimatedCost.toStringAsFixed(2)} $currency',
+                      label: context.l10n.estimatedAmount(
+                        totalEstimatedCost.toStringAsFixed(2),
+                        currency,
+                      ),
                       icon: Icons.euro_outlined,
                     ),
                   if (pastCount > 0)
@@ -1010,7 +1012,7 @@ class _MealEstimatedCostPill extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            'Est. ${amount.toStringAsFixed(2)} $currency',
+            context.l10n.estimatedAmount(amount.toStringAsFixed(2), currency),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
