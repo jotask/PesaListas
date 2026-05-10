@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -265,7 +266,7 @@ class ProductRepository {
     required String groupId,
     required String barcode,
     required double price,
-    String currency = 'EUR',
+    String currency = AppConfig.defaultCurrency,
     String? storeName,
     String? note,
   }) async {

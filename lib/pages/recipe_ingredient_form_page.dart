@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
@@ -15,7 +16,7 @@ class RecipeIngredientFormPageResult {
     this.unit,
     this.note,
     this.estimatedUnitPrice,
-    this.priceCurrency = 'EUR',
+    this.priceCurrency = AppConfig.defaultCurrency,
     this.barcode,
     this.productName,
     this.productImageUrl,
@@ -71,7 +72,7 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
     return textOrNull(
           widget.ingredient?[AppRecipeIngredientFields.priceCurrency],
         ) ??
-        'EUR';
+        AppConfig.defaultCurrency;
   }
 
   bool get hasProductData {
@@ -86,7 +87,7 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
 
     productRepository = ProductRepository(
       Supabase.instance.client,
-      useStaging: true,
+      useStaging: AppConfig.useOpenFoodFactsStaging,
     );
 
     final ingredient = widget.ingredient;

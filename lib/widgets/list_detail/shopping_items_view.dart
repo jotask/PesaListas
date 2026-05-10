@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
@@ -85,7 +86,7 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
       }
     }
 
-    return 'EUR';
+    return AppConfig.defaultCurrency;
   }
 
   double get totalEstimatedCost {
@@ -633,7 +634,8 @@ class _ShoppingItemCard extends StatelessWidget {
   }
 
   String get priceCurrency {
-    return _textOrNull(item[AppShoppingItemFields.priceCurrency]) ?? 'EUR';
+    return _textOrNull(item[AppShoppingItemFields.priceCurrency]) ??
+        AppConfig.defaultCurrency;
   }
 
   double? get estimatedUnitPrice {

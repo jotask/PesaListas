@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/meal_plan_cost_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
@@ -544,7 +545,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   String ingredientCurrency(Map<String, dynamic> ingredient) {
     return nullableText(ingredient[AppRecipeIngredientFields.priceCurrency]) ??
-        'EUR';
+        AppConfig.defaultCurrency;
   }
 
   Map<String, dynamic> enrichMealPlanWithEstimatedCost({
@@ -553,7 +554,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   }) {
     var total = 0.0;
     var hasEstimatedCost = false;
-    var currency = 'EUR';
+    var currency = AppConfig.defaultCurrency;
 
     for (final ingredient in ingredients) {
       final ingredientTotal = estimatedIngredientTotal(ingredient);

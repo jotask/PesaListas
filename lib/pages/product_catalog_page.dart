@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/product_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/product_detail_page.dart';
@@ -36,7 +37,7 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
 
     productRepository = ProductRepository(
       Supabase.instance.client,
-      useStaging: true,
+      useStaging: AppConfig.useOpenFoodFactsStaging,
     );
 
     loadProducts();

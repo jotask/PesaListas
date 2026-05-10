@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
@@ -67,7 +68,7 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
 
       // Development staging.
       // Change to false later for production.
-      useStaging: true,
+      useStaging: AppConfig.useOpenFoodFactsStaging,
     );
   }
 
@@ -264,7 +265,7 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
         productName: productName,
         productImageUrl: productImageUrl,
         estimatedUnitPrice: price,
-        priceCurrency: 'EUR',
+        priceCurrency: AppConfig.defaultCurrency,
       );
 
       if (!mounted) return;
@@ -728,7 +729,7 @@ class _ProductCard extends StatelessWidget {
     final latestPriceText = latestPrice == null
         ? context.l10n.noPriceSavedYet
         : '${latestPrice?[AppProductPriceFields.price]} '
-              '${latestPrice?[AppProductPriceFields.currency] ?? 'EUR'}';
+              '${latestPrice?[AppProductPriceFields.currency] ?? AppConfig.defaultCurrency}';
 
     return Card(
       child: Padding(
@@ -814,7 +815,9 @@ class _ProductPriceCard extends StatelessWidget {
 
   String latestPriceText(BuildContext context) {
     final price = latestPrice?[AppProductPriceFields.price];
-    final currency = latestPrice?[AppProductPriceFields.currency] ?? 'EUR';
+    final currency =
+        latestPrice?[AppProductPriceFields.currency] ??
+        AppConfig.defaultCurrency;
     final store = latestPrice?[AppProductPriceFields.storeName]?.toString();
 
     if (price == null) {
@@ -906,7 +909,7 @@ class _ProductPriceCard extends StatelessWidget {
                 labelText: context.l10n.price,
                 hintText: '2.49',
                 prefixIcon: Icon(Icons.euro_outlined),
-                suffixText: 'EUR',
+                suffixText: AppConfig.defaultCurrency,
               ),
             ),
             const SizedBox(height: 12),

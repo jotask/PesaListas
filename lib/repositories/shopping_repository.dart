@@ -1,3 +1,4 @@
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
@@ -91,7 +92,7 @@ class ShoppingRepository {
     String? productName,
     String? productImageUrl,
     double? estimatedUnitPrice,
-    String priceCurrency = 'EUR',
+    String priceCurrency = AppConfig.defaultCurrency,
   }) async {
     final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
         ? quantity * estimatedUnitPrice
@@ -145,7 +146,7 @@ class ShoppingRepository {
     double? quantity,
     String? unit,
     double? estimatedUnitPrice,
-    String priceCurrency = 'EUR',
+    String priceCurrency = AppConfig.defaultCurrency,
     String? barcode,
     String? productName,
     String? productImageUrl,
@@ -175,7 +176,7 @@ class ShoppingRepository {
     double? quantity,
     String? unit,
     double? estimatedUnitPrice,
-    String priceCurrency = 'EUR',
+    String priceCurrency = AppConfig.defaultCurrency,
     String? barcode,
     String? productName,
     String? productImageUrl,

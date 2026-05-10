@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
@@ -14,7 +15,7 @@ class ShoppingItemFormPageResult {
     this.quantity,
     this.unit,
     this.estimatedUnitPrice,
-    this.priceCurrency = 'EUR',
+    this.priceCurrency = AppConfig.defaultCurrency,
     this.barcode,
     this.productName,
     this.productImageUrl,
@@ -61,7 +62,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
 
   String get priceCurrency {
     return textOrNull(widget.item?[AppShoppingItemFields.priceCurrency]) ??
-        'EUR';
+        AppConfig.defaultCurrency;
   }
 
   bool get hasProductData {
@@ -76,7 +77,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
 
     productRepository = ProductRepository(
       Supabase.instance.client,
-      useStaging: true,
+      useStaging: AppConfig.useOpenFoodFactsStaging,
     );
 
     final item = widget.item;

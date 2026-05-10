@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
@@ -49,7 +50,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     productRepository = ProductRepository(
       Supabase.instance.client,
-      useStaging: true,
+      useStaging: AppConfig.useOpenFoodFactsStaging,
     );
 
     shoppingRepository = ShoppingRepository(Supabase.instance.client);
@@ -297,7 +298,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         productName: nullableText(product[AppProductFields.name]),
         productImageUrl: nullableText(product[AppProductFields.imageUrl]),
         estimatedUnitPrice: estimatedUnitPrice,
-        priceCurrency: 'EUR',
+        priceCurrency: AppConfig.defaultCurrency,
       );
 
       if (!mounted) return;
@@ -862,7 +863,7 @@ class _ProductPriceHistoryTile extends StatelessWidget {
     final amount = text(price[AppProductPriceFields.price]);
     final currency = text(
       price[AppProductPriceFields.currency],
-      fallback: 'EUR',
+      fallback: AppConfig.defaultCurrency,
     );
     final store = text(price[AppProductPriceFields.storeName]);
     final note = text(price[AppProductPriceFields.note], fallback: '');
@@ -1064,7 +1065,7 @@ class _AddProductToShoppingCard extends StatelessWidget {
                 labelText: context.l10n.estimatedUnitPrice,
                 hintText: '2.49',
                 prefixIcon: const Icon(Icons.euro_outlined),
-                suffixText: 'EUR',
+                suffixText: AppConfig.defaultCurrency,
               ),
             ),
             if (validationMessage != null) ...[

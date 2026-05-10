@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
@@ -89,7 +90,7 @@ class RecipeDetailsPage extends StatelessWidget {
       }
     }
 
-    return 'EUR';
+    return AppConfig.defaultCurrency;
   }
 
   double get estimatedRecipeCost {
@@ -523,7 +524,7 @@ class _IngredientCard extends StatelessWidget {
         .trim();
 
     if (value == null || value.isEmpty) {
-      return 'EUR';
+      return AppConfig.defaultCurrency;
     }
 
     return value;

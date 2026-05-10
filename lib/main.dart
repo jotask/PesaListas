@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_theme_controller.dart';
 import 'package:pesalistas/core/app_locale_controller.dart';
 import 'package:pesalistas/pages/splash_page.dart';
@@ -32,9 +33,11 @@ Future<void> main() async {
   await AppNotificationController.initialize();
   await AppNotificationController.initialize();
 
+  AppConfig.validate();
+
   await Supabase.initialize(
-    url: '***REMOVED***',
-    anonKey: '***REMOVED***',
+    url: AppConfig.supabaseUrl,
+    anonKey: AppConfig.supabaseAnonKey,
   );
 
   runApp(const PesaListas());

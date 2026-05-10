@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/meal_plan_cost_fields.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_fields.dart';
@@ -161,7 +162,7 @@ class _MealPlanItemsViewState extends State<MealPlanItemsView> {
       }
     }
 
-    return 'EUR';
+    return AppConfig.defaultCurrency;
   }
 
   bool mealPlanHasEstimatedCost(Map<String, dynamic> mealPlan) {
@@ -732,7 +733,7 @@ class _MealPlanCard extends StatelessWidget {
     final value = mealPlan[AppMealPlanCostFields.priceCurrency]?.toString();
 
     if (value == null || value.trim().isEmpty) {
-      return 'EUR';
+      return AppConfig.defaultCurrency;
     }
 
     return value.trim();

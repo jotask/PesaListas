@@ -1,3 +1,4 @@
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
@@ -227,7 +228,7 @@ class MealPlanRepository {
               nullableText(
                 ingredient[AppRecipeIngredientFields.priceCurrency],
               ) ??
-              'EUR',
+              AppConfig.defaultCurrency,
         });
       }
     }
