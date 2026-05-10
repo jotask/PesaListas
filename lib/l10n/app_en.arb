@@ -420,10 +420,44 @@
   "flash": "Flash",
   "switchCamera": "Switch camera",
   "people": "People",
+  "instructionsExampleHint": "1. Chop vegetables\n2. Cook pasta\n3. Mix everything",
+  "minutesAbbreviation": "min",
   "pendingRole": "Pending • {role}",
   "@pendingRole": {
     "placeholders": {
       "role": {}
+    }
+  },
+  "memberCountOne": "1 member",
+  "memberCountMany": "{count} members",
+  "@memberCountMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "pendingInviteCountOne": "1 pending invite",
+  "pendingInviteCountMany": "{count} pending invites",
+  "@pendingInviteCountMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "fieldMustBeWholeNumber": "{fieldName} must be a whole number.",
+  "@fieldMustBeWholeNumber": {
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
+  "fieldCannotBeNegative": "{fieldName} cannot be negative.",
+  "@fieldCannotBeNegative": {
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
+  "fieldMustBeGreaterThanZero": "{fieldName} must be greater than 0.",
+  "@fieldMustBeGreaterThanZero": {
+    "placeholders": {
+      "fieldName": {}
     }
   },
   "rawJson": "Raw JSON",

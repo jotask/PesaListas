@@ -78,7 +78,9 @@ class _VoteSummaryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final voteLabel = voteCount == 1 ? 'vote' : 'votes';
+    final voteLabel = voteCount == 1
+        ? context.l10n.voteCountOne
+        : context.l10n.voteCountMany(voteCount);
 
     return Card(
       child: Padding(
@@ -92,10 +94,7 @@ class _VoteSummaryHeader extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: _SummaryValue(
-                label: context.l10n.votes,
-                value: '$voteCount $voteLabel',
-              ),
+              child: _SummaryValue(label: context.l10n.votes, value: voteLabel),
             ),
             Expanded(
               child: _SummaryValue(

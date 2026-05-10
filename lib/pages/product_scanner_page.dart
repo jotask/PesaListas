@@ -1209,7 +1209,7 @@ class _AddToShoppingListCard extends StatelessWidget {
                     enabled: productWasFound && !loading,
                     decoration: InputDecoration(
                       labelText: context.l10n.unit,
-                      hintText: 'pcs',
+                      hintText: context.l10n.unitPcsHint,
                       prefixIcon: const Icon(Icons.scale_outlined),
                     ),
                   ),

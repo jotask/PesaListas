@@ -94,12 +94,16 @@ class _PeopleHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitleParts = <String>[
-      '$memberCount ${memberCount == 1 ? 'member' : 'members'}',
+      memberCount == 1
+          ? context.l10n.memberCountOne
+          : context.l10n.memberCountMany(memberCount),
     ];
 
     if (pendingInviteCount > 0) {
       subtitleParts.add(
-        '$pendingInviteCount pending ${pendingInviteCount == 1 ? 'invite' : 'invites'}',
+        pendingInviteCount == 1
+            ? context.l10n.pendingInviteCountOne
+            : context.l10n.pendingInviteCountMany(pendingInviteCount),
       );
     }
 

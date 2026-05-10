@@ -1310,8 +1310,46 @@ class AppLocalizationsEs extends AppLocalizations {
   String get people => 'Personas';
 
   @override
+  String get instructionsExampleHint =>
+      '1. Corta las verduras\n2. Cocina la pasta\n3. Mézclalo todo';
+
+  @override
+  String get minutesAbbreviation => 'min';
+
+  @override
   String pendingRole(Object role) {
     return 'Pendiente • $role';
+  }
+
+  @override
+  String get memberCountOne => '1 miembro';
+
+  @override
+  String memberCountMany(Object count) {
+    return '$count miembros';
+  }
+
+  @override
+  String get pendingInviteCountOne => '1 invitación pendiente';
+
+  @override
+  String pendingInviteCountMany(Object count) {
+    return '$count invitaciones pendientes';
+  }
+
+  @override
+  String fieldMustBeWholeNumber(Object fieldName) {
+    return '$fieldName debe ser un número entero.';
+  }
+
+  @override
+  String fieldCannotBeNegative(Object fieldName) {
+    return '$fieldName no puede ser negativo.';
+  }
+
+  @override
+  String fieldMustBeGreaterThanZero(Object fieldName) {
+    return '$fieldName debe ser mayor que 0.';
   }
 
   @override

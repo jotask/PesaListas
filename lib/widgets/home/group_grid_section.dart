@@ -129,9 +129,9 @@ class _GroupGridCard extends StatelessWidget {
     final count = members.length;
 
     if (count == 0) return context.l10n.noMembersLoaded;
-    if (count == 1) return '1 member';
+    if (count == 1) return context.l10n.memberCountOne;
 
-    return '$count members';
+    return context.l10n.memberCountMany(count);
   }
 
   @override

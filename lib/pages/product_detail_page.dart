@@ -1046,7 +1046,7 @@ class _AddProductToShoppingCard extends StatelessWidget {
                     enabled: productWasFound && !loading,
                     decoration: InputDecoration(
                       labelText: context.l10n.unit,
-                      hintText: 'pcs',
+                      hintText: context.l10n.unitPcsHint,
                       prefixIcon: Icon(Icons.scale_outlined),
                     ),
                   ),

@@ -569,7 +569,7 @@ class _IngredientCard extends StatelessWidget {
     return double.tryParse(value.toString().replaceAll(',', '.'));
   }
 
-  String? priceText() {
+  String? priceText(BuildContext context) {
     final unitPrice = estimatedUnitPrice;
     final totalPrice = estimatedTotalPrice;
 
@@ -578,15 +578,21 @@ class _IngredientCard extends StatelessWidget {
     }
 
     if (unitPrice != null && totalPrice != null) {
-      return '${totalPrice.toStringAsFixed(2)} $priceCurrency total · '
-          '${unitPrice.toStringAsFixed(2)} $priceCurrency each';
+      return context.l10n.priceTotalEach(
+        '${totalPrice.toStringAsFixed(2)} $priceCurrency',
+        '${unitPrice.toStringAsFixed(2)} $priceCurrency',
+      );
     }
 
     if (totalPrice != null) {
-      return '${totalPrice.toStringAsFixed(2)} $priceCurrency total';
+      return context.l10n.priceTotal(
+        '${totalPrice.toStringAsFixed(2)} $priceCurrency',
+      );
     }
 
-    return '${unitPrice!.toStringAsFixed(2)} $priceCurrency each';
+    return context.l10n.priceEach(
+      '${unitPrice!.toStringAsFixed(2)} $priceCurrency',
+    );
   }
 
   String amountText(BuildContext context) {
@@ -634,7 +640,7 @@ class _IngredientCard extends StatelessWidget {
 
     final parts = <String>[amountText(context)];
 
-    final price = priceText();
+    final price = priceText(context);
 
     if (price != null) {
       parts.add(price);

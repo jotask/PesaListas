@@ -2546,11 +2546,65 @@ abstract class AppLocalizations {
   /// **'People'**
   String get people;
 
+  /// No description provided for @instructionsExampleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Chop vegetables\n2. Cook pasta\n3. Mix everything'**
+  String get instructionsExampleHint;
+
+  /// No description provided for @minutesAbbreviation.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get minutesAbbreviation;
+
   /// No description provided for @pendingRole.
   ///
   /// In en, this message translates to:
   /// **'Pending • {role}'**
   String pendingRole(Object role);
+
+  /// No description provided for @memberCountOne.
+  ///
+  /// In en, this message translates to:
+  /// **'1 member'**
+  String get memberCountOne;
+
+  /// No description provided for @memberCountMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String memberCountMany(Object count);
+
+  /// No description provided for @pendingInviteCountOne.
+  ///
+  /// In en, this message translates to:
+  /// **'1 pending invite'**
+  String get pendingInviteCountOne;
+
+  /// No description provided for @pendingInviteCountMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending invites'**
+  String pendingInviteCountMany(Object count);
+
+  /// No description provided for @fieldMustBeWholeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'{fieldName} must be a whole number.'**
+  String fieldMustBeWholeNumber(Object fieldName);
+
+  /// No description provided for @fieldCannotBeNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'{fieldName} cannot be negative.'**
+  String fieldCannotBeNegative(Object fieldName);
+
+  /// No description provided for @fieldMustBeGreaterThanZero.
+  ///
+  /// In en, this message translates to:
+  /// **'{fieldName} must be greater than 0.'**
+  String fieldMustBeGreaterThanZero(Object fieldName);
 
   /// No description provided for @rawJson.
   ///

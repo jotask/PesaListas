@@ -88,6 +88,7 @@ class _EditRecipeInfoPageState extends State<EditRecipeInfoPage> {
   }
 
   int? parseOptionalPositiveInt({
+    required BuildContext context,
     required String value,
     required String fieldName,
     bool allowZero = true,
@@ -101,15 +102,15 @@ class _EditRecipeInfoPageState extends State<EditRecipeInfoPage> {
     final parsed = int.tryParse(text);
 
     if (parsed == null) {
-      throw '$fieldName must be a whole number.';
+      throw context.l10n.fieldMustBeWholeNumber(fieldName);
     }
 
     if (allowZero && parsed < 0) {
-      throw '$fieldName cannot be negative.';
+      throw context.l10n.fieldCannotBeNegative(fieldName);
     }
 
     if (!allowZero && parsed <= 0) {
-      throw '$fieldName must be greater than 0.';
+      throw context.l10n.fieldMustBeGreaterThanZero(fieldName);
     }
 
     return parsed;
@@ -128,16 +129,19 @@ class _EditRecipeInfoPageState extends State<EditRecipeInfoPage> {
 
     try {
       final prepTime = parseOptionalPositiveInt(
+        context: context,
         value: prepTimeController.text,
         fieldName: context.l10n.prepTime,
       );
 
       final cookTime = parseOptionalPositiveInt(
+        context: context,
         value: cookTimeController.text,
         fieldName: context.l10n.cookTime,
       );
 
       final servings = parseOptionalPositiveInt(
+        context: context,
         value: servingsController.text,
         fieldName: context.l10n.servings,
         allowZero: false,
@@ -213,7 +217,7 @@ class _EditRecipeInfoPageState extends State<EditRecipeInfoPage> {
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           labelText: context.l10n.prep,
-                          suffixText: 'min',
+                          suffixText: context.l10n.minutesAbbreviation,
                           prefixIcon: const Icon(Icons.timer_outlined),
                         ),
                         textInputAction: TextInputAction.next,
@@ -227,7 +231,7 @@ class _EditRecipeInfoPageState extends State<EditRecipeInfoPage> {
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           labelText: context.l10n.cook,
-                          suffixText: 'min',
+                          suffixText: context.l10n.minutesAbbreviation,
                           prefixIcon: const Icon(
                             Icons.local_fire_department_outlined,
                           ),

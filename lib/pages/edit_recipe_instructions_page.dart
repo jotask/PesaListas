@@ -77,8 +77,7 @@ class _EditRecipeInstructionsPageState
                   autofocus: true,
                   decoration: InputDecoration(
                     labelText: context.l10n.instructions,
-                    hintText:
-                        '1. Chop vegetables\n2. Cook pasta\n3. Mix everything',
+                    hintText: context.l10n.instructionsExampleHint,
                     alignLabelWithHint: true,
                     prefixIcon: const Icon(Icons.edit_note_outlined),
                   ),

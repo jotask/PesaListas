@@ -1291,8 +1291,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get people => 'People';
 
   @override
+  String get instructionsExampleHint =>
+      '1. Chop vegetables\n2. Cook pasta\n3. Mix everything';
+
+  @override
+  String get minutesAbbreviation => 'min';
+
+  @override
   String pendingRole(Object role) {
     return 'Pending • $role';
+  }
+
+  @override
+  String get memberCountOne => '1 member';
+
+  @override
+  String memberCountMany(Object count) {
+    return '$count members';
+  }
+
+  @override
+  String get pendingInviteCountOne => '1 pending invite';
+
+  @override
+  String pendingInviteCountMany(Object count) {
+    return '$count pending invites';
+  }
+
+  @override
+  String fieldMustBeWholeNumber(Object fieldName) {
+    return '$fieldName must be a whole number.';
+  }
+
+  @override
+  String fieldCannotBeNegative(Object fieldName) {
+    return '$fieldName cannot be negative.';
+  }
+
+  @override
+  String fieldMustBeGreaterThanZero(Object fieldName) {
+    return '$fieldName must be greater than 0.';
   }
 
   @override

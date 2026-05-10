@@ -637,8 +637,41 @@
   "openProductFromShoppingListToAddIt": "Abre este producto desde una lista de la compra para añadirlo.",
   "cannotAddUnknownProduct": "No se puede añadir un producto desconocido.",
   "createShoppingItemFromCachedProduct": "Crear un item de compra desde este producto cacheado.",
+  "instructionsExampleHint": "1. Corta las verduras\n2. Cocina la pasta\n3. Mézclalo todo",
   "estimatedUnitPrice": "Precio unitario estimado",
-
+  "memberCountOne": "1 miembro",
+  "memberCountMany": "{count} miembros",
+  "minutesAbbreviation": "min",
+  "@memberCountMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "pendingInviteCountOne": "1 invitación pendiente",
+  "pendingInviteCountMany": "{count} invitaciones pendientes",
+  "@pendingInviteCountMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "fieldMustBeWholeNumber": "{fieldName} debe ser un número entero.",
+  "@fieldMustBeWholeNumber": {
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
+  "fieldCannotBeNegative": "{fieldName} no puede ser negativo.",
+  "@fieldCannotBeNegative": {
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
+  "fieldMustBeGreaterThanZero": "{fieldName} debe ser mayor que 0.",
+  "@fieldMustBeGreaterThanZero": {
+    "placeholders": {
+      "fieldName": {}
+    }
+  },
   "productLinkedLatestGroupPriceLoaded": "Producto enlazado. Se ha cargado el último precio del grupo.",
   "productLinkedNoGroupPriceSavedYet": "Producto enlazado. Todavía no hay precio guardado para este grupo.",
   "productLinkRemoved": "Enlace de producto eliminado.",

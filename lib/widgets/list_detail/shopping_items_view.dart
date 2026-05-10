@@ -773,10 +773,10 @@ class _ShoppingItemCard extends StatelessWidget {
     }
 
     if (total != null) {
-      return '${_formatMoney(total, priceCurrency)} total';
+      return context.l10n.priceTotal(_formatMoney(total, priceCurrency));
     }
 
-    return '${_formatMoney(unitPrice!, priceCurrency)} each';
+    return context.l10n.priceEach(_formatMoney(unitPrice!, priceCurrency));
   }
 
   @override
