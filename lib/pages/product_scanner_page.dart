@@ -210,14 +210,14 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
     if (groupId == null || groupId.isEmpty) {
       setState(() {
         shoppingValidationMessage =
-            'Open the scanner from a shopping list to add products.';
+            context.l10n.openScannerFromShoppingListToAddProducts;
       });
       return;
     }
 
     if (currentProduct == null || !productWasFound) {
       setState(() {
-        shoppingValidationMessage = 'Scan or load a known product first.';
+        shoppingValidationMessage = context.l10n.scanOrLoadKnownProductFirst;
       });
       return;
     }
@@ -226,7 +226,7 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
 
     if (name.isEmpty) {
       setState(() {
-        shoppingValidationMessage = 'Shopping item name is required.';
+        shoppingValidationMessage = context.l10n.shoppingItemNameRequired;
       });
       return;
     }
@@ -238,7 +238,7 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
 
     if (quantityText.isNotEmpty && quantity == null) {
       setState(() {
-        shoppingValidationMessage = 'Quantity must be a valid number.';
+        shoppingValidationMessage = context.l10n.quantityMustBeANumber;
       });
       return;
     }
@@ -271,7 +271,7 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Added to shopping list.')));
+      ).showSnackBar(SnackBar(content: Text(context.l10n.addedToShoppingList)));
     } catch (error) {
       if (!mounted) return;
 
@@ -312,22 +312,21 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
 
     if (groupId == null || groupId.isEmpty) {
       setState(() {
-        priceValidationMessage =
-            'Open the scanner from a group or shopping list to save prices.';
+        priceValidationMessage = context.l10n.openScannerFromGroupToSavePrices;
       });
       return;
     }
 
     if (product == null || barcode.isEmpty) {
       setState(() {
-        priceValidationMessage = 'Scan or load a product first.';
+        priceValidationMessage = context.l10n.scanOrLoadProductFirst;
       });
       return;
     }
 
     if (!productWasFound) {
       setState(() {
-        priceValidationMessage = 'Cannot save a price for an unknown product.';
+        priceValidationMessage = context.l10n.cannotSavePriceForUnknownProduct;
       });
       return;
     }
@@ -336,14 +335,14 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
 
     if (price == null) {
       setState(() {
-        priceValidationMessage = 'Price must be a valid number.';
+        priceValidationMessage = context.l10n.priceMustBeValidNumber;
       });
       return;
     }
 
     if (price < 0) {
       setState(() {
-        priceValidationMessage = 'Price cannot be negative.';
+        priceValidationMessage = context.l10n.priceCannotBeNegative;
       });
       return;
     }
@@ -374,7 +373,7 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Price saved.')));
+      ).showSnackBar(SnackBar(content: Text(context.l10n.priceSaved)));
     } catch (error) {
       if (!mounted) return;
 
@@ -813,13 +812,13 @@ class _ProductPriceCard extends StatelessWidget {
   final String? validationMessage;
   final VoidCallback onSave;
 
-  String latestPriceText() {
+  String latestPriceText(BuildContext context) {
     final price = latestPrice?[AppProductPriceFields.price];
     final currency = latestPrice?[AppProductPriceFields.currency] ?? 'EUR';
     final store = latestPrice?[AppProductPriceFields.storeName]?.toString();
 
     if (price == null) {
-      return 'No saved price for this group yet.';
+      return context.l10n.noSavedPriceForGroupYet;
     }
 
     if (store == null || store.trim().isEmpty) {
@@ -848,9 +847,9 @@ class _ProductPriceCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Product lookup works here. To save prices, open this scanner from a group or shopping list.',
+                  context.l10n.productLookupOnlyOpenFromGroupToSavePrices,
                 ),
               ),
             ],
@@ -879,15 +878,18 @@ class _ProductPriceCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Group price',
+                      Text(
+                        context.l10n.groupPrice,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       const SizedBox(height: 3),
-                      Text(latestPriceText(), style: theme.textTheme.bodySmall),
+                      Text(
+                        latestPriceText(context),
+                        style: theme.textTheme.bodySmall,
+                      ),
                     ],
                   ),
                 ),
@@ -900,8 +902,8 @@ class _ProductPriceCard extends StatelessWidget {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
-                labelText: 'Price',
+              decoration: InputDecoration(
+                labelText: context.l10n.price,
                 hintText: '2.49',
                 prefixIcon: Icon(Icons.euro_outlined),
                 suffixText: 'EUR',
@@ -911,8 +913,8 @@ class _ProductPriceCard extends StatelessWidget {
             TextField(
               controller: storeNameController,
               enabled: productWasFound && !savingPrice,
-              decoration: const InputDecoration(
-                labelText: 'Store',
+              decoration: InputDecoration(
+                labelText: context.l10n.store,
                 hintText: 'Mercadona',
                 prefixIcon: Icon(Icons.store_outlined),
               ),
@@ -921,9 +923,9 @@ class _ProductPriceCard extends StatelessWidget {
             TextField(
               controller: noteController,
               enabled: productWasFound && !savingPrice,
-              decoration: const InputDecoration(
-                labelText: 'Note',
-                hintText: 'Optional',
+              decoration: InputDecoration(
+                labelText: context.l10n.note,
+                hintText: context.l10n.optional,
                 prefixIcon: Icon(Icons.notes_outlined),
               ),
               minLines: 2,
@@ -943,7 +945,9 @@ class _ProductPriceCard extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save_outlined),
-              label: Text(savingPrice ? 'Saving...' : 'Save price'),
+              label: Text(
+                savingPrice ? context.l10n.saving : context.l10n.savePrice,
+              ),
             ),
           ],
         ),
@@ -1127,9 +1131,9 @@ class _AddToShoppingListCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Open this scanner from a shopping list to add products directly.',
+                  context.l10n.openScannerFromShoppingListToAddDirectly,
                 ),
               ),
             ],
@@ -1154,19 +1158,19 @@ class _AddToShoppingListCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Add to shopping list',
+                        context.l10n.addToShoppingList,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       SizedBox(height: 3),
-                      Text('Create a shopping item from this product.'),
+                      Text(context.l10n.createShoppingItemFromProduct),
                     ],
                   ),
                 ),
@@ -1176,9 +1180,9 @@ class _AddToShoppingListCard extends StatelessWidget {
             TextField(
               controller: nameController,
               enabled: productWasFound && !loading,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                prefixIcon: Icon(Icons.shopping_basket_outlined),
+              decoration: InputDecoration(
+                labelText: context.l10n.name,
+                prefixIcon: const Icon(Icons.shopping_basket_outlined),
               ),
             ),
             const SizedBox(height: 12),
@@ -1191,10 +1195,10 @@ class _AddToShoppingListCard extends StatelessWidget {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Quantity',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.quantity,
                       hintText: '1',
-                      prefixIcon: Icon(Icons.numbers_outlined),
+                      prefixIcon: const Icon(Icons.numbers_outlined),
                     ),
                   ),
                 ),
@@ -1203,10 +1207,10 @@ class _AddToShoppingListCard extends StatelessWidget {
                   child: TextField(
                     controller: unitController,
                     enabled: productWasFound && !loading,
-                    decoration: const InputDecoration(
-                      labelText: 'Unit',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.unit,
                       hintText: 'pcs',
-                      prefixIcon: Icon(Icons.scale_outlined),
+                      prefixIcon: const Icon(Icons.scale_outlined),
                     ),
                   ),
                 ),
@@ -1226,7 +1230,9 @@ class _AddToShoppingListCard extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.add_shopping_cart_outlined),
-              label: Text(loading ? 'Adding...' : 'Add to shopping list'),
+              label: Text(
+                loading ? context.l10n.adding : context.l10n.addToShoppingList,
+              ),
             ),
           ],
         ),

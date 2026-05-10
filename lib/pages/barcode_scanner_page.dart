@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class BarcodeScannerPage extends StatefulWidget {
   const BarcodeScannerPage({super.key});
@@ -49,15 +50,15 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan barcode'),
+        title: Text(context.l10n.scanBarcodeTitle),
         actions: [
           IconButton(
-            tooltip: 'Flash',
+            tooltip: context.l10n.flash,
             icon: const Icon(Icons.flash_on),
             onPressed: controller.toggleTorch,
           ),
           IconButton(
-            tooltip: 'Switch camera',
+            tooltip: context.l10n.switchCamera,
             icon: const Icon(Icons.cameraswitch_outlined),
             onPressed: controller.switchCamera,
           ),

@@ -1277,6 +1277,44 @@ class AppLocalizationsEs extends AppLocalizations {
   String get unitPcsHint => 'uds';
 
   @override
+  String get productBrand => 'Marca';
+
+  @override
+  String get productQuantity => 'Cantidad';
+
+  @override
+  String get productCategories => 'Categorías';
+
+  @override
+  String get productSource => 'Fuente';
+
+  @override
+  String get productStatus => 'Estado';
+
+  @override
+  String get createdAt => 'Creado el';
+
+  @override
+  String get updatedAt => 'Actualizado el';
+
+  @override
+  String get scanBarcodeTitle => 'Escanear código de barras';
+
+  @override
+  String get flash => 'Flash';
+
+  @override
+  String get switchCamera => 'Cambiar cámara';
+
+  @override
+  String get people => 'Personas';
+
+  @override
+  String pendingRole(Object role) {
+    return 'Pendiente • $role';
+  }
+
+  @override
   String get rawJson => 'JSON original';
 
   @override
@@ -1977,15 +2015,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get rawProductInfoSubtitle =>
       'Respuesta completa del producto desde OpenFoodFacts.';
-
-  @override
-  String get productBrand => 'Marca';
-
-  @override
-  String get productQuantity => 'Cantidad';
-
-  @override
-  String get productCategories => 'Categorías';
 
   @override
   String get productIngredients => 'Ingredientes';

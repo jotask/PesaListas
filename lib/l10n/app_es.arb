@@ -542,6 +542,23 @@
   "novaGroup": "Grupo NOVA",
   "ecoscore": "Ecoscore",
   "fetchedAt": "Obtenido el",
+  "productBrand": "Marca",
+  "productQuantity": "Cantidad",
+  "productCategories": "Categorías",
+  "productSource": "Fuente",
+  "productStatus": "Estado",
+  "createdAt": "Creado el",
+  "updatedAt": "Actualizado el",
+  "scanBarcodeTitle": "Escanear código de barras",
+  "flash": "Flash",
+  "switchCamera": "Cambiar cámara",
+  "people": "Personas",
+  "pendingRole": "Pendiente • {role}",
+  "@pendingRole": {
+    "placeholders": {
+      "role": {}
+    }
+  },
   "fat": "Grasas",
   "saturatedFat": "Grasas saturadas",
   "carbohydrates": "Carbohidratos",

@@ -409,7 +409,23 @@
   "createShoppingItemFromProduct": "Create a shopping item from this product.",
   "adding": "Adding...",
   "unitPcsHint": "pcs",
-
+  "productBrand": "Brand",
+  "productQuantity": "Quantity",
+  "productCategories": "Categories",
+  "productSource": "Source",
+  "productStatus": "Status",
+  "createdAt": "Created at",
+  "updatedAt": "Updated at",
+  "scanBarcodeTitle": "Scan barcode",
+  "flash": "Flash",
+  "switchCamera": "Switch camera",
+  "people": "People",
+  "pendingRole": "Pending • {role}",
+  "@pendingRole": {
+    "placeholders": {
+      "role": {}
+    }
+  },
   "rawJson": "Raw JSON",
   "noRawJsonStored": "No raw_json stored.",
   "collapse": "Collapse",

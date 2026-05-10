@@ -1258,6 +1258,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unitPcsHint => 'pcs';
 
   @override
+  String get productBrand => 'Brand';
+
+  @override
+  String get productQuantity => 'Quantity';
+
+  @override
+  String get productCategories => 'Categories';
+
+  @override
+  String get productSource => 'Source';
+
+  @override
+  String get productStatus => 'Status';
+
+  @override
+  String get createdAt => 'Created at';
+
+  @override
+  String get updatedAt => 'Updated at';
+
+  @override
+  String get scanBarcodeTitle => 'Scan barcode';
+
+  @override
+  String get flash => 'Flash';
+
+  @override
+  String get switchCamera => 'Switch camera';
+
+  @override
+  String get people => 'People';
+
+  @override
+  String pendingRole(Object role) {
+    return 'Pending • $role';
+  }
+
+  @override
   String get rawJson => 'Raw JSON';
 
   @override
@@ -1943,15 +1981,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rawProductInfoSubtitle => 'Full OpenFoodFacts product payload.';
-
-  @override
-  String get productBrand => 'Brand';
-
-  @override
-  String get productQuantity => 'Quantity';
-
-  @override
-  String get productCategories => 'Categories';
 
   @override
   String get productIngredients => 'Ingredients';

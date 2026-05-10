@@ -231,14 +231,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     if (groupId == null || groupId.trim().isEmpty) {
       setState(() {
         shoppingValidationMessage =
-            'Open this product from a shopping list to add it.';
+            context.l10n.openProductFromShoppingListToAddIt;
       });
       return;
     }
 
     if (!productWasFound) {
       setState(() {
-        shoppingValidationMessage = 'Cannot add an unknown product.';
+        shoppingValidationMessage = context.l10n.cannotAddUnknownProduct;
       });
       return;
     }
@@ -247,7 +247,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     if (itemName.isEmpty) {
       setState(() {
-        shoppingValidationMessage = 'Shopping item name is required.';
+        shoppingValidationMessage = context.l10n.shoppingItemNameRequired;
       });
       return;
     }
@@ -259,7 +259,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     if (quantityText.isNotEmpty && quantity == null) {
       setState(() {
-        shoppingValidationMessage = 'Quantity must be a valid number.';
+        shoppingValidationMessage = context.l10n.quantityMustBeANumber;
       });
       return;
     }
@@ -271,14 +271,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     if (priceText.isNotEmpty && estimatedUnitPrice == null) {
       setState(() {
-        shoppingValidationMessage = 'Price must be a valid number.';
+        shoppingValidationMessage = context.l10n.priceMustBeValidNumber;
       });
       return;
     }
 
     if (estimatedUnitPrice != null && estimatedUnitPrice < 0) {
       setState(() {
-        shoppingValidationMessage = 'Price cannot be negative.';
+        shoppingValidationMessage = context.l10n.priceCannotBeNegative;
       });
       return;
     }
@@ -304,7 +304,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Added to shopping list.')));
+      ).showSnackBar(SnackBar(content: Text(context.l10n.addedToShoppingList)));
     } catch (error) {
       if (!mounted) return;
 
@@ -376,51 +376,51 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               _ProductInfoCard(
                 rows: [
                   _ProductInfoRowData(
-                    label: 'Barcode',
+                    label: context.l10n.barcode,
                     value: text(product[AppProductFields.barcode]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Brand',
+                    label: context.l10n.productBrand,
                     value: text(product[AppProductFields.brand]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Quantity',
+                    label: context.l10n.quantity,
                     value: text(product[AppProductFields.quantity]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Categories',
+                    label: context.l10n.productCategories,
                     value: text(product[AppProductFields.categories]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Nutriscore',
+                    label: context.l10n.nutriscore,
                     value: text(product[AppProductFields.nutriscore]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Nova group',
+                    label: context.l10n.novaGroup,
                     value: text(product[AppProductFields.novaGroup]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Ecoscore',
+                    label: context.l10n.ecoscore,
                     value: text(product[AppProductFields.ecoscore]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Source',
+                    label: context.l10n.productSource,
                     value: text(product[AppProductFields.source]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Status',
+                    label: context.l10n.productStatus,
                     value: text(product[AppProductFields.status]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Fetched at',
+                    label: context.l10n.fetchedAt,
                     value: text(product[AppProductFields.fetchedAt]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Created at',
+                    label: context.l10n.createdAt,
                     value: text(product[AppProductFields.createdAt]),
                   ),
                   _ProductInfoRowData(
-                    label: 'Updated at',
+                    label: context.l10n.updatedAt,
                     value: text(product[AppProductFields.updatedAt]),
                   ),
                 ],
@@ -1017,8 +1017,8 @@ class _AddProductToShoppingCard extends StatelessWidget {
             TextField(
               controller: nameController,
               enabled: productWasFound && !loading,
-              decoration: const InputDecoration(
-                labelText: 'Name',
+              decoration: InputDecoration(
+                labelText: context.l10n.name,
                 prefixIcon: Icon(Icons.shopping_basket_outlined),
               ),
             ),
@@ -1032,8 +1032,8 @@ class _AddProductToShoppingCard extends StatelessWidget {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Quantity',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.quantity,
                       hintText: '1',
                       prefixIcon: Icon(Icons.numbers_outlined),
                     ),
@@ -1044,8 +1044,8 @@ class _AddProductToShoppingCard extends StatelessWidget {
                   child: TextField(
                     controller: unitController,
                     enabled: productWasFound && !loading,
-                    decoration: const InputDecoration(
-                      labelText: 'Unit',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.unit,
                       hintText: 'pcs',
                       prefixIcon: Icon(Icons.scale_outlined),
                     ),
@@ -1081,7 +1081,9 @@ class _AddProductToShoppingCard extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.add_shopping_cart_outlined),
-              label: Text(loading ? 'Adding...' : 'Add to shopping list'),
+              label: Text(
+                loading ? context.l10n.adding : context.l10n.addToShoppingList,
+              ),
             ),
           ],
         ),

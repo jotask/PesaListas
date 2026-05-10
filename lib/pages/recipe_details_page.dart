@@ -326,7 +326,10 @@ class _RecipeStatsWrap extends StatelessWidget {
         if (hasEstimatedCost)
           _RecipeInfoChip(
             icon: Icons.euro_outlined,
-            label: 'Est. ${estimatedCost.toStringAsFixed(2)} $currency',
+            label: context.l10n.estimatedAmount(
+              estimatedCost.toStringAsFixed(2),
+              currency,
+            ),
           ),
       ],
     );

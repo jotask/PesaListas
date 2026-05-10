@@ -2480,6 +2480,78 @@ abstract class AppLocalizations {
   /// **'pcs'**
   String get unitPcsHint;
 
+  /// No description provided for @productBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand'**
+  String get productBrand;
+
+  /// No description provided for @productQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get productQuantity;
+
+  /// No description provided for @productCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get productCategories;
+
+  /// No description provided for @productSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get productSource;
+
+  /// No description provided for @productStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get productStatus;
+
+  /// No description provided for @createdAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created at'**
+  String get createdAt;
+
+  /// No description provided for @updatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated at'**
+  String get updatedAt;
+
+  /// No description provided for @scanBarcodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcode'**
+  String get scanBarcodeTitle;
+
+  /// No description provided for @flash.
+  ///
+  /// In en, this message translates to:
+  /// **'Flash'**
+  String get flash;
+
+  /// No description provided for @switchCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch camera'**
+  String get switchCamera;
+
+  /// No description provided for @people.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get people;
+
+  /// No description provided for @pendingRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending • {role}'**
+  String pendingRole(Object role);
+
   /// No description provided for @rawJson.
   ///
   /// In en, this message translates to:
@@ -3727,24 +3799,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Full OpenFoodFacts product payload.'**
   String get rawProductInfoSubtitle;
-
-  /// No description provided for @productBrand.
-  ///
-  /// In en, this message translates to:
-  /// **'Brand'**
-  String get productBrand;
-
-  /// No description provided for @productQuantity.
-  ///
-  /// In en, this message translates to:
-  /// **'Quantity'**
-  String get productQuantity;
-
-  /// No description provided for @productCategories.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories'**
-  String get productCategories;
 
   /// No description provided for @productIngredients.
   ///

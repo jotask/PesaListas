@@ -233,9 +233,9 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
             priceController.text = price.toString();
           }
 
-          productLinkMessage = 'Product linked. Latest group price loaded.';
+          productLinkMessage = context.l10n.productLinkedLatestGroupPriceLoaded;
         } else {
-          productLinkMessage = 'Product linked. No group price saved yet.';
+          productLinkMessage = context.l10n.productLinkedNoGroupPriceSavedYet;
         }
       });
     } catch (error) {
@@ -256,7 +256,7 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
       linkedBarcode = null;
       linkedProductName = null;
       linkedProductImageUrl = null;
-      productLinkMessage = 'Product link removed.';
+      productLinkMessage = context.l10n.productLinkRemoved;
     });
   }
 
@@ -284,12 +284,12 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
     final estimatedUnitPrice = parseOptionalDouble(priceText);
 
     if (priceText.isNotEmpty && estimatedUnitPrice == null) {
-      setState(() => validationMessage = 'Price must be a valid number.');
+      setState(() => validationMessage = context.l10n.priceMustBeValidNumber);
       return;
     }
 
     if (estimatedUnitPrice != null && estimatedUnitPrice < 0) {
-      setState(() => validationMessage = 'Price cannot be negative.');
+      setState(() => validationMessage = context.l10n.priceCannotBeNegative);
       return;
     }
 
@@ -406,7 +406,7 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
                     decimal: true,
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Estimated unit price',
+                    labelText: context.l10n.estimatedUnitPrice,
                     hintText: '0.50',
                     prefixIcon: const Icon(Icons.euro_outlined),
                     suffixText: priceCurrency,

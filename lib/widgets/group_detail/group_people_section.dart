@@ -107,7 +107,7 @@ class _PeopleHeader extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            'People',
+            context.l10n.people,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
@@ -385,7 +385,7 @@ class _PendingInvitePersonCard extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Pending • $role',
+                    context.l10n.pendingRole(role),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
