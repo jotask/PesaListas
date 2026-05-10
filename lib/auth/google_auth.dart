@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> signInWithGoogleNative() async {
   const webClientId =
-      '826964057612-6pfgome4ijjs83hnfkvm55661uut02f2.apps.googleusercontent.com';
+      '826964057612-de6bpjtahlvbr95vofnst81lhhvlimem.apps.googleusercontent.com';
 
   final googleSignIn = GoogleSignIn.instance;
 
