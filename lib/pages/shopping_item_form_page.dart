@@ -4,6 +4,7 @@ import 'package:pesalistas/core/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/pages/catalog_item_price_page.dart';
 import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
@@ -147,6 +148,111 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     });
   }
 
+  double? unitPriceFromPriceRow(
+    Map<String, dynamic> priceRow, {
+    String? targetUnit,
+  }) {
+    final price = parseOptionalDouble(
+      priceRow[AppProductPriceFields.price]?.toString() ?? '',
+    );
+
+    if (price == null) {
+      return null;
+    }
+
+    final priceQuantity =
+        parseOptionalDouble(
+          priceRow[AppProductPriceFields.priceQuantity]?.toString() ?? '',
+        ) ??
+        1;
+
+    if (priceQuantity <= 0) {
+      return price;
+    }
+
+    final priceUnit = textOrNull(priceRow[AppProductPriceFields.priceUnit]);
+
+    final normalizedPriceUnit = priceUnit?.toLowerCase();
+    final normalizedTargetUnit = targetUnit?.toLowerCase();
+
+    if (normalizedPriceUnit == null ||
+        normalizedTargetUnit == null ||
+        normalizedPriceUnit == normalizedTargetUnit) {
+      return price / priceQuantity;
+    }
+
+    if (normalizedPriceUnit == 'kg' && normalizedTargetUnit == 'g') {
+      return price / (priceQuantity * 1000);
+    }
+
+    if (normalizedPriceUnit == 'g' && normalizedTargetUnit == 'kg') {
+      return price / (priceQuantity / 1000);
+    }
+
+    if ((normalizedPriceUnit == 'l' || normalizedPriceUnit == 'lt') &&
+        normalizedTargetUnit == 'ml') {
+      return price / (priceQuantity * 1000);
+    }
+
+    if (normalizedPriceUnit == 'ml' &&
+        (normalizedTargetUnit == 'l' || normalizedTargetUnit == 'lt')) {
+      return price / (priceQuantity / 1000);
+    }
+
+    return price / priceQuantity;
+  }
+
+  Future<void> loadLatestGenericItemPrice() async {
+    final catalogItemId = linkedCatalogItemId;
+
+    if (catalogItemId == null || catalogItemId.isEmpty) return;
+
+    setState(() {
+      loadingProductPrice = true;
+      productLinkMessage = null;
+    });
+
+    try {
+      final latestPrice = await productRepository.getLatestCatalogItemPrice(
+        groupId: widget.groupId,
+        catalogItemId: catalogItemId,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        if (latestPrice != null) {
+          final targetUnit =
+              textOrNull(unitController.text) ?? linkedCatalogItemDefaultUnit;
+
+          final unitPrice = unitPriceFromPriceRow(
+            latestPrice,
+            targetUnit: targetUnit,
+          );
+
+          if (unitPrice != null) {
+            priceController.text = unitPrice.toString();
+          }
+
+          productLinkMessage =
+              'Generic item linked. Latest group price loaded.';
+        } else {
+          productLinkMessage = 'Generic item linked. No group price saved yet.';
+        }
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        productLinkMessage = error.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() => loadingProductPrice = false);
+      }
+    }
+  }
+
   Future<void> selectGenericItem() async {
     final item = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(builder: (_) => const CatalogItemPickerPage()),
@@ -179,6 +285,8 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       productLinkMessage = 'Generic item linked.';
       validationMessage = null;
     });
+
+    await loadLatestGenericItemPrice();
   }
 
   void clearGenericItemLink() {
@@ -222,6 +330,30 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     }
 
     return quantity * price;
+  }
+
+  Future<void> openGenericItemPricePage() async {
+    final catalogItemId = linkedCatalogItemId;
+    final catalogItemName = linkedCatalogItemName ?? nameController.text.trim();
+
+    if (catalogItemId == null || catalogItemId.isEmpty) return;
+    if (catalogItemName.isEmpty) return;
+
+    final savedPrice = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        builder: (_) => CatalogItemPricePage(
+          groupId: widget.groupId,
+          catalogItemId: catalogItemId,
+          catalogItemName: catalogItemName,
+          defaultUnit:
+              textOrNull(unitController.text) ?? linkedCatalogItemDefaultUnit,
+        ),
+      ),
+    );
+
+    if (savedPrice == null) return;
+
+    await loadLatestGenericItemPrice();
   }
 
   Future<void> selectProduct() async {
@@ -403,10 +535,13 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
               catalogItemId: linkedCatalogItemId,
               catalogItemName: linkedCatalogItemName,
               defaultUnit: linkedCatalogItemDefaultUnit,
+              loading: hasGenericItemData ? loadingProductPrice : false,
+              message: hasGenericItemData ? productLinkMessage : null,
               onSelectGenericItem: selectGenericItem,
               onClearGenericItem: hasGenericItemData
                   ? clearGenericItemLink
                   : null,
+              onSavePrice: hasGenericItemData ? openGenericItemPricePage : null,
             ),
             const SizedBox(height: 16),
             AppFormSectionCard(
@@ -720,15 +855,21 @@ class _LinkedGenericItemActionsCard extends StatelessWidget {
     required this.catalogItemId,
     required this.catalogItemName,
     required this.defaultUnit,
+    required this.loading,
+    required this.message,
     required this.onSelectGenericItem,
     required this.onClearGenericItem,
+    required this.onSavePrice,
   });
 
   final String? catalogItemId;
   final String? catalogItemName;
   final String? defaultUnit;
+  final bool loading;
+  final String? message;
   final VoidCallback onSelectGenericItem;
   final VoidCallback? onClearGenericItem;
+  final VoidCallback? onSavePrice;
 
   bool get hasGenericItemData {
     return catalogItemId != null;
@@ -789,26 +930,41 @@ class _LinkedGenericItemActionsCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (message != null) ...[
+              const SizedBox(height: 12),
+              _InfoMessage(message: message!),
+            ],
+            if (loading) ...[
+              const SizedBox(height: 12),
+              const LinearProgressIndicator(),
+            ],
             const SizedBox(height: 14),
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onSelectGenericItem,
-                    icon: const Icon(Icons.category_outlined),
-                    label: Text(
-                      hasGenericItemData
-                          ? 'Change generic item'
-                          : 'Link generic item',
-                    ),
+                OutlinedButton.icon(
+                  onPressed: onSelectGenericItem,
+                  icon: const Icon(Icons.category_outlined),
+                  label: Text(
+                    hasGenericItemData
+                        ? 'Change generic item'
+                        : 'Link generic item',
                   ),
                 ),
+                if (onSavePrice != null) ...[
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    onPressed: onSavePrice,
+                    icon: const Icon(Icons.euro_outlined),
+                    label: const Text('Save group price'),
+                  ),
+                ],
                 if (onClearGenericItem != null) ...[
-                  const SizedBox(width: 8),
-                  IconButton(
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
                     onPressed: onClearGenericItem,
                     icon: const Icon(Icons.link_off_outlined),
-                    tooltip: 'Remove generic item link',
+                    label: const Text('Remove generic item link'),
                   ),
                 ],
               ],

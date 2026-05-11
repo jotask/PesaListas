@@ -228,6 +228,16 @@ class ProductRepository {
     return null;
   }
 
+  String? nullableText(String? value) {
+    final text = value?.trim();
+
+    if (text == null || text.isEmpty) {
+      return null;
+    }
+
+    return text;
+  }
+
   int? intOrNull(dynamic value) {
     if (value == null) return null;
 
@@ -244,6 +254,80 @@ class ProductRepository {
     if (value is num) return value.toDouble();
 
     return double.tryParse(value.toString());
+  }
+
+  Future<List<Map<String, dynamic>>> getPricesForCatalogItem({
+    required String catalogItemId,
+    required String groupId,
+    int limit = 50,
+  }) async {
+    final response = await client
+        .from(productPricesTable)
+        .select()
+        .eq(AppProductPriceFields.groupId, groupId)
+        .eq(AppProductPriceFields.catalogItemId, catalogItemId)
+        .order(AppProductPriceFields.observedAt, ascending: false)
+        .limit(limit);
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<Map<String, dynamic>?> getLatestCatalogItemPrice({
+    required String groupId,
+    required String catalogItemId,
+  }) async {
+    final result = await client
+        .from(productPricesTable)
+        .select()
+        .eq(AppProductPriceFields.groupId, groupId)
+        .eq(AppProductPriceFields.catalogItemId, catalogItemId)
+        .order(AppProductPriceFields.observedAt, ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    return result;
+  }
+
+  Future<Map<String, dynamic>> saveCatalogItemPrice({
+    required String groupId,
+    required String catalogItemId,
+    required double price,
+    String currency = AppConfig.defaultCurrency,
+    double priceQuantity = 1,
+    String? priceUnit,
+    String? storeName,
+    String? note,
+  }) async {
+    if (catalogItemId.trim().isEmpty) {
+      throw ArgumentError('Catalog item id is required.');
+    }
+
+    if (priceQuantity <= 0) {
+      throw ArgumentError('Price quantity must be greater than 0.');
+    }
+
+    final row = {
+      AppProductPriceFields.groupId: groupId,
+      AppProductPriceFields.barcode: null,
+      AppProductPriceFields.catalogItemId: catalogItemId,
+      AppProductPriceFields.price: price,
+      AppProductPriceFields.currency: currency,
+      AppProductPriceFields.priceQuantity: priceQuantity,
+      AppProductPriceFields.priceUnit: nullableText(priceUnit),
+      AppProductPriceFields.storeName: nullableText(storeName),
+      AppProductPriceFields.note: nullableText(note),
+      AppProductPriceFields.observedAt: DateTime.now()
+          .toUtc()
+          .toIso8601String(),
+    };
+
+    final result = await client
+        .from(productPricesTable)
+        .insert(row)
+        .select()
+        .single();
+
+    return result;
   }
 
   Future<Map<String, dynamic>?> getLatestPrice({
@@ -267,6 +351,8 @@ class ProductRepository {
     required String barcode,
     required double price,
     String currency = AppConfig.defaultCurrency,
+    double priceQuantity = 1,
+    String? priceUnit,
     String? storeName,
     String? note,
   }) async {
@@ -275,13 +361,11 @@ class ProductRepository {
       AppProductPriceFields.barcode: barcode,
       AppProductPriceFields.price: price,
       AppProductPriceFields.currency: currency,
-      AppProductPriceFields.storeName:
-          storeName == null || storeName.trim().isEmpty
-          ? null
-          : storeName.trim(),
-      AppProductPriceFields.note: note == null || note.trim().isEmpty
-          ? null
-          : note.trim(),
+      AppProductPriceFields.catalogItemId: null,
+      AppProductPriceFields.priceQuantity: priceQuantity,
+      AppProductPriceFields.priceUnit: nullableText(priceUnit),
+      AppProductPriceFields.storeName: nullableText(storeName),
+      AppProductPriceFields.note: nullableText(note),
       AppProductPriceFields.observedAt: DateTime.now()
           .toUtc()
           .toIso8601String(),
