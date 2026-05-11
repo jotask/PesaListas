@@ -9,6 +9,7 @@ class AppTables {
   static const items = 'items';
   static const itemVotes = 'item_votes';
   static const itemCompletions = 'item_completions';
+  static const itemAssignees = 'item_assignees';
   static const recipes = 'recipes';
   static const recipeIngredients = 'recipe_ingredients';
   static const mealPlans = 'meal_plans';

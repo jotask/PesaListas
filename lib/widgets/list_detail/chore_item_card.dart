@@ -4,6 +4,7 @@ import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
+import 'package:pesalistas/widgets/list_detail/assignment_meta_pill.dart';
 
 class ChoreItemCard extends StatelessWidget {
   const ChoreItemCard({
@@ -201,6 +202,7 @@ class ChoreItemCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
+                  AssignmentMetaPill(item: item),
                   _ChoreInfoChip(
                     icon: Icons.repeat,
                     label: hasRecurrence

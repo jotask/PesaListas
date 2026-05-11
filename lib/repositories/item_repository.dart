@@ -1,4 +1,6 @@
 import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/item_assignee_fields.dart';
+import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
@@ -37,6 +39,109 @@ class ItemRepository {
     await _client.from(AppTables.items).delete().eq(AppItemFields.id, itemId);
   }
 
+  String normalizeAssignmentScope(String value) {
+    if (AppItemAssignmentScopes.isValid(value)) {
+      return value;
+    }
+
+    return AppItemAssignmentScopes.none;
+  }
+
+  Future<List<Map<String, dynamic>>> getAssigneesForItem(String itemId) async {
+    final response = await _client
+        .from(AppTables.itemAssignees)
+        .select()
+        .eq(AppItemAssigneeFields.itemId, itemId)
+        .order(AppItemAssigneeFields.createdAt, ascending: true);
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<Map<String, List<Map<String, dynamic>>>> getAssigneesForItems(
+    List<String> itemIds,
+  ) async {
+    final cleanItemIds = itemIds
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (cleanItemIds.isEmpty) {
+      return {};
+    }
+
+    final response = await _client
+        .from(AppTables.itemAssignees)
+        .select()
+        .inFilter(AppItemAssigneeFields.itemId, cleanItemIds)
+        .order(AppItemAssigneeFields.createdAt, ascending: true);
+
+    final rows = List<Map<String, dynamic>>.from(response);
+    final grouped = <String, List<Map<String, dynamic>>>{};
+
+    for (final row in rows) {
+      final itemId = row[AppItemAssigneeFields.itemId]?.toString();
+
+      if (itemId == null || itemId.isEmpty) continue;
+
+      grouped.putIfAbsent(itemId, () => []);
+      grouped[itemId]!.add(row);
+    }
+
+    return grouped;
+  }
+
+  Future<void> replaceAssignees({
+    required String itemId,
+    required List<String> userIds,
+  }) async {
+    final cleanUserIds = userIds
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    await _client
+        .from(AppTables.itemAssignees)
+        .delete()
+        .eq(AppItemAssigneeFields.itemId, itemId);
+
+    if (cleanUserIds.isEmpty) {
+      return;
+    }
+
+    final currentUserId = _client.auth.currentUser?.id;
+
+    final rows = cleanUserIds.map((userId) {
+      return {
+        AppItemAssigneeFields.itemId: itemId,
+        AppItemAssigneeFields.userId: userId,
+        AppItemAssigneeFields.assignedBy: currentUserId,
+      };
+    }).toList();
+
+    await _client.from(AppTables.itemAssignees).insert(rows);
+  }
+
+  Future<void> setItemAssignment({
+    required String itemId,
+    required String assignmentScope,
+    required List<String> assigneeUserIds,
+  }) async {
+    final normalizedScope = normalizeAssignmentScope(assignmentScope);
+
+    await _client
+        .from(AppTables.items)
+        .update({AppItemFields.assignmentScope: normalizedScope})
+        .eq(AppItemFields.id, itemId);
+
+    if (normalizedScope == AppItemAssignmentScopes.specific) {
+      await replaceAssignees(itemId: itemId, userIds: assigneeUserIds);
+    } else {
+      await replaceAssignees(itemId: itemId, userIds: const []);
+    }
+  }
+
   Future<void> updateItem({
     required String itemId,
     required String title,
@@ -48,6 +153,8 @@ class ItemRepository {
     String? recurrenceType,
     int? recurrenceInterval,
     DateTime? nextDueAt,
+    String? assignmentScope,
+    List<String>? assigneeUserIds,
   }) async {
     final values = <String, dynamic>{
       AppItemFields.title: title,
@@ -72,32 +179,76 @@ class ItemRepository {
       });
     }
 
+    if (assignmentScope != null) {
+      values[AppItemFields.assignmentScope] = normalizeAssignmentScope(
+        assignmentScope,
+      );
+    }
+
     await _client
         .from(AppTables.items)
         .update(values)
         .eq(AppItemFields.id, itemId);
+
+    if (assignmentScope != null) {
+      final normalizedScope = normalizeAssignmentScope(assignmentScope);
+
+      if (normalizedScope == AppItemAssignmentScopes.specific) {
+        await replaceAssignees(
+          itemId: itemId,
+          userIds: assigneeUserIds ?? const [],
+        );
+      } else {
+        await replaceAssignees(itemId: itemId, userIds: const []);
+      }
+    }
   }
 
-  Future<void> createItem({
+  Future<Map<String, dynamic>> createItem({
     required String listId,
     required String title,
     String? description,
-    int priority = 0,
+    int? priority,
+    String? status,
+    int? position,
     DateTime? deadlineAt,
     String? recurrenceType,
     int? recurrenceInterval,
     DateTime? nextDueAt,
+    String assignmentScope = AppItemAssignmentScopes.none,
+    List<String> assigneeUserIds = const [],
   }) async {
-    await _client.from(AppTables.items).insert({
-      AppItemFields.listId: listId,
-      AppItemFields.title: title,
-      AppItemFields.description: description,
-      AppItemFields.priority: priority,
-      AppItemFields.deadlineAt: deadlineAt?.toIso8601String(),
-      AppItemFields.recurrenceType: recurrenceType,
-      AppItemFields.recurrenceInterval: recurrenceInterval,
-      AppItemFields.nextDueAt: nextDueAt?.toIso8601String(),
-      AppItemFields.createdBy: _client.auth.currentUser!.id,
-    });
+    final normalizedScope = normalizeAssignmentScope(assignmentScope);
+
+    final created = await _client
+        .from(AppTables.items)
+        .insert({
+          AppItemFields.listId: listId,
+          AppItemFields.title: title,
+          AppItemFields.description: description,
+          AppItemFields.priority: priority,
+          AppItemFields.status: status ?? AppItemStatus.open,
+          AppItemFields.position: position,
+          AppItemFields.deadlineAt: deadlineAt?.toIso8601String(),
+          AppItemFields.assignmentScope: normalizedScope,
+          AppItemFields.recurrenceType: recurrenceType,
+          AppItemFields.recurrenceInterval:
+              recurrenceType == AppRecurrenceTypes.everyNDays.value
+              ? recurrenceInterval
+              : null,
+          AppItemFields.nextDueAt: nextDueAt?.toIso8601String(),
+          AppItemFields.createdBy: _client.auth.currentUser!.id,
+        })
+        .select()
+        .single();
+
+    final createdItem = Map<String, dynamic>.from(created);
+    final createdItemId = createdItem[AppItemFields.id].toString();
+
+    if (normalizedScope == AppItemAssignmentScopes.specific) {
+      await replaceAssignees(itemId: createdItemId, userIds: assigneeUserIds);
+    }
+
+    return createdItem;
   }
 }

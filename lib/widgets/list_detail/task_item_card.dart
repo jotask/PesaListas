@@ -5,6 +5,7 @@ import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/priority_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
+import 'package:pesalistas/widgets/list_detail/assignment_meta_pill.dart';
 
 class TaskItemCard extends StatelessWidget {
   const TaskItemCard({
@@ -207,6 +208,7 @@ class TaskItemCard extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
+                    AssignmentMetaPill(item: item),
                     _TaskInfoChip(
                       icon: priorityStyle.icon,
                       label: hasPriority

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/date_formatting.dart';
+import 'package:pesalistas/core/item_assignee_fields.dart';
+import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/item_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
+import 'package:pesalistas/core/member_fields.dart';
 import 'package:pesalistas/core/priority_types.dart';
+import 'package:pesalistas/core/profile_fields.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
@@ -17,6 +21,8 @@ class ItemFormPageResult {
     this.recurrenceType,
     this.recurrenceInterval,
     this.nextDueAt,
+    this.assignmentScope = AppItemAssignmentScopes.none,
+    this.assigneeUserIds = const [],
   });
 
   final String title;
@@ -26,13 +32,23 @@ class ItemFormPageResult {
   final String? recurrenceType;
   final int? recurrenceInterval;
   final DateTime? nextDueAt;
+  final String assignmentScope;
+  final List<String> assigneeUserIds;
 }
 
 class ItemFormPage extends StatefulWidget {
-  const ItemFormPage({super.key, required this.listType, this.item});
+  const ItemFormPage({
+    super.key,
+    this.item,
+    required this.listType,
+    this.groupMembers = const [],
+    this.currentUserId,
+  });
 
-  final String listType;
   final Map<String, dynamic>? item;
+  final String listType;
+  final List<Map<String, dynamic>> groupMembers;
+  final String? currentUserId;
 
   @override
   State<ItemFormPage> createState() => _ItemFormPageState();
@@ -42,6 +58,8 @@ class _ItemFormPageState extends State<ItemFormPage> {
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
   late final TextEditingController recurrenceIntervalController;
+  late String selectedAssignmentScope;
+  late Set<String> selectedAssigneeUserIds;
 
   int priority = 0;
   DateTime? deadlineAt;
@@ -66,6 +84,117 @@ class _ItemFormPageState extends State<ItemFormPage> {
   }
 
   bool get hasRecurrence => recurrenceType != null;
+
+  bool get supportsAssignments {
+    return widget.listType == AppListTypes.tasks.value ||
+        widget.listType == AppListTypes.chores.value;
+  }
+
+  bool get hasMultipleGroupMembers {
+    return widget.groupMembers.length > 1;
+  }
+
+  String assignmentNameForMember(Map<String, dynamic> member) {
+    final userId = member[AppMemberFields.userId]?.toString();
+
+    if (userId == widget.currentUserId) {
+      return 'You';
+    }
+
+    final profile = member[AppMemberFields.profiles];
+
+    if (profile is Map<String, dynamic>) {
+      final displayName = profile[AppProfileFields.displayName]?.toString();
+
+      if (displayName != null && displayName.trim().isNotEmpty) {
+        return displayName.trim();
+      }
+    }
+
+    if (userId != null && userId.length >= 8) {
+      return 'Member ${userId.substring(0, 8)}';
+    }
+
+    return 'Member';
+  }
+
+  String initialsForMember(Map<String, dynamic> member) {
+    final name = assignmentNameForMember(member).trim();
+
+    if (name.isEmpty) return '?';
+
+    final parts = name
+        .split(RegExp(r'\s+'))
+        .where((part) => part.trim().isNotEmpty)
+        .toList();
+
+    if (parts.isEmpty) return '?';
+
+    if (parts.length == 1) {
+      return parts.first.substring(0, 1).toUpperCase();
+    }
+
+    return '${parts.first.substring(0, 1)}${parts.last.substring(0, 1)}'
+        .toUpperCase();
+  }
+
+  void setNoAssignment() {
+    setState(() {
+      selectedAssignmentScope = AppItemAssignmentScopes.none;
+      selectedAssigneeUserIds.clear();
+    });
+  }
+
+  void setAssignToEveryone() {
+    setState(() {
+      selectedAssignmentScope = AppItemAssignmentScopes.all;
+      selectedAssigneeUserIds.clear();
+    });
+  }
+
+  void setAssignToMe() {
+    final currentUserId = widget.currentUserId;
+
+    if (currentUserId == null || currentUserId.isEmpty) {
+      setNoAssignment();
+      return;
+    }
+
+    setState(() {
+      selectedAssignmentScope = AppItemAssignmentScopes.specific;
+      selectedAssigneeUserIds = {currentUserId};
+    });
+  }
+
+  void setPickMembersMode() {
+    setState(() {
+      selectedAssignmentScope = AppItemAssignmentScopes.specific;
+
+      if (selectedAssigneeUserIds.isEmpty) {
+        final currentUserId = widget.currentUserId;
+
+        if (currentUserId != null && currentUserId.isNotEmpty) {
+          selectedAssigneeUserIds = {currentUserId};
+        }
+      }
+    });
+  }
+
+  void toggleAssignedMember(String userId) {
+    setState(() {
+      selectedAssignmentScope = AppItemAssignmentScopes.specific;
+
+      if (selectedAssigneeUserIds.contains(userId)) {
+        selectedAssigneeUserIds.remove(userId);
+      } else {
+        selectedAssigneeUserIds.add(userId);
+      }
+
+      if (selectedAssigneeUserIds.isEmpty) {
+        selectedAssignmentScope = AppItemAssignmentScopes.none;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -101,6 +230,28 @@ class _ItemFormPageState extends State<ItemFormPage> {
     recurrenceIntervalController = TextEditingController(
       text: recurrenceInterval.toString(),
     );
+
+    final currentUserId = widget.currentUserId;
+    final itemAssignmentScope = widget.item?[AppItemFields.assignmentScope]
+        ?.toString();
+
+    selectedAssignmentScope =
+        AppItemAssignmentScopes.isValid(itemAssignmentScope ?? '')
+        ? itemAssignmentScope!
+        : AppItemAssignmentScopes.none;
+
+    selectedAssigneeUserIds = initialAssigneeUserIds();
+
+    final shouldAutoAssignToCurrentUser =
+        widget.item == null &&
+        currentUserId != null &&
+        currentUserId.isNotEmpty &&
+        (widget.listType == 'tasks' || widget.listType == 'chores');
+
+    if (shouldAutoAssignToCurrentUser) {
+      selectedAssignmentScope = AppItemAssignmentScopes.specific;
+      selectedAssigneeUserIds = {currentUserId};
+    }
   }
 
   @override
@@ -109,6 +260,23 @@ class _ItemFormPageState extends State<ItemFormPage> {
     descriptionController.dispose();
     recurrenceIntervalController.dispose();
     super.dispose();
+  }
+
+  Set<String> initialAssigneeUserIds() {
+    final value = widget.item?[AppItemFields.assignees];
+
+    if (value is! List) {
+      return {};
+    }
+
+    return value
+        .map((row) {
+          if (row is! Map) return null;
+          return row[AppItemAssigneeFields.userId]?.toString();
+        })
+        .whereType<String>()
+        .where((userId) => userId.isNotEmpty)
+        .toSet();
   }
 
   void clearValidation() {
@@ -136,6 +304,14 @@ class _ItemFormPageState extends State<ItemFormPage> {
       return;
     }
 
+    final assignmentScope = supportsAssignments
+        ? selectedAssignmentScope
+        : AppItemAssignmentScopes.none;
+
+    final assigneeUserIds = assignmentScope == AppItemAssignmentScopes.specific
+        ? selectedAssigneeUserIds.toList()
+        : <String>[];
+
     Navigator.of(context).pop(
       ItemFormPageResult(
         title: title,
@@ -145,6 +321,8 @@ class _ItemFormPageState extends State<ItemFormPage> {
         recurrenceType: recurrenceType,
         recurrenceInterval: usesCustomInterval ? recurrenceInterval : null,
         nextDueAt: nextDueAt,
+        assignmentScope: assignmentScope,
+        assigneeUserIds: assigneeUserIds,
       ),
     );
   }
@@ -232,6 +410,23 @@ class _ItemFormPageState extends State<ItemFormPage> {
               title: config.label(context),
               subtitle: config.description(context),
             ),
+            const SizedBox(height: 16),
+            if (supportsAssignments) ...[
+              const SizedBox(height: 12),
+              _AssignmentSelectorCard(
+                groupMembers: widget.groupMembers,
+                currentUserId: widget.currentUserId,
+                selectedAssignmentScope: selectedAssignmentScope,
+                selectedAssigneeUserIds: selectedAssigneeUserIds,
+                memberNameBuilder: assignmentNameForMember,
+                memberInitialsBuilder: initialsForMember,
+                onNoAssignment: setNoAssignment,
+                onAssignToMe: setAssignToMe,
+                onAssignToEveryone: setAssignToEveryone,
+                onPickMembersMode: setPickMembersMode,
+                onToggleMember: toggleAssignedMember,
+              ),
+            ],
             const SizedBox(height: 16),
             AppFormSectionCard(
               children: [
@@ -463,6 +658,203 @@ class _ChoreFieldsSection extends StatelessWidget {
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
+    );
+  }
+}
+
+class _AssignmentSelectorCard extends StatelessWidget {
+  const _AssignmentSelectorCard({
+    required this.groupMembers,
+    required this.currentUserId,
+    required this.selectedAssignmentScope,
+    required this.selectedAssigneeUserIds,
+    required this.memberNameBuilder,
+    required this.memberInitialsBuilder,
+    required this.onNoAssignment,
+    required this.onAssignToMe,
+    required this.onAssignToEveryone,
+    required this.onPickMembersMode,
+    required this.onToggleMember,
+  });
+
+  final List<Map<String, dynamic>> groupMembers;
+  final String? currentUserId;
+  final String selectedAssignmentScope;
+  final Set<String> selectedAssigneeUserIds;
+  final String Function(Map<String, dynamic> member) memberNameBuilder;
+  final String Function(Map<String, dynamic> member) memberInitialsBuilder;
+  final VoidCallback onNoAssignment;
+  final VoidCallback onAssignToMe;
+  final VoidCallback onAssignToEveryone;
+  final VoidCallback onPickMembersMode;
+  final void Function(String userId) onToggleMember;
+
+  bool get isNone {
+    return selectedAssignmentScope == AppItemAssignmentScopes.none;
+  }
+
+  bool get isAll {
+    return selectedAssignmentScope == AppItemAssignmentScopes.all;
+  }
+
+  bool get isSpecific {
+    return selectedAssignmentScope == AppItemAssignmentScopes.specific;
+  }
+
+  bool get hasMultipleMembers {
+    return groupMembers.length > 1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.assignment_ind_outlined,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Assignment',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text('Choose who is responsible for this item.'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ChoiceChip(
+                  selected: isNone,
+                  label: const Text('No assignment'),
+                  avatar: const Icon(Icons.person_off_outlined, size: 16),
+                  onSelected: (_) => onNoAssignment(),
+                ),
+                ChoiceChip(
+                  selected:
+                      isSpecific &&
+                      currentUserId != null &&
+                      selectedAssigneeUserIds.length == 1 &&
+                      selectedAssigneeUserIds.contains(currentUserId),
+                  label: const Text('Me'),
+                  avatar: const Icon(Icons.person_outline, size: 16),
+                  onSelected: (_) => onAssignToMe(),
+                ),
+                if (hasMultipleMembers)
+                  ChoiceChip(
+                    selected: isAll,
+                    label: const Text('Everyone'),
+                    avatar: const Icon(Icons.groups_outlined, size: 16),
+                    onSelected: (_) => onAssignToEveryone(),
+                  ),
+                if (hasMultipleMembers)
+                  ChoiceChip(
+                    selected: isSpecific,
+                    label: const Text('Pick members'),
+                    avatar: const Icon(Icons.checklist_outlined, size: 16),
+                    onSelected: (_) => onPickMembersMode(),
+                  ),
+              ],
+            ),
+            if (isSpecific && hasMultipleMembers) ...[
+              const SizedBox(height: 14),
+              Text(
+                'Members',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              for (final member in groupMembers)
+                _AssignmentMemberTile(
+                  member: member,
+                  selectedAssigneeUserIds: selectedAssigneeUserIds,
+                  memberNameBuilder: memberNameBuilder,
+                  memberInitialsBuilder: memberInitialsBuilder,
+                  onToggleMember: onToggleMember,
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AssignmentMemberTile extends StatelessWidget {
+  const _AssignmentMemberTile({
+    required this.member,
+    required this.selectedAssigneeUserIds,
+    required this.memberNameBuilder,
+    required this.memberInitialsBuilder,
+    required this.onToggleMember,
+  });
+
+  final Map<String, dynamic> member;
+  final Set<String> selectedAssigneeUserIds;
+  final String Function(Map<String, dynamic> member) memberNameBuilder;
+  final String Function(Map<String, dynamic> member) memberInitialsBuilder;
+  final void Function(String userId) onToggleMember;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final userId = member[AppMemberFields.userId]?.toString();
+
+    if (userId == null || userId.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final selected = selectedAssigneeUserIds.contains(userId);
+    final name = memberNameBuilder(member);
+    final initials = memberInitialsBuilder(member);
+
+    return CheckboxListTile(
+      value: selected,
+      onChanged: (_) => onToggleMember(userId),
+      contentPadding: EdgeInsets.zero,
+      secondary: CircleAvatar(
+        backgroundColor: selected
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.surfaceContainerHighest,
+        child: Text(
+          initials,
+          style: TextStyle(
+            color: selected
+                ? theme.colorScheme.onPrimaryContainer
+                : theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+      title: Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
+      controlAffinity: ListTileControlAffinity.trailing,
     );
   }
 }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/meal_plan_cost_fields.dart';
+import 'package:pesalistas/core/member_fields.dart';
+import 'package:pesalistas/core/profile_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/item_fields.dart';
@@ -73,6 +77,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   List<Map<String, dynamic>> items = [];
   late Map<String, dynamic> currentList;
+  List<Map<String, dynamic>> groupMembers = [];
 
   String get listId => currentList[AppListFields.id].toString();
 
@@ -125,6 +130,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
       deletingList ||
       editingList;
 
+  String? get currentUserId {
+    return Supabase.instance.client.auth.currentUser?.id;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -143,12 +152,60 @@ class _ListDetailPageState extends State<ListDetailPage> {
     loadItems();
   }
 
+  Future<List<Map<String, dynamic>>> loadGroupMembersWithProfiles() async {
+    final client = Supabase.instance.client;
+
+    final membersResponse = await client
+        .from(AppTables.groupMembers)
+        .select()
+        .eq(AppMemberFields.groupId, groupId)
+        .order(AppMemberFields.createdAt, ascending: true);
+
+    final members = List<Map<String, dynamic>>.from(membersResponse);
+
+    if (members.isEmpty) {
+      return members;
+    }
+
+    final userIds = members
+        .map((member) => member[AppMemberFields.userId]?.toString())
+        .whereType<String>()
+        .where((userId) => userId.isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (userIds.isEmpty) {
+      return members;
+    }
+
+    final profilesResponse = await client
+        .from(AppTables.profiles)
+        .select()
+        .inFilter(AppProfileFields.id, userIds);
+
+    final profiles = List<Map<String, dynamic>>.from(profilesResponse);
+
+    final profilesById = {
+      for (final profile in profiles)
+        profile[AppProfileFields.id].toString(): profile,
+    };
+
+    return members.map((member) {
+      final userId = member[AppMemberFields.userId]?.toString();
+      final profile = userId == null ? null : profilesById[userId];
+
+      return {...member, AppMemberFields.profiles: profile};
+    }).toList();
+  }
+
   Future<void> loadItems() async {
     if (!mounted) return;
 
     setState(() => loadingItems = true);
 
     try {
+      final loadedGroupMembers = await loadGroupMembersWithProfiles();
+
       if (isShoppingList) {
         final shoppingItems = await shoppingRepository.getShoppingItemsForGroup(
           groupId,
@@ -217,6 +274,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         if (!mounted) return;
 
         setState(() {
+          groupMembers = loadedGroupMembers;
           items = enrichedMealPlans;
           loadingItems = false;
         });
@@ -230,6 +288,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         if (!mounted) return;
 
         setState(() {
+          groupMembers = loadedGroupMembers;
           items = recipes;
           loadingItems = false;
         });
@@ -237,12 +296,19 @@ class _ListDetailPageState extends State<ListDetailPage> {
         return;
       }
 
-      final loadedItems = await itemRepository.getItemsForList(listId);
-      final enrichedItems = await enrichItemsWithVoteSummaries(loadedItems);
+      final rawItems = await itemRepository.getItemsForList(listId);
+      final itemsWithAssignees = await enrichItemsWithAssignees(
+        rawItems,
+        loadedGroupMembers,
+      );
+      final enrichedItems = await enrichItemsWithVoteSummaries(
+        itemsWithAssignees,
+      );
 
       if (!mounted) return;
 
       setState(() {
+        groupMembers = loadedGroupMembers;
         items = enrichedItems;
         loadingItems = false;
       });
@@ -624,7 +690,13 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
 
     final result = await Navigator.of(context).push<ItemFormPageResult>(
-      MaterialPageRoute(builder: (_) => ItemFormPage(listType: listType)),
+      MaterialPageRoute(
+        builder: (_) => ItemFormPage(
+          listType: listType,
+          groupMembers: groupMembers,
+          currentUserId: currentUserId,
+        ),
+      ),
     );
 
     if (result == null) return;
@@ -641,6 +713,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
         recurrenceType: result.recurrenceType,
         recurrenceInterval: result.recurrenceInterval,
         nextDueAt: result.nextDueAt,
+        assignmentScope: result.assignmentScope,
+        assigneeUserIds: result.assigneeUserIds,
       );
 
       await loadItems();
@@ -657,6 +731,55 @@ class _ListDetailPageState extends State<ListDetailPage> {
         setState(() => creatingItem = false);
       }
     }
+  }
+
+  Future<List<Map<String, dynamic>>> enrichItemsWithAssignees(
+    List<Map<String, dynamic>> rawItems,
+    List<Map<String, dynamic>> loadedGroupMembers,
+  ) async {
+    if (rawItems.isEmpty) {
+      return rawItems;
+    }
+
+    final itemIds = rawItems
+        .map((item) => item[AppItemFields.id]?.toString())
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toList();
+
+    if (itemIds.isEmpty) {
+      return rawItems;
+    }
+
+    final assigneesByItemId = await itemRepository.getAssigneesForItems(
+      itemIds,
+    );
+
+    final membersByUserId = {
+      for (final member in loadedGroupMembers)
+        if (member[AppMemberFields.userId] != null)
+          member[AppMemberFields.userId].toString(): member,
+    };
+
+    return rawItems.map((item) {
+      final itemId = item[AppItemFields.id]?.toString();
+
+      final assignees = itemId == null
+          ? <Map<String, dynamic>>[]
+          : assigneesByItemId[itemId] ?? <Map<String, dynamic>>[];
+
+      final enrichedAssignees = assignees.map((assignee) {
+        final userId = assignee[AppItemAssigneeFields.userId]?.toString();
+        final member = userId == null ? null : membersByUserId[userId];
+
+        return {
+          ...assignee,
+          if (member != null) AppMemberFields.groupMembers: member,
+        };
+      }).toList();
+
+      return {...item, AppItemFields.assignees: enrichedAssignees};
+    }).toList();
   }
 
   Future<void> createShoppingItemDialog() async {
@@ -815,7 +938,12 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     final result = await Navigator.of(context).push<ItemFormPageResult>(
       MaterialPageRoute(
-        builder: (_) => ItemFormPage(item: item, listType: listType),
+        builder: (_) => ItemFormPage(
+          item: item,
+          listType: listType,
+          groupMembers: groupMembers,
+          currentUserId: currentUserId,
+        ),
       ),
     );
 
@@ -835,6 +963,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
         recurrenceType: result.recurrenceType,
         recurrenceInterval: result.recurrenceInterval,
         nextDueAt: result.nextDueAt,
+        assignmentScope: result.assignmentScope,
+        assigneeUserIds: result.assigneeUserIds,
       );
 
       await loadItems();
