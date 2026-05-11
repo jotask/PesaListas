@@ -1,5 +1,6 @@
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/list_fields.dart';
+import 'package:pesalistas/core/list_types.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ListRepository {
@@ -56,6 +57,58 @@ class ListRepository {
           AppListFields.description: description,
         })
         .eq(AppListFields.id, listId);
+  }
+
+  Future<Map<String, dynamic>> ensureShoppingListForGroup({
+    required String groupId,
+  }) async {
+    final existing = await _client
+        .from(AppTables.lists)
+        .select()
+        .eq(AppListFields.groupId, groupId)
+        .eq(AppListFields.listType, AppListTypes.shopping.value)
+        .isFilter(AppListFields.archivedAt, null)
+        .maybeSingle();
+
+    if (existing != null) {
+      return existing;
+    }
+
+    final currentUserId = _client.auth.currentUser?.id;
+
+    if (currentUserId == null) {
+      throw StateError('User must be signed in to create a shopping list.');
+    }
+
+    try {
+      final created = await _client
+          .from(AppTables.lists)
+          .insert({
+            AppListFields.groupId: groupId,
+            AppListFields.name: 'Shopping',
+            AppListFields.description: null,
+            AppListFields.listType: AppListTypes.shopping.value,
+            AppListFields.createdBy: currentUserId,
+          })
+          .select()
+          .single();
+
+      return created;
+    } catch (_) {
+      final existingAfterConflict = await _client
+          .from(AppTables.lists)
+          .select()
+          .eq(AppListFields.groupId, groupId)
+          .eq(AppListFields.listType, AppListTypes.shopping.value)
+          .isFilter(AppListFields.archivedAt, null)
+          .maybeSingle();
+
+      if (existingAfterConflict != null) {
+        return existingAfterConflict;
+      }
+
+      rethrow;
+    }
   }
 
   Future<void> archiveList(String listId) async {

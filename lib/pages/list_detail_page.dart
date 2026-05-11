@@ -467,6 +467,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
     setState(() => generatingShopping = true);
 
     try {
+      await listRepository.ensureShoppingListForGroup(groupId: groupId);
+
       final createdCount = await mealPlanRepository
           .generateShoppingFromMealPlans(
             groupId: groupId,
