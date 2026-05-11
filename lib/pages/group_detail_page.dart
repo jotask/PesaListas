@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/group_fields.dart';
+import 'package:pesalistas/core/fields/group_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
@@ -15,7 +15,7 @@ import 'package:pesalistas/widgets/group_detail/group_overview_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/pages/archived_lists_page.dart';
 import 'package:pesalistas/core/member_fields.dart';
-import 'package:pesalistas/core/profile_fields.dart';
+import 'package:pesalistas/core/fields/profile_fields.dart';
 
 class GroupDetailPage extends StatefulWidget {
   const GroupDetailPage({super.key, required this.group});

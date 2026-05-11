@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:pesalistas/core/app_locale_controller.dart';
-import 'package:pesalistas/core/app_notification_controller.dart';
-import 'package:pesalistas/core/app_theme_controller.dart';
-import 'package:pesalistas/core/profile_fields.dart';
+import 'package:pesalistas/core/controllers/app_locale_controller.dart';
+import 'package:pesalistas/core/controllers/app_notification_controller.dart';
+import 'package:pesalistas/core/controllers/app_theme_controller.dart';
+import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';

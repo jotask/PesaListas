@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';

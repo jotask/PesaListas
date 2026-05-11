@@ -1,7 +1,7 @@
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/item_assignment_scope.dart';
-import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

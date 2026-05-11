@@ -1,30 +1,61 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:pesalistas/main.dart';
+import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/item_assignment_scope.dart';
+import 'package:pesalistas/core/fields/item_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const PesaListas());
+  group('AppItemAssignmentScopes', () {
+    test('accepts valid assignment scopes', () {
+      expect(
+        AppItemAssignmentScopes.isValid(AppItemAssignmentScopes.none),
+        true,
+      );
+      expect(
+        AppItemAssignmentScopes.isValid(AppItemAssignmentScopes.specific),
+        true,
+      );
+      expect(
+        AppItemAssignmentScopes.isValid(AppItemAssignmentScopes.all),
+        true,
+      );
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('rejects invalid assignment scopes', () {
+      expect(AppItemAssignmentScopes.isValid(''), false);
+      expect(AppItemAssignmentScopes.isValid('me'), false);
+      expect(AppItemAssignmentScopes.isValid('everyone'), false);
+      expect(AppItemAssignmentScopes.isValid('invalid'), false);
+    });
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  group('AppItemFields', () {
+    test('assignment field names match database columns/local keys', () {
+      expect(AppItemFields.assignmentScope, 'assignment_scope');
+      expect(AppItemFields.assignees, 'assignees');
+    });
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  group('AppConfig', () {
+    test('has a default currency', () {
+      expect(AppConfig.defaultCurrency, isNotEmpty);
+      expect(AppConfig.defaultCurrency, 'EUR');
+    });
+  });
+
+  group('AppValueParsing', () {
+    test('parses valid integers', () {
+      expect(AppValueParsing.intOrNull(5), 5);
+      expect(AppValueParsing.intOrNull('5'), 5);
+      expect(AppValueParsing.intOrNull(' 5 '), 5);
+      expect(AppValueParsing.intOrNull(5.0), 5);
+    });
+
+    test('returns null for invalid integers', () {
+      expect(AppValueParsing.intOrNull(null), null);
+      expect(AppValueParsing.intOrNull(''), null);
+      expect(AppValueParsing.intOrNull('abc'), null);
+      expect(AppValueParsing.intOrNull('5.5'), null);
+    });
   });
 }

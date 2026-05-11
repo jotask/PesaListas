@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/date_formatting.dart';
-import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/widgets/list_detail/assignment_meta_pill.dart';

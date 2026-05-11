@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/value_parsing.dart';
-import 'package:pesalistas/core/vote_fields.dart';
+import 'package:pesalistas/core/fields/vote_fields.dart';
 
 class VoteDetailsDialog extends StatelessWidget {
   const VoteDetailsDialog({

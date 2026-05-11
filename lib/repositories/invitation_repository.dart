@@ -1,5 +1,5 @@
 import 'package:pesalistas/core/app_tables.dart';
-import 'package:pesalistas/core/invitation_fields.dart';
+import 'package:pesalistas/core/fields/invitation_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class InvitationRepository {

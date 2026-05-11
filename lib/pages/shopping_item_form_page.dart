@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
-import 'package:pesalistas/core/product_fields.dart';
+import 'package:pesalistas/core/price_unit_converter.dart';
+import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
@@ -9,7 +10,7 @@ import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pesalistas/core/catalog_item_fields.dart';
+import 'package:pesalistas/core/fields/catalog_item_fields.dart';
 import 'package:pesalistas/pages/catalog_item_picker_page.dart';
 
 class ShoppingItemFormPageResult {
@@ -148,60 +149,6 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     });
   }
 
-  double? unitPriceFromPriceRow(
-    Map<String, dynamic> priceRow, {
-    String? targetUnit,
-  }) {
-    final price = parseOptionalDouble(
-      priceRow[AppProductPriceFields.price]?.toString() ?? '',
-    );
-
-    if (price == null) {
-      return null;
-    }
-
-    final priceQuantity =
-        parseOptionalDouble(
-          priceRow[AppProductPriceFields.priceQuantity]?.toString() ?? '',
-        ) ??
-        1;
-
-    if (priceQuantity <= 0) {
-      return price;
-    }
-
-    final priceUnit = textOrNull(priceRow[AppProductPriceFields.priceUnit]);
-
-    final normalizedPriceUnit = priceUnit?.toLowerCase();
-    final normalizedTargetUnit = targetUnit?.toLowerCase();
-
-    if (normalizedPriceUnit == null ||
-        normalizedTargetUnit == null ||
-        normalizedPriceUnit == normalizedTargetUnit) {
-      return price / priceQuantity;
-    }
-
-    if (normalizedPriceUnit == 'kg' && normalizedTargetUnit == 'g') {
-      return price / (priceQuantity * 1000);
-    }
-
-    if (normalizedPriceUnit == 'g' && normalizedTargetUnit == 'kg') {
-      return price / (priceQuantity / 1000);
-    }
-
-    if ((normalizedPriceUnit == 'l' || normalizedPriceUnit == 'lt') &&
-        normalizedTargetUnit == 'ml') {
-      return price / (priceQuantity * 1000);
-    }
-
-    if (normalizedPriceUnit == 'ml' &&
-        (normalizedTargetUnit == 'l' || normalizedTargetUnit == 'lt')) {
-      return price / (priceQuantity / 1000);
-    }
-
-    return price / priceQuantity;
-  }
-
   Future<void> loadLatestGenericItemPrice() async {
     final catalogItemId = linkedCatalogItemId;
 
@@ -225,7 +172,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
           final targetUnit =
               textOrNull(unitController.text) ?? linkedCatalogItemDefaultUnit;
 
-          final unitPrice = unitPriceFromPriceRow(
+          final unitPrice = AppPriceUnitConverter.unitPriceFromPriceRow(
             latestPrice,
             targetUnit: targetUnit,
           );

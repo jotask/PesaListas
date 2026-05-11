@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/catalog_item_fields.dart';
+import 'package:pesalistas/core/fields/catalog_item_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/catalog_item_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

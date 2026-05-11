@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:pesalistas/core/app_tables.dart';
-import 'package:pesalistas/core/profile_fields.dart';
+import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileRepository {

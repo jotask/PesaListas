@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
-import 'package:pesalistas/core/list_fields.dart';
+import 'package:pesalistas/core/fields/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
 
 class ListCard extends StatelessWidget {

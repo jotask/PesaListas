@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
-import 'package:pesalistas/core/app_theme_controller.dart';
-import 'package:pesalistas/core/app_locale_controller.dart';
+import 'package:pesalistas/core/controllers/app_theme_controller.dart';
+import 'package:pesalistas/core/controllers/app_locale_controller.dart';
 import 'package:pesalistas/pages/splash_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/l10n/app_localizations.dart';
-import 'package:pesalistas/core/app_notification_controller.dart';
+import 'package:pesalistas/core/controllers/app_notification_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

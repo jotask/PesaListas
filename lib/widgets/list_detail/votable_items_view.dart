@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/item_fields.dart';
+import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 import 'package:pesalistas/widgets/list_detail/votable_item_card.dart';
 

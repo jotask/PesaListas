@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
-import 'package:pesalistas/core/invitation_fields.dart';
+import 'package:pesalistas/core/fields/invitation_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
-import 'package:pesalistas/core/profile_fields.dart';
+import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/widgets/common/empty_info_card.dart';
 
 class GroupPeopleSection extends StatelessWidget {

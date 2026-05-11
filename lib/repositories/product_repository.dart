@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:pesalistas/core/app_config.dart';
-import 'package:pesalistas/core/product_fields.dart';
+import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

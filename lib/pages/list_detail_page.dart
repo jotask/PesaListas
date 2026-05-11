@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
-import 'package:pesalistas/core/meal_plan_cost_fields.dart';
+import 'package:pesalistas/core/fields/meal_plan_cost_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
-import 'package:pesalistas/core/profile_fields.dart';
+import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
-import 'package:pesalistas/core/item_fields.dart';
-import 'package:pesalistas/core/list_fields.dart';
+import 'package:pesalistas/core/fields/item_fields.dart';
+import 'package:pesalistas/core/fields/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
-import 'package:pesalistas/core/meal_plan_fields.dart';
-import 'package:pesalistas/core/recipe_fields.dart';
+import 'package:pesalistas/core/fields/meal_plan_fields.dart';
+import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
-import 'package:pesalistas/core/vote_fields.dart';
+import 'package:pesalistas/core/fields/vote_fields.dart';
 import 'package:pesalistas/pages/edit_recipe_info_page.dart';
 import 'package:pesalistas/pages/edit_recipe_instructions_page.dart';
 import 'package:pesalistas/pages/generate_shopping_page.dart';
@@ -772,10 +772,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         final userId = assignee[AppItemAssigneeFields.userId]?.toString();
         final member = userId == null ? null : membersByUserId[userId];
 
-        return {
-          ...assignee,
-          if (member != null) AppMemberFields.groupMembers: member,
-        };
+        return {...assignee, AppMemberFields.groupMembers: ?member};
       }).toList();
 
       return {...item, AppItemFields.assignees: enrichedAssignees};

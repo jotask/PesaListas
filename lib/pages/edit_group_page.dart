@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/group_fields.dart';
+import 'package:pesalistas/core/fields/group_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
 
