@@ -240,8 +240,104 @@ class MealPlanRepository {
       return 0;
     }
 
-    await _client.from(AppTables.shoppingListItems).insert(rows);
-    return rows.length;
+    final uniqueRows = deduplicateGeneratedShoppingRows(rows);
+
+    final rowsToInsert = await removeExistingGeneratedShoppingRows(
+      groupId: groupId,
+      rows: uniqueRows,
+    );
+
+    if (rowsToInsert.isEmpty) {
+      return 0;
+    }
+
+    await _client.from(AppTables.shoppingListItems).insert(rowsToInsert);
+
+    return rowsToInsert.length;
+  }
+
+  List<Map<String, dynamic>> deduplicateGeneratedShoppingRows(
+    List<Map<String, dynamic>> rows,
+  ) {
+    final seenKeys = <String>{};
+    final uniqueRows = <Map<String, dynamic>>[];
+
+    for (final row in rows) {
+      final key = generatedShoppingUniqueKeyFromRow(row);
+
+      if (key == null) {
+        uniqueRows.add(row);
+        continue;
+      }
+
+      if (seenKeys.add(key)) {
+        uniqueRows.add(row);
+      }
+    }
+
+    return uniqueRows;
+  }
+
+  Future<List<Map<String, dynamic>>> removeExistingGeneratedShoppingRows({
+    required String groupId,
+    required List<Map<String, dynamic>> rows,
+  }) async {
+    if (rows.isEmpty) {
+      return rows;
+    }
+
+    final mealPlanIds = rows
+        .map((row) => nullableText(row[AppShoppingItemFields.sourceMealPlanId]))
+        .whereType<String>()
+        .toSet()
+        .toList();
+
+    if (mealPlanIds.isEmpty) {
+      return rows;
+    }
+
+    final existing = await _client
+        .from(AppTables.shoppingListItems)
+        .select(
+          '${AppShoppingItemFields.sourceMealPlanId},'
+          '${AppShoppingItemFields.sourceRecipeId},'
+          '${AppShoppingItemFields.name},'
+          '${AppShoppingItemFields.unit}',
+        )
+        .inFilter(AppShoppingItemFields.sourceMealPlanId, mealPlanIds);
+
+    final existingKeys = List<Map<String, dynamic>>.from(
+      existing,
+    ).map(generatedShoppingUniqueKeyFromRow).whereType<String>().toSet();
+
+    return rows.where((row) {
+      final key = generatedShoppingUniqueKeyFromRow(row);
+
+      if (key == null) {
+        return true;
+      }
+
+      return !existingKeys.contains(key);
+    }).toList();
+  }
+
+  String? generatedShoppingUniqueKeyFromRow(Map<String, dynamic> row) {
+    final mealPlanId = nullableText(
+      row[AppShoppingItemFields.sourceMealPlanId],
+    );
+
+    final recipeId = nullableText(row[AppShoppingItemFields.sourceRecipeId]);
+
+    final name = nullableText(row[AppShoppingItemFields.name]);
+
+    if (mealPlanId == null || recipeId == null || name == null) {
+      return null;
+    }
+
+    final normalizedName = name.trim().toLowerCase();
+    final unit = nullableText(row[AppShoppingItemFields.unit]) ?? '';
+
+    return '$mealPlanId::$recipeId::$normalizedName::$unit';
   }
 
   String generatedKey({
