@@ -13,4 +13,5 @@ class AppTables {
   static const recipeIngredients = 'recipe_ingredients';
   static const mealPlans = 'meal_plans';
   static const shoppingListItems = 'shopping_list_items';
+  static const catalogItems = 'catalog_items';
 }

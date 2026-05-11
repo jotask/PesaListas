@@ -8,6 +8,8 @@ import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/catalog_item_fields.dart';
+import 'package:pesalistas/pages/catalog_item_picker_page.dart';
 
 class ShoppingItemFormPageResult {
   const ShoppingItemFormPageResult({
@@ -17,6 +19,7 @@ class ShoppingItemFormPageResult {
     this.estimatedUnitPrice,
     this.priceCurrency = AppConfig.defaultCurrency,
     this.barcode,
+    this.catalogItemId,
     this.productName,
     this.productImageUrl,
   });
@@ -27,6 +30,7 @@ class ShoppingItemFormPageResult {
   final double? estimatedUnitPrice;
   final String priceCurrency;
   final String? barcode;
+  final String? catalogItemId;
   final String? productName;
   final String? productImageUrl;
 }
@@ -56,6 +60,10 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
   String? linkedProductName;
   String? linkedProductImageUrl;
 
+  String? linkedCatalogItemId;
+  String? linkedCatalogItemName;
+  String? linkedCatalogItemDefaultUnit;
+
   bool loadingProductPrice = false;
 
   bool get isEditing => widget.item != null;
@@ -69,6 +77,14 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     return linkedBarcode != null ||
         linkedProductName != null ||
         linkedProductImageUrl != null;
+  }
+
+  bool get hasGenericItemData {
+    return linkedCatalogItemId != null;
+  }
+
+  bool get hasAnyLinkedItem {
+    return hasProductData || hasGenericItemData;
   }
 
   @override
@@ -103,6 +119,14 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     priceController = TextEditingController(
       text: item?[AppShoppingItemFields.estimatedUnitPrice]?.toString() ?? '',
     );
+
+    linkedCatalogItemId = textOrNull(
+      item?[AppShoppingItemFields.catalogItemId],
+    );
+    linkedCatalogItemName = textOrNull(item?[AppShoppingItemFields.name]);
+    linkedCatalogItemDefaultUnit = textOrNull(
+      item?[AppShoppingItemFields.unit],
+    );
   }
 
   @override
@@ -120,6 +144,49 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     setState(() {
       validationMessage = null;
       productLinkMessage = null;
+    });
+  }
+
+  Future<void> selectGenericItem() async {
+    final item = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(builder: (_) => const CatalogItemPickerPage()),
+    );
+
+    if (item == null) return;
+
+    final catalogItemId = textOrNull(item[AppCatalogItemFields.id]);
+    final catalogItemName = textOrNull(item[AppCatalogItemFields.name]);
+    final defaultUnit = textOrNull(item[AppCatalogItemFields.defaultUnit]);
+
+    if (catalogItemId == null || catalogItemName == null) return;
+
+    setState(() {
+      linkedCatalogItemId = catalogItemId;
+      linkedCatalogItemName = catalogItemName;
+      linkedCatalogItemDefaultUnit = defaultUnit;
+
+      // Generic item and barcode product are alternatives for now.
+      linkedBarcode = null;
+      linkedProductName = null;
+      linkedProductImageUrl = null;
+
+      nameController.text = catalogItemName;
+
+      if (defaultUnit != null && unitController.text.trim().isEmpty) {
+        unitController.text = defaultUnit;
+      }
+
+      productLinkMessage = 'Generic item linked.';
+      validationMessage = null;
+    });
+  }
+
+  void clearGenericItemLink() {
+    setState(() {
+      linkedCatalogItemId = null;
+      linkedCatalogItemName = null;
+      linkedCatalogItemDefaultUnit = null;
+      productLinkMessage = 'Generic item link removed.';
     });
   }
 
@@ -177,6 +244,9 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       linkedProductImageUrl = productImageUrl;
       productLinkMessage = null;
       validationMessage = null;
+      linkedCatalogItemId = null;
+      linkedCatalogItemName = null;
+      linkedCatalogItemDefaultUnit = null;
 
       if (productName != null) {
         nameController.text = productName;
@@ -281,6 +351,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
         estimatedUnitPrice: estimatedUnitPrice,
         priceCurrency: priceCurrency,
         barcode: linkedBarcode,
+        catalogItemId: linkedCatalogItemId,
         productName: linkedProductName,
         productImageUrl: linkedProductImageUrl,
       ),
@@ -314,11 +385,10 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
             AppFormPageHeaderCard(
               icon: Icons.shopping_cart_outlined,
               title: context.l10n.shoppingItem,
-              subtitle: hasProductData
-                  ? context.l10n.itemLinkedToCachedProduct
+              subtitle: hasAnyLinkedItem
+                  ? 'This item is linked to a saved item.'
                   : context.l10n.addAnItemQuantityAndUnit,
             ),
-            const SizedBox(height: 16),
             _LinkedProductActionsCard(
               barcode: linkedBarcode,
               productName: linkedProductName,
@@ -327,6 +397,16 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
               message: productLinkMessage,
               onSelectProduct: selectProduct,
               onClearProduct: hasProductData ? clearProductLink : null,
+            ),
+            const SizedBox(height: 12),
+            _LinkedGenericItemActionsCard(
+              catalogItemId: linkedCatalogItemId,
+              catalogItemName: linkedCatalogItemName,
+              defaultUnit: linkedCatalogItemDefaultUnit,
+              onSelectGenericItem: selectGenericItem,
+              onClearGenericItem: hasGenericItemData
+                  ? clearGenericItemLink
+                  : null,
             ),
             const SizedBox(height: 16),
             AppFormSectionCard(
@@ -630,6 +710,111 @@ class _InfoMessage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LinkedGenericItemActionsCard extends StatelessWidget {
+  const _LinkedGenericItemActionsCard({
+    required this.catalogItemId,
+    required this.catalogItemName,
+    required this.defaultUnit,
+    required this.onSelectGenericItem,
+    required this.onClearGenericItem,
+  });
+
+  final String? catalogItemId;
+  final String? catalogItemName;
+  final String? defaultUnit;
+  final VoidCallback onSelectGenericItem;
+  final VoidCallback? onClearGenericItem;
+
+  bool get hasGenericItemData {
+    return catalogItemId != null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 29,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  child: Icon(
+                    Icons.category_outlined,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        catalogItemName ??
+                            (hasGenericItemData
+                                ? 'Linked generic item'
+                                : 'No generic item linked'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (defaultUnit != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Default unit: $defaultUnit',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Text(
+                        hasGenericItemData
+                            ? 'This shopping item is linked to a reusable generic item.'
+                            : 'Link a generic item like Tomatoes, Onion or Eggs.',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onSelectGenericItem,
+                    icon: const Icon(Icons.category_outlined),
+                    label: Text(
+                      hasGenericItemData
+                          ? 'Change generic item'
+                          : 'Link generic item',
+                    ),
+                  ),
+                ),
+                if (onClearGenericItem != null) ...[
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: onClearGenericItem,
+                    icon: const Icon(Icons.link_off_outlined),
+                    tooltip: 'Remove generic item link',
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

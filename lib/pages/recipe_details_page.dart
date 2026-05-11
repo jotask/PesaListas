@@ -502,6 +502,59 @@ class _IngredientCard extends StatelessWidget {
     return value.trim();
   }
 
+  String? get barcode {
+    final value = ingredient[AppRecipeIngredientFields.barcode]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    return value.trim();
+  }
+
+  String? get catalogItemId {
+    final value = ingredient[AppRecipeIngredientFields.catalogItemId]
+        ?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    return value.trim();
+  }
+
+  String? get productImageUrl {
+    final value = ingredient[AppRecipeIngredientFields.productImageUrl]
+        ?.toString()
+        .trim();
+
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    return value;
+  }
+
+  bool get isLinkedProduct {
+    return barcode != null;
+  }
+
+  bool get isLinkedGenericItem {
+    return catalogItemId != null && barcode == null;
+  }
+
+  String? sourceText(BuildContext context) {
+    if (isLinkedProduct) {
+      return 'Product';
+    }
+
+    if (isLinkedGenericItem) {
+      return 'Generic item';
+    }
+
+    return null;
+  }
+
   String? get quantityText {
     final value = ingredient[AppRecipeIngredientFields.quantity];
 
@@ -637,9 +690,13 @@ class _IngredientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     final parts = <String>[amountText(context)];
+
+    final source = sourceText(context);
+
+    if (source != null) {
+      parts.add(source);
+    }
 
     final price = priceText(context);
 
@@ -657,12 +714,10 @@ class _IngredientCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         contentPadding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.surfaceContainerHighest,
-          child: Icon(
-            Icons.kitchen_outlined,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        leading: _IngredientLeadingAvatar(
+          productImageUrl: productImageUrl,
+          isLinkedProduct: isLinkedProduct,
+          isLinkedGenericItem: isLinkedGenericItem,
         ),
         title: Text(
           name(context),
@@ -712,6 +767,81 @@ class _IngredientCard extends StatelessWidget {
 }
 
 enum _IngredientAction { edit, delete }
+
+class _IngredientLeadingAvatar extends StatelessWidget {
+  const _IngredientLeadingAvatar({
+    required this.productImageUrl,
+    required this.isLinkedProduct,
+    required this.isLinkedGenericItem,
+  });
+
+  final String? productImageUrl;
+  final bool isLinkedProduct;
+  final bool isLinkedGenericItem;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final imageUrl = productImageUrl;
+
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(999),
+        child: Image.network(
+          imageUrl,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) {
+            return _FallbackIngredientAvatar(
+              isLinkedProduct: isLinkedProduct,
+              isLinkedGenericItem: isLinkedGenericItem,
+            );
+          },
+        ),
+      );
+    }
+
+    return CircleAvatar(
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        isLinkedProduct
+            ? Icons.inventory_2_outlined
+            : isLinkedGenericItem
+            ? Icons.category_outlined
+            : Icons.kitchen_outlined,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
+class _FallbackIngredientAvatar extends StatelessWidget {
+  const _FallbackIngredientAvatar({
+    required this.isLinkedProduct,
+    required this.isLinkedGenericItem,
+  });
+
+  final bool isLinkedProduct;
+  final bool isLinkedGenericItem;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return CircleAvatar(
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        isLinkedProduct
+            ? Icons.inventory_2_outlined
+            : isLinkedGenericItem
+            ? Icons.category_outlined
+            : Icons.kitchen_outlined,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
 
 class _RecipeInfoChip extends StatelessWidget {
   const _RecipeInfoChip({required this.icon, required this.label});

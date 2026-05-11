@@ -29,6 +29,7 @@ class RecipeIngredientRepository {
     double? estimatedUnitPrice,
     String priceCurrency = AppConfig.defaultCurrency,
     String? barcode,
+    String? catalogItemId,
     String? productName,
     String? productImageUrl,
   }) async {
@@ -46,6 +47,7 @@ class RecipeIngredientRepository {
       AppRecipeIngredientFields.estimatedTotalPrice: estimatedTotalPrice,
       AppRecipeIngredientFields.priceCurrency: priceCurrency,
       AppRecipeIngredientFields.barcode: barcode,
+      AppRecipeIngredientFields.catalogItemId: catalogItemId,
       AppRecipeIngredientFields.productName: productName,
       AppRecipeIngredientFields.productImageUrl: productImageUrl,
     });
@@ -60,6 +62,7 @@ class RecipeIngredientRepository {
     double? estimatedUnitPrice,
     String priceCurrency = AppConfig.defaultCurrency,
     String? barcode,
+    String? catalogItemId,
     String? productName,
     String? productImageUrl,
   }) async {
@@ -78,6 +81,7 @@ class RecipeIngredientRepository {
           AppRecipeIngredientFields.estimatedTotalPrice: estimatedTotalPrice,
           AppRecipeIngredientFields.priceCurrency: priceCurrency,
           AppRecipeIngredientFields.barcode: barcode,
+          AppRecipeIngredientFields.catalogItemId: catalogItemId,
           AppRecipeIngredientFields.productName: productName,
           AppRecipeIngredientFields.productImageUrl: productImageUrl,
         })

@@ -89,6 +89,7 @@ class ShoppingRepository {
     double? quantity,
     String? unit,
     String? barcode,
+    String? catalogItemId,
     String? productName,
     String? productImageUrl,
     double? estimatedUnitPrice,
@@ -104,6 +105,7 @@ class ShoppingRepository {
       AppShoppingItemFields.quantity: quantity,
       AppShoppingItemFields.unit: unit,
       AppShoppingItemFields.barcode: barcode,
+      AppShoppingItemFields.catalogItemId: catalogItemId,
       AppShoppingItemFields.productName: productName,
       AppShoppingItemFields.productImageUrl: productImageUrl,
       AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
@@ -148,6 +150,7 @@ class ShoppingRepository {
     double? estimatedUnitPrice,
     String priceCurrency = AppConfig.defaultCurrency,
     String? barcode,
+    String? catalogItemId,
     String? productName,
     String? productImageUrl,
   }) async {
@@ -164,6 +167,7 @@ class ShoppingRepository {
       AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
       AppShoppingItemFields.priceCurrency: priceCurrency,
       AppShoppingItemFields.barcode: barcode,
+      AppShoppingItemFields.catalogItemId: catalogItemId,
       AppShoppingItemFields.productName: productName,
       AppShoppingItemFields.productImageUrl: productImageUrl,
       AppShoppingItemFields.createdBy: _client.auth.currentUser!.id,
@@ -178,6 +182,7 @@ class ShoppingRepository {
     double? estimatedUnitPrice,
     String priceCurrency = AppConfig.defaultCurrency,
     String? barcode,
+    String? catalogItemId,
     String? productName,
     String? productImageUrl,
   }) async {
@@ -195,6 +200,7 @@ class ShoppingRepository {
           AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
           AppShoppingItemFields.priceCurrency: priceCurrency,
           AppShoppingItemFields.barcode: barcode,
+          AppShoppingItemFields.catalogItemId: catalogItemId,
           AppShoppingItemFields.productName: productName,
           AppShoppingItemFields.productImageUrl: productImageUrl,
         })

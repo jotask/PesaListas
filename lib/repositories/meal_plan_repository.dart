@@ -216,6 +216,9 @@ class MealPlanRepository {
           AppShoppingItemFields.barcode: nullableText(
             ingredient[AppRecipeIngredientFields.barcode],
           ),
+          AppShoppingItemFields.catalogItemId: nullableText(
+            ingredient[AppRecipeIngredientFields.catalogItemId],
+          ),
           AppShoppingItemFields.productName: nullableText(
             ingredient[AppRecipeIngredientFields.productName],
           ),

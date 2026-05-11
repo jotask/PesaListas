@@ -675,6 +675,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         estimatedUnitPrice: result.estimatedUnitPrice,
         priceCurrency: result.priceCurrency,
         barcode: result.barcode,
+        catalogItemId: result.catalogItemId,
         productName: result.productName,
         productImageUrl: result.productImageUrl,
       );
@@ -872,6 +873,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         estimatedUnitPrice: result.estimatedUnitPrice,
         priceCurrency: result.priceCurrency,
         barcode: result.barcode,
+        catalogItemId: result.catalogItemId,
         productName: result.productName,
         productImageUrl: result.productImageUrl,
       );
@@ -1410,6 +1412,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
             estimatedUnitPrice: ingredientResult.estimatedUnitPrice,
             priceCurrency: ingredientResult.priceCurrency,
             barcode: ingredientResult.barcode,
+            catalogItemId: ingredientResult.catalogItemId,
             productName: ingredientResult.productName,
             productImageUrl: ingredientResult.productImageUrl,
           );
@@ -1461,6 +1464,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
             estimatedUnitPrice: editIngredientResult.estimatedUnitPrice,
             priceCurrency: editIngredientResult.priceCurrency,
             barcode: editIngredientResult.barcode,
+            catalogItemId: editIngredientResult.catalogItemId,
             productName: editIngredientResult.productName,
             productImageUrl: editIngredientResult.productImageUrl,
           );

@@ -19,6 +19,7 @@ class AppShoppingItemFields {
   static const sourceMealPlan = 'source_meal_plan';
 
   static const barcode = 'barcode';
+  static const catalogItemId = 'catalog_item_id';
   static const productName = 'product_name';
   static const productImageUrl = 'product_image_url';
   static const estimatedUnitPrice = 'estimated_unit_price';

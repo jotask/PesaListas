@@ -591,6 +591,36 @@ class _ShoppingItemCard extends StatelessWidget {
 
   bool get checked => item[AppShoppingItemFields.checked] == true;
 
+  String? get catalogItemId {
+    final value = item[AppShoppingItemFields.catalogItemId]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    return value.trim();
+  }
+
+  bool get isLinkedProduct {
+    return barcode != null;
+  }
+
+  bool get isLinkedGenericItem {
+    return catalogItemId != null && barcode == null;
+  }
+
+  String? sourceText(BuildContext context) {
+    if (isLinkedProduct) {
+      return 'Product';
+    }
+
+    if (isLinkedGenericItem) {
+      return 'Generic item';
+    }
+
+    return null;
+  }
+
   String name(BuildContext context) {
     final value = item[AppShoppingItemFields.name]?.toString();
 
@@ -726,6 +756,12 @@ class _ShoppingItemCard extends StatelessWidget {
   String subtitle(BuildContext context) {
     final parts = <String>[amountText(context)];
 
+    final source = sourceText(context);
+
+    if (source != null) {
+      parts.add(source);
+    }
+
     if (recipeName != null) {
       parts.add(context.l10n.recipeSourceLabel(recipeName!));
     } else if (generatedFromMealPlan) {
@@ -805,6 +841,7 @@ class _ShoppingItemCard extends StatelessWidget {
                       imageUrl: productImageUrl,
                       checked: checked,
                       hasProductData: hasProductData,
+                      isLinkedGenericItem: isLinkedGenericItem,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -912,11 +949,27 @@ class _ShoppingProductAvatar extends StatelessWidget {
     required this.imageUrl,
     required this.checked,
     required this.hasProductData,
+    required this.isLinkedGenericItem,
   });
 
   final String? imageUrl;
   final bool checked;
   final bool hasProductData;
+  final bool isLinkedGenericItem;
+
+  IconData get icon {
+    if (hasProductData) {
+      return Icons.inventory_2_outlined;
+    }
+
+    if (isLinkedGenericItem) {
+      return Icons.category_outlined;
+    }
+
+    return checked
+        ? Icons.shopping_cart_checkout
+        : Icons.shopping_cart_outlined;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -943,14 +996,7 @@ class _ShoppingProductAvatar extends StatelessWidget {
           errorBuilder: (_, _, _) {
             return CircleAvatar(
               backgroundColor: backgroundColor,
-              child: Icon(
-                hasProductData
-                    ? Icons.inventory_2_outlined
-                    : checked
-                    ? Icons.shopping_cart_checkout
-                    : Icons.shopping_cart_outlined,
-                color: iconColor,
-              ),
+              child: Icon(icon, color: iconColor),
             );
           },
         ),
@@ -959,14 +1005,7 @@ class _ShoppingProductAvatar extends StatelessWidget {
 
     return CircleAvatar(
       backgroundColor: backgroundColor,
-      child: Icon(
-        hasProductData
-            ? Icons.inventory_2_outlined
-            : checked
-            ? Icons.shopping_cart_checkout
-            : Icons.shopping_cart_outlined,
-        color: iconColor,
-      ),
+      child: Icon(icon, color: iconColor),
     );
   }
 }
