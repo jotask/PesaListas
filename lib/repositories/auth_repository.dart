@@ -1,5 +1,8 @@
 import 'package:pesalistas/auth/google_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AuthRepository {
   AuthRepository(this._client);
@@ -34,6 +37,14 @@ class AuthRepository {
 
   Future<void> signInWithGoogle() async {
     await signInWithGoogleNative();
+  }
+
+  Future<void> signInWithGoogleOAuth() async {
+    await _client.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: kIsWeb ? null : 'pesalistas://login-callback/',
+      authScreenLaunchMode: LaunchMode.externalApplication,
+    );
   }
 
   Future<void> signOut() async {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/animated_logo.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
@@ -78,6 +79,31 @@ class _AuthPageState extends State<AuthPage> {
       if (!mounted) return;
 
       showErrorSnackBar(context, context.l10n.googleLoginFailed, error);
+    } finally {
+      if (mounted) {
+        setState(() => loading = false);
+      }
+    }
+  }
+
+  Future<void> signInWithGoogleDesktopOAuth() async {
+    if (loading) return;
+
+    setState(() => loading = true);
+
+    try {
+      await authRepository.signInWithGoogleOAuth();
+
+      // OAuth continues in browser.
+      // Your Supabase auth listener / Splash/Home logic should handle the session
+      // when the app receives the callback.
+    } catch (error, stackTrace) {
+      debugPrint('GOOGLE OAUTH ERROR: $error', wrapWidth: 1024);
+      debugPrint('STACK TRACE: $stackTrace', wrapWidth: 1024);
+
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Google sign-in failed.', error);
     } finally {
       if (mounted) {
         setState(() => loading = false);
@@ -269,25 +295,48 @@ class _AuthPageState extends State<AuthPage> {
                                 ),
                         ),
                       ),
-                      SizedBox(height: 14),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: OutlinedButton.icon(
-                          onPressed: loading
-                              ? null
-                              : signInWithGoogleNativeInternal,
-                          icon: Icon(Icons.login),
-                          label: Text(context.l10n.continueWithGoogle),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF1E3A5F),
-                            side: const BorderSide(color: Color(0xFF1E3A5F)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                      if (AppConfig.isMobile) ...[
+                        SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: loading
+                                ? null
+                                : signInWithGoogleNativeInternal,
+                            icon: Icon(Icons.login),
+                            label: Text(context.l10n.continueWithGoogle),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF1E3A5F),
+                              side: const BorderSide(color: Color(0xFF1E3A5F)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
+                      if (AppConfig.isDesktop) ...[
+                        SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: loading
+                                ? null
+                                : signInWithGoogleDesktopOAuth,
+                            icon: const Icon(Icons.login),
+                            label: Text(context.l10n.continueWithGoogle),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF1E3A5F),
+                              side: const BorderSide(color: Color(0xFF1E3A5F)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       SizedBox(height: 12),
                       TextButton(
                         onPressed: loading
