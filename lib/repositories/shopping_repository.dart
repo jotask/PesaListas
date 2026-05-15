@@ -99,6 +99,12 @@ class ShoppingRepository {
         ? quantity * estimatedUnitPrice
         : estimatedUnitPrice;
 
+    final currentUserId = _client.auth.currentUser?.id;
+
+    if (currentUserId == null) {
+      throw StateError('User must be signed in to create a shopping item.');
+    }
+
     final row = {
       AppShoppingItemFields.groupId: groupId,
       AppShoppingItemFields.name: name,
@@ -111,6 +117,7 @@ class ShoppingRepository {
       AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
       AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
       AppShoppingItemFields.priceCurrency: priceCurrency,
+      AppShoppingItemFields.createdBy: currentUserId,
     };
 
     final result = await _client
