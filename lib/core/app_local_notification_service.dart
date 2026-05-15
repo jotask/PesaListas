@@ -17,9 +17,16 @@ class AppLocalNotificationService {
       requestSoundPermission: false,
     );
 
+    const macosSettings = DarwinInitializationSettings();
+    const linuxSettings = LinuxInitializationSettings(
+      defaultActionName: 'Open PesaListas',
+    );
+
     const settings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
+      macOS: macosSettings,
+      linux: linuxSettings,
     );
 
     await _plugin.initialize(settings: settings);
