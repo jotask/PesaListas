@@ -21,30 +21,114 @@ class EditRecipeInstructionsPage extends StatefulWidget {
 
 class _EditRecipeInstructionsPageState
     extends State<EditRecipeInstructionsPage> {
-  late final TextEditingController instructionsController;
+  final List<TextEditingController> stepControllers = [];
 
   @override
   void initState() {
     super.initState();
 
-    instructionsController = TextEditingController(
-      text: widget.recipe[AppRecipeFields.instructions]?.toString() ?? '',
-    );
+    final existingInstructions = widget.recipe[AppRecipeFields.instructions]
+        ?.toString();
+
+    final steps = parseInstructionSteps(existingInstructions);
+
+    if (steps.isEmpty) {
+      stepControllers.add(TextEditingController());
+    } else {
+      for (final step in steps) {
+        stepControllers.add(TextEditingController(text: step));
+      }
+    }
   }
 
   @override
   void dispose() {
-    instructionsController.dispose();
+    for (final controller in stepControllers) {
+      controller.dispose();
+    }
+
     super.dispose();
   }
 
-  void submit() {
-    final instructions = instructionsController.text.trim();
+  List<String> parseInstructionSteps(String? value) {
+    final text = value?.trim();
 
+    if (text == null || text.isEmpty) {
+      return [];
+    }
+
+    final lines = text
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .map((line) {
+          return line
+              .replaceFirst(RegExp(r'^\s*(?:\d+[\.)]|[-*•])\s*'), '')
+              .trim();
+        })
+        .where((line) => line.isNotEmpty)
+        .toList();
+
+    if (lines.isEmpty) {
+      return [text];
+    }
+
+    return lines;
+  }
+
+  void addStep() {
+    setState(() {
+      stepControllers.add(TextEditingController());
+    });
+  }
+
+  void removeStep(int index) {
+    if (index < 0 || index >= stepControllers.length) return;
+
+    final controller = stepControllers.removeAt(index);
+    controller.dispose();
+
+    if (stepControllers.isEmpty) {
+      stepControllers.add(TextEditingController());
+    }
+
+    setState(() {});
+  }
+
+  void reorderStep(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+
+      final controller = stepControllers.removeAt(oldIndex);
+      stepControllers.insert(newIndex, controller);
+    });
+  }
+
+  List<String> cleanSteps() {
+    return stepControllers
+        .map((controller) => controller.text.trim())
+        .where((step) => step.isNotEmpty)
+        .toList();
+  }
+
+  String? buildInstructionsText() {
+    final steps = cleanSteps();
+
+    if (steps.isEmpty) {
+      return null;
+    }
+
+    return [
+      for (var index = 0; index < steps.length; index++)
+        '${index + 1}. ${steps[index]}',
+    ].join('\n');
+  }
+
+  void submit() {
     Navigator.of(context).pop(
-      EditRecipeInstructionsPageResult(
-        instructions: instructions.isEmpty ? null : instructions,
-      ),
+      EditRecipeInstructionsPageResult(instructions: buildInstructionsText()),
     );
   }
 
@@ -67,28 +151,123 @@ class _EditRecipeInstructionsPageState
             AppFormPageHeaderCard(
               icon: Icons.menu_book_outlined,
               title: context.l10n.cookingInstructions,
-              subtitle: context.l10n.addThePreparationStepsForThisRecipe,
+              subtitle:
+                  'Add each cooking instruction as a separate step. You can reorder, edit, or remove steps.',
             ),
             const SizedBox(height: 16),
             AppFormSectionCard(
               children: [
-                TextField(
-                  controller: instructionsController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.instructions,
-                    hintText: context.l10n.instructionsExampleHint,
-                    alignLabelWithHint: true,
-                    prefixIcon: const Icon(Icons.edit_note_outlined),
-                  ),
-                  minLines: 14,
-                  maxLines: 24,
-                  textInputAction: TextInputAction.newline,
-                  keyboardType: TextInputType.multiline,
+                ReorderableListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  buildDefaultDragHandles: false,
+                  itemCount: stepControllers.length,
+                  onReorder: reorderStep,
+                  itemBuilder: (context, index) {
+                    final controller = stepControllers[index];
+
+                    return _InstructionStepEditor(
+                      key: ValueKey(controller),
+                      index: index,
+                      controller: controller,
+                      canRemove: stepControllers.length > 1,
+                      onRemove: () => removeStep(index),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: addStep,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add step'),
                 ),
               ],
             ),
             const SizedBox(height: 96),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InstructionStepEditor extends StatelessWidget {
+  const _InstructionStepEditor({
+    super.key,
+    required this.index,
+    required this.controller,
+    required this.canRemove,
+    required this.onRemove,
+  });
+
+  final int index;
+  final TextEditingController controller;
+  final bool canRemove;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.35,
+          ),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: Text(
+                '${index + 1}',
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimaryContainer,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  labelText: 'Step instruction',
+                  hintText: 'Example: Chop the onions and garlic.',
+                  alignLabelWithHint: true,
+                  border: OutlineInputBorder(),
+                ),
+                minLines: 2,
+                maxLines: 5,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Column(
+              children: [
+                ReorderableDragStartListener(
+                  index: index,
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.drag_handle),
+                    tooltip: 'Reorder step',
+                  ),
+                ),
+                IconButton(
+                  onPressed: canRemove ? onRemove : null,
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'Remove step',
+                ),
+              ],
+            ),
           ],
         ),
       ),

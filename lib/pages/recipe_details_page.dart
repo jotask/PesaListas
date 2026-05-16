@@ -343,21 +343,84 @@ class _InstructionsCard extends StatelessWidget {
   final String? instructions;
   final VoidCallback onEdit;
 
+  List<String> get steps {
+    final text = instructions?.trim();
+
+    if (text == null || text.isEmpty) {
+      return [];
+    }
+
+    return text
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .map((line) {
+          return line
+              .replaceFirst(RegExp(r'^\s*(?:\d+[\.)]|[-*•])\s*'), '')
+              .trim();
+        })
+        .where((line) => line.isNotEmpty)
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return _RecipeSectionCard(
       icon: Icons.menu_book_outlined,
       title: context.l10n.instructions,
+      subtitle: steps.isEmpty ? null : '${steps.length} steps',
       trailing: IconButton(
         onPressed: onEdit,
         icon: const Icon(Icons.edit_note_outlined),
         tooltip: context.l10n.editInstructions,
       ),
-      child: SelectableText(
-        instructions ?? context.l10n.noInstructionsYet,
-        style: theme.textTheme.bodyMedium,
+      child: steps.isEmpty
+          ? Text(context.l10n.noInstructionsYet)
+          : Column(
+              children: [
+                for (var index = 0; index < steps.length; index++)
+                  _RecipeInstructionStepRow(index: index, text: steps[index]),
+              ],
+            ),
+    );
+  }
+}
+
+class _RecipeInstructionStepRow extends StatelessWidget {
+  const _RecipeInstructionStepRow({required this.index, required this.text});
+
+  final int index;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: index == 0 ? 0 : 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 15,
+            backgroundColor: theme.colorScheme.primaryContainer,
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                color: theme.colorScheme.onPrimaryContainer,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: SelectableText(
+              text,
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.35),
+            ),
+          ),
+        ],
       ),
     );
   }
