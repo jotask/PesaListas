@@ -22,24 +22,22 @@ class IdeaItemCard extends StatelessWidget {
   final VoidCallback onViewVotes;
   final VoidCallback onDelete;
 
-  String get title {
-    final value = item[AppItemFields.title]?.toString().trim();
+  String? textOrNull(dynamic value) {
+    final text = value?.toString().trim();
 
-    if (value == null || value.isEmpty) {
-      return fallbackTitle;
-    }
-
-    return value;
-  }
-
-  String? get description {
-    final value = item[AppItemFields.description]?.toString().trim();
-
-    if (value == null || value.isEmpty) {
+    if (text == null || text.isEmpty) {
       return null;
     }
 
-    return value;
+    return text;
+  }
+
+  String get title {
+    return textOrNull(item[AppItemFields.title]) ?? fallbackTitle;
+  }
+
+  String? get description {
+    return textOrNull(item[AppItemFields.description]);
   }
 
   int get voteCount {
@@ -173,12 +171,12 @@ class IdeaItemCard extends StatelessWidget {
                   FilledButton.icon(
                     onPressed: onVote,
                     icon: Icon(
-                      ownVote == null ? Icons.star_border : Icons.star,
+                      ownVote == null
+                          ? Icons.lightbulb_outline
+                          : Icons.lightbulb,
                     ),
                     label: Text(
-                      ownVote == null
-                          ? context.l10n.vote
-                          : context.l10n.changeVote,
+                      ownVote == null ? 'Support idea' : 'Change support',
                     ),
                   ),
                   OutlinedButton.icon(

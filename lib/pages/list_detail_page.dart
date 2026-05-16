@@ -1399,6 +1399,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
           : int.tryParse(existingPoints?.toString() ?? '') ?? 5;
 
       final isMovieVote = listType == AppListTypes.movies.value;
+      final isIdeaVote = listType == AppListTypes.ideas.value;
+
       final isWatchedMovie =
           isMovieVote && AppItemStatus.isDone(item[AppItemFields.status]);
 
@@ -1410,30 +1412,42 @@ class _ListDetailPageState extends State<ListDetailPage> {
                 : existingVote == null
                 ? 'Want to watch?'
                 : 'Change interest'
+          : isIdeaVote
+          ? existingVote == null
+                ? 'Support idea'
+                : 'Change support'
           : null;
 
       final voteDialogSubtitle = isMovieVote
           ? isWatchedMovie
                 ? 'Rate this movie after watching it.'
                 : 'Rate how much you want to watch this movie.'
+          : isIdeaVote
+          ? 'How much do you like this idea?'
           : null;
 
       final voteDialogScoreLabel = isMovieVote
           ? isWatchedMovie
                 ? 'Rating'
                 : 'Interest'
+          : isIdeaVote
+          ? 'Support'
           : null;
 
       final voteDialogCommentHint = isMovieVote
           ? isWatchedMovie
                 ? 'What did you think?'
                 : 'Why do you want to watch it?'
+          : isIdeaVote
+          ? 'Add your thoughts or why this idea matters'
           : null;
 
       final voteDialogRemoveLabel = isMovieVote
           ? isWatchedMovie
                 ? 'Remove rating'
                 : 'Remove interest'
+          : isIdeaVote
+          ? 'Remove support'
           : null;
 
       final result = await showDialog<VoteDialogResult>(
