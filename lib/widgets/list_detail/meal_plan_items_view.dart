@@ -541,12 +541,16 @@ class _GenerateShoppingCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onGenerateShopping,
         child: Padding(
           padding: const EdgeInsets.all(14),
-          child: Row(
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               CircleAvatar(
                 backgroundColor: theme.colorScheme.secondaryContainer,
@@ -555,8 +559,8 @@ class _GenerateShoppingCard extends StatelessWidget {
                   color: theme.colorScheme.onSecondaryContainer,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 180, maxWidth: 420),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -572,7 +576,6 @@ class _GenerateShoppingCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
               FilledButton.icon(
                 onPressed: onGenerateShopping,
                 icon: const Icon(Icons.shopping_cart_outlined),
@@ -739,6 +742,22 @@ class _MealPlanCard extends StatelessWidget {
     return value.trim();
   }
 
+  String? plannedForText(BuildContext context) {
+    final value = mealPlan[AppMealPlanFields.plannedFor]?.toString();
+
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    final dateText = value.split('T').first;
+
+    if (dateText.isEmpty) {
+      return null;
+    }
+
+    return dateText;
+  }
+
   String title(BuildContext context) {
     final recipeName = recipe?[AppRecipeFields.name]?.toString();
 
@@ -785,6 +804,7 @@ class _MealPlanCard extends StatelessWidget {
     final noteText = note(context);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onEdit,
@@ -815,6 +835,11 @@ class _MealPlanCard extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         _MealTypePill(config: mealTypeConfig),
+                        if (plannedForText(context) != null)
+                          _MealInfoPill(
+                            icon: Icons.event_outlined,
+                            label: plannedForText(context)!,
+                          ),
                         _MealSourcePill(hasRecipe: hasRecipe),
                         if (hasEstimatedCost && estimatedCost != null)
                           _MealEstimatedCostPill(
@@ -834,7 +859,11 @@ class _MealPlanCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       helperText(context),
-                      style: theme.textTheme.bodyMedium,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     if (noteText != null) ...[
                       const SizedBox(height: 8),
@@ -1018,6 +1047,41 @@ class _MealEstimatedCostPill extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w800,
               color: theme.colorScheme.onTertiaryContainer,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MealInfoPill extends StatelessWidget {
+  const _MealInfoPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],

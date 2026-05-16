@@ -407,11 +407,36 @@ class _RecipeCard extends StatelessWidget {
     return instructions != null;
   }
 
+  List<String> get instructionSteps {
+    final text = instructions;
+
+    if (text == null || text.isEmpty) {
+      return [];
+    }
+
+    return text
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .map((line) {
+          return line
+              .replaceFirst(RegExp(r'^\s*(?:\d+[\.)]|[-*•])\s*'), '')
+              .trim();
+        })
+        .where((line) => line.isNotEmpty)
+        .toList();
+  }
+
+  int get instructionStepCount {
+    return instructionSteps.length;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
@@ -472,10 +497,13 @@ class _RecipeCard extends StatelessWidget {
                             label: context.l10n.servingsCount(servings!),
                           ),
                         _RecipeMetaPill(
-                          icon: Icons.notes_outlined,
+                          icon: hasInstructions
+                              ? Icons.format_list_numbered_outlined
+                              : Icons.notes_outlined,
                           label: hasInstructions
-                              ? context.l10n.instructionsAdded
+                              ? '$instructionStepCount steps'
                               : context.l10n.noInstructions,
+                          filled: hasInstructions,
                         ),
                       ],
                     ),
@@ -509,10 +537,15 @@ class _RecipeCard extends StatelessWidget {
 }
 
 class _RecipeMetaPill extends StatelessWidget {
-  const _RecipeMetaPill({required this.icon, required this.label});
+  const _RecipeMetaPill({
+    required this.icon,
+    required this.label,
+    this.filled = false,
+  });
 
   final IconData icon;
   final String label;
+  final bool filled;
 
   @override
   Widget build(BuildContext context) {
@@ -521,18 +554,28 @@ class _RecipeMetaPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: filled
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+          Icon(
+            icon,
+            size: 14,
+            color: filled
+                ? theme.colorScheme.onPrimaryContainer
+                : theme.colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: filled
+                  ? theme.colorScheme.onPrimaryContainer
+                  : theme.colorScheme.onSurfaceVariant,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
