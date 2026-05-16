@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/app_estimated_total_card.dart';
 import 'package:pesalistas/core/price_unit_converter.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/catalog_item_price_page.dart';
 import 'package:pesalistas/pages/product_catalog_page.dart';
@@ -245,22 +247,12 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     });
   }
 
-  double? parseOptionalDouble(String value) {
-    final text = value.trim();
-
-    if (text.isEmpty) {
-      return null;
-    }
-
-    return double.tryParse(text.replaceAll(',', '.'));
-  }
-
   double? currentQuantity() {
-    return parseOptionalDouble(quantityController.text);
+    return AppValueParsing.doubleOrNull(quantityController.text);
   }
 
   double? currentPrice() {
-    return parseOptionalDouble(priceController.text);
+    return AppValueParsing.doubleOrNull(priceController.text);
   }
 
   double? currentEstimatedTotal() {
@@ -403,14 +395,14 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       return;
     }
 
-    final quantity = parseOptionalDouble(quantityText);
+    final quantity = AppValueParsing.doubleOrNull(quantityText);
 
     if (quantityText.isNotEmpty && quantity == null) {
       setState(() => validationMessage = context.l10n.quantityMustBeANumber);
       return;
     }
 
-    final estimatedUnitPrice = parseOptionalDouble(priceText);
+    final estimatedUnitPrice = AppValueParsing.doubleOrNull(priceText);
 
     if (priceText.isNotEmpty && estimatedUnitPrice == null) {
       setState(() => validationMessage = context.l10n.priceMustBeValidNumber);
@@ -561,7 +553,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
                 ),
                 if (estimatedTotal != null) ...[
                   const SizedBox(height: 12),
-                  _EstimatedTotalCard(
+                  AppEstimatedTotalCard(
                     total: estimatedTotal,
                     currency: priceCurrency,
                   ),
@@ -718,45 +710,6 @@ class _ProductFallbackAvatar extends StatelessWidget {
       child: Icon(
         Icons.inventory_2_outlined,
         color: theme.colorScheme.onSurfaceVariant,
-      ),
-    );
-  }
-}
-
-class _EstimatedTotalCard extends StatelessWidget {
-  const _EstimatedTotalCard({required this.total, required this.currency});
-
-  final double total;
-  final String currency;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.receipt_long_outlined,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              context.l10n.estimatedTotal(total.toStringAsFixed(2), currency),
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/date_only.dart';
 import 'package:pesalistas/core/item_status.dart';
+import 'package:pesalistas/core/item_text.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
@@ -24,23 +25,11 @@ class ChoreItemCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   String title(BuildContext context) {
-    final value = item[AppItemFields.title]?.toString();
-
-    if (value == null || value.trim().isEmpty) {
-      return context.l10n.untitledChore;
-    }
-
-    return value.trim();
+    return AppItemText.title(item, fallback: context.l10n.untitledChore);
   }
 
   String? get description {
-    final value = item[AppItemFields.description]?.toString();
-
-    if (value == null || value.trim().isEmpty) {
-      return null;
-    }
-
-    return value.trim();
+    return AppItemText.description(item);
   }
 
   bool get isDone {

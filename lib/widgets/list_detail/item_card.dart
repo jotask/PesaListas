@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/item_text.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
@@ -23,20 +24,14 @@ class ItemCard extends StatelessWidget {
   }
 
   String title(BuildContext context) {
-    final value = item[AppItemFields.title]?.toString();
-
-    if (value == null || value.trim().isEmpty) {
-      return context.l10n.untitledItem;
-    }
-
-    return value.trim();
+    return AppItemText.title(item, fallback: context.l10n.untitledItem);
   }
 
   String subtitle(BuildContext context) {
-    final description = item[AppItemFields.description]?.toString();
+    final description = AppItemText.description(item);
 
-    if (description != null && description.trim().isNotEmpty) {
-      return description.trim();
+    if (description != null) {
+      return description;
     }
 
     return isDone ? context.l10n.done : 'No description';
