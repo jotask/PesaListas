@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
@@ -38,6 +39,10 @@ class ChoreItemCard extends StatelessWidget {
     }
 
     return value.trim();
+  }
+
+  bool get isDone {
+    return AppItemStatus.isDone(item[AppItemFields.status]);
   }
 
   String? get recurrenceType {
@@ -123,6 +128,7 @@ class ChoreItemCard extends StatelessWidget {
   }
 
   ChoreDueState get dueState {
+    if (isDone) return ChoreDueState.done;
     if (isOverdue) return ChoreDueState.overdue;
     if (isDueToday) return ChoreDueState.today;
     if (isUpcoming) return ChoreDueState.upcoming;
@@ -139,8 +145,8 @@ class ChoreItemCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onEdit,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
+        child: Opacity(
+          opacity: isDone ? 0.68 : 1,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -150,7 +156,7 @@ class ChoreItemCard extends StatelessWidget {
                   CircleAvatar(
                     backgroundColor: dueStyle.avatarBackground,
                     child: Icon(
-                      dueStyle.icon,
+                      isDone ? Icons.check_circle : dueStyle.icon,
                       color: dueStyle.avatarForeground,
                     ),
                   ),
@@ -164,9 +170,12 @@ class ChoreItemCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 title(context),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
+                                  decoration: isDone
+                                      ? TextDecoration.lineThrough
+                                      : null,
                                 ),
                               ),
                             ),
@@ -231,9 +240,13 @@ class ChoreItemCard extends StatelessWidget {
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: onComplete,
-                      icon: Icon(Icons.check_circle_outline),
+                      icon: Icon(
+                        isDone ? Icons.undo : Icons.check_circle_outline,
+                      ),
                       label: Text(
-                        isOverdue || isDueToday
+                        isDone
+                            ? context.l10n.markAsOpen
+                            : isOverdue || isDueToday
                             ? context.l10n.completeNow
                             : context.l10n.completeChore,
                       ),
@@ -255,7 +268,7 @@ class ChoreItemCard extends StatelessWidget {
   }
 }
 
-enum ChoreDueState { none, overdue, today, upcoming }
+enum ChoreDueState { none, overdue, today, upcoming, done }
 
 class ChoreDueStyle {
   const ChoreDueStyle({
@@ -322,6 +335,19 @@ class ChoreDueStyle {
           pillForeground: colors.onSecondaryContainer,
           chipBackground: colors.secondaryContainer,
           chipForeground: colors.onSecondaryContainer,
+        );
+
+      case ChoreDueState.done:
+        return ChoreDueStyle(
+          icon: Icons.check_circle,
+          dateIcon: Icons.event_available_outlined,
+          label: context.l10n.done,
+          avatarBackground: colors.surfaceContainerHighest,
+          avatarForeground: colors.onSurfaceVariant,
+          pillBackground: colors.surfaceContainerHighest,
+          pillForeground: colors.onSurfaceVariant,
+          chipBackground: colors.surfaceContainerHighest,
+          chipForeground: colors.onSurfaceVariant,
         );
 
       case ChoreDueState.none:

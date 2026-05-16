@@ -29,6 +29,11 @@ class ItemRepository {
       'complete_item',
       params: {'target_item_id': itemId, 'completion_note': null},
     );
+
+    await _client
+        .from(AppTables.items)
+        .update({AppItemFields.status: AppItemStatus.done})
+        .eq(AppItemFields.id, itemId);
   }
 
   Future<void> reopenItem(String itemId) async {

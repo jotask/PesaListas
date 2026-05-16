@@ -124,6 +124,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   bool get shouldShowStatusSummary {
     return listType == AppListTypes.tasks.value ||
+        listType == AppListTypes.chores.value ||
         listType == AppListTypes.shopping.value ||
         listType == AppListTypes.generic.value;
   }

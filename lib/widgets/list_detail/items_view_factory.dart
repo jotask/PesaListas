@@ -65,6 +65,7 @@ class ItemsViewFactory extends StatelessWidget {
         loading: loading,
         onCreate: onCreate,
         onComplete: onComplete,
+        onReopen: onReopen,
         onEdit: onEdit,
         onDelete: onDelete,
       );
