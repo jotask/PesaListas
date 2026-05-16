@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/fields/meal_plan_cost_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
@@ -33,6 +34,7 @@ import 'package:pesalistas/pages/shopping_item_form_page.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/meal_plan_repository.dart';
+import 'package:pesalistas/repositories/omdb_repository.dart';
 import 'package:pesalistas/repositories/recipe_ingredient_repository.dart';
 import 'package:pesalistas/repositories/recipe_repository.dart';
 import 'package:pesalistas/repositories/shopping_repository.dart';
@@ -58,6 +60,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   late final MealPlanRepository mealPlanRepository;
   late final ShoppingRepository shoppingRepository;
   late final ListRepository listRepository;
+  late final OmdbRepository omdbRepository;
 
   bool loadingItems = true;
   bool creatingItem = false;
@@ -149,6 +152,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
     shoppingRepository = ShoppingRepository(client);
     listRepository = ListRepository(client);
 
+    omdbRepository = OmdbRepository(client);
+
     loadItems();
   }
 
@@ -195,6 +200,41 @@ class _ListDetailPageState extends State<ListDetailPage> {
       final profile = userId == null ? null : profilesById[userId];
 
       return {...member, AppMemberFields.profiles: profile};
+    }).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> enrichItemsWithMovies(
+    List<Map<String, dynamic>> rawItems,
+  ) async {
+    if (rawItems.isEmpty || listType != AppListTypes.movies.value) {
+      return rawItems;
+    }
+
+    final movies = await omdbRepository.getCachedMoviesForItems(rawItems);
+
+    if (movies.isEmpty) {
+      return rawItems;
+    }
+
+    final moviesByImdbId = {
+      for (final movie in movies)
+        movie[AppMovieFields.imdbId].toString(): movie,
+    };
+
+    return rawItems.map((item) {
+      final imdbId = item[AppItemFields.movieImdbId]?.toString();
+
+      if (imdbId == null || imdbId.isEmpty) {
+        return item;
+      }
+
+      final movie = moviesByImdbId[imdbId];
+
+      if (movie == null) {
+        return item;
+      }
+
+      return {...item, AppItemFields.movie: movie};
     }).toList();
   }
 
@@ -297,10 +337,14 @@ class _ListDetailPageState extends State<ListDetailPage> {
       }
 
       final rawItems = await itemRepository.getItemsForList(listId);
+
+      final itemsWithMovies = await enrichItemsWithMovies(rawItems);
+
       final itemsWithAssignees = await enrichItemsWithAssignees(
-        rawItems,
+        itemsWithMovies,
         loadedGroupMembers,
       );
+
       final enrichedItems = await enrichItemsWithVoteSummaries(
         itemsWithAssignees,
       );
@@ -713,6 +757,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         recurrenceType: result.recurrenceType,
         recurrenceInterval: result.recurrenceInterval,
         nextDueAt: result.nextDueAt,
+        movieImdbId: result.movieImdbId,
         assignmentScope: result.assignmentScope,
         assigneeUserIds: result.assigneeUserIds,
       );
@@ -957,6 +1002,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
         priority: result.priority,
         deadlineAt: result.deadlineAt,
         updateChoreFields: isChoreList,
+        updateMovieFields: listType == AppListTypes.movies.value,
+        movieImdbId: result.movieImdbId,
         recurrenceType: result.recurrenceType,
         recurrenceInterval: result.recurrenceInterval,
         nextDueAt: result.nextDueAt,

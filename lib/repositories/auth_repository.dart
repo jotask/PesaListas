@@ -1,8 +1,6 @@
 import 'package:pesalistas/auth/google_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AuthRepository {
   AuthRepository(this._client);

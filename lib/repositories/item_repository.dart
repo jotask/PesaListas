@@ -4,6 +4,9 @@ import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
+import 'package:pesalistas/pages/recipe_ingredient_form_page.dart'
+    // ignore: library_prefixes
+    as AppValueParsing;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ItemRepository {
@@ -152,6 +155,8 @@ class ItemRepository {
     bool updateChoreFields = false,
     String? recurrenceType,
     int? recurrenceInterval,
+    String? movieImdbId,
+    bool updateMovieFields = false,
     DateTime? nextDueAt,
     String? assignmentScope,
     List<String>? assigneeUserIds,
@@ -185,6 +190,12 @@ class ItemRepository {
       );
     }
 
+    if (updateMovieFields) {
+      values[AppItemFields.movieImdbId] = AppValueParsing.textOrNull(
+        movieImdbId,
+      );
+    }
+
     await _client
         .from(AppTables.items)
         .update(values)
@@ -215,6 +226,7 @@ class ItemRepository {
     String? recurrenceType,
     int? recurrenceInterval,
     DateTime? nextDueAt,
+    String? movieImdbId,
     String assignmentScope = AppItemAssignmentScopes.none,
     List<String> assigneeUserIds = const [],
   }) async {
@@ -228,6 +240,7 @@ class ItemRepository {
           AppItemFields.description: description,
           AppItemFields.priority: priority,
           AppItemFields.status: status ?? AppItemStatus.open,
+          AppItemFields.movieImdbId: AppValueParsing.textOrNull(movieImdbId),
           AppItemFields.position: position,
           AppItemFields.deadlineAt: deadlineAt?.toIso8601String(),
           AppItemFields.assignmentScope: normalizedScope,

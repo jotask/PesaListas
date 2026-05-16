@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/date_formatting.dart';
+import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
@@ -10,6 +11,7 @@ import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/pages/movie_picker_page.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
 
 class ItemFormPageResult {
@@ -21,6 +23,7 @@ class ItemFormPageResult {
     this.recurrenceType,
     this.recurrenceInterval,
     this.nextDueAt,
+    this.movieImdbId,
     this.assignmentScope = AppItemAssignmentScopes.none,
     this.assigneeUserIds = const [],
   });
@@ -30,6 +33,7 @@ class ItemFormPageResult {
   final int priority;
   final DateTime? deadlineAt;
   final String? recurrenceType;
+  final String? movieImdbId;
   final int? recurrenceInterval;
   final DateTime? nextDueAt;
   final String assignmentScope;
@@ -60,6 +64,10 @@ class _ItemFormPageState extends State<ItemFormPage> {
   late final TextEditingController recurrenceIntervalController;
   late String selectedAssignmentScope;
   late Set<String> selectedAssigneeUserIds;
+
+  String? selectedMovieImdbId;
+  Map<String, dynamic>? selectedMovie;
+  String? movieLinkMessage;
 
   int priority = 0;
   DateTime? deadlineAt;
@@ -92,6 +100,10 @@ class _ItemFormPageState extends State<ItemFormPage> {
 
   bool get hasMultipleGroupMembers {
     return widget.groupMembers.length > 1;
+  }
+
+  bool get isMovieList {
+    return widget.listType == AppListTypes.movies.value;
   }
 
   String assignmentNameForMember(Map<String, dynamic> member) {
@@ -221,6 +233,12 @@ class _ItemFormPageState extends State<ItemFormPage> {
     recurrenceInterval =
         AppValueParsing.intOrNull(item?[AppItemFields.recurrenceInterval]) ?? 2;
 
+    selectedMovieImdbId = widget.item?[AppItemFields.movieImdbId]?.toString();
+
+    if (selectedMovieImdbId != null && selectedMovieImdbId!.trim().isEmpty) {
+      selectedMovieImdbId = null;
+    }
+
     if (recurrenceInterval < 2) {
       recurrenceInterval = 2;
     }
@@ -312,6 +330,8 @@ class _ItemFormPageState extends State<ItemFormPage> {
         ? selectedAssigneeUserIds.toList()
         : <String>[];
 
+    final movieImdbId = isMovieList ? selectedMovieImdbId : null;
+
     Navigator.of(context).pop(
       ItemFormPageResult(
         title: title,
@@ -319,12 +339,56 @@ class _ItemFormPageState extends State<ItemFormPage> {
         priority: priority,
         deadlineAt: deadlineAt,
         recurrenceType: recurrenceType,
+        movieImdbId: movieImdbId,
         recurrenceInterval: usesCustomInterval ? recurrenceInterval : null,
         nextDueAt: nextDueAt,
         assignmentScope: assignmentScope,
         assigneeUserIds: assigneeUserIds,
       ),
     );
+  }
+
+  Future<void> findMovie() async {
+    final movie = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        builder: (_) => MoviePickerPage(
+          initialQuery: titleController.text.trim().isEmpty
+              ? null
+              : titleController.text.trim(),
+        ),
+      ),
+    );
+
+    if (movie == null) return;
+
+    final imdbId = movie[AppMovieFields.imdbId]?.toString();
+    final title = movie[AppMovieFields.title]?.toString();
+
+    if (imdbId == null || imdbId.trim().isEmpty) {
+      setState(() {
+        movieLinkMessage = 'Selected movie has no IMDb id.';
+      });
+      return;
+    }
+
+    setState(() {
+      selectedMovieImdbId = imdbId.trim();
+      selectedMovie = movie;
+
+      if (title != null && title.trim().isNotEmpty) {
+        titleController.text = title.trim();
+      }
+
+      movieLinkMessage = 'Movie linked.';
+    });
+  }
+
+  void unlinkMovie() {
+    setState(() {
+      selectedMovieImdbId = null;
+      selectedMovie = null;
+      movieLinkMessage = 'Movie link removed.';
+    });
   }
 
   Future<void> pickDeadline() async {
@@ -425,6 +489,16 @@ class _ItemFormPageState extends State<ItemFormPage> {
                 onAssignToEveryone: setAssignToEveryone,
                 onPickMembersMode: setPickMembersMode,
                 onToggleMember: toggleAssignedMember,
+              ),
+            ],
+            if (isMovieList) ...[
+              const SizedBox(height: 12),
+              _LinkedMovieActionsCard(
+                movie: selectedMovie,
+                movieImdbId: selectedMovieImdbId,
+                message: movieLinkMessage,
+                onFindMovie: findMovie,
+                onUnlinkMovie: selectedMovieImdbId == null ? null : unlinkMovie,
               ),
             ],
             const SizedBox(height: 16),
@@ -855,6 +929,207 @@ class _AssignmentMemberTile extends StatelessWidget {
       ),
       title: Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
       controlAffinity: ListTileControlAffinity.trailing,
+    );
+  }
+}
+
+class _LinkedMovieActionsCard extends StatelessWidget {
+  const _LinkedMovieActionsCard({
+    required this.movie,
+    required this.movieImdbId,
+    required this.message,
+    required this.onFindMovie,
+    required this.onUnlinkMovie,
+  });
+
+  final Map<String, dynamic>? movie;
+  final String? movieImdbId;
+  final String? message;
+  final VoidCallback onFindMovie;
+  final VoidCallback? onUnlinkMovie;
+
+  bool get hasMovie {
+    return movieImdbId != null && movieImdbId!.trim().isNotEmpty;
+  }
+
+  String text(dynamic value, {String fallback = '—'}) {
+    final result = value?.toString().trim();
+
+    if (result == null || result.isEmpty) {
+      return fallback;
+    }
+
+    return result;
+  }
+
+  String get title {
+    return text(movie?[AppMovieFields.title], fallback: 'Linked movie');
+  }
+
+  String get year {
+    return text(movie?[AppMovieFields.year]);
+  }
+
+  String get posterUrl {
+    return text(movie?[AppMovieFields.posterUrl], fallback: '');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _LinkedMoviePoster(posterUrl: posterUrl),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hasMovie ? title : 'No movie linked',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (hasMovie) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          year == '—' ? movieImdbId! : '$year • $movieImdbId',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Text(
+                        hasMovie
+                            ? 'This list item is linked to cached OMDb movie details.'
+                            : 'Search OMDb and link this item to a movie.',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (message != null) ...[
+              const SizedBox(height: 12),
+              _InfoMessage(message: message!),
+            ],
+            const SizedBox(height: 14),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FilledButton.icon(
+                  onPressed: onFindMovie,
+                  icon: const Icon(Icons.movie_filter_outlined),
+                  label: Text(hasMovie ? 'Change movie' : 'Find movie'),
+                ),
+                if (onUnlinkMovie != null) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: onUnlinkMovie,
+                    icon: const Icon(Icons.link_off_outlined),
+                    label: const Text('Remove movie link'),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LinkedMoviePoster extends StatelessWidget {
+  const _LinkedMoviePoster({required this.posterUrl});
+
+  final String posterUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (posterUrl.isEmpty) {
+      return _LinkedMoviePosterFallback(theme: theme);
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image.network(
+        posterUrl,
+        width: 58,
+        height: 84,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) {
+          return _LinkedMoviePosterFallback(theme: theme);
+        },
+      ),
+    );
+  }
+}
+
+class _LinkedMoviePosterFallback extends StatelessWidget {
+  const _LinkedMoviePosterFallback({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 58,
+      height: 84,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        Icons.movie_outlined,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
+class _InfoMessage extends StatelessWidget {
+  const _InfoMessage({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

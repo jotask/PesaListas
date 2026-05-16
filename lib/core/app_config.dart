@@ -23,6 +23,11 @@ class AppConfig {
     defaultValue: 'EUR',
   );
 
+  static const omdbApiKey = String.fromEnvironment(
+    'OMDB_API_KEY',
+    defaultValue: '9fefeb6c',
+  );
+
   static void validate() {
     if (supabaseUrl.isEmpty) {
       throw StateError('Missing SUPABASE_URL');
@@ -47,4 +52,10 @@ class AppConfig {
     return defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
   }
+
+  static bool get hasOmdbApiKey {
+    return omdbApiKey.trim().isNotEmpty;
+  }
+
+  static const omdbBaseUrl = 'https://www.omdbapi.com/';
 }

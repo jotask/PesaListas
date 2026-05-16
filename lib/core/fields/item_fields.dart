@@ -12,6 +12,8 @@ class AppItemFields {
   static const deadlineAt = 'deadline_at';
   static const recurrenceType = 'recurrence_type';
   static const recurrenceInterval = 'recurrence_interval';
+  static const movieImdbId = 'movie_imdb_id';
+  static const movie = 'movie';
   static const assignees = 'assignees';
   static const nextDueAt = 'next_due_at';
   static const createdBy = 'created_by';

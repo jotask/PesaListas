@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
-import 'package:pesalistas/widgets/list_detail/votable_items_view.dart';
+import 'package:pesalistas/widgets/list_detail/activity_item_card.dart';
+import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class ActivitiesItemsView extends StatelessWidget {
   const ActivitiesItemsView({
@@ -26,19 +28,31 @@ class ActivitiesItemsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VotableItemsView(
-      items: items,
-      loading: loading,
-      emptyIcon: Icons.local_activity_outlined,
-      emptyTitle: context.l10n.noActivitiesYet,
-      emptySubtitle: context.l10n.addSomethingFunToDo,
-      cardIcon: Icons.local_activity_outlined,
-      fallbackTitle: context.l10n.untitledActivity,
-      onCreate: onCreate,
-      onEdit: onEdit,
-      onDelete: onDelete,
-      onVote: onVote,
-      onViewVotes: onViewVotes,
+    if (loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (items.isEmpty) {
+      return EmptyItemsCard(
+        icon: Icons.local_activity_outlined,
+        title: context.l10n.noActivitiesYet,
+        subtitle: context.l10n.addSomethingFunToDo,
+        onCreate: onCreate,
+      );
+    }
+
+    return Column(
+      children: [
+        for (final item in items)
+          ActivityItemCard(
+            item: item,
+            fallbackTitle: context.l10n.untitledActivity,
+            onEdit: () => onEdit(item),
+            onVote: () => onVote(item),
+            onViewVotes: () => onViewVotes(item),
+            onDelete: () => onDelete(item[AppItemFields.id].toString()),
+          ),
+      ],
     );
   }
 }
