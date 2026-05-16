@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/core/item_vote_summary.dart';
-import 'package:pesalistas/core/value_parsing.dart';
-import 'package:pesalistas/core/vote_summary_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 
 class MovieItemCard extends StatelessWidget {
