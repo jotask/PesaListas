@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
+import 'package:pesalistas/core/item_vote_summary.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/core/vote_summary_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
@@ -40,40 +41,22 @@ class IdeaItemCard extends StatelessWidget {
     return textOrNull(item[AppItemFields.description]);
   }
 
-  int get voteCount {
-    return AppValueParsing.intOrNull(item[AppVoteSummaryFields.voteCount]) ?? 0;
-  }
+  int get voteCount => voteSummary.voteCount;
 
-  int get totalPoints {
-    return AppValueParsing.intOrNull(item[AppVoteSummaryFields.totalPoints]) ??
-        0;
-  }
+  int get totalPoints => voteSummary.totalPoints;
 
-  int? get myPoints {
-    return AppValueParsing.intOrNull(item[AppVoteSummaryFields.myPoints]);
-  }
+  int? get myPoints => voteSummary.myPoints;
 
-  double get averagePoints {
-    final value = item[AppVoteSummaryFields.averagePoints];
+  bool get hasVotes => voteSummary.hasVotes;
 
-    if (value is num) {
-      return value.toDouble();
-    }
-
-    return double.tryParse(value?.toString() ?? '') ?? 0.0;
-  }
-
-  bool get hasVotes => voteCount > 0;
-
-  String get averageText {
-    if (!hasVotes) return '—';
-    return averagePoints.toStringAsFixed(1);
-  }
+  String get averageText => voteSummary.averageText;
 
   String voteCountText(BuildContext context) {
-    if (voteCount == 0) return context.l10n.noVotesYet;
-    if (voteCount == 1) return context.l10n.voteCountOne;
-    return context.l10n.voteCountMany(voteCount);
+    return voteSummary.voteCountText(context);
+  }
+
+  AppItemVoteSummary get voteSummary {
+    return AppItemVoteSummary(item);
   }
 
   @override
