@@ -38,7 +38,7 @@ class ItemCard extends StatelessWidget {
       return description.trim();
     }
 
-    return isDone ? context.l10n.done : context.l10n.open;
+    return isDone ? context.l10n.done : 'No description';
   }
 
   String stateLabel(BuildContext context) {
@@ -50,6 +50,7 @@ class ItemCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onEdit,
@@ -70,7 +71,7 @@ class ItemCard extends StatelessWidget {
                       child: Icon(
                         isDone
                             ? Icons.check_circle
-                            : Icons.radio_button_unchecked,
+                            : Icons.inventory_2_outlined,
                         color: isDone
                             ? theme.colorScheme.onSecondaryContainer
                             : theme.colorScheme.onPrimaryContainer,
@@ -107,6 +108,17 @@ class ItemCard extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _ItemInfoChip(
+                                icon: Icons.category_outlined,
+                                label: 'Generic item',
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -183,6 +195,41 @@ class _ItemStatePill extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
+      ),
+    );
+  }
+}
+
+class _ItemInfoChip extends StatelessWidget {
+  const _ItemInfoChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }
