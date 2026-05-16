@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
+import 'package:pesalistas/core/recipe_instruction_steps.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 
@@ -344,23 +345,7 @@ class _InstructionsCard extends StatelessWidget {
   final VoidCallback onEdit;
 
   List<String> get steps {
-    final text = instructions?.trim();
-
-    if (text == null || text.isEmpty) {
-      return [];
-    }
-
-    return text
-        .split(RegExp(r'\r?\n'))
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .map((line) {
-          return line
-              .replaceFirst(RegExp(r'^\s*(?:\d+[\.)]|[-*•])\s*'), '')
-              .trim();
-        })
-        .where((line) => line.isNotEmpty)
-        .toList();
+    return AppRecipeInstructionSteps.parse(instructions);
   }
 
   @override

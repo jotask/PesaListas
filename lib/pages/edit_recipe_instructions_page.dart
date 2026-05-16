@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
+import 'package:pesalistas/core/recipe_instruction_steps.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
 
@@ -30,7 +31,7 @@ class _EditRecipeInstructionsPageState
     final existingInstructions = widget.recipe[AppRecipeFields.instructions]
         ?.toString();
 
-    final steps = parseInstructionSteps(existingInstructions);
+    final steps = AppRecipeInstructionSteps.parse(existingInstructions);
 
     if (steps.isEmpty) {
       stepControllers.add(TextEditingController());
@@ -48,32 +49,6 @@ class _EditRecipeInstructionsPageState
     }
 
     super.dispose();
-  }
-
-  List<String> parseInstructionSteps(String? value) {
-    final text = value?.trim();
-
-    if (text == null || text.isEmpty) {
-      return [];
-    }
-
-    final lines = text
-        .split(RegExp(r'\r?\n'))
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .map((line) {
-          return line
-              .replaceFirst(RegExp(r'^\s*(?:\d+[\.)]|[-*•])\s*'), '')
-              .trim();
-        })
-        .where((line) => line.isNotEmpty)
-        .toList();
-
-    if (lines.isEmpty) {
-      return [text];
-    }
-
-    return lines;
   }
 
   void addStep() {
@@ -114,16 +89,7 @@ class _EditRecipeInstructionsPageState
   }
 
   String? buildInstructionsText() {
-    final steps = cleanSteps();
-
-    if (steps.isEmpty) {
-      return null;
-    }
-
-    return [
-      for (var index = 0; index < steps.length; index++)
-        '${index + 1}. ${steps[index]}',
-    ].join('\n');
+    return AppRecipeInstructionSteps.buildNumberedText(cleanSteps());
   }
 
   void submit() {
