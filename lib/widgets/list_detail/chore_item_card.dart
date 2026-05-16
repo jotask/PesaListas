@@ -145,122 +145,125 @@ class ChoreItemCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onEdit,
-        child: Opacity(
-          opacity: isDone ? 0.68 : 1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: dueStyle.avatarBackground,
-                    child: Icon(
-                      isDone ? Icons.check_circle : dueStyle.icon,
-                      color: dueStyle.avatarForeground,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Opacity(
+            opacity: isDone ? 0.68 : 1,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: dueStyle.avatarBackground,
+                      child: Icon(
+                        isDone ? Icons.check_circle : dueStyle.icon,
+                        color: dueStyle.avatarForeground,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                title(context),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  decoration: isDone
-                                      ? TextDecoration.lineThrough
-                                      : null,
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  title(context),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    decoration: isDone
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                  ),
                                 ),
                               ),
-                            ),
-                            if (dueState != ChoreDueState.none)
-                              _DuePill(
-                                label: dueStyle.label,
-                                backgroundColor: dueStyle.pillBackground,
-                                foregroundColor: dueStyle.pillForeground,
-                              ),
-                          ],
-                        ),
-                        if (description != null) ...[
-                          SizedBox(height: 4),
-                          Text(
-                            description!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium,
+                              if (dueState != ChoreDueState.none)
+                                _DuePill(
+                                  label: dueStyle.label,
+                                  backgroundColor: dueStyle.pillBackground,
+                                  foregroundColor: dueStyle.pillForeground,
+                                ),
+                            ],
                           ),
+                          if (description != null) ...[
+                            SizedBox(height: 4),
+                            Text(
+                              description!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: onDelete,
-                    icon: Icon(Icons.delete_outline),
-                    tooltip: context.l10n.deleteChore,
-                  ),
-                ],
-              ),
-              SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  AssignmentMetaPill(item: item),
-                  _ChoreInfoChip(
-                    icon: Icons.repeat,
-                    label: hasRecurrence
-                        ? recurrenceText(context)
-                        : context.l10n.doesNotRepeat,
-                    filled: hasRecurrence,
-                  ),
-                  _ChoreInfoChip(
-                    icon: dueStyle.dateIcon,
-                    label: hasNextDueDate
-                        ? context.l10n.nextDueDate(nextDueText(context))
-                        : nextDueText(context),
-                    filled: hasNextDueDate,
-                    backgroundColor: hasNextDueDate
-                        ? dueStyle.chipBackground
-                        : null,
-                    foregroundColor: hasNextDueDate
-                        ? dueStyle.chipForeground
-                        : null,
-                  ),
-                ],
-              ),
-              SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: onComplete,
-                      icon: Icon(
-                        isDone ? Icons.undo : Icons.check_circle_outline,
-                      ),
-                      label: Text(
-                        isDone
-                            ? context.l10n.markAsOpen
-                            : isOverdue || isDueToday
-                            ? context.l10n.completeNow
-                            : context.l10n.completeChore,
                       ),
                     ),
-                  ),
-                  SizedBox(width: 8),
-                  IconButton(
-                    onPressed: onEdit,
-                    icon: Icon(Icons.edit_outlined),
-                    tooltip: context.l10n.editChore,
-                  ),
-                ],
-              ),
-            ],
+                    IconButton(
+                      onPressed: onDelete,
+                      icon: Icon(Icons.delete_outline),
+                      tooltip: context.l10n.deleteChore,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    AssignmentMetaPill(item: item),
+                    _ChoreInfoChip(
+                      icon: Icons.repeat,
+                      label: hasRecurrence
+                          ? recurrenceText(context)
+                          : context.l10n.doesNotRepeat,
+                      filled: hasRecurrence,
+                    ),
+                    _ChoreInfoChip(
+                      icon: dueStyle.dateIcon,
+                      label: hasNextDueDate
+                          ? context.l10n.nextDueDate(nextDueText(context))
+                          : nextDueText(context),
+                      filled: hasNextDueDate,
+                      backgroundColor: hasNextDueDate
+                          ? dueStyle.chipBackground
+                          : null,
+                      foregroundColor: hasNextDueDate
+                          ? dueStyle.chipForeground
+                          : null,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: onComplete,
+                        icon: Icon(
+                          isDone ? Icons.undo : Icons.check_circle_outline,
+                        ),
+                        label: Text(
+                          isDone
+                              ? context.l10n.markAsOpen
+                              : isOverdue || isDueToday
+                              ? context.l10n.completeNow
+                              : context.l10n.completeChore,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    IconButton(
+                      onPressed: onEdit,
+                      icon: Icon(Icons.edit_outlined),
+                      tooltip: context.l10n.editChore,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
