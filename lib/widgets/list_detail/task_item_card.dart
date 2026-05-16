@@ -137,6 +137,7 @@ class TaskItemCard extends StatelessWidget {
     final priorityStyle = TaskPriorityStyle.fromState(context, priorityState);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onEdit,
@@ -244,9 +245,7 @@ class TaskItemCard extends StatelessWidget {
                       child: FilledButton.icon(
                         onPressed: onComplete,
                         icon: Icon(
-                          isDone
-                              ? Icons.check_circle
-                              : Icons.check_circle_outline,
+                          isDone ? Icons.undo : Icons.check_circle_outline,
                         ),
                         label: Text(
                           isDone

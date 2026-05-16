@@ -142,6 +142,7 @@ class ChoreItemCard extends StatelessWidget {
     final dueStyle = ChoreDueStyle.fromState(context, dueState);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onEdit,
