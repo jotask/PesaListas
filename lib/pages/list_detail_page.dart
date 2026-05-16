@@ -1400,6 +1400,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
       final isMovieVote = listType == AppListTypes.movies.value;
       final isIdeaVote = listType == AppListTypes.ideas.value;
+      final isActivityVote = listType == AppListTypes.activities.value;
 
       final isWatchedMovie =
           isMovieVote && AppItemStatus.isDone(item[AppItemFields.status]);
@@ -1416,6 +1417,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
           ? existingVote == null
                 ? 'Support idea'
                 : 'Change support'
+          : isActivityVote
+          ? existingVote == null
+                ? 'Show interest'
+                : 'Change activity interest'
           : null;
 
       final voteDialogSubtitle = isMovieVote
@@ -1424,6 +1429,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
                 : 'Rate how much you want to watch this movie.'
           : isIdeaVote
           ? 'How much do you like this idea?'
+          : isActivityVote
+          ? 'How much would you like to do this activity?'
           : null;
 
       final voteDialogScoreLabel = isMovieVote
@@ -1432,6 +1439,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
                 : 'Interest'
           : isIdeaVote
           ? 'Support'
+          : isActivityVote
+          ? 'Interest'
           : null;
 
       final voteDialogCommentHint = isMovieVote
@@ -1440,6 +1449,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
                 : 'Why do you want to watch it?'
           : isIdeaVote
           ? 'Add your thoughts or why this idea matters'
+          : isActivityVote
+          ? 'Add when, where, or why you want to do it'
           : null;
 
       final voteDialogRemoveLabel = isMovieVote
@@ -1448,6 +1459,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
                 : 'Remove interest'
           : isIdeaVote
           ? 'Remove support'
+          : isActivityVote
+          ? 'Remove interest'
           : null;
 
       final result = await showDialog<VoteDialogResult>(

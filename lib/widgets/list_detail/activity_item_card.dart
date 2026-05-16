@@ -22,24 +22,22 @@ class ActivityItemCard extends StatelessWidget {
   final VoidCallback onViewVotes;
   final VoidCallback onDelete;
 
-  String get title {
-    final value = item[AppItemFields.title]?.toString().trim();
+  String? textOrNull(dynamic value) {
+    final text = value?.toString().trim();
 
-    if (value == null || value.isEmpty) {
-      return fallbackTitle;
-    }
-
-    return value;
-  }
-
-  String? get description {
-    final value = item[AppItemFields.description]?.toString().trim();
-
-    if (value == null || value.isEmpty) {
+    if (text == null || text.isEmpty) {
       return null;
     }
 
-    return value;
+    return text;
+  }
+
+  String get title {
+    return textOrNull(item[AppItemFields.title]) ?? fallbackTitle;
+  }
+
+  String? get description {
+    return textOrNull(item[AppItemFields.description]);
   }
 
   int get voteCount {
@@ -148,7 +146,7 @@ class ActivityItemCard extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   _ActivityMetaPill(
-                    icon: Icons.how_to_vote_outlined,
+                    icon: Icons.groups_2_outlined,
                     text: voteCountText(context),
                   ),
                   if (hasVotes)
@@ -173,12 +171,12 @@ class ActivityItemCard extends StatelessWidget {
                   FilledButton.icon(
                     onPressed: onVote,
                     icon: Icon(
-                      ownVote == null ? Icons.star_border : Icons.star,
+                      ownVote == null
+                          ? Icons.local_activity_outlined
+                          : Icons.local_activity,
                     ),
                     label: Text(
-                      ownVote == null
-                          ? context.l10n.vote
-                          : context.l10n.changeVote,
+                      ownVote == null ? 'Show interest' : 'Change interest',
                     ),
                   ),
                   OutlinedButton.icon(
@@ -235,13 +233,27 @@ class _ActivityScorePill extends StatelessWidget {
         children: [
           Icon(Icons.star, size: 15, color: foregroundColor),
           const SizedBox(width: 4),
-          Text(
-            averageText,
-            style: TextStyle(
-              color: foregroundColor,
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                averageText,
+                style: TextStyle(
+                  color: foregroundColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                'Interest',
+                style: TextStyle(
+                  color: foregroundColor,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
         ],
       ),
