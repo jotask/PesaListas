@@ -9,19 +9,35 @@ class ListCard extends StatelessWidget {
   final Map<String, dynamic> list;
   final VoidCallback onTap;
 
+  String? textOrNull(dynamic value) {
+    final text = value?.toString().trim();
+
+    if (text == null || text.isEmpty) {
+      return null;
+    }
+
+    return text;
+  }
+
   @override
   Widget build(BuildContext context) {
     final name =
-        list[AppListFields.name]?.toString() ?? context.l10n.untitledList;
-    final listType = list[AppListFields.listType]?.toString();
+        textOrNull(list[AppListFields.name]) ?? context.l10n.untitledList;
 
+    final description = textOrNull(list[AppListFields.description]);
+
+    final listType = list[AppListFields.listType]?.toString();
     final config = AppListTypes.fromValue(listType);
 
     return Card(
       child: ListTile(
         leading: CircleAvatar(child: Icon(config.icon)),
-        title: Text(name),
-        subtitle: Text(config.label(context)),
+        title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+        subtitle: Text(
+          description ?? config.label(context),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),

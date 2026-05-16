@@ -6,12 +6,14 @@ class ListDetailHeader extends StatelessWidget {
   const ListDetailHeader({
     super.key,
     required this.listName,
+    this.listDescription,
     required this.config,
     required this.onBack,
     required this.onEdit,
   });
 
   final String listName;
+  final String? listDescription;
   final AppListTypeConfig config;
   final VoidCallback onBack;
   final VoidCallback onEdit;
@@ -19,6 +21,9 @@ class ListDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    final description = listDescription?.trim();
+    final hasDescription = description != null && description.isNotEmpty;
 
     return Material(
       color: theme.scaffoldBackgroundColor,
@@ -90,21 +95,25 @@ class ListDetailHeader extends StatelessWidget {
               const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.only(left: 8),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _ListTypePill(
                       icon: config.icon,
                       label: config.label(context),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        config.description(context),
-                        maxLines: 1,
+                    if (hasDescription) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        description,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          height: 1.25,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

@@ -90,6 +90,16 @@ class _ListDetailPageState extends State<ListDetailPage> {
   String get listName =>
       currentList[AppListFields.name]?.toString() ?? context.l10n.list;
 
+  String? get listDescription {
+    final value = currentList[AppListFields.description]?.toString().trim();
+
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    return value;
+  }
+
   String get listType =>
       currentList[AppListFields.listType]?.toString() ??
       AppListTypes.generic.value;
@@ -1767,6 +1777,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         children: [
           ListDetailHeader(
             listName: listName,
+            listDescription: listDescription,
             config: config,
             onBack: goBack,
             onEdit: editList,
