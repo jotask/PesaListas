@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class RecipesItemsView extends StatefulWidget {
@@ -477,26 +478,26 @@ class _RecipeCard extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         if (totalTime != null)
-                          _RecipeMetaPill(
+                          AppMetaPill(
                             icon: Icons.schedule,
                             label: context.l10n.minutesTotal(totalTime!),
                           ),
                         if (prepTime != null)
-                          _RecipeMetaPill(
+                          AppMetaPill(
                             icon: Icons.kitchen_outlined,
                             label: context.l10n.prepMinutes(prepTime!),
                           ),
                         if (cookTime != null)
-                          _RecipeMetaPill(
+                          AppMetaPill(
                             icon: Icons.local_fire_department_outlined,
                             label: context.l10n.cookMinutes(cookTime!),
                           ),
                         if (servings != null)
-                          _RecipeMetaPill(
+                          AppMetaPill(
                             icon: Icons.people_outline,
                             label: context.l10n.servingsCount(servings!),
                           ),
-                        _RecipeMetaPill(
+                        AppMetaPill(
                           icon: hasInstructions
                               ? Icons.format_list_numbered_outlined
                               : Icons.notes_outlined,
@@ -531,56 +532,6 @@ class _RecipeCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _RecipeMetaPill extends StatelessWidget {
-  const _RecipeMetaPill({
-    required this.icon,
-    required this.label,
-    this.filled = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool filled;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: filled
-            ? theme.colorScheme.primaryContainer
-            : theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 14,
-            color: filled
-                ? theme.colorScheme.onPrimaryContainer
-                : theme.colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              color: filled
-                  ? theme.colorScheme.onPrimaryContainer
-                  : theme.colorScheme.onSurfaceVariant,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }

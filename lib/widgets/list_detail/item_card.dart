@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 
 class ItemCard extends StatelessWidget {
   const ItemCard({
@@ -114,7 +115,7 @@ class ItemCard extends StatelessWidget {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              _ItemInfoChip(
+                              AppMetaPill(
                                 icon: Icons.category_outlined,
                                 label: 'Generic item',
                               ),
@@ -195,41 +196,6 @@ class _ItemStatePill extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
-      ),
-    );
-  }
-}
-
-class _ItemInfoChip extends StatelessWidget {
-  const _ItemInfoChip({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }

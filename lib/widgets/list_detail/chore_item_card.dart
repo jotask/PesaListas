@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/date_only.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/list_detail/assignment_meta_pill.dart';
 
 class ChoreItemCard extends StatelessWidget {
@@ -60,19 +62,7 @@ class ChoreItemCard extends StatelessWidget {
   }
 
   DateTime? get nextDueDate {
-    final parsed = AppValueParsing.dateTimeOrNull(
-      item[AppItemFields.nextDueAt],
-    );
-
-    if (parsed == null) return null;
-
-    return DateTime(parsed.year, parsed.month, parsed.day);
-  }
-
-  DateTime get today {
-    final now = DateTime.now();
-
-    return DateTime(now.year, now.month, now.day);
+    return AppDateOnly.fromValue(item[AppItemFields.nextDueAt]);
   }
 
   String recurrenceText(BuildContext context) {
@@ -104,27 +94,21 @@ class ChoreItemCard extends StatelessWidget {
   }
 
   bool get isOverdue {
-    final due = nextDueDate;
+    if (isDone) return false;
 
-    if (due == null) return false;
-
-    return due.isBefore(today);
+    return AppDateOnly.isBeforeToday(nextDueDate);
   }
 
   bool get isDueToday {
-    final due = nextDueDate;
+    if (isDone) return false;
 
-    if (due == null) return false;
-
-    return due == today;
+    return AppDateOnly.isToday(nextDueDate);
   }
 
   bool get isUpcoming {
-    final due = nextDueDate;
+    if (isDone) return false;
 
-    if (due == null) return false;
-
-    return due.isAfter(today);
+    return AppDateOnly.isAfterToday(nextDueDate);
   }
 
   ChoreDueState get dueState {
@@ -215,14 +199,14 @@ class ChoreItemCard extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     AssignmentMetaPill(item: item),
-                    _ChoreInfoChip(
+                    AppMetaPill(
                       icon: Icons.repeat,
                       label: hasRecurrence
                           ? recurrenceText(context)
                           : context.l10n.doesNotRepeat,
                       filled: hasRecurrence,
                     ),
-                    _ChoreInfoChip(
+                    AppMetaPill(
                       icon: dueStyle.dateIcon,
                       label: hasNextDueDate
                           ? context.l10n.nextDueDate(nextDueText(context))
@@ -397,62 +381,6 @@ class _DuePill extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
-      ),
-    );
-  }
-}
-
-class _ChoreInfoChip extends StatelessWidget {
-  const _ChoreInfoChip({
-    required this.icon,
-    required this.label,
-    this.filled = false,
-    this.backgroundColor,
-    this.foregroundColor,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool filled;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final resolvedBackgroundColor =
-        backgroundColor ??
-        (filled
-            ? theme.colorScheme.secondaryContainer
-            : theme.colorScheme.surfaceContainerHighest);
-
-    final resolvedForegroundColor =
-        foregroundColor ??
-        (filled
-            ? theme.colorScheme.onSecondaryContainer
-            : theme.colorScheme.onSurfaceVariant);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: resolvedBackgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 15, color: resolvedForegroundColor),
-          SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: filled ? FontWeight.w700 : FontWeight.w500,
-              color: resolvedForegroundColor,
-            ),
-          ),
-        ],
       ),
     );
   }

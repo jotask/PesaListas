@@ -3,6 +3,9 @@ import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/core/item_vote_summary.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
+import 'package:pesalistas/widgets/common/app_score_pill.dart';
+import 'package:pesalistas/core/item_text.dart';
 
 class MovieItemCard extends StatelessWidget {
   const MovieItemCard({
@@ -36,54 +39,42 @@ class MovieItemCard extends StatelessWidget {
     return null;
   }
 
-  String? textOrNull(dynamic value) {
-    final text = value?.toString().trim();
-
-    if (text == null || text.isEmpty) {
-      return null;
-    }
-
-    return text;
-  }
-
   String get title {
-    final movieTitle = textOrNull(movie?[AppMovieFields.title]);
+    final movieTitle = AppItemText.textOrNull(movie?[AppMovieFields.title]);
 
     if (movieTitle != null) {
       return movieTitle;
     }
 
-    final itemTitle = textOrNull(item[AppItemFields.title]);
-
-    return itemTitle ?? fallbackTitle;
+    return AppItemText.title(item, fallback: fallbackTitle);
   }
 
   String? get description {
-    return textOrNull(item[AppItemFields.description]);
+    return AppItemText.description(item);
   }
 
   String? get posterUrl {
-    return textOrNull(movie?[AppMovieFields.posterUrl]);
+    return AppItemText.textOrNull(movie?[AppMovieFields.posterUrl]);
   }
 
   String? get year {
-    return textOrNull(movie?[AppMovieFields.year]);
+    return AppItemText.textOrNull(movie?[AppMovieFields.year]);
   }
 
   String? get rating {
-    return textOrNull(movie?[AppMovieFields.imdbRating]);
+    return AppItemText.textOrNull(movie?[AppMovieFields.imdbRating]);
   }
 
   String? get runtime {
-    return textOrNull(movie?[AppMovieFields.runtime]);
+    return AppItemText.textOrNull(movie?[AppMovieFields.runtime]);
   }
 
   String? get genre {
-    return textOrNull(movie?[AppMovieFields.genre]);
+    return AppItemText.textOrNull(movie?[AppMovieFields.genre]);
   }
 
   String? get plot {
-    return textOrNull(movie?[AppMovieFields.plot]);
+    return AppItemText.textOrNull(movie?[AppMovieFields.plot]);
   }
 
   bool get hasMovieData {
@@ -170,9 +161,9 @@ class MovieItemCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            _MovieScorePill(
-                              averageText: averageText,
-                              hasVotes: hasVotes,
+                            AppScorePill(
+                              scoreText: averageText,
+                              hasScore: hasVotes,
                               label: scoreLabel,
                             ),
                           ],
@@ -182,25 +173,25 @@ class MovieItemCard extends StatelessWidget {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            _MovieMetaPill(
+                            AppMetaPill(
                               icon: statusIcon,
-                              text: statusText,
+                              label: statusText,
                               filled: isWatched,
                             ),
                             if (year != null)
-                              _MovieMetaPill(
+                              AppMetaPill(
                                 icon: Icons.calendar_today_outlined,
-                                text: year!,
+                                label: year!,
                               ),
                             if (rating != null)
-                              _MovieMetaPill(
+                              AppMetaPill(
                                 icon: Icons.star_outline,
-                                text: 'IMDb $rating',
+                                label: 'IMDb $rating',
                               ),
                             if (runtime != null)
-                              _MovieMetaPill(
+                              AppMetaPill(
                                 icon: Icons.schedule_outlined,
-                                text: runtime!,
+                                label: runtime!,
                               ),
                           ],
                         ),
@@ -236,25 +227,25 @@ class MovieItemCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _MovieMetaPill(
+                  AppMetaPill(
                     icon: Icons.how_to_vote_outlined,
-                    text: voteCountText(context),
+                    label: voteCountText(context),
                   ),
                   if (hasVotes)
-                    _MovieMetaPill(
+                    AppMetaPill(
                       icon: Icons.functions,
-                      text: context.l10n.totalPointsLabel(totalPoints),
+                      label: context.l10n.totalPointsLabel(totalPoints),
                     ),
                   if (ownVote != null)
-                    _MovieMetaPill(
+                    AppMetaPill(
                       icon: Icons.person,
-                      text: context.l10n.yourVoteLabel(ownVote),
+                      label: context.l10n.yourVoteLabel(ownVote),
                       filled: true,
                     ),
                   if (!hasMovieData)
-                    _MovieMetaPill(
+                    AppMetaPill(
                       icon: Icons.link_off_outlined,
-                      text: 'No movie details',
+                      label: 'No movie details',
                     ),
                 ],
               ),
@@ -351,116 +342,6 @@ class _MoviePosterFallback extends StatelessWidget {
         Icons.movie_outlined,
         size: 34,
         color: theme.colorScheme.onSurfaceVariant,
-      ),
-    );
-  }
-}
-
-class _MovieScorePill extends StatelessWidget {
-  const _MovieScorePill({
-    required this.averageText,
-    required this.hasVotes,
-    required this.label,
-  });
-
-  final String averageText;
-  final bool hasVotes;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final backgroundColor = hasVotes
-        ? theme.colorScheme.primaryContainer
-        : theme.colorScheme.surfaceContainerHighest;
-
-    final foregroundColor = hasVotes
-        ? theme.colorScheme.onPrimaryContainer
-        : theme.colorScheme.onSurfaceVariant;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.star, size: 15, color: foregroundColor),
-          const SizedBox(width: 4),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                averageText,
-                style: TextStyle(
-                  color: foregroundColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              Text(
-                label,
-                style: TextStyle(
-                  color: foregroundColor,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MovieMetaPill extends StatelessWidget {
-  const _MovieMetaPill({
-    required this.icon,
-    required this.text,
-    this.filled = false,
-  });
-
-  final IconData icon;
-  final String text;
-  final bool filled;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final backgroundColor = filled
-        ? theme.colorScheme.secondaryContainer
-        : theme.colorScheme.surfaceContainerHighest;
-
-    final foregroundColor = filled
-        ? theme.colorScheme.onSecondaryContainer
-        : theme.colorScheme.onSurfaceVariant;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: foregroundColor),
-          const SizedBox(width: 5),
-          Text(
-            text,
-            style: TextStyle(
-              color: foregroundColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }

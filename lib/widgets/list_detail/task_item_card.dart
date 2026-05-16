@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/date_only.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/priority_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/list_detail/assignment_meta_pill.dart';
 
 class TaskItemCard extends StatelessWidget {
@@ -58,13 +60,7 @@ class TaskItemCard extends StatelessWidget {
   }
 
   DateTime? get deadlineDate {
-    final parsed = AppValueParsing.dateTimeOrNull(
-      item[AppItemFields.deadlineAt],
-    );
-
-    if (parsed == null) return null;
-
-    return DateTime(parsed.year, parsed.month, parsed.day);
+    return AppDateOnly.fromValue(item[AppItemFields.deadlineAt]);
   }
 
   DateTime get today {
@@ -90,27 +86,21 @@ class TaskItemCard extends StatelessWidget {
   }
 
   bool get isOverdue {
-    final deadline = deadlineDate;
+    if (isDone) return false;
 
-    if (deadline == null || isDone) return false;
-
-    return deadline.isBefore(today);
+    return AppDateOnly.isBeforeToday(deadlineDate);
   }
 
   bool get isDueToday {
-    final deadline = deadlineDate;
+    if (isDone) return false;
 
-    if (deadline == null || isDone) return false;
-
-    return deadline == today;
+    return AppDateOnly.isToday(deadlineDate);
   }
 
   bool get isUpcoming {
-    final deadline = deadlineDate;
+    if (isDone) return false;
 
-    if (deadline == null || isDone) return false;
-
-    return deadline.isAfter(today);
+    return AppDateOnly.isAfterToday(deadlineDate);
   }
 
   TaskDeadlineState get deadlineState {
@@ -210,7 +200,7 @@ class TaskItemCard extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     AssignmentMetaPill(item: item),
-                    _TaskInfoChip(
+                    AppMetaPill(
                       icon: priorityStyle.icon,
                       label: hasPriority
                           ? priorityText(context)
@@ -223,7 +213,7 @@ class TaskItemCard extends StatelessWidget {
                           ? priorityStyle.chipForeground
                           : null,
                     ),
-                    _TaskInfoChip(
+                    AppMetaPill(
                       icon: deadlineStyle.dateIcon,
                       label: hasDeadline
                           ? context.l10n.deadlineDate(deadlineText(context))
@@ -451,62 +441,6 @@ class _TaskPill extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
-      ),
-    );
-  }
-}
-
-class _TaskInfoChip extends StatelessWidget {
-  const _TaskInfoChip({
-    required this.icon,
-    required this.label,
-    this.filled = false,
-    this.backgroundColor,
-    this.foregroundColor,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool filled;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final resolvedBackgroundColor =
-        backgroundColor ??
-        (filled
-            ? theme.colorScheme.secondaryContainer
-            : theme.colorScheme.surfaceContainerHighest);
-
-    final resolvedForegroundColor =
-        foregroundColor ??
-        (filled
-            ? theme.colorScheme.onSecondaryContainer
-            : theme.colorScheme.onSurfaceVariant);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: resolvedBackgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 15, color: resolvedForegroundColor),
-          SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: filled ? FontWeight.w700 : FontWeight.w500,
-              color: resolvedForegroundColor,
-            ),
-          ),
-        ],
       ),
     );
   }

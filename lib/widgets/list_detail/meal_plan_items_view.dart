@@ -5,6 +5,7 @@ import 'package:pesalistas/core/fields/meal_plan_fields.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/core/meal_types.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class MealPlanItemsView extends StatefulWidget {
@@ -836,7 +837,7 @@ class _MealPlanCard extends StatelessWidget {
                       children: [
                         _MealTypePill(config: mealTypeConfig),
                         if (plannedForText(context) != null)
-                          _MealInfoPill(
+                          AppMetaPill(
                             icon: Icons.event_outlined,
                             label: plannedForText(context)!,
                           ),
@@ -1047,41 +1048,6 @@ class _MealEstimatedCostPill extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w800,
               color: theme.colorScheme.onTertiaryContainer,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MealInfoPill extends StatelessWidget {
-  const _MealInfoPill({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
