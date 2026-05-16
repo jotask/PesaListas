@@ -19,11 +19,26 @@ class VoteDialog extends StatefulWidget {
     this.initialPoints = 5,
     this.initialComment,
     this.canRemove = false,
+    this.title,
+    this.subtitle,
+    this.scoreLabel,
+    this.commentLabel,
+    this.commentHint,
+    this.removeLabel,
+    this.saveLabel,
   });
 
   final int initialPoints;
   final String? initialComment;
   final bool canRemove;
+
+  final String? title;
+  final String? subtitle;
+  final String? scoreLabel;
+  final String? commentLabel;
+  final String? commentHint;
+  final String? removeLabel;
+  final String? saveLabel;
 
   @override
   State<VoteDialog> createState() => _VoteDialogState();
@@ -70,14 +85,35 @@ class _VoteDialogState extends State<VoteDialog> {
   Widget build(BuildContext context) {
     final roundedPoints = points.round();
 
+    final title =
+        widget.title ??
+        (widget.canRemove ? context.l10n.changeVote : context.l10n.vote);
+
+    final scoreLabel = widget.scoreLabel ?? context.l10n.vote;
+
     return AlertDialog(
-      title: Text(
-        widget.canRemove ? context.l10n.changeVote : context.l10n.vote,
-      ),
+      title: Text(title),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (widget.subtitle != null) ...[
+              Text(
+                widget.subtitle!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+            ],
+            Text(
+              scoreLabel,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
             Text(
               '$roundedPoints / 10',
               style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
@@ -92,12 +128,12 @@ class _VoteDialogState extends State<VoteDialog> {
                 setState(() => points = value);
               },
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             TextField(
               controller: commentController,
               decoration: InputDecoration(
-                labelText: context.l10n.comment,
-                hintText: context.l10n.optional,
+                labelText: widget.commentLabel ?? context.l10n.comment,
+                hintText: widget.commentHint ?? context.l10n.optional,
               ),
               minLines: 1,
               maxLines: 3,
@@ -109,13 +145,16 @@ class _VoteDialogState extends State<VoteDialog> {
         if (widget.canRemove)
           TextButton(
             onPressed: removeVote,
-            child: Text(context.l10n.removeVote),
+            child: Text(widget.removeLabel ?? context.l10n.removeVote),
           ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(context.l10n.cancel),
         ),
-        ElevatedButton(onPressed: submit, child: Text(context.l10n.save)),
+        ElevatedButton(
+          onPressed: submit,
+          child: Text(widget.saveLabel ?? context.l10n.save),
+        ),
       ],
     );
   }

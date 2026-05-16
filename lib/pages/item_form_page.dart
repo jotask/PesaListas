@@ -239,6 +239,14 @@ class _ItemFormPageState extends State<ItemFormPage> {
       selectedMovieImdbId = null;
     }
 
+    final itemMovie = widget.item?[AppItemFields.movie];
+
+    if (itemMovie is Map<String, dynamic>) {
+      selectedMovie = itemMovie;
+    } else if (itemMovie is Map) {
+      selectedMovie = Map<String, dynamic>.from(itemMovie);
+    }
+
     if (recurrenceInterval < 2) {
       recurrenceInterval = 2;
     }
@@ -380,6 +388,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
       }
 
       movieLinkMessage = 'Movie linked.';
+      validationMessage = null;
     });
   }
 
@@ -388,6 +397,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
       selectedMovieImdbId = null;
       selectedMovie = null;
       movieLinkMessage = 'Movie link removed.';
+      validationMessage = null;
     });
   }
 
@@ -963,7 +973,10 @@ class _LinkedMovieActionsCard extends StatelessWidget {
   }
 
   String get title {
-    return text(movie?[AppMovieFields.title], fallback: 'Linked movie');
+    return text(
+      movie?[AppMovieFields.title],
+      fallback: movieImdbId == null ? 'Linked movie' : 'Linked movie details',
+    );
   }
 
   String get year {
@@ -1010,7 +1023,9 @@ class _LinkedMovieActionsCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         hasMovie
-                            ? 'This list item is linked to cached OMDb movie details.'
+                            ? movie == null
+                                  ? 'This item has an IMDb link, but cached details were not loaded yet.'
+                                  : 'This list item is linked to cached OMDb movie details.'
                             : 'Search OMDb and link this item to a movie.',
                         style: theme.textTheme.bodySmall,
                       ),

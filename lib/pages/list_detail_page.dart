@@ -4,6 +4,7 @@ import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/fields/meal_plan_cost_fields.dart';
+import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/member_fields.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
@@ -1386,12 +1387,55 @@ class _ListDetailPageState extends State<ListDetailPage> {
           ? existingPoints
           : int.tryParse(existingPoints?.toString() ?? '') ?? 5;
 
+      final isMovieVote = listType == AppListTypes.movies.value;
+      final isWatchedMovie =
+          isMovieVote && AppItemStatus.isDone(item[AppItemFields.status]);
+
+      final voteDialogTitle = isMovieVote
+          ? isWatchedMovie
+                ? existingVote == null
+                      ? 'Rate movie'
+                      : 'Change movie rating'
+                : existingVote == null
+                ? 'Want to watch?'
+                : 'Change interest'
+          : null;
+
+      final voteDialogSubtitle = isMovieVote
+          ? isWatchedMovie
+                ? 'Rate this movie after watching it.'
+                : 'Rate how much you want to watch this movie.'
+          : null;
+
+      final voteDialogScoreLabel = isMovieVote
+          ? isWatchedMovie
+                ? 'Rating'
+                : 'Interest'
+          : null;
+
+      final voteDialogCommentHint = isMovieVote
+          ? isWatchedMovie
+                ? 'What did you think?'
+                : 'Why do you want to watch it?'
+          : null;
+
+      final voteDialogRemoveLabel = isMovieVote
+          ? isWatchedMovie
+                ? 'Remove rating'
+                : 'Remove interest'
+          : null;
+
       final result = await showDialog<VoteDialogResult>(
         context: context,
         builder: (_) => VoteDialog(
           initialPoints: initialPoints,
           initialComment: existingVote?[AppVoteFields.comment]?.toString(),
           canRemove: existingVote != null,
+          title: voteDialogTitle,
+          subtitle: voteDialogSubtitle,
+          scoreLabel: voteDialogScoreLabel,
+          commentHint: voteDialogCommentHint,
+          removeLabel: voteDialogRemoveLabel,
         ),
       );
 
