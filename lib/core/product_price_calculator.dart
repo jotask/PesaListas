@@ -1,3 +1,4 @@
+import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 
@@ -59,28 +60,6 @@ class AppProductPriceCalculator {
   }
 
   static String? normalizeUnit(String? value) {
-    final unit = AppValueParsing.textOrNull(value)?.toLowerCase();
-
-    if (unit == null) {
-      return null;
-    }
-
-    if (unit == 'lt' ||
-        unit == 'liter' ||
-        unit == 'litre' ||
-        unit == 'liters' ||
-        unit == 'litres') {
-      return 'l';
-    }
-
-    if (unit == 'kgs' || unit == 'kilogram' || unit == 'kilograms') {
-      return 'kg';
-    }
-
-    if (unit == 'gram' || unit == 'grams') {
-      return 'g';
-    }
-
-    return unit;
+    return AppUnitType.normalize(value);
   }
 }

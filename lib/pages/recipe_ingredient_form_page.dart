@@ -12,6 +12,7 @@ import 'package:pesalistas/pages/catalog_item_picker_page.dart';
 import 'package:pesalistas/pages/catalog_item_price_page.dart';
 import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
+import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -545,15 +546,15 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: TextField(
+                      child: AppUnitDropdownField(
                         controller: unitController,
-                        decoration: InputDecoration(
-                          labelText: context.l10n.unit,
-                          hintText: context.l10n.pcsGMl,
-                          prefixIcon: const Icon(Icons.scale_outlined),
-                        ),
-                        textInputAction: TextInputAction.next,
-                        onChanged: (_) => clearValidation(),
+                        labelText: context.l10n.unit,
+                        hintText: context.l10n.pcsGMl,
+                        prefixIcon: Icons.scale_outlined,
+                        onChanged: () {
+                          clearValidation();
+                          setState(() {});
+                        },
                       ),
                     ),
                   ],

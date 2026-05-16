@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
+import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CatalogItemPricePage extends StatefulWidget {
@@ -256,14 +257,14 @@ class _CatalogItemPricePageState extends State<CatalogItemPricePage> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: TextField(
+                          child: AppUnitDropdownField(
                             controller: priceUnitController,
-                            decoration: const InputDecoration(
-                              labelText: 'Unit',
-                              hintText: 'kg, g, pcs, ml',
-                              prefixIcon: Icon(Icons.scale_outlined),
-                            ),
-                            textInputAction: TextInputAction.next,
+                            labelText: 'Unit',
+                            hintText: 'kg, g, pcs, ml',
+                            prefixIcon: Icons.scale_outlined,
+                            onChanged: () {
+                              setState(() {});
+                            },
                           ),
                         ),
                       ],
