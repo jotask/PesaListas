@@ -4,9 +4,7 @@ import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
-import 'package:pesalistas/pages/recipe_ingredient_form_page.dart'
-    // ignore: library_prefixes
-    as AppValueParsing;
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ItemRepository {

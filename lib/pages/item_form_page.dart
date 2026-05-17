@@ -12,6 +12,8 @@ import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/movie_picker_page.dart';
+import 'package:pesalistas/widgets/common/app_info_message.dart';
+import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
 
 class ItemFormPageResult {
@@ -1000,7 +1002,13 @@ class _LinkedMovieActionsCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _LinkedMoviePoster(posterUrl: posterUrl),
+                AppNetworkImageThumbnail(
+                  imageUrl: posterUrl,
+                  width: 58,
+                  height: 84,
+                  borderRadius: 12,
+                  fallbackIcon: Icons.movie_outlined,
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -1036,7 +1044,7 @@ class _LinkedMovieActionsCard extends StatelessWidget {
             ),
             if (message != null) ...[
               const SizedBox(height: 12),
-              _InfoMessage(message: message!),
+              AppInfoMessage(message: message!),
             ],
             const SizedBox(height: 14),
             Column(
@@ -1059,91 +1067,6 @@ class _LinkedMovieActionsCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _LinkedMoviePoster extends StatelessWidget {
-  const _LinkedMoviePoster({required this.posterUrl});
-
-  final String posterUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (posterUrl.isEmpty) {
-      return _LinkedMoviePosterFallback(theme: theme);
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Image.network(
-        posterUrl,
-        width: 58,
-        height: 84,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) {
-          return _LinkedMoviePosterFallback(theme: theme);
-        },
-      ),
-    );
-  }
-}
-
-class _LinkedMoviePosterFallback extends StatelessWidget {
-  const _LinkedMoviePosterFallback({required this.theme});
-
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 58,
-      height: 84,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        Icons.movie_outlined,
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
-    );
-  }
-}
-
-class _InfoMessage extends StatelessWidget {
-  const _InfoMessage({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.info_outline, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

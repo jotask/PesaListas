@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/core/item_vote_summary.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/common/app_meta_pill.dart';
+import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';
 import 'package:pesalistas/widgets/common/app_score_pill.dart';
 import 'package:pesalistas/core/item_text.dart';
 
@@ -40,7 +42,7 @@ class MovieItemCard extends StatelessWidget {
   }
 
   String get title {
-    final movieTitle = AppItemText.textOrNull(movie?[AppMovieFields.title]);
+    final movieTitle = AppValueParsing.textOrNull(movie?[AppMovieFields.title]);
 
     if (movieTitle != null) {
       return movieTitle;
@@ -54,27 +56,27 @@ class MovieItemCard extends StatelessWidget {
   }
 
   String? get posterUrl {
-    return AppItemText.textOrNull(movie?[AppMovieFields.posterUrl]);
+    return AppValueParsing.textOrNull(movie?[AppMovieFields.posterUrl]);
   }
 
   String? get year {
-    return AppItemText.textOrNull(movie?[AppMovieFields.year]);
+    return AppValueParsing.textOrNull(movie?[AppMovieFields.year]);
   }
 
   String? get rating {
-    return AppItemText.textOrNull(movie?[AppMovieFields.imdbRating]);
+    return AppValueParsing.textOrNull(movie?[AppMovieFields.imdbRating]);
   }
 
   String? get runtime {
-    return AppItemText.textOrNull(movie?[AppMovieFields.runtime]);
+    return AppValueParsing.textOrNull(movie?[AppMovieFields.runtime]);
   }
 
   String? get genre {
-    return AppItemText.textOrNull(movie?[AppMovieFields.genre]);
+    return AppValueParsing.textOrNull(movie?[AppMovieFields.genre]);
   }
 
   String? get plot {
-    return AppItemText.textOrNull(movie?[AppMovieFields.plot]);
+    return AppValueParsing.textOrNull(movie?[AppMovieFields.plot]);
   }
 
   bool get hasMovieData {
@@ -141,7 +143,13 @@ class MovieItemCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _MoviePoster(posterUrl: posterUrl),
+                  AppNetworkImageThumbnail(
+                    imageUrl: posterUrl,
+                    width: 86,
+                    height: 126,
+                    borderRadius: 14,
+                    fallbackIcon: Icons.movie_outlined,
+                  ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -290,58 +298,6 @@ class MovieItemCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _MoviePoster extends StatelessWidget {
-  const _MoviePoster({required this.posterUrl});
-
-  final String? posterUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final url = posterUrl;
-
-    if (url == null || url.isEmpty) {
-      return _MoviePosterFallback(theme: theme);
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: Image.network(
-        url,
-        width: 86,
-        height: 126,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) {
-          return _MoviePosterFallback(theme: theme);
-        },
-      ),
-    );
-  }
-}
-
-class _MoviePosterFallback extends StatelessWidget {
-  const _MoviePosterFallback({required this.theme});
-
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 86,
-      height: 126,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Icon(
-        Icons.movie_outlined,
-        size: 34,
-        color: theme.colorScheme.onSurfaceVariant,
       ),
     );
   }

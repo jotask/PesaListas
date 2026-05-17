@@ -138,4 +138,65 @@ enum AppUnitType {
 
     return unit.label;
   }
+
+  static String? valueOrNull(String? value) {
+    final normalized = normalize(value);
+
+    if (normalized == null || normalized.trim().isEmpty) {
+      return null;
+    }
+
+    return normalized;
+  }
+
+  static String displayLabel(String? value, {bool includeValue = true}) {
+    final normalized = normalize(value);
+
+    if (normalized == null || normalized.isEmpty) {
+      return '';
+    }
+
+    final unit = fromValue(normalized);
+
+    if (unit == null) {
+      return normalized;
+    }
+
+    if (!includeValue) {
+      return unit.label;
+    }
+
+    return '${unit.label} (${unit.value})';
+  }
+
+  static String shortLabel(String? value) {
+    final normalized = normalize(value);
+
+    if (normalized == null || normalized.isEmpty) {
+      return '';
+    }
+
+    return normalized;
+  }
+
+  static String quantityText({
+    required double? quantity,
+    required String? unit,
+  }) {
+    final unitLabel = shortLabel(unit);
+
+    if (quantity == null) {
+      return unitLabel;
+    }
+
+    final quantityText = quantity % 1 == 0
+        ? quantity.toInt().toString()
+        : quantity.toString();
+
+    if (unitLabel.isEmpty) {
+      return quantityText;
+    }
+
+    return '$quantityText $unitLabel';
+  }
 }

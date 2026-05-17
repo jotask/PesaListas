@@ -32,7 +32,7 @@ class AppUnitDropdownField extends StatelessWidget {
       for (final unit in AppUnitType.values)
         DropdownMenuItem<String>(
           value: unit.value,
-          child: Text('${unit.label} (${unit.value})'),
+          child: Text(AppUnitType.displayLabel(unit.value)),
         ),
     ];
 
@@ -42,7 +42,7 @@ class AppUnitDropdownField extends StatelessWidget {
       items.add(
         DropdownMenuItem<String>(
           value: currentValue,
-          child: Text('Custom: $currentValue'),
+          child: Text('Custom: ${AppUnitType.displayLabel(currentValue)}'),
         ),
       );
     }

@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/fields/catalog_item_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/catalog_item_repository.dart';
+import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CatalogItemPickerPage extends StatefulWidget {
@@ -17,6 +20,7 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
   late final CatalogItemRepository catalogItemRepository;
 
   final TextEditingController searchController = TextEditingController();
+  final TextEditingController defaultUnitController = TextEditingController();
 
   Timer? searchDebounce;
 
@@ -40,6 +44,7 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
   void dispose() {
     searchDebounce?.cancel();
     searchController.dispose();
+    defaultUnitController.dispose();
     super.dispose();
   }
 
@@ -81,29 +86,24 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
     searchDebounce?.cancel();
     searchController.clear();
 
+    defaultUnitController.clear();
+
     setState(() => query = '');
 
     loadItems();
   }
 
-  String? textOrNull(dynamic value) {
-    final text = value?.toString().trim();
-
-    if (text == null || text.isEmpty) return null;
-
-    return text;
-  }
-
   String itemName(Map<String, dynamic> item) {
-    return textOrNull(item[AppCatalogItemFields.name]) ?? 'Unnamed item';
+    return AppValueParsing.textOrNull(item[AppCatalogItemFields.name]) ??
+        'Unnamed item';
   }
 
   String? itemCategory(Map<String, dynamic> item) {
-    return textOrNull(item[AppCatalogItemFields.category]);
+    return AppValueParsing.textOrNull(item[AppCatalogItemFields.category]);
   }
 
   String? itemDefaultUnit(Map<String, dynamic> item) {
-    return textOrNull(item[AppCatalogItemFields.defaultUnit]);
+    return AppValueParsing.textOrNull(item[AppCatalogItemFields.defaultUnit]);
   }
 
   void selectItem(Map<String, dynamic> item) {
@@ -123,8 +123,11 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
     });
 
     try {
+      final defaultUnit = AppUnitType.valueOrNull(defaultUnitController.text);
+
       final created = await catalogItemRepository.findOrCreateCatalogItem(
         name: name,
+        defaultUnit: defaultUnit,
       );
 
       if (!mounted) return;
@@ -187,6 +190,8 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
                 _CreateCatalogItemCard(
                   name: query.trim(),
                   loading: creating,
+                  defaultUnitController: defaultUnitController,
+                  onUnitChanged: () => setState(() {}),
                   onCreate: createFromSearch,
                 ),
                 const SizedBox(height: 12),
@@ -265,28 +270,71 @@ class _CreateCatalogItemCard extends StatelessWidget {
   const _CreateCatalogItemCard({
     required this.name,
     required this.loading,
+    required this.defaultUnitController,
+    required this.onUnitChanged,
     required this.onCreate,
   });
 
   final String name;
   final bool loading;
+  final TextEditingController defaultUnitController;
+  final VoidCallback onUnitChanged;
   final VoidCallback onCreate;
 
   @override
   Widget build(BuildContext context) {
+    final selectedUnit = defaultUnitController.text.trim();
+
     return Card(
-      child: ListTile(
-        leading: const CircleAvatar(child: Icon(Icons.add)),
-        title: Text('Create "$name"'),
-        subtitle: const Text('Add this as a reusable generic item.'),
-        trailing: loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.chevron_right),
-        onTap: loading ? null : onCreate,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const CircleAvatar(child: Icon(Icons.add)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Create "$name"',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                if (loading)
+                  const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              selectedUnit.isEmpty
+                  ? 'Add this as a reusable generic item.'
+                  : 'Add this as a reusable generic item using "$selectedUnit" by default.',
+            ),
+            const SizedBox(height: 12),
+            AppUnitDropdownField(
+              controller: defaultUnitController,
+              labelText: 'Default unit',
+              hintText: 'Optional',
+              prefixIcon: Icons.scale_outlined,
+              enabled: !loading,
+              onChanged: onUnitChanged,
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: loading ? null : onCreate,
+              icon: const Icon(Icons.add),
+              label: const Text('Create generic item'),
+            ),
+          ],
+        ),
       ),
     );
   }

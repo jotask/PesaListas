@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_estimated_total_card.dart';
+import 'package:pesalistas/core/app_units.dart';
+import 'package:pesalistas/core/estimated_cost_calculator.dart';
 import 'package:pesalistas/core/price_unit_converter.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
@@ -10,6 +12,8 @@ import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/catalog_item_price_page.dart';
 import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
+import 'package:pesalistas/widgets/common/app_info_message.dart';
+import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';
 import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -74,7 +78,9 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
   bool get isEditing => widget.item != null;
 
   String get priceCurrency {
-    return textOrNull(widget.item?[AppShoppingItemFields.priceCurrency]) ??
+    return AppValueParsing.textOrNull(
+          widget.item?[AppShoppingItemFields.priceCurrency],
+        ) ??
         AppConfig.defaultCurrency;
   }
 
@@ -103,9 +109,13 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
 
     final item = widget.item;
 
-    linkedBarcode = textOrNull(item?[AppShoppingItemFields.barcode]);
-    linkedProductName = textOrNull(item?[AppShoppingItemFields.productName]);
-    linkedProductImageUrl = textOrNull(
+    linkedBarcode = AppValueParsing.textOrNull(
+      item?[AppShoppingItemFields.barcode],
+    );
+    linkedProductName = AppValueParsing.textOrNull(
+      item?[AppShoppingItemFields.productName],
+    );
+    linkedProductImageUrl = AppValueParsing.textOrNull(
       item?[AppShoppingItemFields.productImageUrl],
     );
 
@@ -125,11 +135,13 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       text: item?[AppShoppingItemFields.estimatedUnitPrice]?.toString() ?? '',
     );
 
-    linkedCatalogItemId = textOrNull(
+    linkedCatalogItemId = AppValueParsing.textOrNull(
       item?[AppShoppingItemFields.catalogItemId],
     );
-    linkedCatalogItemName = textOrNull(item?[AppShoppingItemFields.name]);
-    linkedCatalogItemDefaultUnit = textOrNull(
+    linkedCatalogItemName = AppValueParsing.textOrNull(
+      item?[AppShoppingItemFields.name],
+    );
+    linkedCatalogItemDefaultUnit = AppValueParsing.textOrNull(
       item?[AppShoppingItemFields.unit],
     );
   }
@@ -173,7 +185,8 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       setState(() {
         if (latestPrice != null) {
           final targetUnit =
-              textOrNull(unitController.text) ?? linkedCatalogItemDefaultUnit;
+              AppValueParsing.textOrNull(unitController.text) ??
+              linkedCatalogItemDefaultUnit;
 
           final unitPrice = AppPriceUnitConverter.unitPriceFromPriceRow(
             latestPrice,
@@ -210,9 +223,15 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
 
     if (item == null) return;
 
-    final catalogItemId = textOrNull(item[AppCatalogItemFields.id]);
-    final catalogItemName = textOrNull(item[AppCatalogItemFields.name]);
-    final defaultUnit = textOrNull(item[AppCatalogItemFields.defaultUnit]);
+    final catalogItemId = AppValueParsing.textOrNull(
+      item[AppCatalogItemFields.id],
+    );
+    final catalogItemName = AppValueParsing.textOrNull(
+      item[AppCatalogItemFields.name],
+    );
+    final defaultUnit = AppValueParsing.textOrNull(
+      item[AppCatalogItemFields.defaultUnit],
+    );
 
     if (catalogItemId == null || catalogItemName == null) return;
 
@@ -257,19 +276,10 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
   }
 
   double? currentEstimatedTotal() {
-    final price = currentPrice();
-
-    if (price == null) {
-      return null;
-    }
-
-    final quantity = currentQuantity();
-
-    if (quantity == null) {
-      return price;
-    }
-
-    return quantity * price;
+    return AppEstimatedCostCalculator.estimatedTotal(
+      quantity: currentQuantity(),
+      unitPrice: currentPrice(),
+    );
   }
 
   Future<void> openGenericItemPricePage() async {
@@ -286,7 +296,8 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
           catalogItemId: catalogItemId,
           catalogItemName: catalogItemName,
           defaultUnit:
-              textOrNull(unitController.text) ?? linkedCatalogItemDefaultUnit,
+              AppValueParsing.textOrNull(unitController.text) ??
+              linkedCatalogItemDefaultUnit,
         ),
       ),
     );
@@ -306,9 +317,15 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
 
     if (product == null) return;
 
-    final barcode = textOrNull(product[AppProductFields.barcode]);
-    final productName = textOrNull(product[AppProductFields.name]);
-    final productImageUrl = textOrNull(product[AppProductFields.imageUrl]);
+    final barcode = AppValueParsing.textOrNull(
+      product[AppProductFields.barcode],
+    );
+    final productName = AppValueParsing.textOrNull(
+      product[AppProductFields.name],
+    );
+    final productImageUrl = AppValueParsing.textOrNull(
+      product[AppProductFields.imageUrl],
+    );
 
     setState(() {
       linkedBarcode = barcode;
@@ -419,7 +436,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       ShoppingItemFormPageResult(
         name: name,
         quantity: quantity,
-        unit: unit.isEmpty ? null : unit,
+        unit: AppUnitType.valueOrNull(unit),
         estimatedUnitPrice: estimatedUnitPrice,
         priceCurrency: priceCurrency,
         barcode: linkedBarcode,
@@ -610,21 +627,13 @@ class _LinkedProductActionsCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (imageUrl != null && imageUrl.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.network(
-                      imageUrl,
-                      width: 58,
-                      height: 58,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) {
-                        return _ProductFallbackAvatar(theme: theme);
-                      },
-                    ),
-                  )
-                else
-                  _ProductFallbackAvatar(theme: theme),
+                AppNetworkImageThumbnail(
+                  imageUrl: imageUrl,
+                  width: 58,
+                  height: 58,
+                  borderRadius: 14,
+                  fallbackIcon: Icons.inventory_2_outlined,
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -661,7 +670,7 @@ class _LinkedProductActionsCard extends StatelessWidget {
             ),
             if (message != null) ...[
               const SizedBox(height: 12),
-              _InfoMessage(message: message!),
+              AppInfoMessage(message: message!),
             ],
             if (loading) ...[
               const SizedBox(height: 12),
@@ -693,59 +702,6 @@ class _LinkedProductActionsCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ProductFallbackAvatar extends StatelessWidget {
-  const _ProductFallbackAvatar({required this.theme});
-
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 29,
-      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-      child: Icon(
-        Icons.inventory_2_outlined,
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
-    );
-  }
-}
-
-class _InfoMessage extends StatelessWidget {
-  const _InfoMessage({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.info_outline, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -833,7 +789,7 @@ class _LinkedGenericItemActionsCard extends StatelessWidget {
             ),
             if (message != null) ...[
               const SizedBox(height: 12),
-              _InfoMessage(message: message!),
+              AppInfoMessage(message: message!),
             ],
             if (loading) ...[
               const SizedBox(height: 12),
@@ -875,14 +831,4 @@ class _LinkedGenericItemActionsCard extends StatelessWidget {
       ),
     );
   }
-}
-
-String? textOrNull(dynamic value) {
-  final text = value?.toString().trim();
-
-  if (text == null || text.isEmpty) {
-    return null;
-  }
-
-  return text;
 }

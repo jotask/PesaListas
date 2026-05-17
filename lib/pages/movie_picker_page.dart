@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/app_message_card.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/repositories/omdb_repository.dart';
+import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MoviePickerPage extends StatefulWidget {
@@ -162,25 +164,31 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
             ],
             if (selecting) ...[
               const SizedBox(height: 16),
-              const _MoviePickerInfoCard(
+              const AppMessageCard(
                 icon: Icons.download_done_outlined,
                 message: 'Loading movie details and saving cache...',
               ),
             ],
             if (errorMessage != null) ...[
               const SizedBox(height: 16),
-              _MoviePickerErrorCard(message: errorMessage!),
+              AppMessageCard(
+                icon: Icons.error_outline,
+                message: errorMessage!,
+                tone: AppMessageCardTone.error,
+              ),
             ],
             if (!hasApiKey) ...[
               const SizedBox(height: 16),
-              const _MoviePickerErrorCard(
+              const AppMessageCard(
+                icon: Icons.error_outline,
                 message:
                     'OMDb API key is missing. Run the app with --dart-define=OMDB_API_KEY=your_key.',
+                tone: AppMessageCardTone.error,
               ),
             ],
             const SizedBox(height: 16),
             if (!searching && results.isEmpty && hasApiKey)
-              const _MoviePickerInfoCard(
+              const AppMessageCard(
                 icon: Icons.search_outlined,
                 message: 'Search for a movie to link it to this list item.',
               )
@@ -291,7 +299,13 @@ class _MovieSearchResultCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              _MoviePosterThumb(posterUrl: posterUrl),
+              AppNetworkImageThumbnail(
+                imageUrl: posterUrl,
+                width: 54,
+                height: 78,
+                borderRadius: 10,
+                fallbackIcon: Icons.movie_outlined,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -318,118 +332,6 @@ class _MovieSearchResultCard extends StatelessWidget {
               const Icon(Icons.chevron_right),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MoviePosterThumb extends StatelessWidget {
-  const _MoviePosterThumb({required this.posterUrl});
-
-  final String posterUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (posterUrl.isEmpty) {
-      return _MoviePosterFallback(theme: theme);
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: Image.network(
-        posterUrl,
-        width: 54,
-        height: 78,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) {
-          return _MoviePosterFallback(theme: theme);
-        },
-      ),
-    );
-  }
-}
-
-class _MoviePosterFallback extends StatelessWidget {
-  const _MoviePosterFallback({required this.theme});
-
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 54,
-      height: 78,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Icon(
-        Icons.movie_outlined,
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
-    );
-  }
-}
-
-class _MoviePickerInfoCard extends StatelessWidget {
-  const _MoviePickerInfoCard({required this.icon, required this.message});
-
-  final IconData icon;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Icon(icon, color: theme.colorScheme.onSurfaceVariant),
-            const SizedBox(width: 10),
-            Expanded(child: Text(message)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MoviePickerErrorCard extends StatelessWidget {
-  const _MoviePickerErrorCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      color: theme.colorScheme.errorContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: theme.colorScheme.onErrorContainer,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                message,
-                style: TextStyle(
-                  color: theme.colorScheme.onErrorContainer,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
