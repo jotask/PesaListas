@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
-import 'package:pesalistas/core/app_message_card.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/repositories/omdb_repository.dart';
 import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';

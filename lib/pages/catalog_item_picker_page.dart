@@ -6,12 +6,20 @@ import 'package:pesalistas/core/fields/catalog_item_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/edit_catalog_item_page.dart';
+import 'package:pesalistas/pages/generic_item_detail_page.dart';
 import 'package:pesalistas/repositories/catalog_item_repository.dart';
 import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CatalogItemPickerPage extends StatefulWidget {
-  const CatalogItemPickerPage({super.key});
+  const CatalogItemPickerPage({
+    super.key,
+    this.selectionMode = true,
+    this.groupId,
+  });
+
+  final bool selectionMode;
+  final String? groupId;
 
   @override
   State<CatalogItemPickerPage> createState() => _CatalogItemPickerPageState();
@@ -107,8 +115,22 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
     return AppValueParsing.textOrNull(item[AppCatalogItemFields.defaultUnit]);
   }
 
-  void selectItem(Map<String, dynamic> item) {
-    Navigator.of(context).pop(item);
+  Future<void> selectItem(Map<String, dynamic> item) async {
+    if (widget.selectionMode) {
+      Navigator.of(context).pop(item);
+      return;
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            GenericItemDetailPage(catalogItem: item, groupId: widget.groupId),
+      ),
+    );
+
+    if (!mounted) return;
+
+    await loadItems();
   }
 
   Future<void> createFromSearch() async {
@@ -133,14 +155,35 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
 
       if (!mounted) return;
 
-      Navigator.of(context).pop(created);
+      if (widget.selectionMode) {
+        Navigator.of(context).pop(created);
+        return;
+      }
+
+      searchController.clear();
+      defaultUnitController.clear();
+
+      setState(() {
+        query = '';
+      });
+
+      await loadItems();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Generic item created.')));
     } catch (error) {
       if (!mounted) return;
 
       setState(() {
         errorMessage = error.toString();
-        creating = false;
       });
+    } finally {
+      if (mounted) {
+        setState(() => creating = false);
+      }
     }
   }
 
@@ -183,7 +226,9 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select generic item'),
+        title: Text(
+          widget.selectionMode ? 'Select generic item' : 'Generic items',
+        ),
         actions: [
           IconButton(
             onPressed: loading ? null : loadItems,
@@ -241,6 +286,7 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
                 for (final item in items)
                   _CatalogItemCard(
                     item: item,
+                    selectionMode: widget.selectionMode,
                     onTap: () => selectItem(item),
                     onEdit: () => editCatalogItem(item),
                   ),
@@ -376,11 +422,13 @@ class _CreateCatalogItemCard extends StatelessWidget {
 class _CatalogItemCard extends StatelessWidget {
   const _CatalogItemCard({
     required this.item,
+    required this.selectionMode,
     required this.onTap,
     required this.onEdit,
   });
 
   final Map<String, dynamic> item;
+  final bool selectionMode;
   final VoidCallback onTap;
   final VoidCallback onEdit;
 
@@ -404,7 +452,7 @@ class _CatalogItemCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     final subtitleParts = <String>[
-      if (category != null) category!,
+      ?category,
       if (defaultUnit != null)
         'Default unit: ${AppUnitType.displayLabel(defaultUnit)}',
     ];
@@ -430,7 +478,9 @@ class _CatalogItemCard extends StatelessWidget {
               icon: const Icon(Icons.edit_outlined),
               tooltip: 'Edit generic item',
             ),
-            const Icon(Icons.check_circle_outline),
+            Icon(
+              selectionMode ? Icons.check_circle_outline : Icons.chevron_right,
+            ),
           ],
         ),
         onTap: onTap,

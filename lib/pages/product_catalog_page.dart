@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/pages/generic_catalog_page.dart';
 import 'package:pesalistas/pages/product_detail_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -143,6 +144,17 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
               : context.l10n.productDatabaseTitle,
         ),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => GenericCatalogPage(groupId: widget.groupId),
+                ),
+              );
+            },
+            icon: const Icon(Icons.category_outlined),
+            tooltip: 'Generic items',
+          ),
           IconButton(
             onPressed: loading ? null : loadProducts,
             icon: const Icon(Icons.refresh),

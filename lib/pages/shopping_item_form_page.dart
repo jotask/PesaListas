@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
-import 'package:pesalistas/core/app_estimated_total_card.dart';
+import 'package:pesalistas/widgets/common/app_estimated_total_card.dart';
 import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/estimated_cost_calculator.dart';
 import 'package:pesalistas/core/price_unit_converter.dart';
