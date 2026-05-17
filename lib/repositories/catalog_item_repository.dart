@@ -1,5 +1,7 @@
 import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/fields/catalog_item_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CatalogItemRepository {
@@ -40,6 +42,34 @@ class CatalogItemRepository {
         .limit(limit);
 
     return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<Map<String, dynamic>> updateCatalogItem({
+    required String catalogItemId,
+    required String name,
+    String? category,
+    String? defaultUnit,
+  }) async {
+    final cleanName = name.trim();
+
+    if (cleanName.isEmpty) {
+      throw ArgumentError('Catalog item name is required.');
+    }
+
+    final response = await _client
+        .from(AppTables.catalogItems)
+        .update({
+          AppCatalogItemFields.name: cleanName,
+          AppCatalogItemFields.category: AppValueParsing.textOrNull(category),
+          AppCatalogItemFields.defaultUnit: AppUnitType.valueOrNull(
+            defaultUnit,
+          ),
+        })
+        .eq(AppCatalogItemFields.id, catalogItemId)
+        .select()
+        .single();
+
+    return Map<String, dynamic>.from(response);
   }
 
   Future<Map<String, dynamic>?> getCatalogItemByNormalizedName(

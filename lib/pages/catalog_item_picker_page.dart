@@ -5,6 +5,7 @@ import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/fields/catalog_item_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/pages/edit_catalog_item_page.dart';
 import 'package:pesalistas/repositories/catalog_item_repository.dart';
 import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -143,6 +144,39 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
     }
   }
 
+  Future<void> editCatalogItem(Map<String, dynamic> item) async {
+    final itemId = item[AppCatalogItemFields.id]?.toString();
+
+    if (itemId == null || itemId.isEmpty) {
+      return;
+    }
+
+    final result = await Navigator.of(context).push<EditCatalogItemPageResult>(
+      MaterialPageRoute(builder: (_) => EditCatalogItemPage(catalogItem: item)),
+    );
+
+    if (result == null) {
+      return;
+    }
+
+    setState(() => creating = true);
+
+    try {
+      await catalogItemRepository.updateCatalogItem(
+        catalogItemId: itemId,
+        name: result.name,
+        category: result.category,
+        defaultUnit: result.defaultUnit,
+      );
+
+      await loadItems();
+    } finally {
+      if (mounted) {
+        setState(() => creating = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final canCreate = query.trim().isNotEmpty;
@@ -206,10 +240,9 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
               else
                 for (final item in items)
                   _CatalogItemCard(
-                    name: itemName(item),
-                    category: itemCategory(item),
-                    defaultUnit: itemDefaultUnit(item),
+                    item: item,
                     onTap: () => selectItem(item),
+                    onEdit: () => editCatalogItem(item),
                   ),
               const SizedBox(height: 32),
             ],
@@ -342,24 +375,38 @@ class _CreateCatalogItemCard extends StatelessWidget {
 
 class _CatalogItemCard extends StatelessWidget {
   const _CatalogItemCard({
-    required this.name,
-    required this.category,
-    required this.defaultUnit,
+    required this.item,
     required this.onTap,
+    required this.onEdit,
   });
 
-  final String name;
-  final String? category;
-  final String? defaultUnit;
+  final Map<String, dynamic> item;
   final VoidCallback onTap;
+  final VoidCallback onEdit;
+
+  String get name {
+    return AppValueParsing.textOrNull(item[AppCatalogItemFields.name]) ??
+        'Unnamed item';
+  }
+
+  String? get category {
+    return AppValueParsing.textOrNull(item[AppCatalogItemFields.category]);
+  }
+
+  String? get defaultUnit {
+    return AppUnitType.valueOrNull(
+      AppValueParsing.textOrNull(item[AppCatalogItemFields.defaultUnit]),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     final subtitleParts = <String>[
-      ?category,
-      if (defaultUnit != null) 'Default unit: $defaultUnit',
+      if (category != null) category!,
+      if (defaultUnit != null)
+        'Default unit: ${AppUnitType.displayLabel(defaultUnit)}',
     ];
 
     return Card(
@@ -375,7 +422,17 @@ class _CatalogItemCard extends StatelessWidget {
         subtitle: subtitleParts.isEmpty
             ? null
             : Text(subtitleParts.join(' • ')),
-        trailing: const Icon(Icons.check_circle_outline),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              onPressed: onEdit,
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Edit generic item',
+            ),
+            const Icon(Icons.check_circle_outline),
+          ],
+        ),
         onTap: onTap,
       ),
     );
