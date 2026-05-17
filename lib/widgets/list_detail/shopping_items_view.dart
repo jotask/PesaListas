@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/fields/meal_plan_fields.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/core/money_formatting.dart';
@@ -373,31 +374,31 @@ class _ShoppingSummaryCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _SummaryPill(
+                  AppMetaPill(
                     label: context.l10n.toBuySummary(toBuyCount),
                     icon: Icons.shopping_cart_outlined,
                   ),
-                  _SummaryPill(
+                  AppMetaPill(
                     label: context.l10n.boughtSummary(boughtCount),
                     icon: Icons.shopping_cart_checkout,
                   ),
-                  _SummaryPill(
+                  AppMetaPill(
                     label: context.l10n.generatedSummary(generatedCount),
                     icon: Icons.auto_awesome_outlined,
                   ),
-                  _SummaryPill(
+                  AppMetaPill(
                     label: context.l10n.totalCountSummary(totalCount),
                     icon: Icons.list_alt_outlined,
                   ),
                   if (hasEstimatedPrices)
-                    _SummaryPill(
+                    AppMetaPill(
                       label: context.l10n.toBuyEstimated(
                         AppMoneyFormatting.format(toBuyEstimatedCost, currency),
                       ),
                       icon: Icons.euro_outlined,
                     ),
                   if (hasEstimatedPrices)
-                    _SummaryPill(
+                    AppMetaPill(
                       label: context.l10n.totalEstimated(
                         AppMoneyFormatting.format(totalEstimatedCost, currency),
                       ),
@@ -408,41 +409,6 @@ class _ShoppingSummaryCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SummaryPill extends StatelessWidget {
-  const _SummaryPill({required this.label, required this.icon});
-
-  final String label;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -641,24 +607,14 @@ class _ShoppingItemCard extends StatelessWidget {
     return value.trim();
   }
 
-  String? get quantity {
-    final value = item[AppShoppingItemFields.quantity];
-
-    if (value == null || value.toString().trim().isEmpty) {
-      return null;
-    }
-
-    return value.toString();
+  double? get quantity {
+    return AppValueParsing.doubleOrNull(item[AppShoppingItemFields.quantity]);
   }
 
   String? get unit {
-    final value = item[AppShoppingItemFields.unit]?.toString();
-
-    if (value == null || value.trim().isEmpty) {
-      return null;
-    }
-
-    return value.trim();
+    return AppUnitType.valueOrNull(
+      AppValueParsing.textOrNull(item[AppShoppingItemFields.unit]),
+    );
   }
 
   String? get barcode {
@@ -717,21 +673,13 @@ class _ShoppingItemCard extends StatelessWidget {
   }
 
   String amountText(BuildContext context) {
-    final parts = <String>[];
+    final amount = AppUnitType.quantityText(quantity: quantity, unit: unit);
 
-    if (quantity != null) {
-      parts.add(quantity!);
-    }
-
-    if (unit != null) {
-      parts.add(unit!);
-    }
-
-    if (parts.isEmpty) {
+    if (amount.isEmpty) {
       return checked ? context.l10n.bought : context.l10n.toBuy;
     }
 
-    return parts.join(' ');
+    return amount;
   }
 
   String? get recipeName {
