@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/fields/meal_plan_fields.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
+import 'package:pesalistas/core/money_formatting.dart';
+import 'package:pesalistas/core/shopping_item_cost.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/core/meal_types.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
+import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';
+import 'package:pesalistas/widgets/common/app_state_pill.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
 class ShoppingItemsView extends StatefulWidget {
@@ -79,10 +85,12 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
 
   String get priceCurrency {
     for (final item in widget.items) {
-      final value = item[AppShoppingItemFields.priceCurrency]?.toString();
+      final value = AppValueParsing.textOrNull(
+        item[AppShoppingItemFields.priceCurrency],
+      );
 
-      if (value != null && value.trim().isNotEmpty) {
-        return value.trim();
+      if (value != null) {
+        return value;
       }
     }
 
@@ -91,7 +99,7 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
 
   double get totalEstimatedCost {
     return widget.items.fold<double>(0, (total, item) {
-      return total + (_estimatedItemTotal(item) ?? 0);
+      return total + (AppShoppingItemCost.estimatedTotal(item) ?? 0);
     });
   }
 
@@ -99,12 +107,14 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
     return widget.items
         .where((item) => item[AppShoppingItemFields.checked] != true)
         .fold<double>(0, (total, item) {
-          return total + (_estimatedItemTotal(item) ?? 0);
+          return total + (AppShoppingItemCost.estimatedTotal(item) ?? 0);
         });
   }
 
   bool get hasEstimatedPrices {
-    return widget.items.any((item) => _estimatedItemTotal(item) != null);
+    return widget.items.any(
+      (item) => AppShoppingItemCost.estimatedTotal(item) != null,
+    );
   }
 
   bool isGeneratedItem(Map<String, dynamic> item) {
@@ -382,14 +392,14 @@ class _ShoppingSummaryCard extends StatelessWidget {
                   if (hasEstimatedPrices)
                     _SummaryPill(
                       label: context.l10n.toBuyEstimated(
-                        _formatMoney(toBuyEstimatedCost, currency),
+                        AppMoneyFormatting.format(toBuyEstimatedCost, currency),
                       ),
                       icon: Icons.euro_outlined,
                     ),
                   if (hasEstimatedPrices)
                     _SummaryPill(
                       label: context.l10n.totalEstimated(
-                        _formatMoney(totalEstimatedCost, currency),
+                        AppMoneyFormatting.format(totalEstimatedCost, currency),
                       ),
                       icon: Icons.receipt_long_outlined,
                     ),
@@ -652,28 +662,29 @@ class _ShoppingItemCard extends StatelessWidget {
   }
 
   String? get barcode {
-    return _textOrNull(item[AppShoppingItemFields.barcode]);
+    return AppValueParsing.textOrNull(item[AppShoppingItemFields.barcode]);
   }
 
   String? get productName {
-    return _textOrNull(item[AppShoppingItemFields.productName]);
+    return AppValueParsing.textOrNull(item[AppShoppingItemFields.productName]);
   }
 
   String? get productImageUrl {
-    return _textOrNull(item[AppShoppingItemFields.productImageUrl]);
+    return AppValueParsing.textOrNull(
+      item[AppShoppingItemFields.productImageUrl],
+    );
   }
 
   String get priceCurrency {
-    return _textOrNull(item[AppShoppingItemFields.priceCurrency]) ??
-        AppConfig.defaultCurrency;
+    return AppShoppingItemCost.priceCurrency(item);
   }
 
   double? get estimatedUnitPrice {
-    return _doubleOrNull(item[AppShoppingItemFields.estimatedUnitPrice]);
+    return AppShoppingItemCost.estimatedUnitPrice(item);
   }
 
   double? get estimatedTotalPrice {
-    return _estimatedItemTotal(item);
+    return AppShoppingItemCost.estimatedTotal(item);
   }
 
   Map<String, dynamic>? get sourceRecipe {
@@ -805,16 +816,20 @@ class _ShoppingItemCard extends StatelessWidget {
 
     if (total != null && unitPrice != null) {
       return context.l10n.priceTotalEach(
-        _formatMoney(total, priceCurrency),
-        _formatMoney(unitPrice, priceCurrency),
+        AppMoneyFormatting.format(total, priceCurrency),
+        AppMoneyFormatting.format(unitPrice, priceCurrency),
       );
     }
 
     if (total != null) {
-      return context.l10n.priceTotal(_formatMoney(total, priceCurrency));
+      return context.l10n.priceTotal(
+        AppMoneyFormatting.format(total, priceCurrency),
+      );
     }
 
-    return context.l10n.priceEach(_formatMoney(unitPrice!, priceCurrency));
+    return context.l10n.priceEach(
+      AppMoneyFormatting.format(unitPrice!, priceCurrency),
+    );
   }
 
   @override
@@ -837,11 +852,12 @@ class _ShoppingItemCard extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _ShoppingProductAvatar(
+                    AppNetworkImageThumbnail(
                       imageUrl: productImageUrl,
-                      checked: checked,
-                      hasProductData: hasProductData,
-                      isLinkedGenericItem: isLinkedGenericItem,
+                      width: 54,
+                      height: 54,
+                      borderRadius: 14,
+                      fallbackIcon: Icons.inventory_2_outlined,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -862,7 +878,12 @@ class _ShoppingItemCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              _ShoppingStatePill(checked: checked),
+                              AppStatePill(
+                                active: checked,
+                                label: checked
+                                    ? context.l10n.bought
+                                    : context.l10n.toBuy,
+                              ),
                             ],
                           ),
                           const SizedBox(height: 4),
@@ -872,8 +893,8 @@ class _ShoppingItemCard extends StatelessWidget {
                           ),
                           if (sourceText != null) ...[
                             const SizedBox(height: 8),
-                            _ShoppingMetaPill(
-                              text: sourceText,
+                            AppMetaPill(
+                              label: sourceText,
                               icon: Icons.event_note_outlined,
                             ),
                           ],
@@ -889,18 +910,18 @@ class _ShoppingItemCard extends StatelessWidget {
                     runSpacing: 8,
                     children: [
                       if (productName != null && productName != name(context))
-                        _ShoppingMetaPill(
-                          text: productName!,
+                        AppMetaPill(
+                          label: productName!,
                           icon: Icons.inventory_2_outlined,
                         ),
                       if (barcode != null)
-                        _ShoppingMetaPill(
-                          text: barcode!,
+                        AppMetaPill(
+                          label: barcode!,
                           icon: Icons.qr_code_2_outlined,
                         ),
                       if (priceText != null)
-                        _ShoppingMetaPill(
-                          text: priceText,
+                        AppMetaPill(
+                          label: priceText,
                           icon: Icons.euro_outlined,
                         ),
                     ],
@@ -942,191 +963,4 @@ class _ShoppingItemCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ShoppingProductAvatar extends StatelessWidget {
-  const _ShoppingProductAvatar({
-    required this.imageUrl,
-    required this.checked,
-    required this.hasProductData,
-    required this.isLinkedGenericItem,
-  });
-
-  final String? imageUrl;
-  final bool checked;
-  final bool hasProductData;
-  final bool isLinkedGenericItem;
-
-  IconData get icon {
-    if (hasProductData) {
-      return Icons.inventory_2_outlined;
-    }
-
-    if (isLinkedGenericItem) {
-      return Icons.category_outlined;
-    }
-
-    return checked
-        ? Icons.shopping_cart_checkout
-        : Icons.shopping_cart_outlined;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final backgroundColor = checked
-        ? theme.colorScheme.secondaryContainer
-        : theme.colorScheme.primaryContainer;
-
-    final iconColor = checked
-        ? theme.colorScheme.onSecondaryContainer
-        : theme.colorScheme.onPrimaryContainer;
-
-    final url = imageUrl;
-
-    if (url != null && url.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(999),
-        child: Image.network(
-          url,
-          width: 42,
-          height: 42,
-          fit: BoxFit.cover,
-          errorBuilder: (_, _, _) {
-            return CircleAvatar(
-              backgroundColor: backgroundColor,
-              child: Icon(icon, color: iconColor),
-            );
-          },
-        ),
-      );
-    }
-
-    return CircleAvatar(
-      backgroundColor: backgroundColor,
-      child: Icon(icon, color: iconColor),
-    );
-  }
-}
-
-class _ShoppingMetaPill extends StatelessWidget {
-  const _ShoppingMetaPill({required this.text, required this.icon});
-
-  final String text;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ShoppingStatePill extends StatelessWidget {
-  const _ShoppingStatePill({required this.checked});
-
-  final bool checked;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final backgroundColor = checked
-        ? theme.colorScheme.secondaryContainer
-        : theme.colorScheme.primaryContainer;
-
-    final foregroundColor = checked
-        ? theme.colorScheme.onSecondaryContainer
-        : theme.colorScheme.onPrimaryContainer;
-
-    return Container(
-      margin: const EdgeInsets.only(left: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        checked ? context.l10n.bought : context.l10n.toBuy,
-        style: TextStyle(
-          color: foregroundColor,
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-}
-
-String? _textOrNull(dynamic value) {
-  final text = value?.toString().trim();
-
-  if (text == null || text.isEmpty) {
-    return null;
-  }
-
-  return text;
-}
-
-double? _doubleOrNull(dynamic value) {
-  if (value == null) return null;
-
-  if (value is num) return value.toDouble();
-
-  return double.tryParse(value.toString().replaceAll(',', '.'));
-}
-
-double? _estimatedItemTotal(Map<String, dynamic> item) {
-  final explicitTotal = _doubleOrNull(
-    item[AppShoppingItemFields.estimatedTotalPrice],
-  );
-
-  if (explicitTotal != null) {
-    return explicitTotal;
-  }
-
-  final unitPrice = _doubleOrNull(
-    item[AppShoppingItemFields.estimatedUnitPrice],
-  );
-
-  if (unitPrice == null) {
-    return null;
-  }
-
-  final quantity = _doubleOrNull(item[AppShoppingItemFields.quantity]);
-
-  if (quantity == null) {
-    return unitPrice;
-  }
-
-  return unitPrice * quantity;
-}
-
-String _formatMoney(double value, String currency) {
-  return '${value.toStringAsFixed(2)} $currency';
 }

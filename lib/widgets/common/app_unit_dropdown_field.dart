@@ -55,7 +55,7 @@ class AppUnitDropdownField extends StatelessWidget {
     final value = selectedValue;
 
     return DropdownButtonFormField<String>(
-      value: value == null || value.isEmpty ? '' : value,
+      initialValue: value == null || value.isEmpty ? '' : value,
       items: unitItems,
       isExpanded: true,
       decoration: InputDecoration(
