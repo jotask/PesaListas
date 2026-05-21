@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/repositories/account_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum DiagnosticStatus { success, warning, error, info }
@@ -55,6 +56,7 @@ class AppDiagnostics {
     items.add(await _checkSupabaseDatabase());
     items.add(await _checkOmdbEdgeFunction());
     items.add(await _checkOpenFoodFactsEdgeFunction());
+    items.add(await _checkAccountDeletionDryRun());
 
     return DiagnosticsReport(generatedAt: DateTime.now(), items: items);
   }
@@ -334,6 +336,42 @@ class AppDiagnostics {
         label: 'OpenFoodFacts Edge Function',
         status: DiagnosticStatus.error,
         message: 'Failed',
+        details: error.toString(),
+      );
+    }
+  }
+
+  static Future<DiagnosticItem> _checkAccountDeletionDryRun() async {
+    try {
+      final repository = AccountRepository(Supabase.instance.client);
+      final result = await repository.dryRunDeleteCurrentAccount();
+
+      return DiagnosticItem(
+        label: 'Account deletion Edge Function',
+        status: DiagnosticStatus.success,
+        message: 'Dry run passed',
+        details:
+            'Memberships: ${result['membershipCount'] ?? 0}, owned groups: ${result['ownedGroupCount'] ?? 0}, sole-owner groups: ${result['soleOwnerGroupCount'] ?? 0}',
+      );
+    } on AccountDeletionBlockedException catch (error) {
+      debugPrint('================ ACCOUNT DELETION BLOCKED ================');
+      debugPrint('Message: ${error.message}');
+      debugPrint('Sole-owner groups: ${error.soleOwnerGroupCount}');
+      debugPrint('Raw data: ${error.rawData}');
+      debugPrint('==========================================================');
+
+      return DiagnosticItem(
+        label: 'Account deletion Edge Function',
+        status: DiagnosticStatus.warning,
+        message: 'Blocked by sole-owner groups',
+        details:
+            '${error.soleOwnerGroupCount} group(s) need another owner before account deletion.',
+      );
+    } catch (error) {
+      return DiagnosticItem(
+        label: 'Account deletion Edge Function',
+        status: DiagnosticStatus.error,
+        message: 'Dry run failed',
         details: error.toString(),
       );
     }

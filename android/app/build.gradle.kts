@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.josevives.pesalistas"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
