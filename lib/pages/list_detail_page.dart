@@ -80,6 +80,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool clearingBoughtItems = false;
   bool deletingList = false;
   bool clearingAllShoppingItems = false;
+  bool listChanged = false;
 
   List<Map<String, dynamic>> items = [];
   late Map<String, dynamic> currentList;
@@ -446,7 +447,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
       if (!mounted) return;
 
       showSuccessSnackBar(context, context.l10n.listArchived);
-      Navigator.of(context).maybePop();
+      Navigator.of(context).maybePop(true);
     } catch (error) {
       if (!mounted) return;
 
@@ -565,6 +566,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
           AppListFields.name: name,
           AppListFields.description: result.description,
         };
+        listChanged = true;
       });
 
       showSuccessSnackBar(context, context.l10n.listUpdated);
@@ -1766,70 +1768,84 @@ class _ListDetailPageState extends State<ListDetailPage> {
   Widget build(BuildContext context) {
     final config = listTypeConfig;
 
-    return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: creatingItem ? null : createItemDialog,
-        icon: const Icon(Icons.add),
-        label: Text(
-          isRecipeList
-              ? context.l10n.addRecipe
-              : isMealPlanList
-              ? context.l10n.addMeal
-              : isShoppingList
-              ? context.l10n.addItem
-              : context.l10n.addItem,
-        ),
-      ),
-      body: Column(
-        children: [
-          ListDetailHeader(
-            listName: listName,
-            listDescription: listDescription,
-            config: config,
-            onBack: goBack,
-            onEdit: editList,
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) return;
+
+        if (listChanged && result != true) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Navigator.of(context).maybePop(true);
+            }
+          });
+        }
+      },
+      child: Scaffold(
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: creatingItem ? null : createItemDialog,
+          icon: const Icon(Icons.add),
+          label: Text(
+            isRecipeList
+                ? context.l10n.addRecipe
+                : isMealPlanList
+                ? context.l10n.addMeal
+                : isShoppingList
+                ? context.l10n.addItem
+                : context.l10n.addItem,
           ),
-          if (isBusy) const LinearProgressIndicator(),
-          Expanded(
-            child: SafeArea(
-              top: false,
-              child: RefreshIndicator(
-                onRefresh: loadItems,
-                child: ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    if (isShoppingList) ...[
-                      _ProductScannerShortcutCard(onTap: openProductScanner),
-                      const SizedBox(height: 12),
-                      _ProductCatalogShortcutCard(onTap: openProductCatalog),
-                      const SizedBox(height: 12),
+        ),
+        body: Column(
+          children: [
+            ListDetailHeader(
+              listName: listName,
+              listDescription: listDescription,
+              config: config,
+              onBack: goBack,
+              onEdit: editList,
+            ),
+            if (isBusy) const LinearProgressIndicator(),
+            Expanded(
+              child: SafeArea(
+                top: false,
+                child: RefreshIndicator(
+                  onRefresh: loadItems,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      if (isShoppingList) ...[
+                        _ProductScannerShortcutCard(onTap: openProductScanner),
+                        const SizedBox(height: 12),
+                        _ProductCatalogShortcutCard(onTap: openProductCatalog),
+                        const SizedBox(height: 12),
+                      ],
+                      ListItemsSection(
+                        listType: listType,
+                        items: items,
+                        loading: loadingItems,
+                        showStatusSummary: shouldShowStatusSummary,
+                        onCreate: createItemDialog,
+                        onComplete: completeItem,
+                        onReopen: reopenItem,
+                        onEdit: editItem,
+                        onDelete: deleteItem,
+                        onVote: voteItem,
+                        onViewVotes: viewVotes,
+                        onViewRecipeDetails: viewRecipeDetails,
+                        onDeleteRecipe: deleteRecipe,
+                        onGenerateShoppingFromMealPlans:
+                            generateShoppingFromMealPlans,
+                        onClearBoughtShoppingItems: clearBoughtShoppingItems,
+                        onClearAllShoppingItems: clearAllShoppingItems,
+                      ),
+                      const SizedBox(height: 96),
                     ],
-                    ListItemsSection(
-                      listType: listType,
-                      items: items,
-                      loading: loadingItems,
-                      showStatusSummary: shouldShowStatusSummary,
-                      onCreate: createItemDialog,
-                      onComplete: completeItem,
-                      onReopen: reopenItem,
-                      onEdit: editItem,
-                      onDelete: deleteItem,
-                      onVote: voteItem,
-                      onViewVotes: viewVotes,
-                      onViewRecipeDetails: viewRecipeDetails,
-                      onDeleteRecipe: deleteRecipe,
-                      onGenerateShoppingFromMealPlans:
-                          generateShoppingFromMealPlans,
-                      onClearBoughtShoppingItems: clearBoughtShoppingItems,
-                      onClearAllShoppingItems: clearAllShoppingItems,
-                    ),
-                    const SizedBox(height: 96),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

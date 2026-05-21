@@ -239,6 +239,7 @@ class _HomePageState extends State<HomePage> {
                     loading: false,
                     creatingGroup: creatingGroup,
                     onCreateGroup: createGroupDialog,
+                    onGroupsChanged: loadHomeData,
                   ),
                 ],
               ),

@@ -501,6 +501,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                       loading: loadingLists,
                       creatingList: creatingList,
                       onCreateList: createList,
+                      onListsChanged: loadLists,
                     ),
                     const SizedBox(height: 96),
                   ],

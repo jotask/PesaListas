@@ -13,12 +13,14 @@ class GroupGridSection extends StatelessWidget {
     required this.loading,
     required this.creatingGroup,
     required this.onCreateGroup,
+    required this.onGroupsChanged,
   });
 
   final List<Map<String, dynamic>> groups;
   final bool loading;
   final bool creatingGroup;
   final VoidCallback onCreateGroup;
+  final VoidCallback onGroupsChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -59,15 +61,16 @@ class GroupGridSection extends StatelessWidget {
           ),
           itemBuilder: (context, index) {
             final group = groups[index];
-
             return _GroupGridCard(
               group: group,
-              onTap: () {
-                Navigator.of(context).push(
+              onTap: () async {
+                await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => GroupDetailPage(group: group),
                   ),
                 );
+
+                onGroupsChanged();
               },
             );
           },

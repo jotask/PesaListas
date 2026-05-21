@@ -11,17 +11,23 @@ class GroupListsSection extends StatelessWidget {
     required this.loading,
     required this.creatingList,
     required this.onCreateList,
+    required this.onListsChanged,
   });
 
   final List<Map<String, dynamic>> lists;
   final bool loading;
   final bool creatingList;
   final VoidCallback onCreateList;
+  final VoidCallback onListsChanged;
 
-  void onOpenList(BuildContext context, Map<String, dynamic> list) {
-    Navigator.of(
+  Future<void> openList(BuildContext context, Map<String, dynamic> list) async {
+    final changed = await Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => ListDetailPage(list: list)));
+    ).push<bool>(MaterialPageRoute(builder: (_) => ListDetailPage(list: list)));
+
+    if (changed == true) {
+      onListsChanged();
+    }
   }
 
   @override
@@ -62,8 +68,7 @@ class GroupListsSection extends StatelessWidget {
           ),
           itemBuilder: (context, index) {
             final list = lists[index];
-
-            return ListCard(list: list, onTap: () => onOpenList(context, list));
+            return ListCard(list: list, onTap: () => openList(context, list));
           },
         );
       },
