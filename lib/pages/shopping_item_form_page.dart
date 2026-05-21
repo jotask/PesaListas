@@ -218,7 +218,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
 
   Future<void> selectGenericItem() async {
     final item = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(builder: (_) => const CatalogItemPickerPage()),
+      MaterialPageRoute(settings: const RouteSettings(name: '/catalog_item_picker'), builder: (_) => const CatalogItemPickerPage()),
     );
 
     if (item == null) return;
@@ -291,6 +291,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
 
     final savedPrice = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/catalog_item_price'),
         builder: (_) => CatalogItemPricePage(
           groupId: widget.groupId,
           catalogItemId: catalogItemId,
@@ -310,6 +311,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
   Future<void> selectProduct() async {
     final product = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/product_catalog'),
         builder: (_) =>
             ProductCatalogPage(groupId: widget.groupId, selectionMode: true),
       ),

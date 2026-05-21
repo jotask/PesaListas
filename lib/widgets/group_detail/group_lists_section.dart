@@ -23,7 +23,7 @@ class GroupListsSection extends StatelessWidget {
   Future<void> openList(BuildContext context, Map<String, dynamic> list) async {
     final changed = await Navigator.of(
       context,
-    ).push<bool>(MaterialPageRoute(builder: (_) => ListDetailPage(list: list)));
+    ).push<bool>(MaterialPageRoute(settings: const RouteSettings(name: '/list_detail'), builder: (_) => ListDetailPage(list: list)));
 
     if (changed == true) {
       onListsChanged();

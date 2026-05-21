@@ -311,7 +311,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
   Future<void> openArchivedLists() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ArchivedListsPage(groupId: groupId)),
+      MaterialPageRoute(settings: const RouteSettings(name: '/archived_lists'), builder: (_) => ArchivedListsPage(groupId: groupId)),
     );
 
     if (!mounted) return;
@@ -323,7 +323,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     if (editingGroup) return;
 
     final result = await Navigator.of(context).push<EditGroupPageResult>(
-      MaterialPageRoute(builder: (_) => EditGroupPage(group: currentGroup)),
+      MaterialPageRoute(settings: const RouteSettings(name: '/edit_group'), builder: (_) => EditGroupPage(group: currentGroup)),
     );
 
     if (result == null) return;
@@ -364,7 +364,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
     final email = await Navigator.of(
       context,
-    ).push<String>(MaterialPageRoute(builder: (_) => const InviteMemberPage()));
+    ).push<String>(MaterialPageRoute(settings: const RouteSettings(name: '/invite_member'), builder: (_) => const InviteMemberPage()));
 
     if (email == null || email.isEmpty) return;
 
@@ -425,7 +425,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     if (creatingList) return;
 
     final result = await Navigator.of(context).push<CreateListPageResult>(
-      MaterialPageRoute(builder: (_) => const CreateListPage()),
+      MaterialPageRoute(settings: const RouteSettings(name: '/create_list'), builder: (_) => const CreateListPage()),
     );
 
     if (result == null) return;

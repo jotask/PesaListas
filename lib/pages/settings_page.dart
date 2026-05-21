@@ -233,13 +233,13 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> openProductCatalog() async {
     await Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => const ProductCatalogPage()));
+    ).push(MaterialPageRoute(settings: const RouteSettings(name: '/product_catalog'), builder: (_) => const ProductCatalogPage()));
   }
 
   Future<void> openDiagnostics() async {
     await Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => const DiagnosticsPage()));
+    ).push(MaterialPageRoute(settings: const RouteSettings(name: '/diagnostics'), builder: (_) => const DiagnosticsPage()));
   }
 
   Future<void> chooseTheme() async {
@@ -351,6 +351,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     final result = await Navigator.of(context).push<EditProfilePageResult>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/edit_profile'),
         builder: (_) =>
             EditProfilePage(profile: profile, fallbackDisplayName: displayName),
       ),
@@ -419,7 +420,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (!mounted) return;
 
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const AuthPage()),
+        MaterialPageRoute(settings: const RouteSettings(name: '/auth'), builder: (_) => const AuthPage()),
         (_) => false,
       );
     } catch (error) {
@@ -436,7 +437,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> openProductScanner() async {
     await Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => const ProductScannerPage()));
+    ).push(MaterialPageRoute(settings: const RouteSettings(name: '/product_scanner'), builder: (_) => const ProductScannerPage()));
   }
 
   @override

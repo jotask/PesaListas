@@ -5,6 +5,7 @@ import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class MealPlanRepository {
   MealPlanRepository(this._client);
@@ -39,6 +40,12 @@ class MealPlanRepository {
       AppMealPlanFields.note: note,
       AppMealPlanFields.createdBy: _client.auth.currentUser!.id,
     });
+
+    await AppAnalytics.instance.logMealPlanCreated(
+      mealType: mealType,
+      hasRecipe: recipeId != null && recipeId.trim().isNotEmpty,
+      hasNote: note != null && note.trim().isNotEmpty,
+    );
   }
 
   Future<void> updateMealPlan({
@@ -57,6 +64,12 @@ class MealPlanRepository {
           AppMealPlanFields.note: note,
         })
         .eq(AppMealPlanFields.id, mealPlanId);
+
+    await AppAnalytics.instance.logMealPlanUpdated(
+      mealType: mealType,
+      hasRecipe: recipeId != null && recipeId.trim().isNotEmpty,
+      hasNote: note != null && note.trim().isNotEmpty,
+    );
   }
 
   Future<void> deleteMealPlan(String mealPlanId) async {
@@ -64,6 +77,8 @@ class MealPlanRepository {
         .from(AppTables.mealPlans)
         .delete()
         .eq(AppMealPlanFields.id, mealPlanId);
+
+    await AppAnalytics.instance.logMealPlanDeleted();
   }
 
   Future<int> generateShoppingFromMealPlans({
@@ -95,6 +110,13 @@ class MealPlanRepository {
         .toList();
 
     if (mealPlans.isEmpty || recipeIds.isEmpty || mealPlanIds.isEmpty) {
+      await AppAnalytics.instance.logShoppingGeneratedFromMealPlans(
+        insertedCount: 0,
+        mealPlanCount: mealPlans.length,
+        recipeCount: recipeIds.length,
+        dayCount: dayCount(fromDate: fromDate, toDate: toDate),
+      );
+
       return 0;
     }
 
@@ -238,6 +260,13 @@ class MealPlanRepository {
     }
 
     if (rows.isEmpty) {
+      await AppAnalytics.instance.logShoppingGeneratedFromMealPlans(
+        insertedCount: 0,
+        mealPlanCount: mealPlans.length,
+        recipeCount: recipeIds.length,
+        dayCount: dayCount(fromDate: fromDate, toDate: toDate),
+      );
+
       return 0;
     }
 
@@ -249,10 +278,24 @@ class MealPlanRepository {
     );
 
     if (rowsToInsert.isEmpty) {
+      await AppAnalytics.instance.logShoppingGeneratedFromMealPlans(
+        insertedCount: 0,
+        mealPlanCount: mealPlans.length,
+        recipeCount: recipeIds.length,
+        dayCount: dayCount(fromDate: fromDate, toDate: toDate),
+      );
+
       return 0;
     }
 
     await _client.from(AppTables.shoppingListItems).insert(rowsToInsert);
+
+    await AppAnalytics.instance.logShoppingGeneratedFromMealPlans(
+      insertedCount: rowsToInsert.length,
+      mealPlanCount: mealPlans.length,
+      recipeCount: recipeIds.length,
+      dayCount: dayCount(fromDate: fromDate, toDate: toDate),
+    );
 
     return rowsToInsert.length;
   }
@@ -361,6 +404,13 @@ class MealPlanRepository {
     final day = value.day.toString().padLeft(2, '0');
 
     return '$year-$month-$day';
+  }
+
+  int dayCount({required DateTime fromDate, required DateTime toDate}) {
+    final start = DateTime(fromDate.year, fromDate.month, fromDate.day);
+    final end = DateTime(toDate.year, toDate.month, toDate.day);
+
+    return end.difference(start).inDays.abs() + 1;
   }
 
   double? estimatedTotalFromQuantityAndUnitPrice({

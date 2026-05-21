@@ -103,6 +103,7 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
 
     await Navigator.of(context).push(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/product_detail'),
         builder: (_) =>
             ProductDetailPage(product: product, groupId: widget.groupId),
       ),
@@ -148,6 +149,7 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
+                  settings: const RouteSettings(name: '/generic_catalog'),
                   builder: (_) => GenericCatalogPage(groupId: widget.groupId),
                 ),
               );

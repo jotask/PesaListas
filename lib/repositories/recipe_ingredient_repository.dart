@@ -2,6 +2,7 @@ import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class RecipeIngredientRepository {
   RecipeIngredientRepository(this._client);
@@ -51,6 +52,13 @@ class RecipeIngredientRepository {
       AppRecipeIngredientFields.productName: productName,
       AppRecipeIngredientFields.productImageUrl: productImageUrl,
     });
+
+    await AppAnalytics.instance.logRecipeIngredientCreated(
+      hasQuantity: quantity != null,
+      hasEstimatedPrice: estimatedUnitPrice != null,
+      hasBarcode: barcode != null && barcode.trim().isNotEmpty,
+      hasCatalogItem: catalogItemId != null && catalogItemId.trim().isNotEmpty,
+    );
   }
 
   Future<void> updateIngredient({
@@ -86,6 +94,13 @@ class RecipeIngredientRepository {
           AppRecipeIngredientFields.productImageUrl: productImageUrl,
         })
         .eq(AppRecipeIngredientFields.id, ingredientId);
+
+    await AppAnalytics.instance.logRecipeIngredientUpdated(
+      hasQuantity: quantity != null,
+      hasEstimatedPrice: estimatedUnitPrice != null,
+      hasBarcode: barcode != null && barcode.trim().isNotEmpty,
+      hasCatalogItem: catalogItemId != null && catalogItemId.trim().isNotEmpty,
+    );
   }
 
   Future<void> deleteIngredient(String ingredientId) async {
@@ -93,5 +108,7 @@ class RecipeIngredientRepository {
         .from(AppTables.recipeIngredients)
         .delete()
         .eq(AppRecipeIngredientFields.id, ingredientId);
+
+    await AppAnalytics.instance.logRecipeIngredientDeleted();
   }
 }

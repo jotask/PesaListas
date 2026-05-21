@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:pesalistas/models/open_food_facts_product.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class OpenFoodFactsRepository {
   const OpenFoodFactsRepository({http.Client? client, this.useStaging = true})
@@ -40,6 +41,13 @@ class OpenFoodFactsRepository {
       final response = await client.get(uri, headers: headers);
 
       if (response.statusCode == 404) {
+        await AppAnalytics.instance.logProductLookup(
+          source: 'open_food_facts_direct',
+          found: false,
+          forceRefresh: true,
+          useStaging: useStaging,
+        );
+
         return null;
       }
 
@@ -58,13 +66,29 @@ class OpenFoodFactsRepository {
       final status = decoded['status'];
 
       if (status == 0 || status == '0') {
+        await AppAnalytics.instance.logProductLookup(
+          source: 'open_food_facts_direct',
+          found: false,
+          forceRefresh: true,
+          useStaging: useStaging,
+        );
+
         return null;
       }
 
-      return OpenFoodFactsProduct.fromJson(
+      final product = OpenFoodFactsProduct.fromJson(
         barcode: cleanBarcode,
         json: decoded,
       );
+
+      await AppAnalytics.instance.logProductLookup(
+        source: 'open_food_facts_direct',
+        found: true,
+        forceRefresh: true,
+        useStaging: useStaging,
+      );
+
+      return product;
     } finally {
       if (_client == null) {
         client.close();

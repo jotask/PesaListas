@@ -52,7 +52,7 @@ class _AuthPageState extends State<AuthPage> {
 
         Navigator.of(
           context,
-        ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+        ).pushReplacement(MaterialPageRoute(settings: const RouteSettings(name: '/home'), builder: (_) => const HomePage()));
       }
     });
   }

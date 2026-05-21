@@ -66,6 +66,7 @@ class GroupGridSection extends StatelessWidget {
               onTap: () async {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
+                    settings: const RouteSettings(name: '/group_detail'),
                     builder: (_) => GroupDetailPage(group: group),
                   ),
                 );

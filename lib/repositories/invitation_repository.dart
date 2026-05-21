@@ -1,6 +1,7 @@
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/invitation_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class InvitationRepository {
   InvitationRepository(this._client);
@@ -35,6 +36,8 @@ class InvitationRepository {
       'accept_group_invitation',
       params: {'invitation_id': invitationId},
     );
+
+    await AppAnalytics.instance.logInvitationAccepted();
   }
 
   Future<void> declineInvitation(String invitationId) async {
@@ -42,6 +45,8 @@ class InvitationRepository {
       'decline_group_invitation',
       params: {'invitation_id': invitationId},
     );
+
+    await AppAnalytics.instance.logInvitationDeclined();
   }
 
   Future<void> inviteToGroup({
@@ -63,6 +68,8 @@ class InvitationRepository {
         'target_role': role,
       },
     );
+
+    await AppAnalytics.instance.logInvitationSent(role: role);
   }
 
   Future<void> cancelInvitation(String invitationId) async {
@@ -70,5 +77,7 @@ class InvitationRepository {
       'cancel_group_invitation',
       params: {'invitation_id': invitationId},
     );
+
+    await AppAnalytics.instance.logInvitationCanceled();
   }
 }

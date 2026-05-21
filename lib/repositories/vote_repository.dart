@@ -2,6 +2,7 @@ import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/vote_fields.dart';
 import 'package:pesalistas/core/vote_summary_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class VoteRepository {
   VoteRepository(this._client);
@@ -123,6 +124,11 @@ class VoteRepository {
       AppVoteFields.points: points,
       AppVoteFields.comment: comment,
     });
+
+    await AppAnalytics.instance.logVoteUpserted(
+      points: points,
+      hasComment: comment?.trim().isNotEmpty ?? false,
+    );
   }
 
   Future<void> deleteMyVote(String itemId) async {
@@ -133,6 +139,8 @@ class VoteRepository {
         .delete()
         .eq(AppVoteFields.itemId, itemId)
         .eq(AppVoteFields.userId, userId);
+
+    await AppAnalytics.instance.logVoteDeleted();
   }
 
   int? _parseInt(dynamic value) {

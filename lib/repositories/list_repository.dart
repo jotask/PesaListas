@@ -2,6 +2,7 @@ import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class ListRepository {
   ListRepository(this._client);
@@ -43,6 +44,8 @@ class ListRepository {
       AppListFields.listType: listType,
       AppListFields.createdBy: _client.auth.currentUser!.id,
     });
+
+    await AppAnalytics.instance.logListCreated(listType: listType);
   }
 
   Future<void> updateListInfo({
@@ -93,6 +96,8 @@ class ListRepository {
           .select()
           .single();
 
+      await AppAnalytics.instance.logShoppingListEnsured(created: true);
+
       return created;
     } catch (_) {
       final existingAfterConflict = await _client
@@ -118,6 +123,8 @@ class ListRepository {
           AppListFields.archivedAt: DateTime.now().toUtc().toIso8601String(),
         })
         .eq(AppListFields.id, listId);
+
+    await AppAnalytics.instance.logListArchived();
   }
 
   Future<void> restoreList(String listId) async {
@@ -125,9 +132,13 @@ class ListRepository {
         .from(AppTables.lists)
         .update({AppListFields.archivedAt: null})
         .eq(AppListFields.id, listId);
+
+    await AppAnalytics.instance.logListRestored();
   }
 
   Future<void> deleteList(String listId) async {
     await _client.from(AppTables.lists).delete().eq(AppListFields.id, listId);
+
+    await AppAnalytics.instance.logListDeleted();
   }
 }

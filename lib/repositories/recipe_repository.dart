@@ -1,6 +1,7 @@
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class RecipeRepository {
   RecipeRepository(this._client);
@@ -33,6 +34,10 @@ class RecipeRepository {
         .select()
         .single();
 
+    await AppAnalytics.instance.logRecipeCreated(
+      hasDescription: description != null && description.trim().isNotEmpty,
+    );
+
     return Map<String, dynamic>.from(response);
   }
 
@@ -64,6 +69,13 @@ class RecipeRepository {
           AppRecipeFields.servings: servings,
         })
         .eq(AppRecipeFields.id, recipeId);
+
+    await AppAnalytics.instance.logRecipeInfoUpdated(
+      hasDescription: description != null && description.trim().isNotEmpty,
+      hasPrepTime: prepTimeMinutes != null,
+      hasCookTime: cookTimeMinutes != null,
+      hasServings: servings != null,
+    );
   }
 
   Future<void> updateRecipeInstructions({
@@ -74,6 +86,10 @@ class RecipeRepository {
         .from(AppTables.recipes)
         .update({AppRecipeFields.instructions: instructions})
         .eq(AppRecipeFields.id, recipeId);
+
+    await AppAnalytics.instance.logRecipeInstructionsUpdated(
+      hasInstructions: instructions != null && instructions.trim().isNotEmpty,
+    );
   }
 
   Future<void> deleteRecipe(String recipeId) async {
@@ -81,5 +97,7 @@ class RecipeRepository {
         .from(AppTables.recipes)
         .delete()
         .eq(AppRecipeFields.id, recipeId);
+
+    await AppAnalytics.instance.logRecipeDeleted();
   }
 }

@@ -4,6 +4,7 @@ import 'package:pesalistas/core/fields/meal_plan_fields.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class ShoppingRepository {
   ShoppingRepository(this._client);
@@ -73,6 +74,8 @@ class ShoppingRepository {
         .from(AppTables.shoppingListItems)
         .delete()
         .eq(AppShoppingItemFields.groupId, groupId);
+
+    await AppAnalytics.instance.logShoppingItemsCleared(scope: 'all');
   }
 
   Future<void> clearBoughtItems(String groupId) async {
@@ -81,6 +84,8 @@ class ShoppingRepository {
         .delete()
         .eq(AppShoppingItemFields.groupId, groupId)
         .eq(AppShoppingItemFields.checked, true);
+
+    await AppAnalytics.instance.logShoppingItemsCleared(scope: 'bought');
   }
 
   Future<Map<String, dynamic>> createShoppingItemFromProduct({
@@ -125,6 +130,14 @@ class ShoppingRepository {
         .insert(row)
         .select()
         .single();
+
+    await AppAnalytics.instance.logShoppingItemCreated(
+      source: 'product',
+      hasQuantity: quantity != null,
+      hasEstimatedPrice: estimatedUnitPrice != null,
+      hasBarcode: barcode != null && barcode.trim().isNotEmpty,
+      hasCatalogItem: catalogItemId != null && catalogItemId.trim().isNotEmpty,
+    );
 
     return result;
   }
@@ -179,6 +192,14 @@ class ShoppingRepository {
       AppShoppingItemFields.productImageUrl: productImageUrl,
       AppShoppingItemFields.createdBy: _client.auth.currentUser!.id,
     });
+
+    await AppAnalytics.instance.logShoppingItemCreated(
+      source: 'manual',
+      hasQuantity: quantity != null,
+      hasEstimatedPrice: estimatedUnitPrice != null,
+      hasBarcode: barcode != null && barcode.trim().isNotEmpty,
+      hasCatalogItem: catalogItemId != null && catalogItemId.trim().isNotEmpty,
+    );
   }
 
   Future<void> updateShoppingItem({
@@ -212,6 +233,13 @@ class ShoppingRepository {
           AppShoppingItemFields.productImageUrl: productImageUrl,
         })
         .eq(AppShoppingItemFields.id, shoppingItemId);
+
+    await AppAnalytics.instance.logShoppingItemUpdated(
+      hasQuantity: quantity != null,
+      hasEstimatedPrice: estimatedUnitPrice != null,
+      hasBarcode: barcode != null && barcode.trim().isNotEmpty,
+      hasCatalogItem: catalogItemId != null && catalogItemId.trim().isNotEmpty,
+    );
   }
 
   Future<void> setShoppingItemChecked({
@@ -222,6 +250,8 @@ class ShoppingRepository {
         .from(AppTables.shoppingListItems)
         .update({AppShoppingItemFields.checked: checked})
         .eq(AppShoppingItemFields.id, shoppingItemId);
+
+    await AppAnalytics.instance.logShoppingItemChecked(checked: checked);
   }
 
   Future<void> deleteShoppingItem(String shoppingItemId) async {
@@ -229,5 +259,7 @@ class ShoppingRepository {
         .from(AppTables.shoppingListItems)
         .delete()
         .eq(AppShoppingItemFields.id, shoppingItemId);
+
+    await AppAnalytics.instance.logShoppingItemDeleted();
   }
 }

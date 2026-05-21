@@ -6,6 +6,7 @@ import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class ItemRepository {
   ItemRepository(this._client);
@@ -32,6 +33,8 @@ class ItemRepository {
         .from(AppTables.items)
         .update({AppItemFields.status: AppItemStatus.done})
         .eq(AppItemFields.id, itemId);
+
+    await AppAnalytics.instance.logItemCompleted();
   }
 
   Future<void> reopenItem(String itemId) async {
@@ -39,10 +42,14 @@ class ItemRepository {
         .from(AppTables.items)
         .update({AppItemFields.status: AppItemStatus.open})
         .eq(AppItemFields.id, itemId);
+
+    await AppAnalytics.instance.logItemReopened();
   }
 
   Future<void> deleteItem(String itemId) async {
     await _client.from(AppTables.items).delete().eq(AppItemFields.id, itemId);
+
+    await AppAnalytics.instance.logItemDeleted();
   }
 
   String normalizeAssignmentScope(String value) {
@@ -216,6 +223,8 @@ class ItemRepository {
         await replaceAssignees(itemId: itemId, userIds: const []);
       }
     }
+
+    await AppAnalytics.instance.logItemUpdated();
   }
 
   Future<Map<String, dynamic>> createItem({
@@ -264,6 +273,13 @@ class ItemRepository {
     if (normalizedScope == AppItemAssignmentScopes.specific) {
       await replaceAssignees(itemId: createdItemId, userIds: assigneeUserIds);
     }
+
+    await AppAnalytics.instance.logItemCreated(
+      assignmentScope: normalizedScope,
+      hasDeadline: deadlineAt != null,
+      isRecurring: recurrenceType != null && recurrenceType.trim().isNotEmpty,
+      hasMovie: movieImdbId != null && movieImdbId.trim().isNotEmpty,
+    );
 
     return createdItem;
   }

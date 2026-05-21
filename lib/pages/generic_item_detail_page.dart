@@ -172,6 +172,7 @@ class _GenericItemDetailPageState extends State<GenericItemDetailPage> {
   Future<void> editItem() async {
     final result = await Navigator.of(context).push<EditCatalogItemPageResult>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/edit_catalog_item'),
         builder: (_) => EditCatalogItemPage(catalogItem: catalogItem),
       ),
     );
@@ -216,6 +217,7 @@ class _GenericItemDetailPageState extends State<GenericItemDetailPage> {
 
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/catalog_item_price'),
         builder: (_) => CatalogItemPricePage(
           groupId: widget.groupId!,
           catalogItemId: itemId,

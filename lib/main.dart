@@ -1,14 +1,30 @@
+import 'dart:ui';
+
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 import 'package:pesalistas/core/app_config.dart';
-import 'package:pesalistas/core/controllers/app_theme_controller.dart';
 import 'package:pesalistas/core/controllers/app_locale_controller.dart';
+import 'package:pesalistas/core/controllers/app_notification_controller.dart';
+import 'package:pesalistas/core/controllers/app_theme_controller.dart';
+import 'package:pesalistas/firebase_options.dart';
+import 'package:pesalistas/l10n/app_localizations.dart';
 import 'package:pesalistas/pages/splash_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pesalistas/l10n/app_localizations.dart';
-import 'package:pesalistas/core/controllers/app_notification_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Avoid polluting Crashlytics with debug/local development errors.
+  // For a real release build, this becomes enabled automatically.
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+    kReleaseMode,
+  );
 
   FlutterError.onError = (FlutterErrorDetails details) {
     final message = details.exceptionAsString();
@@ -25,12 +41,28 @@ Future<void> main() async {
       debugPrint('=======================================================');
     }
 
+    if (kReleaseMode) {
+      if (isOverflow) {
+        FirebaseCrashlytics.instance.recordFlutterError(details);
+      } else {
+        FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+      }
+    }
+
     FlutterError.presentError(details);
+  };
+
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stackTrace) {
+    if (kReleaseMode) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
+      return true;
+    }
+
+    return false;
   };
 
   await AppLocaleController.loadSavedLocale();
   await AppThemeController.loadSavedThemeMode();
-  await AppNotificationController.initialize();
   await AppNotificationController.initialize();
 
   AppConfig.validate();
@@ -39,6 +71,22 @@ Future<void> main() async {
     url: AppConfig.supabaseUrl,
     anonKey: AppConfig.supabaseAnonKey,
   );
+
+  final supabase = Supabase.instance.client;
+
+  await AppAnalytics.instance.setUserId(supabase.auth.currentUser?.id);
+
+  await AppAnalytics.instance.logAppOpened();
+
+  supabase.auth.onAuthStateChange.listen((data) async {
+    final userId = data.session?.user.id;
+
+    await AppAnalytics.instance.setUserId(userId);
+
+    if (userId != null) {
+      await AppAnalytics.instance.logAuthSessionRestored();
+    }
+  });
 
   runApp(const PesaListas());
 }
@@ -55,11 +103,16 @@ class PesaListas extends StatelessWidget {
           valueListenable: AppThemeController.themeMode,
           builder: (context, themeMode, _) {
             return MaterialApp(
-              title: 'Pesalistas',
+              title: 'PesaListas',
               locale: locale,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               themeMode: themeMode,
+              navigatorObservers: [
+                FirebaseAnalyticsObserver(
+                  analytics: FirebaseAnalytics.instance,
+                ),
+              ],
               theme: ThemeData(
                 useMaterial3: true,
                 colorScheme: ColorScheme.fromSeed(

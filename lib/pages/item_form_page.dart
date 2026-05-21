@@ -361,6 +361,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
   Future<void> findMovie() async {
     final movie = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/movie_picker'),
         builder: (_) => MoviePickerPage(
           initialQuery: titleController.text.trim().isEmpty
               ? null

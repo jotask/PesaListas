@@ -6,6 +6,7 @@ import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class ProductRepository {
   ProductRepository(
@@ -68,11 +69,18 @@ class ProductRepository {
       final cached = await getCachedProduct(cleanBarcode);
 
       if (cached != null && isFresh(cached, maxCacheAge)) {
+        await AppAnalytics.instance.logProductLookup(
+          source: 'cache',
+          found: cached[AppProductFields.status] == AppProductStatus.found,
+          forceRefresh: forceRefresh,
+          useStaging: useStaging,
+        );
+
         return cached;
       }
     }
 
-    return fetchAndCacheProduct(cleanBarcode);
+    return fetchAndCacheProduct(cleanBarcode, forceRefresh: forceRefresh);
   }
 
   Future<void> deleteProductPrice(String priceId) async {
@@ -80,6 +88,8 @@ class ProductRepository {
         .from(productPricesTable)
         .delete()
         .eq(AppProductPriceFields.id, priceId);
+
+    await AppAnalytics.instance.logProductPriceDeleted();
   }
 
   Future<List<Map<String, dynamic>>> getRecentProducts({
@@ -124,7 +134,10 @@ class ProductRepository {
     return DateTime.now().toUtc().difference(fetchedAt.toUtc()) <= maxCacheAge;
   }
 
-  Future<Map<String, dynamic>> fetchAndCacheProduct(String barcode) async {
+  Future<Map<String, dynamic>> fetchAndCacheProduct(
+    String barcode, {
+    bool forceRefresh = true,
+  }) async {
     final response = await http.get(
       productUri(barcode),
       headers: openFoodFactsHeaders,
@@ -149,6 +162,13 @@ class ProductRepository {
         .upsert(row, onConflict: AppProductFields.barcode)
         .select()
         .single();
+
+    await AppAnalytics.instance.logProductLookup(
+      source: 'open_food_facts',
+      found: saved[AppProductFields.status] == AppProductStatus.found,
+      forceRefresh: forceRefresh,
+      useStaging: useStaging,
+    );
 
     return saved;
   }
@@ -309,6 +329,13 @@ class ProductRepository {
         .select()
         .single();
 
+    await AppAnalytics.instance.logProductPriceSaved(
+      source: 'catalog_item',
+      hasStoreName: storeName != null && storeName.trim().isNotEmpty,
+      hasNote: note != null && note.trim().isNotEmpty,
+      hasPriceUnit: priceUnit != null && priceUnit.trim().isNotEmpty,
+    );
+
     return result;
   }
 
@@ -358,6 +385,13 @@ class ProductRepository {
         .insert(row)
         .select()
         .single();
+
+    await AppAnalytics.instance.logProductPriceSaved(
+      source: 'barcode',
+      hasStoreName: storeName != null && storeName.trim().isNotEmpty,
+      hasNote: note != null && note.trim().isNotEmpty,
+      hasPriceUnit: priceUnit != null && priceUnit.trim().isNotEmpty,
+    );
 
     return result;
   }

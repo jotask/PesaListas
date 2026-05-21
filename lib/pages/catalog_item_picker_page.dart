@@ -123,6 +123,7 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
 
     await Navigator.of(context).push(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/generic_item_detail'),
         builder: (_) =>
             GenericItemDetailPage(catalogItem: item, groupId: widget.groupId),
       ),
@@ -195,7 +196,7 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
     }
 
     final result = await Navigator.of(context).push<EditCatalogItemPageResult>(
-      MaterialPageRoute(builder: (_) => EditCatalogItemPage(catalogItem: item)),
+      MaterialPageRoute(settings: const RouteSettings(name: '/edit_catalog_item'), builder: (_) => EditCatalogItemPage(catalogItem: item)),
     );
 
     if (result == null) {

@@ -3,6 +3,7 @@ import 'package:pesalistas/core/fields/group_fields.dart';
 import 'package:pesalistas/core/member_fields.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class GroupRepository {
   GroupRepository(this._client);
@@ -36,6 +37,10 @@ class GroupRepository {
       AppGroupFields.description: description,
       AppGroupFields.createdBy: _client.auth.currentUser!.id,
     });
+
+    await AppAnalytics.instance.logGroupCreated(
+      hasDescription: description?.trim().isNotEmpty ?? false,
+    );
   }
 
   Future<void> updateGroup({
@@ -50,5 +55,9 @@ class GroupRepository {
           AppGroupFields.description: description,
         })
         .eq(AppGroupFields.id, groupId);
+
+    await AppAnalytics.instance.logGroupUpdated(
+      hasDescription: description?.trim().isNotEmpty ?? false,
+    );
   }
 }

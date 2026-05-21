@@ -44,11 +44,11 @@ class _SplashPageState extends State<SplashPage> {
 
       Navigator.of(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+      ).pushReplacement(MaterialPageRoute(settings: const RouteSettings(name: '/home'), builder: (_) => const HomePage()));
     } else {
       Navigator.of(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthPage()));
+      ).pushReplacement(MaterialPageRoute(settings: const RouteSettings(name: '/auth'), builder: (_) => const AuthPage()));
     }
   }
 

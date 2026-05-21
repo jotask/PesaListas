@@ -3,6 +3,7 @@ import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/fields/catalog_item_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 
 class CatalogItemRepository {
   CatalogItemRepository(this._client);
@@ -69,6 +70,11 @@ class CatalogItemRepository {
         .select()
         .single();
 
+    await AppAnalytics.instance.logCatalogItemUpdated(
+      hasCategory: category != null && category.trim().isNotEmpty,
+      hasDefaultUnit: defaultUnit != null && defaultUnit.trim().isNotEmpty,
+    );
+
     return Map<String, dynamic>.from(response);
   }
 
@@ -107,6 +113,12 @@ class CatalogItemRepository {
     final existing = await getCatalogItemByNormalizedName(cleanName);
 
     if (existing != null) {
+      await AppAnalytics.instance.logCatalogItemCreated(
+        hasCategory: category != null && category.trim().isNotEmpty,
+        hasDefaultUnit: defaultUnit != null && defaultUnit.trim().isNotEmpty,
+        reusedExisting: true,
+      );
+
       return existing;
     }
 
@@ -127,6 +139,12 @@ class CatalogItemRepository {
           .select()
           .single();
 
+      await AppAnalytics.instance.logCatalogItemCreated(
+        hasCategory: category != null && category.trim().isNotEmpty,
+        hasDefaultUnit: defaultUnit != null && defaultUnit.trim().isNotEmpty,
+        reusedExisting: false,
+      );
+
       return response;
     } catch (_) {
       final existingAfterInsert = await getCatalogItemByNormalizedName(
@@ -134,6 +152,12 @@ class CatalogItemRepository {
       );
 
       if (existingAfterInsert != null) {
+        await AppAnalytics.instance.logCatalogItemCreated(
+          hasCategory: category != null && category.trim().isNotEmpty,
+          hasDefaultUnit: defaultUnit != null && defaultUnit.trim().isNotEmpty,
+          reusedExisting: true,
+        );
+
         return existingAfterInsert;
       }
 
