@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/app_platform.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/animated_logo.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
@@ -50,9 +50,12 @@ class _AuthPageState extends State<AuthPage> {
 
         if (!mounted) return;
 
-        Navigator.of(
-          context,
-        ).pushReplacement(MaterialPageRoute(settings: const RouteSettings(name: '/home'), builder: (_) => const HomePage()));
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            settings: const RouteSettings(name: '/home'),
+            builder: (_) => const HomePage(),
+          ),
+        );
       }
     });
   }
@@ -295,7 +298,7 @@ class _AuthPageState extends State<AuthPage> {
                                 ),
                         ),
                       ),
-                      if (AppConfig.isMobile) ...[
+                      if (AppPlatform.isMobile) ...[
                         SizedBox(height: 14),
                         SizedBox(
                           width: double.infinity,
@@ -316,7 +319,7 @@ class _AuthPageState extends State<AuthPage> {
                           ),
                         ),
                       ],
-                      if (AppConfig.isDesktop) ...[
+                      if (AppPlatform.isDesktop) ...[
                         SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,

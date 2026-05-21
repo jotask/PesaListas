@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/controllers/app_locale_controller.dart';
@@ -64,6 +65,12 @@ Future<void> main() async {
   await AppLocaleController.loadSavedLocale();
   await AppThemeController.loadSavedThemeMode();
   await AppNotificationController.initialize();
+
+  final envFile = kReleaseMode
+      ? 'assets/env/.env.production'
+      : 'assets/env/.env.development';
+
+  await dotenv.load(fileName: envFile);
 
   AppConfig.validate();
 

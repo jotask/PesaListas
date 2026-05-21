@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.josevives.pesalistas"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -25,11 +25,10 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID.
         applicationId = "com.josevives.pesalistas"
 
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
