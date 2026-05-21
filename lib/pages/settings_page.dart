@@ -7,6 +7,7 @@ import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
+import 'package:pesalistas/pages/diagnostics_page.dart';
 import 'package:pesalistas/pages/edit_profile_page.dart';
 import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/pages/product_scanner_page.dart';
@@ -30,6 +31,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool syncingProfile = false;
   bool editingProfile = false;
   bool signingOut = false;
+  int diagnosticsTapCount = 0;
 
   Map<String, dynamic>? profile;
 
@@ -132,6 +134,24 @@ class _SettingsPageState extends State<SettingsPage> {
     return context.l10n.languageSubtitleEnglish;
   }
 
+  void registerDiagnosticsTap() {
+    diagnosticsTapCount += 1;
+
+    const requiredTaps = 7;
+    final remaining = requiredTaps - diagnosticsTapCount;
+
+    if (remaining > 0) {
+      if (remaining <= 3) {
+        showInfoSnackBar(context, '$remaining more taps to open diagnostics.');
+      }
+
+      return;
+    }
+
+    diagnosticsTapCount = 0;
+    openDiagnostics();
+  }
+
   Future<void> chooseLanguage() async {
     final selected = await showDialog<String>(
       context: context,
@@ -214,6 +234,12 @@ class _SettingsPageState extends State<SettingsPage> {
     await Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const ProductCatalogPage()));
+  }
+
+  Future<void> openDiagnostics() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const DiagnosticsPage()));
   }
 
   Future<void> chooseTheme() async {
@@ -507,7 +533,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     const SizedBox(height: 16),
                     const _NotificationsSection(),
                     const SizedBox(height: 16),
-                    _AboutSection(packageInfoFuture: packageInfoFuture),
+                    _AboutSection(
+                      packageInfoFuture: packageInfoFuture,
+                      onBuildNumberTap: registerDiagnosticsTap,
+                    ),
                     const SizedBox(height: 16),
                     _SettingsSection(
                       title: context.l10n.accountSectionTitle,
@@ -644,9 +673,13 @@ class _SettingsSection extends StatelessWidget {
 }
 
 class _AboutSection extends StatelessWidget {
-  const _AboutSection({required this.packageInfoFuture});
+  const _AboutSection({
+    required this.packageInfoFuture,
+    required this.onBuildNumberTap,
+  });
 
   final Future<PackageInfo> packageInfoFuture;
+  final VoidCallback onBuildNumberTap;
 
   @override
   Widget build(BuildContext context) {
@@ -674,6 +707,7 @@ class _AboutSection extends StatelessWidget {
               leading: const Icon(Icons.numbers_outlined),
               title: Text(context.l10n.buildNumber),
               subtitle: Text(packageInfo?.buildNumber ?? '—'),
+              onTap: onBuildNumberTap,
             ),
           ],
         );
