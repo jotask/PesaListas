@@ -196,7 +196,10 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
     }
 
     final result = await Navigator.of(context).push<EditCatalogItemPageResult>(
-      MaterialPageRoute(settings: const RouteSettings(name: '/edit_catalog_item'), builder: (_) => EditCatalogItemPage(catalogItem: item)),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/edit_catalog_item'),
+        builder: (_) => EditCatalogItemPage(catalogItem: item),
+      ),
     );
 
     if (result == null) {

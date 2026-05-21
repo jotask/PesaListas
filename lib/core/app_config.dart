@@ -1,8 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
   const AppConfig._();
+
+  static const defaultCurrency = 'EUR';
 
   static String get supabaseUrl {
     return dotenv.env['SUPABASE_URL'] ?? '';
@@ -14,18 +15,6 @@ class AppConfig {
 
   static bool get useOpenFoodFactsStaging {
     return _boolFromEnv('USE_OPEN_FOOD_FACTS_STAGING', defaultValue: false);
-  }
-
-  static String get defaultCurrency {
-    return dotenv.env['DEFAULT_CURRENCY'] ?? 'EUR';
-  }
-
-  static String get omdbApiKey {
-    return dotenv.env['OMDB_API_KEY'] ?? '';
-  }
-
-  static bool get hasOmdbApiKey {
-    return omdbApiKey.trim().isNotEmpty;
   }
 
   static void validate() {

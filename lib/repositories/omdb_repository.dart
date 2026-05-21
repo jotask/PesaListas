@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
@@ -9,25 +7,9 @@ import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OmdbRepository {
-  OmdbRepository(this._client, {http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+  OmdbRepository(this._client);
 
   final SupabaseClient _client;
-  final http.Client _httpClient;
-
-  Uri _omdbUri(Map<String, String> queryParameters) {
-    final apiKey = AppConfig.omdbApiKey.trim();
-
-    if (apiKey.isEmpty) {
-      throw StateError(
-        'OMDb API key is missing. Run the app with --dart-define=OMDB_API_KEY=your_key',
-      );
-    }
-
-    return Uri.parse(
-      AppConfig.omdbBaseUrl,
-    ).replace(queryParameters: {'apikey': apiKey, ...queryParameters});
-  }
 
   String? _omdbText(dynamic value) {
     final text = AppValueParsing.textOrNull(value);
@@ -39,6 +21,60 @@ class OmdbRepository {
     return text;
   }
 
+  Future<Map<String, dynamic>> _invokeOmdbFunction({
+    String? query,
+    String? imdbId,
+    bool fullPlot = false,
+  }) async {
+    final body = <String, dynamic>{};
+
+    final cleanQuery = query?.trim();
+    final cleanImdbId = imdbId?.trim();
+
+    if (cleanQuery != null && cleanQuery.isNotEmpty) {
+      body['query'] = cleanQuery;
+    }
+
+    if (cleanImdbId != null && cleanImdbId.isNotEmpty) {
+      body['imdbId'] = cleanImdbId;
+      body['fullPlot'] = fullPlot;
+    }
+
+    if (body.isEmpty) {
+      throw ArgumentError('Missing query or IMDb id.');
+    }
+
+    final response = await _client.functions.invoke('omdb-search', body: body);
+
+    if (response.status < 200 || response.status >= 300) {
+      throw Exception('OMDb function failed with status ${response.status}.');
+    }
+
+    final data = response.data;
+
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+
+    if (data is String) {
+      final decoded = jsonDecode(data);
+
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+
+      if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
+      }
+    }
+
+    throw Exception('OMDb function returned invalid JSON.');
+  }
+
   Future<List<Map<String, dynamic>>> searchMovies(String query) async {
     final searchText = query.trim();
 
@@ -46,19 +82,7 @@ class OmdbRepository {
       return [];
     }
 
-    final uri = _omdbUri({'s': searchText, 'type': 'movie'});
-
-    final response = await _httpClient.get(uri);
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception('OMDb search failed with status ${response.statusCode}.');
-    }
-
-    final decoded = jsonDecode(response.body);
-
-    if (decoded is! Map<String, dynamic>) {
-      throw Exception('OMDb returned invalid JSON.');
-    }
+    final decoded = await _invokeOmdbFunction(query: searchText);
 
     final responseValue = decoded['Response']?.toString();
 
@@ -108,21 +132,10 @@ class OmdbRepository {
       throw ArgumentError('IMDb id is required.');
     }
 
-    final uri = _omdbUri({'i': cleanImdbId, 'plot': 'full'});
-
-    final response = await _httpClient.get(uri);
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'OMDb details request failed with status ${response.statusCode}.',
-      );
-    }
-
-    final decoded = jsonDecode(response.body);
-
-    if (decoded is! Map<String, dynamic>) {
-      throw Exception('OMDb returned invalid JSON.');
-    }
+    final decoded = await _invokeOmdbFunction(
+      imdbId: cleanImdbId,
+      fullPlot: true,
+    );
 
     final responseValue = decoded['Response']?.toString();
 

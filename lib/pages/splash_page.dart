@@ -42,13 +42,19 @@ class _SplashPageState extends State<SplashPage> {
 
       if (!mounted) return;
 
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(settings: const RouteSettings(name: '/home'), builder: (_) => const HomePage()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          settings: const RouteSettings(name: '/home'),
+          builder: (_) => const HomePage(),
+        ),
+      );
     } else {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(settings: const RouteSettings(name: '/auth'), builder: (_) => const AuthPage()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          settings: const RouteSettings(name: '/auth'),
+          builder: (_) => const AuthPage(),
+        ),
+      );
     }
   }
 

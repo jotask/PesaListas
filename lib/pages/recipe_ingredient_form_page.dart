@@ -249,7 +249,10 @@ class _RecipeIngredientFormPageState extends State<RecipeIngredientFormPage> {
 
   Future<void> selectGenericItem() async {
     final item = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(settings: const RouteSettings(name: '/catalog_item_picker'), builder: (_) => const CatalogItemPickerPage()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/catalog_item_picker'),
+        builder: (_) => const CatalogItemPickerPage(),
+      ),
     );
 
     if (item == null) return;

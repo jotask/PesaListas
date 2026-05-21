@@ -44,36 +44,25 @@ class AppAnalytics {
   Future<void> logGroupCreated({required bool hasDescription}) async {
     await logEvent(
       'group_created',
-      parameters: {
-        'has_description': _boolValue(hasDescription),
-      },
+      parameters: {'has_description': _boolValue(hasDescription)},
     );
   }
 
   Future<void> logGroupUpdated({required bool hasDescription}) async {
     await logEvent(
       'group_updated',
-      parameters: {
-        'has_description': _boolValue(hasDescription),
-      },
+      parameters: {'has_description': _boolValue(hasDescription)},
     );
   }
 
   Future<void> logListCreated({required String listType}) async {
-    await logEvent(
-      'list_created',
-      parameters: {
-        'list_type': listType,
-      },
-    );
+    await logEvent('list_created', parameters: {'list_type': listType});
   }
 
   Future<void> logShoppingListEnsured({required bool created}) async {
     await logEvent(
       'shopping_list_ensured',
-      parameters: {
-        'created': _boolValue(created),
-      },
+      parameters: {'created': _boolValue(created)},
     );
   }
 
@@ -123,12 +112,7 @@ class AppAnalytics {
   }
 
   Future<void> logInvitationSent({required String role}) async {
-    await logEvent(
-      'invitation_sent',
-      parameters: {
-        'role': role,
-      },
-    );
+    await logEvent('invitation_sent', parameters: {'role': role});
   }
 
   Future<void> logInvitationAccepted() async {
@@ -149,10 +133,7 @@ class AppAnalytics {
   }) async {
     await logEvent(
       'vote_upserted',
-      parameters: {
-        'points': points,
-        'has_comment': _boolValue(hasComment),
-      },
+      parameters: {'points': points, 'has_comment': _boolValue(hasComment)},
     );
   }
 
@@ -199,9 +180,7 @@ class AppAnalytics {
   Future<void> logShoppingItemChecked({required bool checked}) async {
     await logEvent(
       'shopping_item_checked',
-      parameters: {
-        'checked': _boolValue(checked),
-      },
+      parameters: {'checked': _boolValue(checked)},
     );
   }
 
@@ -210,12 +189,7 @@ class AppAnalytics {
   }
 
   Future<void> logShoppingItemsCleared({required String scope}) async {
-    await logEvent(
-      'shopping_items_cleared',
-      parameters: {
-        'scope': scope,
-      },
-    );
+    await logEvent('shopping_items_cleared', parameters: {'scope': scope});
   }
 
   Future<void> logCatalogItemCreated({
@@ -287,9 +261,7 @@ class AppAnalytics {
   Future<void> logRecipeCreated({required bool hasDescription}) async {
     await logEvent(
       'recipe_created',
-      parameters: {
-        'has_description': _boolValue(hasDescription),
-      },
+      parameters: {'has_description': _boolValue(hasDescription)},
     );
   }
 
@@ -315,9 +287,7 @@ class AppAnalytics {
   }) async {
     await logEvent(
       'recipe_instructions_updated',
-      parameters: {
-        'has_instructions': _boolValue(hasInstructions),
-      },
+      parameters: {'has_instructions': _boolValue(hasInstructions)},
     );
   }
 
@@ -414,15 +384,9 @@ class AppAnalytics {
     );
   }
 
-  Future<void> logEvent(
-    String name, {
-    Map<String, Object>? parameters,
-  }) async {
+  Future<void> logEvent(String name, {Map<String, Object>? parameters}) async {
     await _safeRun(name, () async {
-      await _analytics.logEvent(
-        name: name,
-        parameters: parameters,
-      );
+      await _analytics.logEvent(name: name, parameters: parameters);
     });
   }
 

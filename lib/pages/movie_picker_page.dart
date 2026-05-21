@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/repositories/omdb_repository.dart';
@@ -129,8 +128,6 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final hasApiKey = AppConfig.hasOmdbApiKey;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Find movie')),
       body: SafeArea(
@@ -138,19 +135,17 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _MoviePickerHeaderCard(hasApiKey: hasApiKey),
+            _MoviePickerHeaderCard(),
             const SizedBox(height: 12),
             TextField(
               controller: searchController,
-              enabled: hasApiKey && !searching && !selecting,
+              enabled: !searching && !selecting,
               decoration: InputDecoration(
                 labelText: 'Movie title',
                 hintText: 'The Matrix',
                 prefixIcon: const Icon(Icons.movie_filter_outlined),
                 suffixIcon: IconButton(
-                  onPressed: hasApiKey && !searching && !selecting
-                      ? searchMovies
-                      : null,
+                  onPressed: !searching && !selecting ? searchMovies : null,
                   icon: const Icon(Icons.search),
                   tooltip: 'Search',
                 ),
@@ -177,17 +172,8 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
                 tone: AppMessageCardTone.error,
               ),
             ],
-            if (!hasApiKey) ...[
-              const SizedBox(height: 16),
-              const AppMessageCard(
-                icon: Icons.error_outline,
-                message:
-                    'OMDb API key is missing. Run the app with --dart-define=OMDB_API_KEY=your_key.',
-                tone: AppMessageCardTone.error,
-              ),
-            ],
             const SizedBox(height: 16),
-            if (!searching && results.isEmpty && hasApiKey)
+            if (!searching && results.isEmpty)
               const AppMessageCard(
                 icon: Icons.search_outlined,
                 message: 'Search for a movie to link it to this list item.',
@@ -211,9 +197,7 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
 }
 
 class _MoviePickerHeaderCard extends StatelessWidget {
-  const _MoviePickerHeaderCard({required this.hasApiKey});
-
-  final bool hasApiKey;
+  const _MoviePickerHeaderCard();
 
   @override
   Widget build(BuildContext context) {
@@ -243,9 +227,7 @@ class _MoviePickerHeaderCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    hasApiKey
-                        ? 'Search OMDb and save the movie details in your cache.'
-                        : 'OMDb API key is not configured.',
+                    'Search OMDb and save the movie details in your cache.',
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],

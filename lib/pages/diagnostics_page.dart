@@ -96,10 +96,6 @@ class _DiagnosticsPageState extends State<DiagnosticsPage> {
     return date.toLocal().toIso8601String();
   }
 
-  bool get omdbConfigured {
-    return AppConfig.omdbApiKey.trim().isNotEmpty;
-  }
-
   @override
   Widget build(BuildContext context) {
     final info = packageInfo;
@@ -149,10 +145,6 @@ class _DiagnosticsPageState extends State<DiagnosticsPage> {
               title: 'Configuration',
               icon: Icons.tune_outlined,
               rows: [
-                _DiagnosticsRow(
-                  label: 'OMDb key',
-                  value: omdbConfigured ? 'configured' : 'missing',
-                ),
                 _DiagnosticsRow(
                   label: 'OpenFoodFacts staging',
                   value: AppConfig.useOpenFoodFactsStaging ? 'yes' : 'no',

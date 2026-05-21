@@ -381,7 +381,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   Future<void> openProductCatalog() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(settings: const RouteSettings(name: '/product_catalog'), builder: (_) => ProductCatalogPage(groupId: groupId)),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/product_catalog'),
+        builder: (_) => ProductCatalogPage(groupId: groupId),
+      ),
     );
 
     if (!mounted) return;
@@ -527,7 +530,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
     if (editingList || archivingList || deletingList) return;
 
     final result = await Navigator.of(context).push<EditListPageResult>(
-      MaterialPageRoute(settings: const RouteSettings(name: '/edit_list'), builder: (_) => EditListPage(list: currentList)),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/edit_list'),
+        builder: (_) => EditListPage(list: currentList),
+      ),
     );
 
     if (result == null) return;
@@ -585,7 +591,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
     if (generatingShopping) return;
 
     final result = await Navigator.of(context).push<GenerateShoppingPageResult>(
-      MaterialPageRoute(settings: const RouteSettings(name: '/generate_shopping'), builder: (_) => const GenerateShoppingPage()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/generate_shopping'),
+        builder: (_) => const GenerateShoppingPage(),
+      ),
     );
 
     if (result == null) return;
@@ -820,7 +829,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   Future<void> createShoppingItemDialog() async {
     final result = await Navigator.of(context).push<ShoppingItemFormPageResult>(
-      MaterialPageRoute(settings: const RouteSettings(name: '/shopping_item_form'), builder: (_) => ShoppingItemFormPage(groupId: groupId)),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/shopping_item_form'),
+        builder: (_) => ShoppingItemFormPage(groupId: groupId),
+      ),
     );
 
     if (result == null) return;
@@ -863,7 +875,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   Future<void> openProductScanner() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(settings: const RouteSettings(name: '/product_scanner'), builder: (_) => ProductScannerPage(groupId: groupId)),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/product_scanner'),
+        builder: (_) => ProductScannerPage(groupId: groupId),
+      ),
     );
 
     if (!mounted) return;
@@ -895,7 +910,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
     setState(() => creatingItem = false);
 
     final result = await Navigator.of(context).push<MealPlanFormPageResult>(
-      MaterialPageRoute(settings: const RouteSettings(name: '/meal_plan_form'), builder: (_) => MealPlanFormPage(recipes: recipes)),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/meal_plan_form'),
+        builder: (_) => MealPlanFormPage(recipes: recipes),
+      ),
     );
 
     if (result == null) return;
@@ -929,7 +947,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   Future<void> createRecipeDialog() async {
     final result = await Navigator.of(context).push<CreateRecipePageResult>(
-      MaterialPageRoute(settings: const RouteSettings(name: '/create_recipe'), builder: (_) => const CreateRecipePage()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/create_recipe'),
+        builder: (_) => const CreateRecipePage(),
+      ),
     );
 
     if (result == null) return;
@@ -1604,7 +1625,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
           final instructionsResult = await Navigator.of(context)
               .push<EditRecipeInstructionsPageResult>(
                 MaterialPageRoute(
-                  settings: const RouteSettings(name: '/edit_recipe_instructions'),
+                  settings: const RouteSettings(
+                    name: '/edit_recipe_instructions',
+                  ),
                   builder: (_) =>
                       EditRecipeInstructionsPage(recipe: currentRecipe),
                 ),
@@ -1636,7 +1659,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
           final ingredientResult = await Navigator.of(context)
               .push<RecipeIngredientFormPageResult>(
                 MaterialPageRoute(
-                  settings: const RouteSettings(name: '/recipe_ingredient_form'),
+                  settings: const RouteSettings(
+                    name: '/recipe_ingredient_form',
+                  ),
                   builder: (_) => RecipeIngredientFormPage(groupId: groupId),
                 ),
               );
@@ -1686,7 +1711,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
           final editIngredientResult = await Navigator.of(context)
               .push<RecipeIngredientFormPageResult>(
                 MaterialPageRoute(
-                  settings: const RouteSettings(name: '/recipe_ingredient_form'),
+                  settings: const RouteSettings(
+                    name: '/recipe_ingredient_form',
+                  ),
                   builder: (_) => RecipeIngredientFormPage(
                     groupId: groupId,
                     ingredient: ingredient,

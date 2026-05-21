@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
@@ -9,40 +6,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 
 class ProductRepository {
-  ProductRepository(
-    this.client, {
-    this.useStaging = false,
-    this.userAgent = 'PesaListas/0.1.0 (contact: acachitoro@gmail.com)',
-  });
+  ProductRepository(this.client, {this.useStaging = false});
 
   final SupabaseClient client;
   final bool useStaging;
-  final String userAgent;
 
   static const productsTable = 'products';
   static const productPricesTable = 'product_prices';
-
-  Uri productUri(String barcode) {
-    final host = useStaging
-        ? 'world.openfoodfacts.net'
-        : 'world.openfoodfacts.org';
-
-    return Uri.https(host, '/api/v2/product/$barcode.json');
-  }
-
-  Map<String, String> get openFoodFactsHeaders {
-    final headers = <String, String>{
-      'Accept': 'application/json',
-      'User-Agent': userAgent,
-    };
-
-    if (useStaging) {
-      headers['Authorization'] =
-          'Basic ${base64Encode(utf8.encode('off:off'))}';
-    }
-
-    return headers;
-  }
 
   Future<Map<String, dynamic>?> getCachedProduct(String barcode) async {
     final result = await client
@@ -80,7 +50,7 @@ class ProductRepository {
       }
     }
 
-    return fetchAndCacheProduct(cleanBarcode, forceRefresh: forceRefresh);
+    return fetchAndCacheProduct(cleanBarcode);
   }
 
   Future<void> deleteProductPrice(String priceId) async {
@@ -134,41 +104,46 @@ class ProductRepository {
     return DateTime.now().toUtc().difference(fetchedAt.toUtc()) <= maxCacheAge;
   }
 
-  Future<Map<String, dynamic>> fetchAndCacheProduct(
-    String barcode, {
-    bool forceRefresh = true,
-  }) async {
-    final response = await http.get(
-      productUri(barcode),
-      headers: openFoodFactsHeaders,
+  Future<Map<String, dynamic>> fetchAndCacheProduct(String barcode) async {
+    final cleanBarcode = barcode.trim();
+
+    if (cleanBarcode.isEmpty) {
+      throw ArgumentError('Barcode is required.');
+    }
+
+    final response = await client.functions.invoke(
+      'open-food-facts-product',
+      body: {'barcode': cleanBarcode, 'useStaging': useStaging},
     );
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
+    if (response.status < 200 || response.status >= 300) {
       throw Exception(
-        'OpenFoodFacts request failed with status ${response.statusCode}.',
+        'OpenFoodFacts function failed with status ${response.status}.',
       );
     }
 
-    final decoded = jsonDecode(response.body);
+    final data = response.data;
 
-    if (decoded is! Map<String, dynamic>) {
-      throw Exception('OpenFoodFacts returned an invalid JSON response.');
+    Map<String, dynamic> decoded;
+
+    if (data is Map<String, dynamic>) {
+      decoded = data;
+    } else if (data is Map) {
+      decoded = Map<String, dynamic>.from(data);
+    } else {
+      throw Exception('OpenFoodFacts function returned invalid JSON.');
     }
 
-    final row = openFoodFactsJsonToProductRow(barcode: barcode, json: decoded);
+    final row = openFoodFactsJsonToProductRow(
+      barcode: cleanBarcode,
+      json: decoded,
+    );
 
     final saved = await client
         .from(productsTable)
         .upsert(row, onConflict: AppProductFields.barcode)
         .select()
         .single();
-
-    await AppAnalytics.instance.logProductLookup(
-      source: 'open_food_facts',
-      found: saved[AppProductFields.status] == AppProductStatus.found,
-      forceRefresh: forceRefresh,
-      useStaging: useStaging,
-    );
 
     return saved;
   }

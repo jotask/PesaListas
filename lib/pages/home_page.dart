@@ -144,7 +144,10 @@ class _HomePageState extends State<HomePage> {
     if (creatingGroup) return;
 
     final result = await Navigator.of(context).push<CreateGroupPageResult>(
-      MaterialPageRoute(settings: const RouteSettings(name: '/create_group'), builder: (_) => const CreateGroupPage()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/create_group'),
+        builder: (_) => const CreateGroupPage(),
+      ),
     );
 
     if (result == null) return;
@@ -183,9 +186,12 @@ class _HomePageState extends State<HomePage> {
 
       if (!mounted) return;
 
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(settings: const RouteSettings(name: '/auth'), builder: (_) => const AuthPage()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          settings: const RouteSettings(name: '/auth'),
+          builder: (_) => const AuthPage(),
+        ),
+      );
     } catch (error) {
       if (!mounted) return;
 
@@ -205,9 +211,12 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(settings: const RouteSettings(name: '/settings'), builder: (_) => const SettingsPage()));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  settings: const RouteSettings(name: '/settings'),
+                  builder: (_) => const SettingsPage(),
+                ),
+              );
             },
             icon: const Icon(Icons.settings_outlined),
             tooltip: context.l10n.settingsTitle,
