@@ -139,6 +139,42 @@ class AppPushNotificationService {
     debugPrint('FCM TOKEN DISABLED: ${_maskToken(token)}');
   }
 
+  static Future<Map<String, dynamic>> sendTestPush() async {
+    final client = _trySupabaseClient();
+
+    if (client == null) {
+      throw StateError('Supabase is not initialized yet.');
+    }
+
+    final response = await client.functions.invoke(
+      'send-test-push',
+      body: <String, dynamic>{},
+    );
+
+    final data = _asMap(response.data);
+
+    if (response.status < 200 || response.status >= 300) {
+      throw Exception(
+        data['error']?.toString() ??
+            'send-test-push failed with status ${response.status}.',
+      );
+    }
+
+    return data;
+  }
+
+  static Map<String, dynamic> _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+
+    return {'value': value?.toString()};
+  }
+
   static Future<void> _handleForegroundMessage(RemoteMessage message) async {
     debugPrint('FCM FOREGROUND MESSAGE: ${message.messageId}');
     debugPrint('FCM DATA: ${message.data}');

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/invitation_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -69,7 +70,34 @@ class InvitationRepository {
       },
     );
 
+    await _sendInvitationPush(groupId: groupId, invitedEmail: normalizedEmail);
+
     await AppAnalytics.instance.logInvitationSent(role: role);
+  }
+
+  Future<void> _sendInvitationPush({
+    required String groupId,
+    required String invitedEmail,
+  }) async {
+    try {
+      final response = await _client.functions.invoke(
+        'send-invitation-push',
+        body: {'groupId': groupId, 'invitedEmail': invitedEmail},
+      );
+
+      debugPrint(
+        'INVITATION PUSH RESULT: status=${response.status} data=${response.data}',
+      );
+    } catch (error, stackTrace) {
+      debugPrint('INVITATION PUSH FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      await AppAnalytics.instance.recordNonFatalError(
+        error,
+        stackTrace,
+        reason: 'send_invitation_push_failed',
+      );
+    }
   }
 
   Future<void> cancelInvitation(String invitationId) async {

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/controllers/app_notification_controller.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
@@ -214,12 +215,30 @@ class ItemRepository {
         .eq(AppItemFields.id, itemId);
 
     if (assignmentScope != null) {
+      final previousAssignees = await getAssigneesForItem(itemId);
+      final previousUserIds = previousAssignees
+          .map((row) => row[AppItemAssigneeFields.userId]?.toString())
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toSet();
+
       final normalizedScope = normalizeAssignmentScope(assignmentScope);
 
       if (normalizedScope == AppItemAssignmentScopes.specific) {
-        await replaceAssignees(
+        final nextUserIds = (assigneeUserIds ?? const [])
+            .map((id) => id.trim())
+            .where((id) => id.isNotEmpty)
+            .toSet();
+
+        await replaceAssignees(itemId: itemId, userIds: nextUserIds.toList());
+
+        final newlyAssignedUserIds = nextUserIds
+            .where((id) => !previousUserIds.contains(id))
+            .toList();
+
+        await _sendItemAssignedPush(
           itemId: itemId,
-          userIds: assigneeUserIds ?? const [],
+          assigneeUserIds: newlyAssignedUserIds,
         );
       } else {
         await replaceAssignees(itemId: itemId, userIds: const []);
@@ -239,6 +258,41 @@ class ItemRepository {
     );
 
     await AppAnalytics.instance.logItemUpdated();
+  }
+
+  Future<void> _sendItemAssignedPush({
+    required String itemId,
+    required List<String> assigneeUserIds,
+  }) async {
+    final cleanUserIds = assigneeUserIds
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (cleanUserIds.isEmpty) {
+      return;
+    }
+
+    try {
+      final response = await _client.functions.invoke(
+        'send-item-assigned-push',
+        body: {'itemId': itemId, 'assigneeUserIds': cleanUserIds},
+      );
+
+      debugPrint(
+        'ITEM ASSIGNED PUSH RESULT: status=${response.status} data=${response.data}',
+      );
+    } catch (error, stackTrace) {
+      debugPrint('ITEM ASSIGNED PUSH FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      await AppAnalytics.instance.recordNonFatalError(
+        error,
+        stackTrace,
+        reason: 'send_item_assigned_push_failed',
+      );
+    }
   }
 
   Future<Map<String, dynamic>> createItem({
@@ -286,6 +340,11 @@ class ItemRepository {
 
     if (normalizedScope == AppItemAssignmentScopes.specific) {
       await replaceAssignees(itemId: createdItemId, userIds: assigneeUserIds);
+
+      await _sendItemAssignedPush(
+        itemId: createdItemId,
+        assigneeUserIds: assigneeUserIds,
+      );
     }
 
     await AppAnalytics.instance.logItemCreated(

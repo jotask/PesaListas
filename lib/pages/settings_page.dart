@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:pesalistas/core/app_push_notification_service.dart';
 import 'package:pesalistas/core/controllers/app_locale_controller.dart';
 import 'package:pesalistas/core/controllers/app_notification_controller.dart';
 import 'package:pesalistas/core/controllers/app_theme_controller.dart';
@@ -841,6 +842,33 @@ class _NotificationsSection extends StatelessWidget {
                 if (!context.mounted) return;
 
                 showSuccessSnackBar(context, 'Test notification sent.');
+              },
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.cloud_upload_outlined),
+              title: const Text('Send test push notification'),
+              subtitle: const Text('Send a Firebase push through Supabase.'),
+              onTap: () async {
+                try {
+                  final result =
+                      await AppPushNotificationService.sendTestPush();
+
+                  if (!context.mounted) return;
+
+                  showSuccessSnackBar(
+                    context,
+                    'Push sent: ${result['sentCount'] ?? 0} device(s).',
+                  );
+                } catch (error) {
+                  if (!context.mounted) return;
+
+                  showErrorSnackBar(
+                    context,
+                    'Failed to send test push.',
+                    error,
+                  );
+                }
               },
             ),
           ],
