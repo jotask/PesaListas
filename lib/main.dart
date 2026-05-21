@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/app_push_notification_service.dart';
 import 'package:pesalistas/core/controllers/app_locale_controller.dart';
 import 'package:pesalistas/core/controllers/app_notification_controller.dart';
 import 'package:pesalistas/core/controllers/app_theme_controller.dart';
@@ -21,8 +22,12 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Avoid polluting Crashlytics with debug/local development errors.
-  // For a real release build, this becomes enabled automatically.
+  final envFile = kReleaseMode
+      ? 'assets/env/.env.production'
+      : 'assets/env/.env.development';
+
+  await dotenv.load(fileName: envFile);
+
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
     kReleaseMode,
   );
@@ -66,12 +71,6 @@ Future<void> main() async {
   await AppThemeController.loadSavedThemeMode();
   await AppNotificationController.initialize();
 
-  final envFile = kReleaseMode
-      ? 'assets/env/.env.production'
-      : 'assets/env/.env.development';
-
-  await dotenv.load(fileName: envFile);
-
   AppConfig.validate();
 
   await Supabase.initialize(
@@ -81,9 +80,13 @@ Future<void> main() async {
 
   final supabase = Supabase.instance.client;
 
+  await AppPushNotificationService.initialize();
+
   await AppAnalytics.instance.setUserId(supabase.auth.currentUser?.id);
 
   await AppAnalytics.instance.logAppOpened();
+
+  await AppPushNotificationService.syncCurrentDevice();
 
   supabase.auth.onAuthStateChange.listen((data) async {
     final userId = data.session?.user.id;
@@ -92,6 +95,7 @@ Future<void> main() async {
 
     if (userId != null) {
       await AppAnalytics.instance.logAuthSessionRestored();
+      await AppPushNotificationService.syncCurrentDevice();
     }
   });
 

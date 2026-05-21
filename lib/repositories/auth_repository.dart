@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:pesalistas/auth/google_auth.dart';
 import 'package:pesalistas/core/app_analytics.dart';
+import 'package:pesalistas/core/app_push_notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthRepository {
@@ -59,6 +60,8 @@ class AuthRepository {
 
   Future<void> signOut() async {
     await AppAnalytics.instance.logLogout();
+
+    await AppPushNotificationService.unregisterCurrentDevice();
 
     await _client.auth.signOut();
 

@@ -1,4 +1,5 @@
 import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/controllers/app_notification_controller.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
@@ -34,6 +35,7 @@ class ItemRepository {
         .update({AppItemFields.status: AppItemStatus.done})
         .eq(AppItemFields.id, itemId);
 
+    await AppNotificationController.cancelItemReminders(itemId);
     await AppAnalytics.instance.logItemCompleted();
   }
 
@@ -48,7 +50,7 @@ class ItemRepository {
 
   Future<void> deleteItem(String itemId) async {
     await _client.from(AppTables.items).delete().eq(AppItemFields.id, itemId);
-
+    await AppNotificationController.cancelItemReminders(itemId);
     await AppAnalytics.instance.logItemDeleted();
   }
 
@@ -224,6 +226,18 @@ class ItemRepository {
       }
     }
 
+    await AppNotificationController.scheduleTaskDeadlineReminders(
+      itemId: itemId,
+      title: title,
+      deadlineAt: updateTaskFields ? deadlineAt : null,
+    );
+
+    await AppNotificationController.scheduleChoreDueReminders(
+      itemId: itemId,
+      title: title,
+      nextDueAt: updateChoreFields ? nextDueAt : null,
+    );
+
     await AppAnalytics.instance.logItemUpdated();
   }
 
@@ -279,6 +293,18 @@ class ItemRepository {
       hasDeadline: deadlineAt != null,
       isRecurring: recurrenceType != null && recurrenceType.trim().isNotEmpty,
       hasMovie: movieImdbId != null && movieImdbId.trim().isNotEmpty,
+    );
+
+    await AppNotificationController.scheduleTaskDeadlineReminders(
+      itemId: createdItemId,
+      title: title,
+      deadlineAt: deadlineAt,
+    );
+
+    await AppNotificationController.scheduleChoreDueReminders(
+      itemId: createdItemId,
+      title: title,
+      nextDueAt: nextDueAt,
     );
 
     return createdItem;

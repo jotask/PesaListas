@@ -73,6 +73,7 @@ class AppNotificationController {
 
   static Future<bool> setEnabled(bool value) async {
     if (!value) {
+      await AppLocalNotificationService.cancelAll();
       await _save(preferences.value.copyWith(enabled: false));
       return true;
     }
@@ -89,6 +90,10 @@ class AppNotificationController {
   }
 
   static Future<void> setChoreReminders(bool value) async {
+    if (!value) {
+      await AppLocalNotificationService.cancelAll();
+    }
+
     await _save(preferences.value.copyWith(choreReminders: value));
   }
 
@@ -98,6 +103,66 @@ class AppNotificationController {
 
   static Future<void> setShoppingReminders(bool value) async {
     await _save(preferences.value.copyWith(shoppingReminders: value));
+  }
+
+  static Future<void> showTestNotification() async {
+    if (!preferences.value.enabled) {
+      final granted = await setEnabled(true);
+
+      if (!granted) {
+        return;
+      }
+    }
+
+    await AppLocalNotificationService.showTestNotification();
+  }
+
+  static Future<void> scheduleTaskDeadlineReminders({
+    required String itemId,
+    required String title,
+    required DateTime? deadlineAt,
+  }) async {
+    if (!preferences.value.enabled) return;
+
+    if (deadlineAt == null) {
+      await AppLocalNotificationService.cancelTaskDeadlineReminders(itemId);
+      return;
+    }
+
+    await AppLocalNotificationService.scheduleTaskDeadlineReminders(
+      itemId: itemId,
+      title: title,
+      deadlineAt: deadlineAt,
+    );
+  }
+
+  static Future<void> scheduleChoreDueReminders({
+    required String itemId,
+    required String title,
+    required DateTime? nextDueAt,
+  }) async {
+    if (!preferences.value.enabled || !preferences.value.choreReminders) {
+      return;
+    }
+
+    if (nextDueAt == null) {
+      await AppLocalNotificationService.cancelChoreDueReminders(itemId);
+      return;
+    }
+
+    await AppLocalNotificationService.scheduleChoreDueReminders(
+      itemId: itemId,
+      title: title,
+      nextDueAt: nextDueAt,
+    );
+  }
+
+  static Future<void> cancelItemReminders(String itemId) async {
+    await AppLocalNotificationService.cancelItemReminders(itemId);
+  }
+
+  static Future<void> cancelAllLocalNotifications() async {
+    await AppLocalNotificationService.cancelAll();
   }
 
   static Future<void> _save(AppNotificationPreferences value) async {

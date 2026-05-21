@@ -828,6 +828,21 @@ class _NotificationsSection extends StatelessWidget {
               leading: const Icon(Icons.info_outline),
               title: Text(context.l10n.notificationPreferencesStoredOnDevice),
             ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.notification_add_outlined),
+              title: const Text('Send test notification'),
+              subtitle: const Text(
+                'Check that local notifications work on this device.',
+              ),
+              onTap: () async {
+                await AppNotificationController.showTestNotification();
+
+                if (!context.mounted) return;
+
+                showSuccessSnackBar(context, 'Test notification sent.');
+              },
+            ),
           ],
         );
       },
