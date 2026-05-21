@@ -19,6 +19,7 @@ class GroupOverviewCard extends StatelessWidget {
     required this.onCancelInvitation,
     required this.onRemoveMember,
     required this.onChangeMemberRole,
+    required this.onTransferOwnership,
   });
 
   final Map<String, dynamic> group;
@@ -36,6 +37,7 @@ class GroupOverviewCard extends StatelessWidget {
     required String role,
   })
   onChangeMemberRole;
+  final void Function(Map<String, dynamic> member) onTransferOwnership;
 
   String groupName(BuildContext context) {
     final value = group[AppGroupFields.name]?.toString();
@@ -177,6 +179,7 @@ class GroupOverviewCard extends StatelessWidget {
                         onCancelInvitation: onCancelInvitation,
                         onRemoveMember: onRemoveMember,
                         onChangeMemberRole: onChangeMemberRole,
+                        onTransferOwnership: onTransferOwnership,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -208,6 +211,7 @@ class _PeoplePreview extends StatelessWidget {
     required this.onCancelInvitation,
     required this.onRemoveMember,
     required this.onChangeMemberRole,
+    required this.onTransferOwnership,
   });
 
   final List<Map<String, dynamic>> members;
@@ -221,6 +225,7 @@ class _PeoplePreview extends StatelessWidget {
     required String role,
   })
   onChangeMemberRole;
+  final void Function(Map<String, dynamic> member) onTransferOwnership;
 
   static const int maxVisibleMembers = 5;
 
@@ -258,6 +263,10 @@ class _PeoplePreview extends StatelessWidget {
                   onMakeMember: () {
                     Navigator.of(context).pop();
                     onChangeMemberRole(member: member, role: 'member');
+                  },
+                  onTransferOwnership: () {
+                    Navigator.of(context).pop();
+                    onTransferOwnership(member);
                   },
                 ),
             ],
@@ -382,6 +391,7 @@ class _MemberManagementTile extends StatelessWidget {
     required this.onRemove,
     required this.onMakeAdmin,
     required this.onMakeMember,
+    required this.onTransferOwnership,
   });
 
   final Map<String, dynamic> member;
@@ -390,6 +400,7 @@ class _MemberManagementTile extends StatelessWidget {
   final VoidCallback onRemove;
   final VoidCallback onMakeAdmin;
   final VoidCallback onMakeMember;
+  final VoidCallback onTransferOwnership;
 
   String get userId {
     return member[AppMemberFields.userId]?.toString() ?? '';
@@ -423,6 +434,10 @@ class _MemberManagementTile extends StatelessWidget {
     return canManage && role == 'admin';
   }
 
+  bool get canTransferOwnership {
+    return currentUserRole == 'owner' && !isCurrentUser && !isOwner;
+  }
+
   @override
   Widget build(BuildContext context) {
     final name = _MemberDisplay.nameFor(context, member);
@@ -439,7 +454,7 @@ class _MemberManagementTile extends StatelessWidget {
             child: _RoleBadge(role: role),
           ),
         ),
-        trailing: canManage
+        trailing: canManage || canTransferOwnership
             ? PopupMenuButton<String>(
                 tooltip: context.l10n.manageMembers,
                 onSelected: (value) {
@@ -449,6 +464,9 @@ class _MemberManagementTile extends StatelessWidget {
                       break;
                     case 'make_member':
                       onMakeMember();
+                      break;
+                    case 'transfer_ownership':
+                      onTransferOwnership();
                       break;
                     case 'remove':
                       onRemove();
@@ -477,6 +495,16 @@ class _MemberManagementTile extends StatelessWidget {
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.person_outline),
                           title: Text(context.l10n.makeMember),
+                        ),
+                      ),
+                    if (canTransferOwnership)
+                      const PopupMenuItem(
+                        value: 'transfer_ownership',
+                        child: ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.workspace_premium_outlined),
+                          title: Text('Transfer ownership'),
                         ),
                       ),
                     PopupMenuItem(

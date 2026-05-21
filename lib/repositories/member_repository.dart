@@ -26,6 +26,16 @@ class MemberRepository {
     );
   }
 
+  Future<void> transferGroupOwnership({
+    required String groupId,
+    required String newOwnerUserId,
+  }) async {
+    await _client.rpc(
+      'transfer_group_ownership',
+      params: {'target_group_id': groupId, 'new_owner_user_id': newOwnerUserId},
+    );
+  }
+
   Future<void> updateGroupMemberRole({
     required String groupId,
     required String userId,

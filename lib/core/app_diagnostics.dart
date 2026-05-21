@@ -360,12 +360,17 @@ class AppDiagnostics {
       debugPrint('Raw data: ${error.rawData}');
       debugPrint('==========================================================');
 
+      final groupNames = error.soleOwnerGroups
+          .map((group) => group.name)
+          .join(', ');
+
       return DiagnosticItem(
         label: 'Account deletion Edge Function',
         status: DiagnosticStatus.warning,
         message: 'Blocked by sole-owner groups',
-        details:
-            '${error.soleOwnerGroupCount} group(s) need another owner before account deletion.',
+        details: groupNames.isEmpty
+            ? '${error.soleOwnerGroupCount} group(s) need another owner before account deletion.'
+            : 'Blocking groups: $groupNames',
       );
     } catch (error) {
       return DiagnosticItem(

@@ -41,6 +41,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   bool editingGroup = false;
   bool removingMember = false;
   bool updatingMemberRole = false;
+  bool transferringOwnership = false;
 
   late Map<String, dynamic> currentGroup;
 
@@ -59,6 +60,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         editingGroup ||
         updatingMemberRole ||
         removingMember ||
+        transferringOwnership ||
         loadingPeople;
   }
 
@@ -138,6 +140,67 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     }
 
     return context.l10n.member;
+  }
+
+  Future<void> transferOwnership(Map<String, dynamic> member) async {
+    if (transferringOwnership) return;
+
+    final userId = member[AppMemberFields.userId]?.toString();
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+
+    if (userId == null || userId.isEmpty) return;
+
+    if (currentUserRole != 'owner') {
+      showErrorSnackBar(context, 'Only owners can transfer ownership.');
+      return;
+    }
+
+    if (userId == currentUserId) {
+      showErrorSnackBar(context, 'You are already the owner.');
+      return;
+    }
+
+    final role = member[AppMemberFields.role]?.toString();
+
+    if (role == 'owner') {
+      showErrorSnackBar(context, 'This member is already an owner.');
+      return;
+    }
+
+    final name = memberDisplayName(member);
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Transfer ownership?',
+      message:
+          'This will make $name the owner of this group. Your role will become admin.',
+      deleteLabel: 'Transfer ownership',
+    );
+
+    if (!confirmed) return;
+
+    setState(() => transferringOwnership = true);
+
+    try {
+      await memberRepository.transferGroupOwnership(
+        groupId: groupId,
+        newOwnerUserId: userId,
+      );
+
+      await loadMembers();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(context, 'Ownership transferred.');
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to transfer ownership.', error);
+    } finally {
+      if (mounted) {
+        setState(() => transferringOwnership = false);
+      }
+    }
   }
 
   Future<void> updateMemberRole({
@@ -496,6 +559,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             onCancelInvitation: cancelInvitation,
             onRemoveMember: removeMember,
             onChangeMemberRole: updateMemberRole,
+            onTransferOwnership: transferOwnership,
           ),
           if (isBusy) const LinearProgressIndicator(),
           Expanded(

@@ -7,6 +7,7 @@ import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
+import 'package:pesalistas/pages/delete_account_page.dart';
 import 'package:pesalistas/pages/diagnostics_page.dart';
 import 'package:pesalistas/pages/edit_profile_page.dart';
 import 'package:pesalistas/pages/product_catalog_page.dart';
@@ -443,6 +444,15 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> openDeleteAccount() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/delete_account'),
+        builder: (_) => const DeleteAccountPage(),
+      ),
+    );
+  }
+
   Future<void> openProductScanner() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -554,6 +564,25 @@ class _SettingsPageState extends State<SettingsPage> {
                     _SettingsSection(
                       title: context.l10n.accountSectionTitle,
                       children: [
+                        ListTile(
+                          leading: Icon(
+                            Icons.delete_forever_outlined,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          title: Text(
+                            'Delete account',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Permanently delete your login account and private account data.',
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: openDeleteAccount,
+                        ),
+                        const Divider(height: 1),
                         ListTile(
                           leading: const Icon(Icons.logout),
                           title: Text(context.l10n.signOutTitle),
