@@ -41,34 +41,36 @@ class GroupGridSection extends StatelessWidget {
         const spacing = 12.0;
         final width = constraints.maxWidth;
 
-        final crossAxisCount = width >= 900
+        final crossAxisCount = width >= 1200
+            ? 4
+            : width >= 760
             ? 3
-            : width >= 560
-            ? 2
-            : 1;
+            : 2;
 
-        final cardWidth =
-            (width - (spacing * (crossAxisCount - 1))) / crossAxisCount;
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: groups.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: spacing,
+            crossAxisSpacing: spacing,
+            childAspectRatio: width < 380 ? 0.9 : 1.0,
+          ),
+          itemBuilder: (context, index) {
+            final group = groups[index];
 
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: [
-            for (final group in groups)
-              SizedBox(
-                width: cardWidth,
-                child: _GroupGridCard(
-                  group: group,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => GroupDetailPage(group: group),
-                      ),
-                    );
-                  },
-                ),
-              ),
-          ],
+            return _GroupGridCard(
+              group: group,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => GroupDetailPage(group: group),
+                  ),
+                );
+              },
+            );
+          },
         );
       },
     );
@@ -139,91 +141,86 @@ class _GroupGridCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+          padding: const EdgeInsets.all(14),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: isShared
-                    ? theme.colorScheme.primaryContainer
-                    : theme.colorScheme.secondaryContainer,
-                child: Icon(
-                  typeIcon,
-                  color: isShared
-                      ? theme.colorScheme.onPrimaryContainer
-                      : theme.colorScheme.onSecondaryContainer,
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: isShared
+                          ? theme.colorScheme.primaryContainer
+                          : theme.colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      typeIcon,
+                      color: isShared
+                          ? theme.colorScheme.onPrimaryContainer
+                          : theme.colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                name(context),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
                 ),
               ),
-              SizedBox(width: 14),
+              const SizedBox(height: 6),
               Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            name(context),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        _GroupTypePill(
-                          icon: typeIcon,
-                          label: typeLabel(context),
-                          highlighted: isShared,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      description(context),
-                      softWrap: true,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(child: _MemberPreview(members: members)),
-                        SizedBox(width: 8),
-                        Text(
-                          memberCountLabel(context),
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 16,
-                          color: theme.colorScheme.primary,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          context.l10n.open,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                child: Text(
+                  description(context),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.2,
+                  ),
                 ),
+              ),
+              const SizedBox(height: 10),
+              _GroupTypePill(
+                icon: typeIcon,
+                label: typeLabel(context),
+                highlighted: isShared,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(child: _MemberPreview(members: members)),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      memberCountLabel(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -238,35 +235,61 @@ class _MemberPreview extends StatelessWidget {
 
   final List<Map<String, dynamic>> members;
 
-  static const maxVisible = 5;
-
   @override
   Widget build(BuildContext context) {
     if (members.isEmpty) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
-    final visibleMembers = members.take(maxVisible).toList();
-    final extraCount = members.length - visibleMembers.length;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const avatarSize = 30.0;
+        const overlap = 18.0;
+        const extraAvatarWidth = 34.0;
 
-    return SizedBox(
-      height: 30,
-      child: Row(
-        children: [
-          for (final member in visibleMembers)
-            Padding(
-              padding: const EdgeInsets.only(right: 5),
-              child: Tooltip(
-                message: _MemberDisplay.nameFor(context, member),
-                child: _TinyMemberAvatar(
-                  name: _MemberDisplay.nameFor(context, member),
-                  avatarUrl: _MemberDisplay.avatarUrlFor(member),
+        final availableWidth = constraints.maxWidth;
+
+        final maxAvatars = ((availableWidth - extraAvatarWidth) / overlap)
+            .floor()
+            .clamp(1, 4);
+
+        final visibleMembers = members.take(maxAvatars).toList();
+        final extraCount = members.length - visibleMembers.length;
+
+        return SizedBox(
+          height: avatarSize,
+          width: availableWidth,
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              for (var index = 0; index < visibleMembers.length; index++)
+                Positioned(
+                  left: index * overlap,
+                  child: Tooltip(
+                    message: _MemberDisplay.nameFor(
+                      context,
+                      visibleMembers[index],
+                    ),
+                    child: _TinyMemberAvatar(
+                      name: _MemberDisplay.nameFor(
+                        context,
+                        visibleMembers[index],
+                      ),
+                      avatarUrl: _MemberDisplay.avatarUrlFor(
+                        visibleMembers[index],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          if (extraCount > 0) _ExtraMembersAvatar(count: extraCount),
-        ],
-      ),
+              if (extraCount > 0)
+                Positioned(
+                  left: visibleMembers.length * overlap,
+                  child: _ExtraMembersAvatar(count: extraCount),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -405,26 +428,34 @@ class _GroupTypePill extends StatelessWidget {
         ? theme.colorScheme.onPrimaryContainer
         : theme.colorScheme.onSurfaceVariant;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: foregroundColor),
-          SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: foregroundColor,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 96),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 13, color: foregroundColor),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: foregroundColor,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/repositories/shopping_repository.dart';
@@ -97,25 +98,13 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
     lookupBarcode(barcode);
   }
 
-  double? doubleOrNull(dynamic value) {
-    if (value == null) return null;
-
-    if (value is num) return value.toDouble();
-
-    return double.tryParse(value.toString().replaceAll(',', '.'));
-  }
-
-  String? nullableText(dynamic value) {
-    final text = value?.toString().trim();
-
-    if (text == null || text.isEmpty) return null;
-
-    return text;
-  }
-
   void prefillShoppingFields(Map<String, dynamic>? loadedProduct) {
-    final name = nullableText(loadedProduct?[AppProductFields.name]);
-    final barcode = nullableText(loadedProduct?[AppProductFields.barcode]);
+    final name = AppValueParsing.textOrNull(
+      loadedProduct?[AppProductFields.name],
+    );
+    final barcode = AppValueParsing.textOrNull(
+      loadedProduct?[AppProductFields.barcode],
+    );
 
     shoppingNameController.text = name ?? barcode ?? '';
     shoppingQuantityController.text = '1';
@@ -245,7 +234,7 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
     }
 
     final unit = shoppingUnitController.text.trim();
-    final price = doubleOrNull(priceController.text);
+    final price = AppValueParsing.doubleOrNull(priceController.text);
     final barcode = currentProduct[AppProductFields.barcode]?.toString();
     final productName = currentProduct[AppProductFields.name]?.toString();
     final productImageUrl = currentProduct[AppProductFields.imageUrl]

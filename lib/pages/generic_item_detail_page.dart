@@ -4,6 +4,7 @@ import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/fields/catalog_item_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
+import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/pages/catalog_item_price_page.dart';
 import 'package:pesalistas/pages/edit_catalog_item_page.dart';
 import 'package:pesalistas/repositories/catalog_item_repository.dart';
@@ -35,6 +36,7 @@ class _GenericItemDetailPageState extends State<GenericItemDetailPage> {
   bool saving = false;
   String? errorMessage;
   Map<String, dynamic>? latestPrice;
+  List<Map<String, dynamic>> priceHistory = [];
 
   @override
   void initState() {
@@ -87,15 +89,17 @@ class _GenericItemDetailPageState extends State<GenericItemDetailPage> {
     });
 
     try {
-      final result = await productRepository.getLatestCatalogItemPrice(
+      final prices = await productRepository.getPricesForCatalogItem(
         groupId: widget.groupId!,
         catalogItemId: itemId,
+        limit: 10,
       );
 
       if (!mounted) return;
 
       setState(() {
-        latestPrice = result;
+        priceHistory = prices;
+        latestPrice = prices.isEmpty ? null : prices.first;
         loadingPrice = false;
       });
     } catch (error) {
@@ -106,6 +110,63 @@ class _GenericItemDetailPageState extends State<GenericItemDetailPage> {
         loadingPrice = false;
       });
     }
+  }
+
+  String priceRowTitle(Map<String, dynamic> price) {
+    final amount =
+        AppValueParsing.textOrNull(price[AppProductPriceFields.price]) ?? '—';
+
+    final currency =
+        AppValueParsing.textOrNull(price[AppProductPriceFields.currency]) ??
+        AppConfig.defaultCurrency;
+
+    final quantity =
+        AppValueParsing.textOrNull(
+          price[AppProductPriceFields.priceQuantity],
+        ) ??
+        '1';
+
+    final unit = AppUnitType.valueOrNull(
+      AppValueParsing.textOrNull(price[AppProductPriceFields.priceUnit]),
+    );
+
+    if (unit == null) {
+      return '$amount $currency per $quantity';
+    }
+
+    return '$amount $currency per $quantity ${AppUnitType.shortLabel(unit)}';
+  }
+
+  String? priceRowSubtitle(Map<String, dynamic> price) {
+    final parts = <String>[];
+
+    final store = AppValueParsing.textOrNull(
+      price[AppProductPriceFields.storeName],
+    );
+
+    if (store != null) {
+      parts.add(store);
+    }
+
+    final observedAt = AppValueParsing.textOrNull(
+      price[AppProductPriceFields.observedAt],
+    );
+
+    if (observedAt != null) {
+      parts.add(observedAt.split('T').first);
+    }
+
+    final note = AppValueParsing.textOrNull(price[AppProductPriceFields.note]);
+
+    if (note != null) {
+      parts.add(note);
+    }
+
+    if (parts.isEmpty) {
+      return null;
+    }
+
+    return parts.join(' • ');
   }
 
   Future<void> editItem() async {
@@ -167,6 +228,51 @@ class _GenericItemDetailPageState extends State<GenericItemDetailPage> {
     if (result == null) return;
 
     await loadLatestPrice();
+  }
+
+  Future<void> deletePrice(Map<String, dynamic> price) async {
+    final priceId = AppValueParsing.textOrNull(price[AppProductPriceFields.id]);
+
+    if (priceId == null) {
+      return;
+    }
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Delete price?',
+      message: 'This price entry will be removed from the history.',
+      deleteLabel: 'Delete price',
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setState(() {
+      loadingPrice = true;
+      errorMessage = null;
+    });
+
+    try {
+      await productRepository.deleteProductPrice(priceId);
+
+      if (!mounted) return;
+
+      await loadLatestPrice();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Price deleted.')));
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        errorMessage = error.toString();
+        loadingPrice = false;
+      });
+    }
   }
 
   String latestPriceText() {
@@ -325,6 +431,64 @@ class _GenericItemDetailPageState extends State<GenericItemDetailPage> {
                 ),
               ),
             ),
+            if (canManagePrice) ...[
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.history_outlined),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Recent prices',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (loadingPrice)
+                        const LinearProgressIndicator()
+                      else if (priceHistory.isEmpty)
+                        const Text('No price history yet.')
+                      else
+                        for (final price in priceHistory)
+                          ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading: const CircleAvatar(
+                              child: Icon(Icons.euro_outlined),
+                            ),
+                            title: Text(
+                              priceRowTitle(price),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            subtitle: priceRowSubtitle(price) == null
+                                ? null
+                                : Text(priceRowSubtitle(price)!),
+                            trailing: IconButton(
+                              onPressed: loadingPrice
+                                  ? null
+                                  : () => deletePrice(price),
+                              icon: const Icon(Icons.delete_outline),
+                              tooltip: 'Delete price',
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

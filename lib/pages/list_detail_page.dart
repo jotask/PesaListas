@@ -9,6 +9,7 @@ import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/member_fields.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/fields/list_fields.dart';
@@ -624,24 +625,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
   }
 
-  double? doubleOrNull(dynamic value) {
-    if (value == null) return null;
-
-    if (value is num) return value.toDouble();
-
-    return double.tryParse(value.toString().replaceAll(',', '.'));
-  }
-
-  String? nullableText(dynamic value) {
-    final text = value?.toString().trim();
-
-    if (text == null || text.isEmpty) return null;
-
-    return text;
-  }
-
   double? estimatedIngredientTotal(Map<String, dynamic> ingredient) {
-    final explicitTotal = doubleOrNull(
+    final explicitTotal = AppValueParsing.doubleOrNull(
       ingredient[AppRecipeIngredientFields.estimatedTotalPrice],
     );
 
@@ -650,15 +635,19 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }
 
     return AppEstimatedCostCalculator.estimatedTotal(
-      quantity: doubleOrNull(ingredient[AppRecipeIngredientFields.quantity]),
-      unitPrice: doubleOrNull(
+      quantity: AppValueParsing.doubleOrNull(
+        ingredient[AppRecipeIngredientFields.quantity],
+      ),
+      unitPrice: AppValueParsing.doubleOrNull(
         ingredient[AppRecipeIngredientFields.estimatedUnitPrice],
       ),
     );
   }
 
   String ingredientCurrency(Map<String, dynamic> ingredient) {
-    return nullableText(ingredient[AppRecipeIngredientFields.priceCurrency]) ??
+    return AppValueParsing.textOrNull(
+          ingredient[AppRecipeIngredientFields.priceCurrency],
+        ) ??
         AppConfig.defaultCurrency;
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -65,19 +66,36 @@ class _CatalogItemPricePageState extends State<CatalogItemPricePage> {
   }
 
   double? parseDouble(String value) {
-    final text = value.trim();
-
-    if (text.isEmpty) return null;
-
-    return double.tryParse(text.replaceAll(',', '.'));
+    return AppValueParsing.doubleOrNull(value);
   }
 
-  String? nullableText(String value) {
-    final text = value.trim();
+  void fillFormFromLatestPrice(Map<String, dynamic>? price) {
+    if (price == null) {
+      return;
+    }
 
-    if (text.isEmpty) return null;
+    priceController.text =
+        AppValueParsing.textOrNull(price[AppProductPriceFields.price]) ?? '';
 
-    return text;
+    priceQuantityController.text =
+        AppValueParsing.textOrNull(
+          price[AppProductPriceFields.priceQuantity],
+        ) ??
+        '1';
+
+    priceUnitController.text =
+        AppUnitType.valueOrNull(
+          AppValueParsing.textOrNull(price[AppProductPriceFields.priceUnit]),
+        ) ??
+        widget.defaultUnit ??
+        '';
+
+    storeController.text =
+        AppValueParsing.textOrNull(price[AppProductPriceFields.storeName]) ??
+        '';
+
+    noteController.text =
+        AppValueParsing.textOrNull(price[AppProductPriceFields.note]) ?? '';
   }
 
   Future<void> loadLatestPrice() async {
@@ -98,6 +116,7 @@ class _CatalogItemPricePageState extends State<CatalogItemPricePage> {
         latestPrice = result;
         loadingLatestPrice = false;
       });
+      fillFormFromLatestPrice(result);
     } catch (error) {
       if (!mounted) return;
 
@@ -146,8 +165,8 @@ class _CatalogItemPricePageState extends State<CatalogItemPricePage> {
         currency: AppConfig.defaultCurrency,
         priceQuantity: priceQuantity,
         priceUnit: AppUnitType.valueOrNull(priceUnitController.text),
-        storeName: nullableText(storeController.text),
-        note: nullableText(noteController.text),
+        storeName: AppValueParsing.textOrNull(storeController.text),
+        note: AppValueParsing.textOrNull(noteController.text),
       );
 
       if (!mounted) return;
@@ -171,19 +190,28 @@ class _CatalogItemPricePageState extends State<CatalogItemPricePage> {
       return 'No saved group price yet.';
     }
 
-    final amount = price[AppProductPriceFields.price]?.toString() ?? '—';
-    final currency =
-        price[AppProductPriceFields.currency]?.toString() ??
-        AppConfig.defaultCurrency;
-    final quantity =
-        price[AppProductPriceFields.priceQuantity]?.toString() ?? '1';
-    final unit = price[AppProductPriceFields.priceUnit]?.toString();
+    final amount =
+        AppValueParsing.textOrNull(price[AppProductPriceFields.price]) ?? '—';
 
-    if (unit == null || unit.trim().isEmpty) {
+    final currency =
+        AppValueParsing.textOrNull(price[AppProductPriceFields.currency]) ??
+        AppConfig.defaultCurrency;
+
+    final quantity =
+        AppValueParsing.textOrNull(
+          price[AppProductPriceFields.priceQuantity],
+        ) ??
+        '1';
+
+    final unit = AppUnitType.valueOrNull(
+      AppValueParsing.textOrNull(price[AppProductPriceFields.priceUnit]),
+    );
+
+    if (unit == null) {
       return '$amount $currency per $quantity';
     }
 
-    return '$amount $currency per $quantity $unit';
+    return '$amount $currency per $quantity ${AppUnitType.shortLabel(unit)}';
   }
 
   @override
@@ -191,7 +219,13 @@ class _CatalogItemPricePageState extends State<CatalogItemPricePage> {
     final defaultUnit = widget.defaultUnit;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Save generic item price')),
+      appBar: AppBar(
+        title: Text(
+          latestPrice == null
+              ? 'Add generic item price'
+              : 'Update generic item price',
+        ),
+      ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -204,7 +238,13 @@ class _CatalogItemPricePageState extends State<CatalogItemPricePage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save_outlined),
-            label: Text(saving ? 'Saving...' : 'Save price'),
+            label: Text(
+              saving
+                  ? 'Saving...'
+                  : latestPrice == null
+                  ? 'Save price'
+                  : 'Update price',
+            ),
           ),
         ),
       ),

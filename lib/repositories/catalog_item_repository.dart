@@ -113,9 +113,9 @@ class CatalogItemRepository {
     final row = {
       AppCatalogItemFields.name: cleanName,
       AppCatalogItemFields.normalizedName: normalizedName,
-      AppCatalogItemFields.category: nullableText(category),
-      AppCatalogItemFields.defaultUnit: nullableText(defaultUnit),
-      AppCatalogItemFields.iconName: nullableText(iconName),
+      AppCatalogItemFields.category: AppValueParsing.textOrNull(category),
+      AppCatalogItemFields.defaultUnit: AppValueParsing.textOrNull(defaultUnit),
+      AppCatalogItemFields.iconName: AppValueParsing.textOrNull(iconName),
       AppCatalogItemFields.createdBy: _client.auth.currentUser?.id,
       AppCatalogItemFields.isGlobal: true,
     };
@@ -168,15 +168,5 @@ class CatalogItemRepository {
         .replaceAll(RegExp(r'\s+'), ' ')
         .replaceAll(RegExp(r'[^a-z0-9áéíóúüñçàèìòùâêîôûäëïöü\s-]'), '')
         .replaceAll(' ', '_');
-  }
-
-  String? nullableText(String? value) {
-    final text = value?.trim();
-
-    if (text == null || text.isEmpty) {
-      return null;
-    }
-
-    return text;
   }
 }

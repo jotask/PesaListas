@@ -3,6 +3,7 @@ import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/meal_plan_fields.dart';
 import 'package:pesalistas/core/recipe_ingredient_fields.dart';
 import 'package:pesalistas/core/shopping_item_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MealPlanRepository {
@@ -183,15 +184,15 @@ class MealPlanRepository {
 
         existingGeneratedKeys.add(key);
 
-        final quantity = doubleOrNull(
+        final quantity = AppValueParsing.doubleOrNull(
           ingredient[AppRecipeIngredientFields.quantity],
         );
 
-        final estimatedUnitPrice = doubleOrNull(
+        final estimatedUnitPrice = AppValueParsing.doubleOrNull(
           ingredient[AppRecipeIngredientFields.estimatedUnitPrice],
         );
 
-        final explicitEstimatedTotalPrice = doubleOrNull(
+        final explicitEstimatedTotalPrice = AppValueParsing.doubleOrNull(
           ingredient[AppRecipeIngredientFields.estimatedTotalPrice],
         );
 
@@ -206,29 +207,29 @@ class MealPlanRepository {
           AppShoppingItemFields.groupId: groupId,
           AppShoppingItemFields.name: name.trim(),
           AppShoppingItemFields.quantity: quantity,
-          AppShoppingItemFields.unit: nullableText(
+          AppShoppingItemFields.unit: AppValueParsing.textOrNull(
             ingredient[AppRecipeIngredientFields.unit],
           ),
           AppShoppingItemFields.sourceRecipeId: recipeId,
           AppShoppingItemFields.sourceMealPlanId: mealPlanId,
           AppShoppingItemFields.sourceRecipeIngredientId: ingredientId,
           AppShoppingItemFields.createdBy: currentUserId,
-          AppShoppingItemFields.barcode: nullableText(
+          AppShoppingItemFields.barcode: AppValueParsing.textOrNull(
             ingredient[AppRecipeIngredientFields.barcode],
           ),
-          AppShoppingItemFields.catalogItemId: nullableText(
+          AppShoppingItemFields.catalogItemId: AppValueParsing.textOrNull(
             ingredient[AppRecipeIngredientFields.catalogItemId],
           ),
-          AppShoppingItemFields.productName: nullableText(
+          AppShoppingItemFields.productName: AppValueParsing.textOrNull(
             ingredient[AppRecipeIngredientFields.productName],
           ),
-          AppShoppingItemFields.productImageUrl: nullableText(
+          AppShoppingItemFields.productImageUrl: AppValueParsing.textOrNull(
             ingredient[AppRecipeIngredientFields.productImageUrl],
           ),
           AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
           AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
           AppShoppingItemFields.priceCurrency:
-              nullableText(
+              AppValueParsing.textOrNull(
                 ingredient[AppRecipeIngredientFields.priceCurrency],
               ) ??
               AppConfig.defaultCurrency,
@@ -287,7 +288,11 @@ class MealPlanRepository {
     }
 
     final mealPlanIds = rows
-        .map((row) => nullableText(row[AppShoppingItemFields.sourceMealPlanId]))
+        .map(
+          (row) => AppValueParsing.textOrNull(
+            row[AppShoppingItemFields.sourceMealPlanId],
+          ),
+        )
         .whereType<String>()
         .toSet()
         .toList();
@@ -322,20 +327,23 @@ class MealPlanRepository {
   }
 
   String? generatedShoppingUniqueKeyFromRow(Map<String, dynamic> row) {
-    final mealPlanId = nullableText(
+    final mealPlanId = AppValueParsing.textOrNull(
       row[AppShoppingItemFields.sourceMealPlanId],
     );
 
-    final recipeId = nullableText(row[AppShoppingItemFields.sourceRecipeId]);
+    final recipeId = AppValueParsing.textOrNull(
+      row[AppShoppingItemFields.sourceRecipeId],
+    );
 
-    final name = nullableText(row[AppShoppingItemFields.name]);
+    final name = AppValueParsing.textOrNull(row[AppShoppingItemFields.name]);
 
     if (mealPlanId == null || recipeId == null || name == null) {
       return null;
     }
 
     final normalizedName = name.trim().toLowerCase();
-    final unit = nullableText(row[AppShoppingItemFields.unit]) ?? '';
+    final unit =
+        AppValueParsing.textOrNull(row[AppShoppingItemFields.unit]) ?? '';
 
     return '$mealPlanId::$recipeId::$normalizedName::$unit';
   }
@@ -353,28 +361,6 @@ class MealPlanRepository {
     final day = value.day.toString().padLeft(2, '0');
 
     return '$year-$month-$day';
-  }
-
-  String? nullableText(dynamic value) {
-    final text = value?.toString().trim();
-
-    if (text == null || text.isEmpty) {
-      return null;
-    }
-
-    return text;
-  }
-
-  double? doubleOrNull(dynamic value) {
-    if (value == null) {
-      return null;
-    }
-
-    if (value is num) {
-      return value.toDouble();
-    }
-
-    return double.tryParse(value.toString().replaceAll(',', '.'));
   }
 
   double? estimatedTotalFromQuantityAndUnitPrice({

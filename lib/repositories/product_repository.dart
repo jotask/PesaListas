@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductRepository {
@@ -72,6 +73,13 @@ class ProductRepository {
     }
 
     return fetchAndCacheProduct(cleanBarcode);
+  }
+
+  Future<void> deleteProductPrice(String priceId) async {
+    await client
+        .from(productPricesTable)
+        .delete()
+        .eq(AppProductPriceFields.id, priceId);
   }
 
   Future<List<Map<String, dynamic>>> getRecentProducts({
@@ -203,7 +211,9 @@ class ProductRepository {
         product['nutriscore_grade'],
         product['nutrition_grades'],
       ]),
-      AppProductFields.novaGroup: intOrNull(product['nova_group']),
+      AppProductFields.novaGroup: AppValueParsing.intOrNull(
+        product['nova_group'],
+      ),
       AppProductFields.ecoscore: firstText([
         product['ecoscore_grade'],
         product['ecoscore_score'],
@@ -226,34 +236,6 @@ class ProductRepository {
     }
 
     return null;
-  }
-
-  String? nullableText(String? value) {
-    final text = value?.trim();
-
-    if (text == null || text.isEmpty) {
-      return null;
-    }
-
-    return text;
-  }
-
-  int? intOrNull(dynamic value) {
-    if (value == null) return null;
-
-    if (value is int) return value;
-
-    if (value is double) return value.round();
-
-    return int.tryParse(value.toString());
-  }
-
-  double? doubleOrNull(dynamic value) {
-    if (value == null) return null;
-
-    if (value is num) return value.toDouble();
-
-    return double.tryParse(value.toString());
   }
 
   Future<List<Map<String, dynamic>>> getPricesForCatalogItem({
@@ -313,9 +295,9 @@ class ProductRepository {
       AppProductPriceFields.price: price,
       AppProductPriceFields.currency: currency,
       AppProductPriceFields.priceQuantity: priceQuantity,
-      AppProductPriceFields.priceUnit: nullableText(priceUnit),
-      AppProductPriceFields.storeName: nullableText(storeName),
-      AppProductPriceFields.note: nullableText(note),
+      AppProductPriceFields.priceUnit: AppValueParsing.textOrNull(priceUnit),
+      AppProductPriceFields.storeName: AppValueParsing.textOrNull(storeName),
+      AppProductPriceFields.note: AppValueParsing.textOrNull(note),
       AppProductPriceFields.observedAt: DateTime.now()
           .toUtc()
           .toIso8601String(),
@@ -363,9 +345,9 @@ class ProductRepository {
       AppProductPriceFields.currency: currency,
       AppProductPriceFields.catalogItemId: null,
       AppProductPriceFields.priceQuantity: priceQuantity,
-      AppProductPriceFields.priceUnit: nullableText(priceUnit),
-      AppProductPriceFields.storeName: nullableText(storeName),
-      AppProductPriceFields.note: nullableText(note),
+      AppProductPriceFields.priceUnit: AppValueParsing.textOrNull(priceUnit),
+      AppProductPriceFields.storeName: AppValueParsing.textOrNull(storeName),
+      AppProductPriceFields.note: AppValueParsing.textOrNull(note),
       AppProductPriceFields.observedAt: DateTime.now()
           .toUtc()
           .toIso8601String(),

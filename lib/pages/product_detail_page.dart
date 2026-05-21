@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/repositories/shopping_repository.dart';
@@ -77,22 +78,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return product[AppProductFields.status] == AppProductStatus.found;
   }
 
-  String? nullableText(dynamic value) {
-    final text = value?.toString().trim();
-
-    if (text == null || text.isEmpty) return null;
-
-    return text;
-  }
-
-  double? doubleOrNull(dynamic value) {
-    if (value == null) return null;
-
-    if (value is num) return value.toDouble();
-
-    return double.tryParse(value.toString().replaceAll(',', '.'));
-  }
-
   Map<String, dynamic>? get latestPrice {
     if (prices.isEmpty) return null;
 
@@ -101,8 +86,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   void prefillShoppingFields() {
     shoppingNameController.text =
-        nullableText(product[AppProductFields.name]) ??
-        nullableText(product[AppProductFields.barcode]) ??
+        AppValueParsing.textOrNull(product[AppProductFields.name]) ??
+        AppValueParsing.textOrNull(product[AppProductFields.barcode]) ??
         '';
 
     if (shoppingQuantityController.text.trim().isEmpty) {
@@ -293,10 +278,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         groupId: groupId,
         name: itemName,
         quantity: quantity,
-        unit: nullableText(shoppingUnitController.text),
-        barcode: nullableText(product[AppProductFields.barcode]),
-        productName: nullableText(product[AppProductFields.name]),
-        productImageUrl: nullableText(product[AppProductFields.imageUrl]),
+        unit: AppValueParsing.textOrNull(shoppingUnitController.text),
+        barcode: AppValueParsing.textOrNull(product[AppProductFields.barcode]),
+        productName: AppValueParsing.textOrNull(product[AppProductFields.name]),
+        productImageUrl: AppValueParsing.textOrNull(
+          product[AppProductFields.imageUrl],
+        ),
         estimatedUnitPrice: estimatedUnitPrice,
         priceCurrency: AppConfig.defaultCurrency,
       );
