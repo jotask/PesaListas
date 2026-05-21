@@ -18,6 +18,12 @@ class GroupListsSection extends StatelessWidget {
   final bool creatingList;
   final VoidCallback onCreateList;
 
+  void onOpenList(BuildContext context, Map<String, dynamic> list) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => ListDetailPage(list: list)));
+  }
+
   @override
   Widget build(BuildContext context) {
     if (loading) {
@@ -34,18 +40,33 @@ class GroupListsSection extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: [
-        for (final list in lists)
-          ListCard(
-            list: list,
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => ListDetailPage(list: list)),
-              );
-            },
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+
+        final crossAxisCount = width >= 1200
+            ? 4
+            : width >= 760
+            ? 3
+            : 2;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: lists.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: width < 380 ? 0.88 : 0.95,
           ),
-      ],
+          itemBuilder: (context, index) {
+            final list = lists[index];
+
+            return ListCard(list: list, onTap: () => onOpenList(context, list));
+          },
+        );
+      },
     );
   }
 }
