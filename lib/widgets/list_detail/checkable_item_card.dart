@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
+import 'package:pesalistas/widgets/common/app_state_pill.dart';
 
 class CheckableItemCard extends StatelessWidget {
   const CheckableItemCard({
@@ -108,10 +109,7 @@ class CheckableItemCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              _ShoppingStatePill(
-                                isDone: isDone,
-                                label: stateLabel,
-                              ),
+                              AppStatePill(label: stateLabel, active: isDone),
                             ],
                           ),
                           SizedBox(height: 4),
@@ -158,43 +156,6 @@ class CheckableItemCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ShoppingStatePill extends StatelessWidget {
-  const _ShoppingStatePill({required this.isDone, required this.label});
-
-  final bool isDone;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final backgroundColor = isDone
-        ? theme.colorScheme.secondaryContainer
-        : theme.colorScheme.primaryContainer;
-
-    final foregroundColor = isDone
-        ? theme.colorScheme.onSecondaryContainer
-        : theme.colorScheme.onPrimaryContainer;
-
-    return Container(
-      margin: const EdgeInsets.only(left: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: foregroundColor,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
         ),
       ),
     );

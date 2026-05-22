@@ -3,6 +3,7 @@ import 'package:pesalistas/core/fields/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/app_list_type_pill.dart';
 
 class ListCard extends StatelessWidget {
   const ListCard({super.key, required this.list, required this.onTap});
@@ -78,50 +79,10 @@ class ListCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              _ListTypePill(icon: config.icon, label: config.label(context)),
+              AppListTypePill(icon: config.icon, label: config.label(context)),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ListTypePill extends StatelessWidget {
-  const _ListTypePill({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 140),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

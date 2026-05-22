@@ -5,7 +5,9 @@ import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/core/fields/vote_summary_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';
+import 'package:pesalistas/widgets/common/app_score_pill.dart';
 
 class BookItemCard extends StatelessWidget {
   const BookItemCard({
@@ -113,16 +115,16 @@ class BookItemCard extends StatelessWidget {
 
     final meta = <Widget>[
       if (authors != null)
-        _BookMetaPill(icon: Icons.person_outline, text: authors!),
+        AppMetaPill(icon: Icons.person_outline, label: authors!),
       if (firstPublishYear != null)
-        _BookMetaPill(
+        AppMetaPill(
           icon: Icons.calendar_today_outlined,
-          text: firstPublishYear.toString(),
+          label: firstPublishYear.toString(),
         ),
       if (editionCount != null)
-        _BookMetaPill(
+        AppMetaPill(
           icon: Icons.library_books_outlined,
-          text: '$editionCount edition(s)',
+          label: '$editionCount edition(s)',
         ),
     ];
 
@@ -164,9 +166,10 @@ class BookItemCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            _BookScorePill(
-                              averageText: averageText,
-                              hasVotes: hasVotes,
+                            AppScorePill(
+                              scoreText: averageText,
+                              hasScore: hasVotes,
+                              icon: Icons.star_outline,
                             ),
                           ],
                         ),
@@ -238,90 +241,6 @@ class BookItemCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _BookScorePill extends StatelessWidget {
-  const _BookScorePill({required this.averageText, required this.hasVotes});
-
-  final String averageText;
-  final bool hasVotes;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-      decoration: BoxDecoration(
-        color: hasVotes
-            ? theme.colorScheme.primaryContainer
-            : theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.star_outline,
-            size: 15,
-            color: hasVotes
-                ? theme.colorScheme.onPrimaryContainer
-                : theme.colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            averageText,
-            style: TextStyle(
-              color: hasVotes
-                  ? theme.colorScheme.onPrimaryContainer
-                  : theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BookMetaPill extends StatelessWidget {
-  const _BookMetaPill({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 180),
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

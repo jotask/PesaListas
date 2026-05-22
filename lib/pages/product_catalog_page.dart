@@ -5,6 +5,7 @@ import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/generic_catalog_page.dart';
 import 'package:pesalistas/pages/product_detail_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductCatalogPage extends StatefulWidget {
@@ -428,16 +429,13 @@ class _ProductCatalogCard extends StatelessWidget {
                       spacing: 6,
                       runSpacing: 6,
                       children: [
-                        _ProductCatalogPill(
+                        AppMetaPill(
                           icon: Icons.qr_code_2_outlined,
                           label: barcode,
                         ),
-                        _ProductCatalogPill(
-                          icon: Icons.info_outline,
-                          label: status,
-                        ),
+                        AppMetaPill(icon: Icons.info_outline, label: status),
                         if (quantity != '—')
-                          _ProductCatalogPill(
+                          AppMetaPill(
                             icon: Icons.scale_outlined,
                             label: quantity,
                           ),
@@ -502,43 +500,6 @@ class _ProductCatalogImage extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _ProductCatalogPill extends StatelessWidget {
-  const _ProductCatalogPill({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

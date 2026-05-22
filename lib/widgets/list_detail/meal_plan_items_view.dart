@@ -458,24 +458,24 @@ class _MealPlanSummaryCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _SummaryPill(
+                  AppMetaPill(
                     label: context.l10n.thisWeekSummary(thisWeekCount),
                     icon: Icons.today_outlined,
                   ),
-                  _SummaryPill(
+                  AppMetaPill(
                     label: context.l10n.upcomingSummary(upcomingCount),
                     icon: Icons.event_available_outlined,
                   ),
-                  _SummaryPill(
+                  AppMetaPill(
                     label: context.l10n.withRecipesSummary(recipeMealCount),
                     icon: Icons.restaurant_menu,
                   ),
-                  _SummaryPill(
+                  AppMetaPill(
                     label: context.l10n.totalCountSummary(totalCount),
                     icon: Icons.list_alt_outlined,
                   ),
                   if (hasEstimatedCosts)
-                    _SummaryPill(
+                    AppMetaPill(
                       label: context.l10n.estimatedAmount(
                         totalEstimatedCost.toStringAsFixed(2),
                         currency,
@@ -483,7 +483,7 @@ class _MealPlanSummaryCard extends StatelessWidget {
                       icon: Icons.euro_outlined,
                     ),
                   if (pastCount > 0)
-                    _SummaryPill(
+                    AppMetaPill(
                       label: context.l10n.pastSummary(pastCount),
                       icon: Icons.history,
                     ),
@@ -492,41 +492,6 @@ class _MealPlanSummaryCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SummaryPill extends StatelessWidget {
-  const _SummaryPill({required this.label, required this.icon});
-
-  final String label;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -908,39 +873,15 @@ class _MealSourcePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final backgroundColor = hasRecipe
-        ? theme.colorScheme.primaryContainer
-        : theme.colorScheme.surfaceContainerHighest;
-
-    final foregroundColor = hasRecipe
-        ? theme.colorScheme.onPrimaryContainer
-        : theme.colorScheme.onSurfaceVariant;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            hasRecipe ? Icons.restaurant_menu : Icons.edit_note_outlined,
-            size: 14,
-            color: foregroundColor,
-          ),
-          const SizedBox(width: 5),
-          Text(
-            hasRecipe ? context.l10n.recipe : context.l10n.custom,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: foregroundColor,
-            ),
-          ),
-        ],
-      ),
+    return AppMetaPill(
+      icon: hasRecipe ? Icons.restaurant_menu_outlined : Icons.edit_note,
+      label: hasRecipe ? 'Recipe' : 'Manual meal',
+      backgroundColor: hasRecipe
+          ? theme.colorScheme.primaryContainer
+          : theme.colorScheme.surfaceContainerHighest,
+      foregroundColor: hasRecipe
+          ? theme.colorScheme.onPrimaryContainer
+          : theme.colorScheme.onSurfaceVariant,
     );
   }
 }
@@ -988,31 +929,11 @@ class _MealTypePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            config.icon,
-            size: 14,
-            color: theme.colorScheme.onSecondaryContainer,
-          ),
-          const SizedBox(width: 5),
-          Text(
-            config.label(context),
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSecondaryContainer,
-            ),
-          ),
-        ],
-      ),
+    return AppMetaPill(
+      icon: config.icon,
+      label: config.label(context),
+      backgroundColor: theme.colorScheme.secondaryContainer,
+      foregroundColor: theme.colorScheme.onSecondaryContainer,
     );
   }
 }
@@ -1027,31 +948,11 @@ class _MealEstimatedCostPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.tertiaryContainer,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.euro_outlined,
-            size: 14,
-            color: theme.colorScheme.onTertiaryContainer,
-          ),
-          const SizedBox(width: 5),
-          Text(
-            context.l10n.estimatedAmount(amount.toStringAsFixed(2), currency),
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onTertiaryContainer,
-            ),
-          ),
-        ],
-      ),
+    return AppMetaPill(
+      icon: Icons.payments_outlined,
+      label: '${amount.toStringAsFixed(2)} $currency',
+      backgroundColor: theme.colorScheme.tertiaryContainer,
+      foregroundColor: theme.colorScheme.onTertiaryContainer,
     );
   }
 }

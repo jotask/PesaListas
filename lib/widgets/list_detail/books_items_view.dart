@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/book_reading_status.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/list_detail/book_item_card.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 
@@ -182,66 +183,31 @@ class _BooksSummaryCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _BookSummaryPill(
+                  AppMetaPill(
                     icon: Icons.bookmark_border_outlined,
-                    text: '$wishlistCount wishlist',
+                    label: '$wishlistCount wishlist',
                   ),
-                  _BookSummaryPill(
+                  AppMetaPill(
                     icon: Icons.menu_book_outlined,
-                    text: '$toReadCount to read',
+                    label: '$toReadCount to read',
                   ),
-                  _BookSummaryPill(
+                  AppMetaPill(
                     icon: Icons.auto_stories_outlined,
-                    text: '$readingCount reading',
+                    label: '$readingCount reading',
                   ),
-                  _BookSummaryPill(
+                  AppMetaPill(
                     icon: Icons.done_all_outlined,
-                    text: '$doneCount done',
+                    label: '$doneCount done',
                   ),
-                  _BookSummaryPill(
+                  AppMetaPill(
                     icon: Icons.list_alt_outlined,
-                    text: '$totalCount total',
+                    label: '$totalCount total',
                   ),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _BookSummaryPill extends StatelessWidget {
-  const _BookSummaryPill({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
-          Text(
-            text,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }

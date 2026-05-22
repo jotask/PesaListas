@@ -5,6 +5,7 @@ import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ArchivedListsPage extends StatefulWidget {
@@ -306,12 +307,12 @@ class _ArchivedListCard extends StatelessWidget {
                     runSpacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      _ArchivedListPill(
+                      AppMetaPill(
                         icon: listConfig.icon,
                         label: listConfig.label(context),
                       ),
                       if (archivedDate != null)
-                        _ArchivedListPill(
+                        AppMetaPill(
                           icon: Icons.archive_outlined,
                           label: archivedDate!,
                         ),
@@ -340,41 +341,6 @@ class _ArchivedListCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ArchivedListPill extends StatelessWidget {
-  const _ArchivedListPill({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -356,21 +356,14 @@ class _DuePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(left: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: foregroundColor,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+    return AppMetaPill(
+      label: label,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      horizontalPadding: 8,
+      verticalPadding: 4,
     );
   }
 }

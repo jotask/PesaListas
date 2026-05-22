@@ -4,6 +4,7 @@ import 'package:pesalistas/core/fields/group_fields.dart';
 import 'package:pesalistas/core/fields/member_fields.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/pages/group_detail_page.dart';
+import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/common/empty_info_card.dart';
 
 class GroupGridSection extends StatelessWidget {
@@ -413,7 +414,7 @@ class _GroupTypePill extends StatelessWidget {
   const _GroupTypePill({
     required this.icon,
     required this.label,
-    required this.highlighted,
+    this.highlighted = false,
   });
 
   final IconData icon;
@@ -424,43 +425,17 @@ class _GroupTypePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final backgroundColor = highlighted
-        ? theme.colorScheme.primaryContainer
-        : theme.colorScheme.surfaceContainerHighest;
-
-    final foregroundColor = highlighted
-        ? theme.colorScheme.onPrimaryContainer
-        : theme.colorScheme.onSurfaceVariant;
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 96),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 13, color: foregroundColor),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                softWrap: false,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: foregroundColor,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return AppMetaPill(
+      icon: icon,
+      label: label,
+      filled: highlighted,
+      backgroundColor: highlighted
+          ? theme.colorScheme.primaryContainer
+          : theme.colorScheme.surfaceContainerHighest,
+      foregroundColor: highlighted
+          ? theme.colorScheme.onPrimaryContainer
+          : theme.colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w900,
     );
   }
 }
