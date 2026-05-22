@@ -11,6 +11,7 @@ import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/delete_account_page.dart';
 import 'package:pesalistas/pages/diagnostics_page.dart';
 import 'package:pesalistas/pages/edit_profile_page.dart';
+import 'package:pesalistas/pages/notification_preferences_page.dart';
 import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/pages/product_scanner_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
@@ -389,6 +390,15 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> openNotificationPreferences() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/notification_preferences'),
+        builder: (_) => const NotificationPreferencesPage(),
+      ),
+    );
+  }
+
   Future<void> syncProfile() async {
     if (syncingProfile) return;
 
@@ -555,7 +565,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       onOpenProductCatalog: openProductCatalog,
                     ),
                     const SizedBox(height: 16),
-                    const _NotificationsSection(),
+                    _NotificationsSection(
+                      onOpenNotificationPreferences:
+                          openNotificationPreferences,
+                    ),
                     const SizedBox(height: 16),
                     _AboutSection(
                       packageInfoFuture: packageInfoFuture,
@@ -760,7 +773,9 @@ class _AboutSection extends StatelessWidget {
 }
 
 class _NotificationsSection extends StatelessWidget {
-  const _NotificationsSection();
+  const _NotificationsSection({required this.onOpenNotificationPreferences});
+
+  final VoidCallback onOpenNotificationPreferences;
 
   @override
   Widget build(BuildContext context) {
@@ -823,6 +838,16 @@ class _NotificationsSection extends StatelessWidget {
               onChanged: enabled
                   ? AppNotificationController.setShoppingReminders
                   : null,
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.tune_outlined),
+              title: const Text('Notification preferences'),
+              subtitle: const Text(
+                'Choose which server-side push notifications you want to receive.',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: onOpenNotificationPreferences,
             ),
             const Divider(height: 1),
             ListTile(
