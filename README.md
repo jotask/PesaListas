@@ -1,5 +1,7 @@
 # PesaListas
 
+[![Flutter CI](https://github.com/acachitoro/pesalistas/actions/workflows/flutter.yml/badge.svg?branch=main)](https://github.com/acachitoro/pesalistas/actions/workflows/flutter.yml)
+
 PesaListas is a shared household planning app built with Flutter and Supabase. It helps people organize groups, lists, chores, tasks, recipes, meal plans, shopping, ideas, movies, and activities in one shared space.
 
 The project is designed around collaborative living: families, couples, roommates, and small groups can plan together, vote on ideas, manage recurring work, and keep shared household information organized.
