@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
+import 'package:pesalistas/core/app_analytics.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/controllers/app_notification_controller.dart';
+import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/item_assignment_scope.dart';
-import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pesalistas/core/app_analytics.dart';
 
 class ItemRepository {
   ItemRepository(this._client);
@@ -51,6 +51,7 @@ class ItemRepository {
 
   Future<void> deleteItem(String itemId) async {
     await _client.from(AppTables.items).delete().eq(AppItemFields.id, itemId);
+
     await AppNotificationController.cancelItemReminders(itemId);
     await AppAnalytics.instance.logItemDeleted();
   }
@@ -168,7 +169,7 @@ class ItemRepository {
     bool updateChoreFields = false,
     String? recurrenceType,
     int? recurrenceInterval,
-    String? movieImdbId,
+    int? movieTmdbId,
     bool updateMovieFields = false,
     String? bookOpenLibraryKey,
     bool updateBookFields = false,
@@ -206,9 +207,7 @@ class ItemRepository {
     }
 
     if (updateMovieFields) {
-      values[AppItemFields.movieImdbId] = AppValueParsing.textOrNull(
-        movieImdbId,
-      );
+      values[AppItemFields.movieTmdbId] = movieTmdbId;
     }
 
     if (updateBookFields) {
@@ -350,7 +349,7 @@ class ItemRepository {
     String? recurrenceType,
     int? recurrenceInterval,
     DateTime? nextDueAt,
-    String? movieImdbId,
+    int? movieTmdbId,
     String? bookOpenLibraryKey,
     String assignmentScope = AppItemAssignmentScopes.none,
     List<String> assigneeUserIds = const [],
@@ -365,8 +364,7 @@ class ItemRepository {
           AppItemFields.description: description,
           AppItemFields.priority: priority,
           AppItemFields.status: status ?? AppItemStatus.open,
-
-          AppItemFields.movieImdbId: AppValueParsing.textOrNull(movieImdbId),
+          AppItemFields.movieTmdbId: movieTmdbId,
           AppItemFields.bookOpenLibraryKey: AppValueParsing.textOrNull(
             bookOpenLibraryKey,
           ),
@@ -400,7 +398,7 @@ class ItemRepository {
       assignmentScope: normalizedScope,
       hasDeadline: deadlineAt != null,
       isRecurring: recurrenceType != null && recurrenceType.trim().isNotEmpty,
-      hasMovie: movieImdbId != null && movieImdbId.trim().isNotEmpty,
+      hasMovie: movieTmdbId != null,
     );
 
     await AppNotificationController.scheduleTaskDeadlineReminders(

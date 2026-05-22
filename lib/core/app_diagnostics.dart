@@ -54,7 +54,7 @@ class AppDiagnostics {
     items.add(await _checkFirebaseCrashlytics());
     items.add(_checkSupabaseAuthSession());
     items.add(await _checkSupabaseDatabase());
-    items.add(await _checkOmdbEdgeFunction());
+    items.add(await _checkTmdbEdgeFunction());
     items.add(await _checkOpenFoodFactsEdgeFunction());
     items.add(await _checkAccountDeletionDryRun());
 
@@ -248,49 +248,13 @@ class AppDiagnostics {
     }
   }
 
-  static Future<DiagnosticItem> _checkOmdbEdgeFunction() async {
-    try {
-      final response = await Supabase.instance.client.functions.invoke(
-        'omdb-search',
-        body: {'query': 'Matrix'},
-      );
-
-      if (response.status < 200 || response.status >= 300) {
-        return DiagnosticItem(
-          label: 'OMDb Edge Function',
-          status: DiagnosticStatus.error,
-          message: 'HTTP ${response.status}',
-          details: _safeDataPreview(response.data),
-        );
-      }
-
-      final data = _asMap(response.data);
-      final omdbResponse = data['Response']?.toString();
-      final search = data['Search'];
-
-      if (omdbResponse == 'True' && search is List && search.isNotEmpty) {
-        return const DiagnosticItem(
-          label: 'OMDb Edge Function',
-          status: DiagnosticStatus.success,
-          message: 'Working',
-          details: 'Search test returned movie results.',
-        );
-      }
-
-      return DiagnosticItem(
-        label: 'OMDb Edge Function',
-        status: DiagnosticStatus.warning,
-        message: 'Unexpected response',
-        details: _safeDataPreview(data),
-      );
-    } catch (error) {
-      return DiagnosticItem(
-        label: 'OMDb Edge Function',
-        status: DiagnosticStatus.error,
-        message: 'Failed',
-        details: error.toString(),
-      );
-    }
+  static Future<DiagnosticItem> _checkTmdbEdgeFunction() async {
+    return DiagnosticItem(
+      label: 'TMDb Edge Function',
+      status: DiagnosticStatus.warning,
+      message: 'TMDb diagnostic check not implemented yet.',
+      details: 'The app uses TMDb, but this diagnostic check is still pending.',
+    );
   }
 
   static Future<DiagnosticItem> _checkOpenFoodFactsEdgeFunction() async {

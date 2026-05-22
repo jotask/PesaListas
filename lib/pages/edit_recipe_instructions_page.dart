@@ -72,10 +72,6 @@ class _EditRecipeInstructionsPageState
 
   void reorderStep(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
-
       final controller = stepControllers.removeAt(oldIndex);
       stepControllers.insert(newIndex, controller);
     });
@@ -128,7 +124,7 @@ class _EditRecipeInstructionsPageState
                   physics: const NeverScrollableScrollPhysics(),
                   buildDefaultDragHandles: false,
                   itemCount: stepControllers.length,
-                  onReorder: reorderStep,
+                  onReorderItem: reorderStep,
                   itemBuilder: (context, index) {
                     final controller = stepControllers[index];
 

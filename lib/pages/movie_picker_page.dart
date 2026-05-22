@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
-import 'package:pesalistas/repositories/omdb_repository.dart';
+import 'package:pesalistas/core/value_parsing.dart';
+import 'package:pesalistas/repositories/tmdb_repository.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,7 +16,7 @@ class MoviePickerPage extends StatefulWidget {
 }
 
 class _MoviePickerPageState extends State<MoviePickerPage> {
-  late final OmdbRepository omdbRepository;
+  late final TmdbRepository tmdbRepository;
   late final TextEditingController searchController;
 
   bool searching = false;
@@ -27,7 +28,7 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
   void initState() {
     super.initState();
 
-    omdbRepository = OmdbRepository(Supabase.instance.client);
+    tmdbRepository = TmdbRepository(Supabase.instance.client);
     searchController = TextEditingController(text: widget.initialQuery ?? '');
 
     final initialQuery = widget.initialQuery?.trim();
@@ -59,19 +60,15 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
     });
 
     try {
-      final movies = await omdbRepository.searchMovies(query);
+      final movies = await tmdbRepository.searchMovies(query);
 
       if (!mounted) return;
 
-      setState(() {
-        results = movies;
-      });
+      setState(() => results = movies);
     } catch (error) {
       if (!mounted) return;
 
-      setState(() {
-        errorMessage = error.toString();
-      });
+      setState(() => errorMessage = error.toString());
     } finally {
       if (mounted) {
         setState(() => searching = false);
@@ -82,10 +79,12 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
   Future<void> selectMovie(Map<String, dynamic> moviePreview) async {
     if (selecting) return;
 
-    final imdbId = moviePreview[AppMovieFields.imdbId]?.toString();
+    final tmdbId = AppValueParsing.intOrNull(
+      moviePreview[AppMovieFields.tmdbId],
+    );
 
-    if (imdbId == null || imdbId.trim().isEmpty) {
-      setState(() => errorMessage = 'This movie result has no IMDb id.');
+    if (tmdbId == null) {
+      setState(() => errorMessage = 'This movie result has no TMDb id.');
       return;
     }
 
@@ -95,10 +94,7 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
     });
 
     try {
-      final cachedMovie = await omdbRepository.fetchAndCacheMovieByImdbId(
-        imdbId,
-        forceRefresh: false,
-      );
+      final cachedMovie = await tmdbRepository.cacheMovie(moviePreview);
 
       if (!mounted) return;
 
@@ -106,9 +102,7 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
     } catch (error) {
       if (!mounted) return;
 
-      setState(() {
-        errorMessage = error.toString();
-      });
+      setState(() => errorMessage = error.toString());
     } finally {
       if (mounted) {
         setState(() => selecting = false);
@@ -135,7 +129,7 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _MoviePickerHeaderCard(),
+            const _MoviePickerHeaderCard(),
             const SizedBox(height: 12),
             TextField(
               controller: searchController,
@@ -161,7 +155,7 @@ class _MoviePickerPageState extends State<MoviePickerPage> {
               const SizedBox(height: 16),
               const AppMessageCard(
                 icon: Icons.download_done_outlined,
-                message: 'Loading movie details and saving cache...',
+                message: 'Saving TMDb movie cache...',
               ),
             ],
             if (errorMessage != null) ...[
@@ -227,7 +221,7 @@ class _MoviePickerHeaderCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Search OMDb and save the movie details in your cache.',
+                    'Search TMDb using your app language and save localized movie details.',
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],
@@ -261,17 +255,36 @@ class _MovieSearchResultCard extends StatelessWidget {
     return result;
   }
 
-  String get posterUrl {
-    return text(movie[AppMovieFields.posterUrl], fallback: '');
+  Map<String, dynamic> get localization {
+    final value = movie['localization'];
+
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+
+    return const {};
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final title = text(
+      localization[AppMovieFields.title],
+      fallback: text(movie[AppMovieFields.originalTitle], fallback: 'Unknown'),
+    );
 
-    final title = text(movie[AppMovieFields.title], fallback: 'Unknown movie');
-    final year = text(movie[AppMovieFields.year]);
-    final type = text(movie[AppMovieFields.type]);
+    final year = text(movie[AppMovieFields.releaseYear]);
+    final overview = text(localization[AppMovieFields.overview], fallback: '');
+
+    final posterUrl = text(
+      localization[AppMovieFields.posterUrl],
+      fallback: '',
+    );
+
+    final tmdbId = text(movie[AppMovieFields.tmdbId]);
 
     return Card(
       child: InkWell(
@@ -280,12 +293,13 @@ class _MovieSearchResultCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AppNetworkImageThumbnail(
                 imageUrl: posterUrl,
-                width: 54,
-                height: 78,
-                borderRadius: 10,
+                width: 58,
+                height: 86,
+                borderRadius: 12,
                 fallbackIcon: Icons.movie_outlined,
               ),
               const SizedBox(width: 12),
@@ -301,16 +315,18 @@ class _MovieSearchResultCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text('$year • $type', style: theme.textTheme.bodyMedium),
-                    const SizedBox(height: 6),
-                    Text(
-                      text(movie[AppMovieFields.imdbId]),
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text(year == '—' ? 'TMDb $tmdbId' : '$year • TMDb $tmdbId'),
+                    if (overview.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        overview,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
               const Icon(Icons.chevron_right),
             ],
           ),

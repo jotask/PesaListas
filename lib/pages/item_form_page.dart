@@ -27,7 +27,7 @@ class ItemFormPageResult {
     this.recurrenceType,
     this.recurrenceInterval,
     this.nextDueAt,
-    this.movieImdbId,
+    this.movieTmdbId,
     this.bookOpenLibraryKey,
     this.assignmentScope = AppItemAssignmentScopes.none,
     this.assigneeUserIds = const [],
@@ -38,7 +38,7 @@ class ItemFormPageResult {
   final int priority;
   final DateTime? deadlineAt;
   final String? recurrenceType;
-  final String? movieImdbId;
+  final int? movieTmdbId;
   final String? bookOpenLibraryKey;
   final int? recurrenceInterval;
   final DateTime? nextDueAt;
@@ -71,7 +71,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
   late String selectedAssignmentScope;
   late Set<String> selectedAssigneeUserIds;
 
-  String? selectedMovieImdbId;
+  int? selectedMovieTmdbId;
   Map<String, dynamic>? selectedMovie;
   String? movieLinkMessage;
 
@@ -247,11 +247,9 @@ class _ItemFormPageState extends State<ItemFormPage> {
     recurrenceInterval =
         AppValueParsing.intOrNull(item?[AppItemFields.recurrenceInterval]) ?? 2;
 
-    selectedMovieImdbId = widget.item?[AppItemFields.movieImdbId]?.toString();
-
-    if (selectedMovieImdbId != null && selectedMovieImdbId!.trim().isEmpty) {
-      selectedMovieImdbId = null;
-    }
+    selectedMovieTmdbId = AppValueParsing.intOrNull(
+      widget.item?[AppItemFields.movieTmdbId],
+    );
 
     final itemMovie = widget.item?[AppItemFields.movie];
 
@@ -368,7 +366,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
         ? selectedAssigneeUserIds.toList()
         : <String>[];
 
-    final movieImdbId = isMovieList ? selectedMovieImdbId : null;
+    final movieTmdbId = isMovieList ? selectedMovieTmdbId : null;
     final bookOpenLibraryKey = isBookList ? selectedBookOpenLibraryKey : null;
 
     Navigator.of(context).pop(
@@ -378,7 +376,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
         priority: priority,
         deadlineAt: deadlineAt,
         recurrenceType: recurrenceType,
-        movieImdbId: movieImdbId,
+        movieTmdbId: movieTmdbId,
         bookOpenLibraryKey: bookOpenLibraryKey,
         recurrenceInterval: usesCustomInterval ? recurrenceInterval : null,
         nextDueAt: nextDueAt,
@@ -402,18 +400,18 @@ class _ItemFormPageState extends State<ItemFormPage> {
 
     if (movie == null) return;
 
-    final imdbId = movie[AppMovieFields.imdbId]?.toString();
+    final tmdbId = AppValueParsing.intOrNull(movie[AppMovieFields.tmdbId]);
     final title = movie[AppMovieFields.title]?.toString();
 
-    if (imdbId == null || imdbId.trim().isEmpty) {
+    if (tmdbId == null) {
       setState(() {
-        movieLinkMessage = 'Selected movie has no IMDb id.';
+        movieLinkMessage = 'Selected movie has no TMDb id.';
       });
       return;
     }
 
     setState(() {
-      selectedMovieImdbId = imdbId.trim();
+      selectedMovieTmdbId = tmdbId;
       selectedMovie = movie;
 
       if (title != null && title.trim().isNotEmpty) {
@@ -427,7 +425,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
 
   void unlinkMovie() {
     setState(() {
-      selectedMovieImdbId = null;
+      selectedMovieTmdbId = null;
       selectedMovie = null;
       movieLinkMessage = 'Movie link removed.';
       validationMessage = null;
@@ -580,10 +578,10 @@ class _ItemFormPageState extends State<ItemFormPage> {
               const SizedBox(height: 12),
               _LinkedMovieActionsCard(
                 movie: selectedMovie,
-                movieImdbId: selectedMovieImdbId,
                 message: movieLinkMessage,
                 onFindMovie: findMovie,
-                onUnlinkMovie: selectedMovieImdbId == null ? null : unlinkMovie,
+                movieTmdbId: selectedMovieTmdbId,
+                onUnlinkMovie: selectedMovieTmdbId == null ? null : unlinkMovie,
               ),
             ],
             if (isBookList) ...[
@@ -1033,20 +1031,20 @@ class _AssignmentMemberTile extends StatelessWidget {
 class _LinkedMovieActionsCard extends StatelessWidget {
   const _LinkedMovieActionsCard({
     required this.movie,
-    required this.movieImdbId,
+    required this.movieTmdbId,
     required this.message,
     required this.onFindMovie,
     required this.onUnlinkMovie,
   });
 
   final Map<String, dynamic>? movie;
-  final String? movieImdbId;
+  final int? movieTmdbId;
   final String? message;
   final VoidCallback onFindMovie;
   final VoidCallback? onUnlinkMovie;
 
   bool get hasMovie {
-    return movieImdbId != null && movieImdbId!.trim().isNotEmpty;
+    return movieTmdbId != null;
   }
 
   String text(dynamic value, {String fallback = '—'}) {
@@ -1062,7 +1060,7 @@ class _LinkedMovieActionsCard extends StatelessWidget {
   String get title {
     return text(
       movie?[AppMovieFields.title],
-      fallback: movieImdbId == null ? 'Linked movie' : 'Linked movie details',
+      fallback: movieTmdbId == null ? 'Linked movie' : 'Linked movie details',
     );
   }
 
@@ -1109,7 +1107,9 @@ class _LinkedMovieActionsCard extends StatelessWidget {
                       if (hasMovie) ...[
                         const SizedBox(height: 4),
                         Text(
-                          year == '—' ? movieImdbId! : '$year • $movieImdbId',
+                          year == '—'
+                              ? 'TMDb $movieTmdbId'
+                              : '$year • TMDb $movieTmdbId',
                           style: theme.textTheme.bodySmall,
                         ),
                       ],
@@ -1117,9 +1117,9 @@ class _LinkedMovieActionsCard extends StatelessWidget {
                       Text(
                         hasMovie
                             ? movie == null
-                                  ? 'This item has an IMDb link, but cached details were not loaded yet.'
-                                  : 'This list item is linked to cached OMDb movie details.'
-                            : 'Search OMDb and link this item to a movie.',
+                                  ? 'This item has a TMDb link, but cached details were not loaded yet.'
+                                  : 'This list item is linked to cached TMDb movie details.'
+                            : 'Search TMDb and link this item to a movie.',
                         style: theme.textTheme.bodySmall,
                       ),
                     ],

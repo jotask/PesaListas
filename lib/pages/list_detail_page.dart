@@ -38,10 +38,10 @@ import 'package:pesalistas/pages/shopping_item_form_page.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/meal_plan_repository.dart';
-import 'package:pesalistas/repositories/omdb_repository.dart';
 import 'package:pesalistas/repositories/recipe_ingredient_repository.dart';
 import 'package:pesalistas/repositories/recipe_repository.dart';
 import 'package:pesalistas/repositories/shopping_repository.dart';
+import 'package:pesalistas/repositories/tmdb_repository.dart';
 import 'package:pesalistas/repositories/vote_repository.dart';
 import 'package:pesalistas/widgets/list_detail/list_detail_header.dart';
 import 'package:pesalistas/widgets/list_detail/list_items_section.dart';
@@ -66,7 +66,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   late final MealPlanRepository mealPlanRepository;
   late final ShoppingRepository shoppingRepository;
   late final ListRepository listRepository;
-  late final OmdbRepository omdbRepository;
+  late final TmdbRepository tmdbRepository;
   late final BookRepository bookRepository;
 
   bool loadingItems = true;
@@ -174,7 +174,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
     shoppingRepository = ShoppingRepository(client);
     listRepository = ListRepository(client);
 
-    omdbRepository = OmdbRepository(client);
+    tmdbRepository = TmdbRepository(client);
     bookRepository = BookRepository(client);
 
     loadItems();
@@ -233,25 +233,25 @@ class _ListDetailPageState extends State<ListDetailPage> {
       return rawItems;
     }
 
-    final movies = await omdbRepository.getCachedMoviesForItems(rawItems);
+    final movies = await tmdbRepository.getCachedMoviesForItems(rawItems);
 
     if (movies.isEmpty) {
       return rawItems;
     }
 
-    final moviesByImdbId = {
+    final moviesByTmdbId = {
       for (final movie in movies)
-        movie[AppMovieFields.imdbId].toString(): movie,
+        AppValueParsing.intOrNull(movie[AppMovieFields.tmdbId]): movie,
     };
 
     return rawItems.map((item) {
-      final imdbId = item[AppItemFields.movieImdbId]?.toString();
+      final tmdbId = AppValueParsing.intOrNull(item[AppItemFields.movieTmdbId]);
 
-      if (imdbId == null || imdbId.isEmpty) {
+      if (tmdbId == null) {
         return item;
       }
 
-      final movie = moviesByImdbId[imdbId];
+      final movie = moviesByTmdbId[tmdbId];
 
       if (movie == null) {
         return item;
@@ -844,7 +844,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         recurrenceType: result.recurrenceType,
         recurrenceInterval: result.recurrenceInterval,
         nextDueAt: result.nextDueAt,
-        movieImdbId: result.movieImdbId,
+        movieTmdbId: result.movieTmdbId,
         bookOpenLibraryKey: result.bookOpenLibraryKey,
         assignmentScope: result.assignmentScope,
         assigneeUserIds: result.assigneeUserIds,
@@ -905,7 +905,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         final userId = assignee[AppItemAssigneeFields.userId]?.toString();
         final member = userId == null ? null : membersByUserId[userId];
 
-        return {...assignee, AppMemberFields.groupMembers: ?member};
+        return {...assignee, AppMemberFields.groupMembers: member};
       }).toList();
 
       return {...item, AppItemFields.assignees: enrichedAssignees};
@@ -1104,7 +1104,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         deadlineAt: result.deadlineAt,
         updateChoreFields: isChoreList,
         updateMovieFields: listType == AppListTypes.movies.value,
-        movieImdbId: result.movieImdbId,
+        movieTmdbId: result.movieTmdbId,
         updateBookFields: isBookList,
         bookOpenLibraryKey: result.bookOpenLibraryKey,
         recurrenceType: result.recurrenceType,

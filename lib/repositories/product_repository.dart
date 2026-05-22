@@ -1,10 +1,11 @@
+import 'package:pesalistas/core/app_analytics.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_language.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
+import 'package:pesalistas/core/fields/product_localization_fields.dart';
 import 'package:pesalistas/core/fields/product_price_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pesalistas/core/app_analytics.dart';
 
 class ProductRepository {
   ProductRepository(this.client, {this.useStaging = false});
@@ -14,15 +15,43 @@ class ProductRepository {
 
   static const productsTable = 'products';
   static const productPricesTable = 'product_prices';
+  static const productLocalizationsTable = 'product_localizations';
+
+  String get currentLanguageCode {
+    return AppLanguage.openFoodFactsLanguageCode;
+  }
+
+  String get currentCountryCode {
+    return AppLanguage.openFoodFactsCountryCode;
+  }
 
   Future<Map<String, dynamic>?> getCachedProduct(String barcode) async {
-    final result = await client
+    final cleanBarcode = barcode.trim();
+
+    if (cleanBarcode.isEmpty) {
+      return null;
+    }
+
+    final baseResult = await client
         .from(productsTable)
         .select()
-        .eq(AppProductFields.barcode, barcode)
+        .eq(AppProductFields.barcode, cleanBarcode)
         .maybeSingle();
 
-    return result;
+    if (baseResult == null) {
+      return null;
+    }
+
+    final localization = await getProductLocalization(
+      barcode: cleanBarcode,
+      languageCode: currentLanguageCode,
+      countryCode: currentCountryCode,
+    );
+
+    return mergeProductWithLocalization(
+      Map<String, dynamic>.from(baseResult),
+      localization,
+    );
   }
 
   Future<Map<String, dynamic>?> getProductByBarcode(
@@ -40,14 +69,20 @@ class ProductRepository {
       final cached = await getCachedProduct(cleanBarcode);
 
       if (cached != null && isFresh(cached, maxCacheAge)) {
-        await AppAnalytics.instance.logProductLookup(
-          source: 'cache',
-          found: cached[AppProductFields.status] == AppProductStatus.found,
-          forceRefresh: forceRefresh,
-          useStaging: useStaging,
-        );
+        final hasCurrentLocalization =
+            cached['localized_language_code'] == currentLanguageCode &&
+            cached['localized_country_code'] == currentCountryCode;
 
-        return cached;
+        if (hasCurrentLocalization) {
+          await AppAnalytics.instance.logProductLookup(
+            source: 'cache',
+            found: cached[AppProductFields.status] == AppProductStatus.found,
+            forceRefresh: forceRefresh,
+            useStaging: useStaging,
+          );
+
+          return cached;
+        }
       }
     }
 
@@ -72,7 +107,42 @@ class ProductRepository {
         .order(AppProductFields.fetchedAt, ascending: false)
         .limit(limit);
 
-    return List<Map<String, dynamic>>.from(response);
+    final products = List<Map<String, dynamic>>.from(response);
+
+    if (products.isEmpty) {
+      return [];
+    }
+
+    final barcodes = products
+        .map((product) => product[AppProductFields.barcode]?.toString())
+        .whereType<String>()
+        .where((barcode) => barcode.trim().isNotEmpty)
+        .toSet()
+        .toList();
+
+    final localizationResponse = await client
+        .from(productLocalizationsTable)
+        .select()
+        .eq(AppProductLocalizationFields.languageCode, currentLanguageCode)
+        .eq(AppProductLocalizationFields.countryCode, currentCountryCode)
+        .inFilter(AppProductLocalizationFields.barcode, barcodes);
+
+    final localizations = List<Map<String, dynamic>>.from(localizationResponse);
+
+    final localizationsByBarcode = {
+      for (final localization in localizations)
+        localization[AppProductLocalizationFields.barcode].toString():
+            localization,
+    };
+
+    return products.map((product) {
+      final barcode = product[AppProductFields.barcode]?.toString();
+      final localization = barcode == null
+          ? null
+          : localizationsByBarcode[barcode];
+
+      return mergeProductWithLocalization(product, localization);
+    }).toList();
   }
 
   Future<List<Map<String, dynamic>>> getPricesForProduct({
@@ -112,13 +182,16 @@ class ProductRepository {
       throw ArgumentError('Barcode is required.');
     }
 
+    final languageCode = currentLanguageCode;
+    final countryCode = currentCountryCode;
+
     final response = await client.functions.invoke(
       'open-food-facts-product',
       body: {
         'barcode': cleanBarcode,
         'useStaging': useStaging,
-        'languageCode': AppLanguage.openFoodFactsLanguageCode,
-        'countryCode': AppLanguage.openFoodFactsCountryCode,
+        'languageCode': languageCode,
+        'countryCode': countryCode,
       },
     );
 
@@ -140,18 +213,37 @@ class ProductRepository {
       throw Exception('OpenFoodFacts function returned invalid JSON.');
     }
 
-    final row = openFoodFactsJsonToProductRow(
+    final baseRow = openFoodFactsJsonToProductRow(
       barcode: cleanBarcode,
       json: decoded,
     );
 
-    final saved = await client
+    final savedBase = await client
         .from(productsTable)
-        .upsert(row, onConflict: AppProductFields.barcode)
+        .upsert(baseRow, onConflict: AppProductFields.barcode)
         .select()
         .single();
 
-    return saved;
+    final localizationRow = openFoodFactsJsonToLocalizationRow(
+      barcode: cleanBarcode,
+      json: decoded,
+      languageCode: languageCode,
+      countryCode: countryCode,
+    );
+
+    final savedLocalization = await client
+        .from(productLocalizationsTable)
+        .upsert(
+          localizationRow,
+          onConflict: 'barcode,language_code,country_code',
+        )
+        .select()
+        .single();
+
+    return mergeProductWithLocalization(
+      Map<String, dynamic>.from(savedBase),
+      Map<String, dynamic>.from(savedLocalization),
+    );
   }
 
   Map<String, dynamic> openFoodFactsJsonToProductRow({
@@ -224,6 +316,142 @@ class ProductRepository {
       AppProductFields.status: AppProductStatus.found,
       AppProductFields.fetchedAt: DateTime.now().toUtc().toIso8601String(),
       AppProductFields.updatedAt: DateTime.now().toUtc().toIso8601String(),
+    };
+  }
+
+  Map<String, dynamic> openFoodFactsJsonToLocalizationRow({
+    required String barcode,
+    required Map<String, dynamic> json,
+    required String languageCode,
+    required String countryCode,
+  }) {
+    final status = json['status'];
+    final productRaw = json['product'];
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    if (status != 1 || productRaw is! Map<String, dynamic>) {
+      return {
+        AppProductLocalizationFields.barcode: barcode,
+        AppProductLocalizationFields.languageCode: languageCode,
+        AppProductLocalizationFields.countryCode: countryCode,
+        AppProductLocalizationFields.name: null,
+        AppProductLocalizationFields.brand: null,
+        AppProductLocalizationFields.quantity: null,
+        AppProductLocalizationFields.categories: null,
+        AppProductLocalizationFields.labels: null,
+        AppProductLocalizationFields.imageUrl: null,
+        AppProductLocalizationFields.rawJson: json,
+        AppProductLocalizationFields.fetchedAt: now,
+        AppProductLocalizationFields.updatedAt: now,
+      };
+    }
+
+    final product = productRaw;
+
+    return {
+      AppProductLocalizationFields.barcode: barcode,
+      AppProductLocalizationFields.languageCode: languageCode,
+      AppProductLocalizationFields.countryCode: countryCode,
+      AppProductLocalizationFields.name: firstText([
+        product['product_name_$languageCode'],
+        product['product_name'],
+        product['product_name_en'],
+        product['generic_name_$languageCode'],
+        product['generic_name'],
+        product['generic_name_en'],
+      ]),
+      AppProductLocalizationFields.brand: firstText([
+        product['brands'],
+        product['brand_owner'],
+      ]),
+      AppProductLocalizationFields.quantity: firstText([
+        product['quantity'],
+        product['product_quantity'],
+        product['serving_size'],
+      ]),
+      AppProductLocalizationFields.categories: firstText([
+        product['categories_$languageCode'],
+        product['categories'],
+        product['categories_en'],
+      ]),
+      AppProductLocalizationFields.labels: firstText([
+        product['labels_$languageCode'],
+        product['labels'],
+        product['labels_en'],
+      ]),
+      AppProductLocalizationFields.imageUrl: firstText([
+        product['image_front_url'],
+        product['image_url'],
+        product['selected_images']?['front']?['display']?[languageCode],
+        product['selected_images']?['front']?['display']?['en'],
+      ]),
+      AppProductLocalizationFields.rawJson: json,
+      AppProductLocalizationFields.fetchedAt: now,
+      AppProductLocalizationFields.updatedAt: now,
+    };
+  }
+
+  Future<Map<String, dynamic>?> getProductLocalization({
+    required String barcode,
+    required String languageCode,
+    required String countryCode,
+  }) async {
+    final result = await client
+        .from(productLocalizationsTable)
+        .select()
+        .eq(AppProductLocalizationFields.barcode, barcode)
+        .eq(AppProductLocalizationFields.languageCode, languageCode)
+        .eq(AppProductLocalizationFields.countryCode, countryCode)
+        .maybeSingle();
+
+    if (result == null) {
+      return null;
+    }
+
+    return Map<String, dynamic>.from(result);
+  }
+
+  Map<String, dynamic> mergeProductWithLocalization(
+    Map<String, dynamic> base,
+    Map<String, dynamic>? localization,
+  ) {
+    if (localization == null) {
+      return base;
+    }
+
+    return {
+      ...base,
+      AppProductFields.name:
+          AppValueParsing.textOrNull(
+            localization[AppProductLocalizationFields.name],
+          ) ??
+          base[AppProductFields.name],
+      AppProductFields.brand:
+          AppValueParsing.textOrNull(
+            localization[AppProductLocalizationFields.brand],
+          ) ??
+          base[AppProductFields.brand],
+      AppProductFields.quantity:
+          AppValueParsing.textOrNull(
+            localization[AppProductLocalizationFields.quantity],
+          ) ??
+          base[AppProductFields.quantity],
+      AppProductFields.categories:
+          AppValueParsing.textOrNull(
+            localization[AppProductLocalizationFields.categories],
+          ) ??
+          base[AppProductFields.categories],
+      AppProductFields.imageUrl:
+          AppValueParsing.textOrNull(
+            localization[AppProductLocalizationFields.imageUrl],
+          ) ??
+          base[AppProductFields.imageUrl],
+      'localized_language_code':
+          localization[AppProductLocalizationFields.languageCode],
+      'localized_country_code':
+          localization[AppProductLocalizationFields.countryCode],
+      'localized_labels': localization[AppProductLocalizationFields.labels],
+      'localized_raw_json': localization[AppProductLocalizationFields.rawJson],
     };
   }
 
