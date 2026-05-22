@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/repositories/notification_preferences_repository.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NotificationPreferencesPage extends StatefulWidget {
@@ -112,11 +113,23 @@ class _NotificationPreferencesPageState
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  const _InfoCard(),
+                  const AppMessageCard(
+                    icon: Icons.notifications_active_outlined,
+                    message:
+                        'Choose which notifications you want to receive for this app.',
+                  ),
                   const SizedBox(height: 12),
-                  if (loading) const _LoadingCard(),
+                  if (loading)
+                    const AppMessageCard(
+                      icon: Icons.sync_outlined,
+                      message: 'Loading notification preferences...',
+                    ),
                   if (!loading && loadError != null)
-                    _ErrorCard(error: loadError!),
+                    AppMessageCard(
+                      icon: Icons.error_outline,
+                      message: loadError.toString(),
+                      tone: AppMessageCardTone.error,
+                    ),
                   if (!loading && current != null)
                     _PreferencesCard(
                       preferences: current,
@@ -128,71 +141,6 @@ class _NotificationPreferencesPageState
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      color: theme.colorScheme.surfaceContainerHighest,
-      child: const Padding(
-        padding: EdgeInsets.all(16),
-        child: Text(
-          'These settings control server-side push notifications sent by Supabase and Firebase, even when the app is closed.',
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
-      ),
-    );
-  }
-}
-
-class _LoadingCard extends StatelessWidget {
-  const _LoadingCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Card(
-      child: Padding(
-        padding: EdgeInsets.all(18),
-        child: Row(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 16),
-            Expanded(child: Text('Loading notification preferences...')),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({required this.error});
-
-  final Object error;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      color: theme.colorScheme.errorContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: SelectableText(
-          error.toString(),
-          style: TextStyle(
-            color: theme.colorScheme.onErrorContainer,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ),
     );
   }

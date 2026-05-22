@@ -8,6 +8,7 @@ import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/repositories/shopping_repository.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -339,7 +340,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
               if (errorMessage != null) ...[
                 const SizedBox(height: 12),
-                _ProductDetailErrorCard(message: errorMessage!),
+                AppMessageCard(
+                  icon: Icons.error_outline,
+                  message: errorMessage.toString(),
+                  tone: AppMessageCardTone.error,
+                ),
               ],
               const SizedBox(height: 12),
               _ProductPriceHistoryCard(
@@ -670,37 +675,6 @@ class _RawJsonCardState extends State<_RawJsonCard> {
   }
 }
 
-class _ProductDetailErrorCard extends StatelessWidget {
-  const _ProductDetailErrorCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundColor: theme.colorScheme.errorContainer,
-              child: Icon(
-                Icons.error_outline,
-                color: theme.colorScheme.onErrorContainer,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _ProductPriceHistoryCard extends StatelessWidget {
   const _ProductPriceHistoryCard({
     required this.loading,
@@ -771,7 +745,11 @@ class _ProductPriceHistoryCard extends StatelessWidget {
                 ],
               )
             else if (errorMessage != null)
-              _ProductDetailInlineError(message: errorMessage!)
+              AppMessageCard(
+                icon: Icons.error_outline,
+                message: errorMessage.toString(),
+                tone: AppMessageCardTone.error,
+              )
             else if (prices.isEmpty)
               Text(
                 context.l10n.noPricesSavedForProduct,
@@ -862,41 +840,6 @@ class _ProductPriceHistoryTile extends StatelessWidget {
                   Text(note, style: theme.textTheme.bodySmall),
                 ],
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProductDetailInlineError extends StatelessWidget {
-  const _ProductDetailInlineError({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: theme.colorScheme.onErrorContainer,
-                fontWeight: FontWeight.w700,
-              ),
             ),
           ),
         ],

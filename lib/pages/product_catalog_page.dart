@@ -5,6 +5,7 @@ import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/generic_catalog_page.dart';
 import 'package:pesalistas/pages/product_detail_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -193,13 +194,21 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
               ),
               const SizedBox(height: 12),
               if (loading)
-                const _LoadingProductsCard()
+                const AppMessageCard(
+                  icon: Icons.sync_outlined,
+                  message: 'Loading products...',
+                )
               else if (errorMessage != null)
-                _ProductCatalogErrorCard(message: errorMessage!)
+                AppMessageCard(
+                  icon: Icons.error_outline,
+                  message: errorMessage!,
+                  tone: AppMessageCardTone.error,
+                )
               else if (visibleProducts.isEmpty)
-                _EmptyProductCatalogCard(
-                  hasSearch: searchQuery.trim().isNotEmpty,
-                  onClearSearch: clearSearch,
+                const AppMessageCard(
+                  icon: Icons.inventory_2_outlined,
+                  message:
+                      'No products found yet. Scan a product to add it to your catalog.',
                 )
               else
                 for (final product in visibleProducts)
@@ -263,100 +272,6 @@ class _ProductCatalogHeaderCard extends StatelessWidget {
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LoadingProductsCard extends StatelessWidget {
-  const _LoadingProductsCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            const SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(context.l10n.loadingProducts)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ProductCatalogErrorCard extends StatelessWidget {
-  const _ProductCatalogErrorCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundColor: theme.colorScheme.errorContainer,
-              child: Icon(
-                Icons.error_outline,
-                color: theme.colorScheme.onErrorContainer,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyProductCatalogCard extends StatelessWidget {
-  const _EmptyProductCatalogCard({
-    required this.hasSearch,
-    required this.onClearSearch,
-  });
-
-  final bool hasSearch;
-  final VoidCallback onClearSearch;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            const CircleAvatar(child: Icon(Icons.search_off_outlined)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                hasSearch
-                    ? context.l10n.noProductsMatchSearch
-                    : context.l10n.noCachedProductsYet,
-              ),
-            ),
-            if (hasSearch) ...[
-              const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: onClearSearch,
-                child: Text(context.l10n.clear),
-              ),
-            ],
           ],
         ),
       ),

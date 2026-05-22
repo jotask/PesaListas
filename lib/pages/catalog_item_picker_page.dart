@@ -8,6 +8,7 @@ import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/edit_catalog_item_page.dart';
 import 'package:pesalistas/pages/generic_item_detail_page.dart';
 import 'package:pesalistas/repositories/catalog_item_repository.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -266,7 +267,11 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
               ),
               const SizedBox(height: 12),
               if (errorMessage != null) ...[
-                _CatalogItemPickerErrorCard(message: errorMessage!),
+                AppMessageCard(
+                  icon: Icons.error_outline,
+                  message: errorMessage!,
+                  tone: AppMessageCardTone.error,
+                ),
                 const SizedBox(height: 12),
               ],
               if (canCreate) ...[
@@ -280,11 +285,14 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
                 const SizedBox(height: 12),
               ],
               if (loading)
-                const _CatalogItemLoadingCard()
+                const AppMessageCard(
+                  icon: Icons.sync_outlined,
+                  message: 'Loading catalog items...',
+                )
               else if (items.isEmpty)
-                _CatalogItemEmptyCard(
-                  hasQuery: query.trim().isNotEmpty,
-                  onCreate: canCreate ? createFromSearch : null,
+                const AppMessageCard(
+                  icon: Icons.inventory_2_outlined,
+                  message: 'No catalog items found yet.',
                 )
               else
                 for (final item in items)
@@ -488,98 +496,6 @@ class _CatalogItemCard extends StatelessWidget {
           ],
         ),
         onTap: onTap,
-      ),
-    );
-  }
-}
-
-class _CatalogItemLoadingCard extends StatelessWidget {
-  const _CatalogItemLoadingCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Card(
-      child: Padding(
-        padding: EdgeInsets.all(18),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            SizedBox(width: 12),
-            Expanded(child: Text('Loading generic items...')),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CatalogItemEmptyCard extends StatelessWidget {
-  const _CatalogItemEmptyCard({required this.hasQuery, required this.onCreate});
-
-  final bool hasQuery;
-  final VoidCallback? onCreate;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            const CircleAvatar(child: Icon(Icons.search_off_outlined)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                hasQuery
-                    ? 'No generic items match this search.'
-                    : 'No generic items yet.',
-              ),
-            ),
-            if (onCreate != null) ...[
-              const SizedBox(width: 8),
-              OutlinedButton.icon(
-                onPressed: onCreate,
-                icon: const Icon(Icons.add),
-                label: const Text('Create'),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CatalogItemPickerErrorCard extends StatelessWidget {
-  const _CatalogItemPickerErrorCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundColor: theme.colorScheme.errorContainer,
-              child: Icon(
-                Icons.error_outline,
-                color: theme.colorScheme.onErrorContainer,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
       ),
     );
   }

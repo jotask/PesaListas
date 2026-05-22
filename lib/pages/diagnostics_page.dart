@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_diagnostics.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DiagnosticsPage extends StatefulWidget {
@@ -189,9 +190,17 @@ class _DiagnosticsPageState extends State<DiagnosticsPage> {
                 title: 'Health checks',
                 icon: Icons.health_and_safety_outlined,
                 children: [
-                  if (loading) const _DiagnosticsLoadingCard(),
+                  if (loading)
+                    const AppMessageCard(
+                      icon: Icons.sync_outlined,
+                      message: 'Running diagnostics...',
+                    ),
                   if (loadError != null)
-                    _DiagnosticsErrorCard(error: loadError.toString()),
+                    AppMessageCard(
+                      icon: Icons.error_outline,
+                      message: loadError.toString(),
+                      tone: AppMessageCardTone.error,
+                    ),
                   if (!loading && currentReport != null) ...[
                     _DiagnosticsSummary(report: currentReport),
                     const SizedBox(height: 12),
@@ -415,37 +424,6 @@ class _DiagnosticItemTile extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _DiagnosticsLoadingCard extends StatelessWidget {
-  const _DiagnosticsLoadingCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 18),
-      child: Center(child: CircularProgressIndicator()),
-    );
-  }
-}
-
-class _DiagnosticsErrorCard extends StatelessWidget {
-  const _DiagnosticsErrorCard({required this.error});
-
-  final String error;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: SelectableText(
-          error,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/pages/book_isbn_scanner_page.dart';
 import 'package:pesalistas/repositories/book_repository.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BookPickerPage extends StatefulWidget {
@@ -192,11 +193,18 @@ class _BookPickerPageState extends State<BookPickerPage> {
             ],
             if (errorMessage != null) ...[
               const SizedBox(height: 12),
-              _ErrorCard(message: errorMessage!),
+              AppMessageCard(
+                icon: Icons.error_outline,
+                message: errorMessage!,
+                tone: AppMessageCardTone.error,
+              ),
             ],
             if (!searching && results.isEmpty && query.trim().isNotEmpty) ...[
               const SizedBox(height: 16),
-              const _EmptySearchCard(),
+              const AppMessageCard(
+                icon: Icons.search_outlined,
+                message: 'Search for a book to link it to this list item.',
+              ),
             ],
             if (results.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -385,47 +393,6 @@ class _BookCover extends StatelessWidget {
                   );
                 },
               ),
-      ),
-    );
-  }
-}
-
-class _EmptySearchCard extends StatelessWidget {
-  const _EmptySearchCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Card(
-      child: Padding(
-        padding: EdgeInsets.all(18),
-        child: Text(
-          'No books found. Try searching by title, author, or a more specific phrase.',
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      color: theme.colorScheme.errorContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SelectableText(
-          message,
-          style: TextStyle(
-            color: theme.colorScheme.onErrorContainer,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ),
     );
   }

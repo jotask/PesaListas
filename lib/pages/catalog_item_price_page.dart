@@ -4,6 +4,7 @@ import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/fields/product_price_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -333,7 +334,11 @@ class _CatalogItemPricePageState extends State<CatalogItemPricePage> {
                     ),
                     if (errorMessage != null) ...[
                       const SizedBox(height: 16),
-                      _CatalogItemPriceError(message: errorMessage!),
+                      AppMessageCard(
+                        icon: Icons.error_outline,
+                        message: errorMessage!,
+                        tone: AppMessageCardTone.error,
+                      ),
                     ],
                   ],
                 ),
@@ -411,42 +416,6 @@ class _CatalogItemPriceHeaderCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CatalogItemPriceError extends StatelessWidget {
-  const _CatalogItemPriceError({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: theme.colorScheme.onErrorContainer,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
