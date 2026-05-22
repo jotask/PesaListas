@@ -17,10 +17,12 @@ void main() {
 
   group('AppPriorityTypes.all', () {
     test('contains values in ascending priority order', () {
-      expect(
-        AppPriorityTypes.all.map((config) => config.value).toList(),
-        [0, 1, 2, 3],
-      );
+      expect(AppPriorityTypes.all.map((config) => config.value).toList(), [
+        0,
+        1,
+        2,
+        3,
+      ]);
     });
   });
 }

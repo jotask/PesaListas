@@ -44,7 +44,10 @@ void main() {
     });
 
     test('keeps text without a prefix', () {
-      expect(AppRecipeInstructionSteps.removeStepPrefix('Mix everything'), 'Mix everything');
+      expect(
+        AppRecipeInstructionSteps.removeStepPrefix('Mix everything'),
+        'Mix everything',
+      );
     });
   });
 

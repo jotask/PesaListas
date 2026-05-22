@@ -7,7 +7,9 @@ void main() {
   group('AppShoppingItemCost.priceCurrency', () {
     test('returns item currency when present', () {
       expect(
-        AppShoppingItemCost.priceCurrency({AppShoppingItemFields.priceCurrency: 'USD'}),
+        AppShoppingItemCost.priceCurrency({
+          AppShoppingItemFields.priceCurrency: 'USD',
+        }),
         'USD',
       );
     });

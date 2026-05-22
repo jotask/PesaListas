@@ -29,12 +29,15 @@ void main() {
       expect(AppLanguage.tmdbLanguageCode, 'en-US');
     });
 
-    test('falls back to world country and raw TMDb language for unsupported short codes', () {
-      AppLocaleController.locale.value = const Locale('fr');
+    test(
+      'falls back to world country and raw TMDb language for unsupported short codes',
+      () {
+        AppLocaleController.locale.value = const Locale('fr');
 
-      expect(AppLanguage.currentLanguageCode, 'fr');
-      expect(AppLanguage.openFoodFactsCountryCode, 'world');
-      expect(AppLanguage.tmdbLanguageCode, 'en-US');
-    });
+        expect(AppLanguage.currentLanguageCode, 'fr');
+        expect(AppLanguage.openFoodFactsCountryCode, 'world');
+        expect(AppLanguage.tmdbLanguageCode, 'en-US');
+      },
+    );
   });
 }

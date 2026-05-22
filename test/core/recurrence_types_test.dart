@@ -16,10 +16,13 @@ void main() {
 
   group('AppRecurrenceTypes.all', () {
     test('contains expected recurrence values', () {
-      expect(
-        AppRecurrenceTypes.all.map((config) => config.value).toList(),
-        [null, 'daily', 'weekly', 'monthly', 'every_n_days'],
-      );
+      expect(AppRecurrenceTypes.all.map((config) => config.value).toList(), [
+        null,
+        'daily',
+        'weekly',
+        'monthly',
+        'every_n_days',
+      ]);
     });
   });
 }

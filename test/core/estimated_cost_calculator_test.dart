@@ -12,7 +12,10 @@ void main() {
 
     test('returns unit price when quantity is missing', () {
       expect(
-        AppEstimatedCostCalculator.estimatedTotal(quantity: null, unitPrice: 3.5),
+        AppEstimatedCostCalculator.estimatedTotal(
+          quantity: null,
+          unitPrice: 3.5,
+        ),
         3.5,
       );
     });

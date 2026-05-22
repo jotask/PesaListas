@@ -4,9 +4,18 @@ import 'package:pesalistas/core/item_assignment_scope.dart';
 void main() {
   group('AppItemAssignmentScopes.isValid', () {
     test('accepts known values', () {
-      expect(AppItemAssignmentScopes.isValid(AppItemAssignmentScopes.none), true);
-      expect(AppItemAssignmentScopes.isValid(AppItemAssignmentScopes.specific), true);
-      expect(AppItemAssignmentScopes.isValid(AppItemAssignmentScopes.all), true);
+      expect(
+        AppItemAssignmentScopes.isValid(AppItemAssignmentScopes.none),
+        true,
+      );
+      expect(
+        AppItemAssignmentScopes.isValid(AppItemAssignmentScopes.specific),
+        true,
+      );
+      expect(
+        AppItemAssignmentScopes.isValid(AppItemAssignmentScopes.all),
+        true,
+      );
     });
 
     test('rejects unknown values', () {

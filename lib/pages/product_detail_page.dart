@@ -963,7 +963,11 @@ class _AddProductToShoppingCard extends StatelessWidget {
             ),
             if (validationMessage != null) ...[
               const SizedBox(height: 12),
-              _ProductDetailInlineError(message: validationMessage!),
+              AppMessageCard(
+                icon: Icons.error_outline,
+                message: validationMessage.toString(),
+                tone: AppMessageCardTone.error,
+              ),
             ],
             const SizedBox(height: 14),
             FilledButton.icon(

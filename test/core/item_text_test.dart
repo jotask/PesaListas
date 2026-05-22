@@ -6,7 +6,9 @@ void main() {
   group('AppItemText.title', () {
     test('returns trimmed title', () {
       expect(
-        AppItemText.title({AppItemFields.title: ' Buy milk '}, fallback: 'Fallback'),
+        AppItemText.title({
+          AppItemFields.title: ' Buy milk ',
+        }, fallback: 'Fallback'),
         'Buy milk',
       );
     });

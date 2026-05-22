@@ -13,17 +13,35 @@ void main() {
     test('maps empty, null, invalid, and old open status to toRead', () {
       expect(AppBookReadingStatus.normalize(null), AppBookReadingStatus.toRead);
       expect(AppBookReadingStatus.normalize(''), AppBookReadingStatus.toRead);
-      expect(AppBookReadingStatus.normalize('   '), AppBookReadingStatus.toRead);
-      expect(AppBookReadingStatus.normalize('open'), AppBookReadingStatus.toRead);
-      expect(AppBookReadingStatus.normalize('invalid'), AppBookReadingStatus.toRead);
+      expect(
+        AppBookReadingStatus.normalize('   '),
+        AppBookReadingStatus.toRead,
+      );
+      expect(
+        AppBookReadingStatus.normalize('open'),
+        AppBookReadingStatus.toRead,
+      );
+      expect(
+        AppBookReadingStatus.normalize('invalid'),
+        AppBookReadingStatus.toRead,
+      );
     });
   });
 
   group('AppBookReadingStatus.label', () {
     test('returns user-facing labels', () {
-      expect(AppBookReadingStatus.label(AppBookReadingStatus.wishlist), 'Wishlist');
-      expect(AppBookReadingStatus.label(AppBookReadingStatus.toRead), 'To read');
-      expect(AppBookReadingStatus.label(AppBookReadingStatus.reading), 'Reading');
+      expect(
+        AppBookReadingStatus.label(AppBookReadingStatus.wishlist),
+        'Wishlist',
+      );
+      expect(
+        AppBookReadingStatus.label(AppBookReadingStatus.toRead),
+        'To read',
+      );
+      expect(
+        AppBookReadingStatus.label(AppBookReadingStatus.reading),
+        'Reading',
+      );
       expect(AppBookReadingStatus.label(AppBookReadingStatus.done), 'Done');
       expect(AppBookReadingStatus.label('unknown'), 'To read');
     });
