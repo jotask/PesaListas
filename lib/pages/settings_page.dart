@@ -7,6 +7,7 @@ import 'package:pesalistas/core/controllers/app_theme_controller.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/pages/app_credits_page.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/delete_account_page.dart';
 import 'package:pesalistas/pages/diagnostics_page.dart';
@@ -231,6 +232,15 @@ class _SettingsPageState extends State<SettingsPage> {
     if (!mounted) return;
 
     setState(() {});
+  }
+
+  Future<void> openCreditsPage() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/credits'),
+        builder: (_) => const AppCreditsPage(),
+      ),
+    );
   }
 
   Future<void> openProductCatalog() async {
@@ -573,6 +583,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     _AboutSection(
                       packageInfoFuture: packageInfoFuture,
                       onBuildNumberTap: registerDiagnosticsTap,
+                      openCreditsPage: openCreditsPage,
                     ),
                     const SizedBox(height: 16),
                     _SettingsSection(
@@ -732,10 +743,12 @@ class _AboutSection extends StatelessWidget {
   const _AboutSection({
     required this.packageInfoFuture,
     required this.onBuildNumberTap,
+    required this.openCreditsPage,
   });
 
   final Future<PackageInfo> packageInfoFuture;
   final VoidCallback onBuildNumberTap;
+  final VoidCallback openCreditsPage;
 
   @override
   Widget build(BuildContext context) {
@@ -764,6 +777,14 @@ class _AboutSection extends StatelessWidget {
               title: Text(context.l10n.buildNumber),
               subtitle: Text(packageInfo?.buildNumber ?? '—'),
               onTap: onBuildNumberTap,
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('Credits & data sources'),
+              subtitle: const Text('TMDb, Open Library, and Open Food Facts.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: openCreditsPage,
             ),
           ],
         );

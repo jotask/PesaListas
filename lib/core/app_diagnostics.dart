@@ -4,6 +4,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/app_language.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/repositories/account_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -249,12 +250,59 @@ class AppDiagnostics {
   }
 
   static Future<DiagnosticItem> _checkTmdbEdgeFunction() async {
-    return DiagnosticItem(
-      label: 'TMDb Edge Function',
-      status: DiagnosticStatus.warning,
-      message: 'TMDb diagnostic check not implemented yet.',
-      details: 'The app uses TMDb, but this diagnostic check is still pending.',
-    );
+    try {
+      final response = await Supabase.instance.client.functions.invoke(
+        'tmdb-search',
+        body: {'query': 'Matrix', 'languageCode': AppLanguage.tmdbLanguageCode},
+      );
+
+      final data = response.data;
+
+      if (response.status < 200 || response.status >= 300) {
+        return DiagnosticItem(
+          label: 'TMDb Edge Function',
+          status: DiagnosticStatus.error,
+          message: 'TMDb search failed with status ${response.status}.',
+          details: data.toString(),
+        );
+      }
+
+      if (data is! Map) {
+        return DiagnosticItem(
+          label: 'TMDb Edge Function',
+          status: DiagnosticStatus.error,
+          message: 'TMDb search returned invalid data.',
+          details: data.toString(),
+        );
+      }
+
+      final movies = data['movies'];
+      final languageCode = data['languageCode']?.toString();
+
+      if (movies is List && movies.isNotEmpty) {
+        return DiagnosticItem(
+          label: 'TMDb Edge Function',
+          status: DiagnosticStatus.success,
+          message: 'TMDb search is working.',
+          details:
+              'Returned ${movies.length} movie(s). Language: ${languageCode ?? AppLanguage.tmdbLanguageCode}.',
+        );
+      }
+
+      return DiagnosticItem(
+        label: 'TMDb Edge Function',
+        status: DiagnosticStatus.warning,
+        message: 'TMDb search responded, but returned no movies.',
+        details: data.toString(),
+      );
+    } catch (error, stackTrace) {
+      return DiagnosticItem(
+        label: 'TMDb Edge Function',
+        status: DiagnosticStatus.error,
+        message: 'TMDb diagnostic failed.',
+        details: '$error\n\n$stackTrace',
+      );
+    }
   }
 
   static Future<DiagnosticItem> _checkOpenFoodFactsEdgeFunction() async {
