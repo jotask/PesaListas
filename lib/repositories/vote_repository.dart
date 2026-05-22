@@ -1,6 +1,6 @@
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/vote_fields.dart';
-import 'package:pesalistas/core/vote_summary_fields.dart';
+import 'package:pesalistas/core/fields/vote_summary_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 

@@ -2,7 +2,7 @@ import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/meal_plan_fields.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
-import 'package:pesalistas/core/shopping_item_fields.dart';
+import 'package:pesalistas/core/fields/shopping_item_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 

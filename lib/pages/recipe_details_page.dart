@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
-import 'package:pesalistas/core/recipe_ingredient_fields.dart';
+import 'package:pesalistas/core/fields/recipe_ingredient_fields.dart';
 import 'package:pesalistas/core/recipe_instruction_steps.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';

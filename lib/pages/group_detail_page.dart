@@ -14,7 +14,7 @@ import 'package:pesalistas/widgets/group_detail/group_lists_section.dart';
 import 'package:pesalistas/widgets/group_detail/group_overview_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/pages/archived_lists_page.dart';
-import 'package:pesalistas/core/member_fields.dart';
+import 'package:pesalistas/core/fields/member_fields.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 
 class GroupDetailPage extends StatefulWidget {

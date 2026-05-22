@@ -1,6 +1,6 @@
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/estimated_cost_calculator.dart';
-import 'package:pesalistas/core/shopping_item_fields.dart';
+import 'package:pesalistas/core/fields/shopping_item_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 
 class AppShoppingItemCost {

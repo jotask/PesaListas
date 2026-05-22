@@ -1,6 +1,6 @@
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/group_fields.dart';
-import 'package:pesalistas/core/member_fields.dart';
+import 'package:pesalistas/core/fields/member_fields.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/app_analytics.dart';

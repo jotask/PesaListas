@@ -1,6 +1,6 @@
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
-import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/core/fields/product_price_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/app_analytics.dart';

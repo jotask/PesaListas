@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/list_types.dart';
-import 'package:pesalistas/core/shopping_item_fields.dart';
+import 'package:pesalistas/core/fields/shopping_item_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/list_detail/items_view_factory.dart';
 

@@ -5,7 +5,7 @@ import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
-import 'package:pesalistas/core/member_fields.dart';
+import 'package:pesalistas/core/fields/member_fields.dart';
 import 'package:pesalistas/core/priority_types.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/core/recurrence_types.dart';

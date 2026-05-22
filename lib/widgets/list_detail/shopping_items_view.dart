@@ -5,7 +5,7 @@ import 'package:pesalistas/core/fields/meal_plan_fields.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/core/money_formatting.dart';
 import 'package:pesalistas/core/shopping_item_cost.dart';
-import 'package:pesalistas/core/shopping_item_fields.dart';
+import 'package:pesalistas/core/fields/shopping_item_fields.dart';
 import 'package:pesalistas/core/meal_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';

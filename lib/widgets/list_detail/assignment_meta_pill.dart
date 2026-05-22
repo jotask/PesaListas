@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
-import 'package:pesalistas/core/member_fields.dart';
+import 'package:pesalistas/core/fields/member_fields.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

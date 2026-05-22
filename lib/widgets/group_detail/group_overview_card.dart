@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/fields/group_fields.dart';
 import 'package:pesalistas/core/fields/invitation_fields.dart';
-import 'package:pesalistas/core/member_fields.dart';
+import 'package:pesalistas/core/fields/member_fields.dart';
 import 'package:pesalistas/core/fields/profile_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pesalistas/core/price_unit_converter.dart';
-import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/core/fields/product_price_fields.dart';
 
 void main() {
   group('AppPriceUnitConverter.unitPriceFromPriceRow', () {

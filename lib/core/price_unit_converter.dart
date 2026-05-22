@@ -1,4 +1,4 @@
-import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/core/fields/product_price_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 
 class AppPriceUnitConverter {

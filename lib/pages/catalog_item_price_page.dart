@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_units.dart';
-import 'package:pesalistas/core/product_price_fields.dart';
+import 'package:pesalistas/core/fields/product_price_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
