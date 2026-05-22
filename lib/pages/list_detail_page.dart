@@ -1884,92 +1884,78 @@ class _ListDetailPageState extends State<ListDetailPage> {
   }
 
   void goBack() {
-    Navigator.of(context).maybePop(currentList);
+    Navigator.of(context).pop(listChanged);
   }
 
   @override
   Widget build(BuildContext context) {
     final config = listTypeConfig;
 
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) return;
-
-        if (listChanged && result != true) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              Navigator.of(context).maybePop(true);
-            }
-          });
-        }
-      },
-      child: Scaffold(
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: creatingItem ? null : createItemDialog,
-          icon: const Icon(Icons.add),
-          label: Text(
-            isRecipeList
-                ? context.l10n.addRecipe
-                : isMealPlanList
-                ? context.l10n.addMeal
-                : isShoppingList
-                ? context.l10n.addItem
-                : context.l10n.addItem,
-          ),
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: creatingItem ? null : createItemDialog,
+        icon: const Icon(Icons.add),
+        label: Text(
+          isRecipeList
+              ? context.l10n.addRecipe
+              : isMealPlanList
+              ? context.l10n.addMeal
+              : isShoppingList
+              ? context.l10n.addItem
+              : context.l10n.addItem,
         ),
-        body: Column(
-          children: [
-            ListDetailHeader(
-              listName: listName,
-              listDescription: listDescription,
-              config: config,
-              onBack: goBack,
-              onEdit: editList,
-            ),
-            if (isBusy) const LinearProgressIndicator(),
-            Expanded(
-              child: SafeArea(
-                top: false,
-                child: RefreshIndicator(
-                  onRefresh: loadItems,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      if (isShoppingList) ...[
-                        _ProductScannerShortcutCard(onTap: openProductScanner),
-                        const SizedBox(height: 12),
-                        _ProductCatalogShortcutCard(onTap: openProductCatalog),
-                        const SizedBox(height: 12),
-                      ],
-                      ListItemsSection(
-                        listType: listType,
-                        items: items,
-                        loading: loadingItems,
-                        showStatusSummary: shouldShowStatusSummary,
-                        onCreate: createItemDialog,
-                        onComplete: completeItem,
-                        onReopen: reopenItem,
-                        onEdit: editItem,
-                        onDelete: deleteItem,
-                        onVote: voteItem,
-                        onViewVotes: viewVotes,
-                        onViewRecipeDetails: viewRecipeDetails,
-                        onDeleteRecipe: deleteRecipe,
-                        onGenerateShoppingFromMealPlans:
-                            generateShoppingFromMealPlans,
-                        onClearBoughtShoppingItems: clearBoughtShoppingItems,
-                        onClearAllShoppingItems: clearAllShoppingItems,
-                        onBookStatusChanged: updateBookReadingStatus,
-                      ),
-                      const SizedBox(height: 96),
+      ),
+      body: Column(
+        children: [
+          ListDetailHeader(
+            listName: listName,
+            listDescription: listDescription,
+            config: config,
+            onBack: goBack,
+            onEdit: editList,
+          ),
+          if (isBusy) const LinearProgressIndicator(),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: RefreshIndicator(
+                onRefresh: loadItems,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    if (isShoppingList) ...[
+                      _ProductScannerShortcutCard(onTap: openProductScanner),
+                      const SizedBox(height: 12),
+                      _ProductCatalogShortcutCard(onTap: openProductCatalog),
+                      const SizedBox(height: 12),
                     ],
-                  ),
+                    ListItemsSection(
+                      listType: listType,
+                      items: items,
+                      loading: loadingItems,
+                      showStatusSummary: shouldShowStatusSummary,
+                      onCreate: createItemDialog,
+                      onComplete: completeItem,
+                      onReopen: reopenItem,
+                      onEdit: editItem,
+                      onDelete: deleteItem,
+                      onVote: voteItem,
+                      onViewVotes: viewVotes,
+                      onViewRecipeDetails: viewRecipeDetails,
+                      onDeleteRecipe: deleteRecipe,
+                      onGenerateShoppingFromMealPlans:
+                          generateShoppingFromMealPlans,
+                      onClearBoughtShoppingItems: clearBoughtShoppingItems,
+                      onClearAllShoppingItems: clearAllShoppingItems,
+                      onBookStatusChanged: updateBookReadingStatus,
+                    ),
+                    const SizedBox(height: 96),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
