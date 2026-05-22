@@ -1,4 +1,5 @@
 import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/app_language.dart';
 import 'package:pesalistas/core/fields/product_fields.dart';
 import 'package:pesalistas/core/fields/product_price_fields.dart';
 import 'package:pesalistas/core/value_parsing.dart';
@@ -113,7 +114,12 @@ class ProductRepository {
 
     final response = await client.functions.invoke(
       'open-food-facts-product',
-      body: {'barcode': cleanBarcode, 'useStaging': useStaging},
+      body: {
+        'barcode': cleanBarcode,
+        'useStaging': useStaging,
+        'languageCode': AppLanguage.openFoodFactsLanguageCode,
+        'countryCode': AppLanguage.openFoodFactsCountryCode,
+      },
     );
 
     if (response.status < 200 || response.status >= 300) {

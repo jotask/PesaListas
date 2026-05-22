@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pesalistas/core/fields/book_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
-import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/repositories/book_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -467,7 +466,7 @@ class _BookCover extends StatelessWidget {
         width: 58,
         height: 84,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) {
+        errorBuilder: (_, _, _) {
           return Container(
             width: 58,
             height: 84,
