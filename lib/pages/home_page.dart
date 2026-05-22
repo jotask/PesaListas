@@ -13,6 +13,7 @@ import 'package:pesalistas/repositories/group_repository.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/profile_repository.dart';
+import 'package:pesalistas/widgets/home/home_attention_section.dart';
 import 'package:pesalistas/widgets/home/home_lists_section.dart';
 import 'package:pesalistas/widgets/home/pending_invitations_section.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -41,6 +42,7 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> lists = [];
   Map<String, String> listSummaries = {};
   List<Map<String, dynamic>> invitations = [];
+  HomeAttentionSummary attentionSummary = const HomeAttentionSummary();
 
   bool get processingInvitation => acceptingInvitation || decliningInvitation;
 
@@ -84,6 +86,10 @@ class _HomePageState extends State<HomePage> {
       final loadedListSummaries = await listRepository.getHomeListSummaries(
         loadedLists,
       );
+
+      final loadedAttentionSummary = await listRepository
+          .getHomeAttentionSummary(groups: loadedGroups, lists: loadedLists);
+
       final loadedInvitations = await invitationsFuture;
 
       if (!mounted) return;
@@ -93,6 +99,7 @@ class _HomePageState extends State<HomePage> {
         lists = loadedLists;
         invitations = loadedInvitations;
         listSummaries = loadedListSummaries;
+        attentionSummary = loadedAttentionSummary;
         loading = false;
       });
     } catch (error) {
@@ -261,6 +268,12 @@ class _HomePageState extends State<HomePage> {
                     onDeclineInvitation: declineInvitation,
                   ),
                   if (invitations.isNotEmpty) const SizedBox(height: 16),
+                  HomeAttentionSection(
+                    summary: attentionSummary,
+                    pendingInvitationCount: invitations.length,
+                  ),
+                  if (invitations.isNotEmpty || attentionSummary.hasAttention)
+                    const SizedBox(height: 16),
                   HomeListsSection(
                     groups: groups,
                     lists: lists,

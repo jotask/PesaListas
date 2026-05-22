@@ -11,6 +11,36 @@ import 'package:pesalistas/core/list_types.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 
+class HomeAttentionSummary {
+  const HomeAttentionSummary({
+    this.overdueTasks = 0,
+    this.tasksDueToday = 0,
+    this.tasksDueSoon = 0,
+    this.overdueChores = 0,
+    this.choresDueToday = 0,
+    this.shoppingToBuy = 0,
+    this.mealsToday = 0,
+  });
+
+  final int overdueTasks;
+  final int tasksDueToday;
+  final int tasksDueSoon;
+  final int overdueChores;
+  final int choresDueToday;
+  final int shoppingToBuy;
+  final int mealsToday;
+
+  bool get hasAttention {
+    return overdueTasks > 0 ||
+        tasksDueToday > 0 ||
+        tasksDueSoon > 0 ||
+        overdueChores > 0 ||
+        choresDueToday > 0 ||
+        shoppingToBuy > 0 ||
+        mealsToday > 0;
+  }
+}
+
 class ListRepository {
   ListRepository(this._client);
 
@@ -48,6 +78,152 @@ class ListRepository {
         .order(AppListFields.updatedAt, ascending: false);
 
     return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<HomeAttentionSummary> getHomeAttentionSummary({
+    required List<Map<String, dynamic>> groups,
+    required List<Map<String, dynamic>> lists,
+  }) async {
+    if (groups.isEmpty || lists.isEmpty) {
+      return const HomeAttentionSummary();
+    }
+
+    final taskListIds = lists
+        .where((list) {
+          return list[AppListFields.listType]?.toString() ==
+              AppListTypes.tasks.value;
+        })
+        .map((list) => list[AppListFields.id]?.toString())
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    final choreListIds = lists
+        .where((list) {
+          return list[AppListFields.listType]?.toString() ==
+              AppListTypes.chores.value;
+        })
+        .map((list) => list[AppListFields.id]?.toString())
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    final groupIds = groups
+        .map((group) => group['id']?.toString())
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    var overdueTasks = 0;
+    var tasksDueToday = 0;
+    var tasksDueSoon = 0;
+    var overdueChores = 0;
+    var choresDueToday = 0;
+    var shoppingToBuy = 0;
+    var mealsToday = 0;
+
+    final today = AppDateOnly.today();
+    final dueSoonLimit = today.add(const Duration(days: 7));
+
+    final itemListIds = [...taskListIds, ...choreListIds];
+
+    if (itemListIds.isNotEmpty) {
+      final response = await _client
+          .from(AppTables.items)
+          .select(
+            '${AppItemFields.listId}, '
+            '${AppItemFields.status}, '
+            '${AppItemFields.deadlineAt}, '
+            '${AppItemFields.nextDueAt}',
+          )
+          .inFilter(AppItemFields.listId, itemListIds);
+
+      final rows = List<Map<String, dynamic>>.from(response);
+
+      for (final row in rows) {
+        if (AppItemStatus.isDone(row[AppItemFields.status])) {
+          continue;
+        }
+
+        final listId = row[AppItemFields.listId]?.toString();
+
+        if (listId == null || listId.isEmpty) {
+          continue;
+        }
+
+        if (taskListIds.contains(listId)) {
+          final deadline = AppDateOnly.fromValue(row[AppItemFields.deadlineAt]);
+
+          if (deadline == null) {
+            continue;
+          }
+
+          if (deadline.isBefore(today)) {
+            overdueTasks += 1;
+          } else if (deadline == today) {
+            tasksDueToday += 1;
+          } else if (!deadline.isAfter(dueSoonLimit)) {
+            tasksDueSoon += 1;
+          }
+
+          continue;
+        }
+
+        if (choreListIds.contains(listId)) {
+          final nextDue = AppDateOnly.fromValue(row[AppItemFields.nextDueAt]);
+
+          if (nextDue == null) {
+            continue;
+          }
+
+          if (nextDue.isBefore(today)) {
+            overdueChores += 1;
+          } else if (nextDue == today) {
+            choresDueToday += 1;
+          }
+        }
+      }
+    }
+
+    if (groupIds.isNotEmpty) {
+      final shoppingResponse = await _client
+          .from(AppTables.shoppingListItems)
+          .select(AppShoppingItemFields.groupId)
+          .inFilter(AppShoppingItemFields.groupId, groupIds)
+          .eq(AppShoppingItemFields.checked, false);
+
+      shoppingToBuy = List<Map<String, dynamic>>.from(shoppingResponse).length;
+
+      final mealPlanResponse = await _client
+          .from(AppTables.mealPlans)
+          .select(
+            '${AppMealPlanFields.groupId}, ${AppMealPlanFields.plannedFor}',
+          )
+          .inFilter(AppMealPlanFields.groupId, groupIds);
+
+      final mealPlans = List<Map<String, dynamic>>.from(mealPlanResponse);
+
+      mealsToday = mealPlans.where((mealPlan) {
+        final plannedFor = AppDateOnly.fromValue(
+          mealPlan[AppMealPlanFields.plannedFor],
+        );
+
+        return plannedFor == today;
+      }).length;
+    }
+
+    return HomeAttentionSummary(
+      overdueTasks: overdueTasks,
+      tasksDueToday: tasksDueToday,
+      tasksDueSoon: tasksDueSoon,
+      overdueChores: overdueChores,
+      choresDueToday: choresDueToday,
+      shoppingToBuy: shoppingToBuy,
+      mealsToday: mealsToday,
+    );
   }
 
   Future<Map<String, String>> getHomeListSummaries(
