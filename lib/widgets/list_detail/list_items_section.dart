@@ -25,6 +25,7 @@ class ListItemsSection extends StatefulWidget {
     required this.onGenerateShoppingFromMealPlans,
     required this.onClearBoughtShoppingItems,
     required this.onClearAllShoppingItems,
+    required this.onBookStatusChanged,
   });
 
   final String listType;
@@ -44,6 +45,11 @@ class ListItemsSection extends StatefulWidget {
   final VoidCallback onGenerateShoppingFromMealPlans;
   final VoidCallback onClearBoughtShoppingItems;
   final VoidCallback onClearAllShoppingItems;
+  final void Function({
+    required Map<String, dynamic> item,
+    required String status,
+  })
+  onBookStatusChanged;
 
   @override
   State<ListItemsSection> createState() => _ListItemsSectionState();
@@ -168,6 +174,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
             onGenerateShoppingFromMealPlans:
                 widget.onGenerateShoppingFromMealPlans,
             onClearAll: widget.onClearAllShoppingItems,
+            onBookStatusChanged: widget.onBookStatusChanged,
           ),
       ],
     );

@@ -16,4 +16,5 @@ class AppTables {
   static const shoppingListItems = 'shopping_list_items';
   static const catalogItems = 'catalog_items';
   static const movieCatalog = 'movie_catalog';
+  static const bookCatalog = 'book_catalog';
 }

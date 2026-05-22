@@ -24,6 +24,8 @@ class AppListTypeConfig {
         return context.l10n.chores;
       case 'movies':
         return context.l10n.movies;
+      case 'books':
+        return 'Books';
       case 'ideas':
         return context.l10n.ideas;
       case 'activities':
@@ -49,6 +51,8 @@ class AppListTypeConfig {
         return context.l10n.recurringHouseholdWork;
       case 'moviesToWatchAndVoteOn':
         return context.l10n.moviesToWatchAndVoteOn;
+      case 'booksToReadAndVoteOn':
+        return 'Books to read, discuss, and vote on.';
       case 'ideasToCollectAndDiscuss':
         return context.l10n.ideasToCollectAndDiscuss;
       case 'thingsToDoTogether':
@@ -96,6 +100,13 @@ class AppListTypes {
     descriptionKey: 'moviesToWatchAndVoteOn',
   );
 
+  static const books = AppListTypeConfig(
+    value: 'books',
+    labelKey: 'books',
+    icon: Icons.menu_book_outlined,
+    descriptionKey: 'booksToReadAndVoteOn',
+  );
+
   static const ideas = AppListTypeConfig(
     value: 'ideas',
     labelKey: 'ideas',
@@ -136,6 +147,7 @@ class AppListTypes {
     tasks,
     chores,
     movies,
+    books,
     ideas,
     activities,
     recipes,

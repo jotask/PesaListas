@@ -170,6 +170,8 @@ class ItemRepository {
     int? recurrenceInterval,
     String? movieImdbId,
     bool updateMovieFields = false,
+    String? bookOpenLibraryKey,
+    bool updateBookFields = false,
     DateTime? nextDueAt,
     String? assignmentScope,
     List<String>? assigneeUserIds,
@@ -206,6 +208,12 @@ class ItemRepository {
     if (updateMovieFields) {
       values[AppItemFields.movieImdbId] = AppValueParsing.textOrNull(
         movieImdbId,
+      );
+    }
+
+    if (updateBookFields) {
+      values[AppItemFields.bookOpenLibraryKey] = AppValueParsing.textOrNull(
+        bookOpenLibraryKey,
       );
     }
 
@@ -260,6 +268,42 @@ class ItemRepository {
     await AppAnalytics.instance.logItemUpdated();
   }
 
+  Future<void> updateBookReadingStatus({
+    required String itemId,
+    required String status,
+  }) async {
+    final cleanItemId = itemId.trim();
+    final cleanStatus = status.trim();
+
+    if (cleanItemId.isEmpty) {
+      throw ArgumentError('Item id is required.');
+    }
+
+    if (cleanStatus.isEmpty) {
+      throw ArgumentError('Status is required.');
+    }
+
+    final values = <String, dynamic>{
+      AppItemFields.status: cleanStatus,
+      AppItemFields.updatedAt: DateTime.now().toUtc().toIso8601String(),
+    };
+
+    if (cleanStatus == 'done') {
+      values[AppItemFields.completedAt] = DateTime.now()
+          .toUtc()
+          .toIso8601String();
+      values[AppItemFields.completedBy] = _client.auth.currentUser?.id;
+    } else {
+      values[AppItemFields.completedAt] = null;
+      values[AppItemFields.completedBy] = null;
+    }
+
+    await _client
+        .from(AppTables.items)
+        .update(values)
+        .eq(AppItemFields.id, cleanItemId);
+  }
+
   Future<void> _sendItemAssignedPush({
     required String itemId,
     required List<String> assigneeUserIds,
@@ -307,6 +351,7 @@ class ItemRepository {
     int? recurrenceInterval,
     DateTime? nextDueAt,
     String? movieImdbId,
+    String? bookOpenLibraryKey,
     String assignmentScope = AppItemAssignmentScopes.none,
     List<String> assigneeUserIds = const [],
   }) async {
@@ -320,7 +365,11 @@ class ItemRepository {
           AppItemFields.description: description,
           AppItemFields.priority: priority,
           AppItemFields.status: status ?? AppItemStatus.open,
+
           AppItemFields.movieImdbId: AppValueParsing.textOrNull(movieImdbId),
+          AppItemFields.bookOpenLibraryKey: AppValueParsing.textOrNull(
+            bookOpenLibraryKey,
+          ),
           AppItemFields.position: position,
           AppItemFields.deadlineAt: deadlineAt?.toIso8601String(),
           AppItemFields.assignmentScope: normalizedScope,

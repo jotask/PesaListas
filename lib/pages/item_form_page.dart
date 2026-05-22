@@ -15,6 +15,8 @@ import 'package:pesalistas/pages/movie_picker_page.dart';
 import 'package:pesalistas/widgets/common/app_info_message.dart';
 import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
+import 'package:pesalistas/core/fields/book_fields.dart';
+import 'package:pesalistas/pages/book_picker_page.dart';
 
 class ItemFormPageResult {
   const ItemFormPageResult({
@@ -26,6 +28,7 @@ class ItemFormPageResult {
     this.recurrenceInterval,
     this.nextDueAt,
     this.movieImdbId,
+    this.bookOpenLibraryKey,
     this.assignmentScope = AppItemAssignmentScopes.none,
     this.assigneeUserIds = const [],
   });
@@ -36,6 +39,7 @@ class ItemFormPageResult {
   final DateTime? deadlineAt;
   final String? recurrenceType;
   final String? movieImdbId;
+  final String? bookOpenLibraryKey;
   final int? recurrenceInterval;
   final DateTime? nextDueAt;
   final String assignmentScope;
@@ -70,6 +74,10 @@ class _ItemFormPageState extends State<ItemFormPage> {
   String? selectedMovieImdbId;
   Map<String, dynamic>? selectedMovie;
   String? movieLinkMessage;
+
+  String? selectedBookOpenLibraryKey;
+  Map<String, dynamic>? selectedBook;
+  String? bookLinkMessage;
 
   int priority = 0;
   DateTime? deadlineAt;
@@ -106,6 +114,10 @@ class _ItemFormPageState extends State<ItemFormPage> {
 
   bool get isMovieList {
     return widget.listType == AppListTypes.movies.value;
+  }
+
+  bool get isBookList {
+    return widget.listType == AppListTypes.books.value;
   }
 
   String assignmentNameForMember(Map<String, dynamic> member) {
@@ -249,6 +261,22 @@ class _ItemFormPageState extends State<ItemFormPage> {
       selectedMovie = Map<String, dynamic>.from(itemMovie);
     }
 
+    selectedBookOpenLibraryKey =
+        widget.item?[AppItemFields.bookOpenLibraryKey]?.toString();
+
+    if (selectedBookOpenLibraryKey != null &&
+        selectedBookOpenLibraryKey!.trim().isEmpty) {
+      selectedBookOpenLibraryKey = null;
+    }
+
+    final itemBook = widget.item?[AppItemFields.book];
+
+    if (itemBook is Map<String, dynamic>) {
+      selectedBook = itemBook;
+    } else if (itemBook is Map) {
+      selectedBook = Map<String, dynamic>.from(itemBook);
+    }
+
     if (recurrenceInterval < 2) {
       recurrenceInterval = 2;
     }
@@ -341,6 +369,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
         : <String>[];
 
     final movieImdbId = isMovieList ? selectedMovieImdbId : null;
+    final bookOpenLibraryKey = isBookList ? selectedBookOpenLibraryKey : null;
 
     Navigator.of(context).pop(
       ItemFormPageResult(
@@ -350,6 +379,7 @@ class _ItemFormPageState extends State<ItemFormPage> {
         deadlineAt: deadlineAt,
         recurrenceType: recurrenceType,
         movieImdbId: movieImdbId,
+        bookOpenLibraryKey: bookOpenLibraryKey,
         recurrenceInterval: usesCustomInterval ? recurrenceInterval : null,
         nextDueAt: nextDueAt,
         assignmentScope: assignmentScope,
@@ -400,6 +430,48 @@ class _ItemFormPageState extends State<ItemFormPage> {
       selectedMovieImdbId = null;
       selectedMovie = null;
       movieLinkMessage = 'Movie link removed.';
+      validationMessage = null;
+    });
+  }
+
+  Future<void> findBook() async {
+    final book = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/book_picker'),
+        builder: (_) => const BookPickerPage(),
+      ),
+    );
+
+    if (book == null) return;
+
+    final openLibraryKey = book[AppBookFields.openLibraryKey]?.toString();
+    final title = book[AppBookFields.title]?.toString();
+
+    if (openLibraryKey == null || openLibraryKey.trim().isEmpty) {
+      setState(() {
+        bookLinkMessage = 'Selected book has no Open Library key.';
+      });
+      return;
+    }
+
+    setState(() {
+      selectedBookOpenLibraryKey = openLibraryKey.trim();
+      selectedBook = book;
+
+      if (title != null && title.trim().isNotEmpty) {
+        titleController.text = title.trim();
+      }
+
+      bookLinkMessage = 'Book linked.';
+      validationMessage = null;
+    });
+  }
+
+  void unlinkBook() {
+    setState(() {
+      selectedBookOpenLibraryKey = null;
+      selectedBook = null;
+      bookLinkMessage = 'Book link removed.';
       validationMessage = null;
     });
   }
@@ -512,6 +584,18 @@ class _ItemFormPageState extends State<ItemFormPage> {
                 message: movieLinkMessage,
                 onFindMovie: findMovie,
                 onUnlinkMovie: selectedMovieImdbId == null ? null : unlinkMovie,
+              ),
+            ],
+            if (isBookList) ...[
+              const SizedBox(height: 12),
+              _LinkedBookActionsCard(
+                book: selectedBook,
+                bookOpenLibraryKey: selectedBookOpenLibraryKey,
+                message: bookLinkMessage,
+                onFindBook: findBook,
+                onUnlinkBook: selectedBookOpenLibraryKey == null
+                    ? null
+                    : unlinkBook,
               ),
             ],
             const SizedBox(height: 16),
@@ -1062,6 +1146,141 @@ class _LinkedMovieActionsCard extends StatelessWidget {
                     onPressed: onUnlinkMovie,
                     icon: const Icon(Icons.link_off_outlined),
                     label: const Text('Remove movie link'),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _LinkedBookActionsCard extends StatelessWidget {
+  const _LinkedBookActionsCard({
+    required this.book,
+    required this.bookOpenLibraryKey,
+    required this.message,
+    required this.onFindBook,
+    required this.onUnlinkBook,
+  });
+
+  final Map<String, dynamic>? book;
+  final String? bookOpenLibraryKey;
+  final String? message;
+  final VoidCallback onFindBook;
+  final VoidCallback? onUnlinkBook;
+
+  bool get hasBook {
+    return bookOpenLibraryKey != null && bookOpenLibraryKey!.trim().isNotEmpty;
+  }
+
+  String text(dynamic value, {String fallback = '—'}) {
+    final result = value?.toString().trim();
+
+    if (result == null || result.isEmpty) {
+      return fallback;
+    }
+
+    return result;
+  }
+
+  String get title {
+    return text(
+      book?[AppBookFields.title],
+      fallback: bookOpenLibraryKey == null ? 'Linked book' : 'Linked book details',
+    );
+  }
+
+  String get authors {
+    return text(book?[AppBookFields.authors]);
+  }
+
+  String get firstPublishYear {
+    return text(book?[AppBookFields.firstPublishYear]);
+  }
+
+  String get coverUrl {
+    return text(book?[AppBookFields.coverUrl], fallback: '');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppNetworkImageThumbnail(
+                  imageUrl: coverUrl,
+                  width: 58,
+                  height: 84,
+                  borderRadius: 12,
+                  fallbackIcon: Icons.menu_book_outlined,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hasBook ? title : 'No book linked',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (hasBook) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          [
+                            if (authors != '—') authors,
+                            if (firstPublishYear != '—') firstPublishYear,
+                          ].join(' • '),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Text(
+                        hasBook
+                            ? book == null
+                                ? 'This item has an Open Library link, but cached details were not loaded yet.'
+                                : 'This list item is linked to cached Open Library book details.'
+                            : 'Search Open Library and link this item to a book.',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (message != null) ...[
+              const SizedBox(height: 12),
+              AppInfoMessage(message: message!),
+            ],
+            const SizedBox(height: 14),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FilledButton.icon(
+                  onPressed: onFindBook,
+                  icon: const Icon(Icons.menu_book_outlined),
+                  label: Text(hasBook ? 'Change book' : 'Find book'),
+                ),
+                if (onUnlinkBook != null) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: onUnlinkBook,
+                    icon: const Icon(Icons.link_off_outlined),
+                    label: const Text('Remove book link'),
                   ),
                 ],
               ],

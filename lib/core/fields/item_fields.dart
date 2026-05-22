@@ -14,7 +14,12 @@ class AppItemFields {
   static const recurrenceInterval = 'recurrence_interval';
   static const movieImdbId = 'movie_imdb_id';
   static const movie = 'movie';
+  static const bookOpenLibraryKey = 'book_open_library_key';
+  static const book = 'book';
   static const assignees = 'assignees';
   static const nextDueAt = 'next_due_at';
   static const createdBy = 'created_by';
+  static const completedAt = 'completed_at';
+  static const completedBy = 'completed_by';
+  static const updatedAt = 'updated_at';
 }

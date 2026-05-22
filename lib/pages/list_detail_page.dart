@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
+import 'package:pesalistas/core/book_reading_status.dart';
 import 'package:pesalistas/core/estimated_cost_calculator.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
@@ -45,6 +46,8 @@ import 'package:pesalistas/repositories/vote_repository.dart';
 import 'package:pesalistas/widgets/list_detail/list_detail_header.dart';
 import 'package:pesalistas/widgets/list_detail/list_items_section.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pesalistas/core/fields/book_fields.dart';
+import 'package:pesalistas/repositories/book_repository.dart';
 
 class ListDetailPage extends StatefulWidget {
   const ListDetailPage({super.key, required this.list});
@@ -64,6 +67,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   late final ShoppingRepository shoppingRepository;
   late final ListRepository listRepository;
   late final OmdbRepository omdbRepository;
+  late final BookRepository bookRepository;
 
   bool loadingItems = true;
   bool creatingItem = false;
@@ -119,8 +123,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
   bool get isShoppingList => listType == AppListTypes.shopping.value;
 
+  bool get isBookList => listType == AppListTypes.books.value;
+
   bool get isVotableList {
     return listType == AppListTypes.movies.value ||
+        listType == AppListTypes.books.value ||
         listType == AppListTypes.ideas.value ||
         listType == AppListTypes.activities.value;
   }
@@ -168,6 +175,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
     listRepository = ListRepository(client);
 
     omdbRepository = OmdbRepository(client);
+    bookRepository = BookRepository(client);
 
     loadItems();
   }
@@ -250,6 +258,41 @@ class _ListDetailPageState extends State<ListDetailPage> {
       }
 
       return {...item, AppItemFields.movie: movie};
+    }).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> enrichItemsWithBooks(
+    List<Map<String, dynamic>> rawItems,
+  ) async {
+    if (rawItems.isEmpty || listType != AppListTypes.books.value) {
+      return rawItems;
+    }
+
+    final books = await bookRepository.getCachedBooksForItems(rawItems);
+
+    if (books.isEmpty) {
+      return rawItems;
+    }
+
+    final booksByKey = {
+      for (final book in books)
+        book[AppBookFields.openLibraryKey].toString(): book,
+    };
+
+    return rawItems.map((item) {
+      final bookKey = item[AppItemFields.bookOpenLibraryKey]?.toString();
+
+      if (bookKey == null || bookKey.isEmpty) {
+        return item;
+      }
+
+      final book = booksByKey[bookKey];
+
+      if (book == null) {
+        return item;
+      }
+
+      return {...item, AppItemFields.book: book};
     }).toList();
   }
 
@@ -354,9 +397,10 @@ class _ListDetailPageState extends State<ListDetailPage> {
       final rawItems = await itemRepository.getItemsForList(listId);
 
       final itemsWithMovies = await enrichItemsWithMovies(rawItems);
+      final itemsWithBooks = await enrichItemsWithBooks(itemsWithMovies);
 
       final itemsWithAssignees = await enrichItemsWithAssignees(
-        itemsWithMovies,
+        itemsWithBooks,
         loadedGroupMembers,
       );
 
@@ -690,6 +734,45 @@ class _ListDetailPageState extends State<ListDetailPage> {
     };
   }
 
+  Future<void> updateBookReadingStatus({
+    required Map<String, dynamic> item,
+    required String status,
+  }) async {
+    if (completingItem) return;
+
+    final itemId = item[AppItemFields.id]?.toString();
+
+    if (itemId == null || itemId.isEmpty) {
+      return;
+    }
+
+    setState(() => completingItem = true);
+
+    try {
+      await itemRepository.updateBookReadingStatus(
+        itemId: itemId,
+        status: status,
+      );
+
+      await loadItems();
+
+      if (!mounted) return;
+
+      showSuccessSnackBar(
+        context,
+        'Book moved to ${AppBookReadingStatus.label(status)}.',
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      showErrorSnackBar(context, 'Failed to update book status.', error);
+    } finally {
+      if (mounted) {
+        setState(() => completingItem = false);
+      }
+    }
+  }
+
   Future<List<Map<String, dynamic>>> enrichItemsWithVoteSummaries(
     List<Map<String, dynamic>> loadedItems,
   ) async {
@@ -756,11 +839,13 @@ class _ListDetailPageState extends State<ListDetailPage> {
         title: result.title,
         description: result.description,
         priority: result.priority,
+        status: isBookList ? AppBookReadingStatus.toRead : null,
         deadlineAt: result.deadlineAt,
         recurrenceType: result.recurrenceType,
         recurrenceInterval: result.recurrenceInterval,
         nextDueAt: result.nextDueAt,
         movieImdbId: result.movieImdbId,
+        bookOpenLibraryKey: result.bookOpenLibraryKey,
         assignmentScope: result.assignmentScope,
         assigneeUserIds: result.assigneeUserIds,
       );
@@ -1020,6 +1105,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
         updateChoreFields: isChoreList,
         updateMovieFields: listType == AppListTypes.movies.value,
         movieImdbId: result.movieImdbId,
+        updateBookFields: isBookList,
+        bookOpenLibraryKey: result.bookOpenLibraryKey,
         recurrenceType: result.recurrenceType,
         recurrenceInterval: result.recurrenceInterval,
         nextDueAt: result.nextDueAt,
@@ -1873,6 +1960,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
                             generateShoppingFromMealPlans,
                         onClearBoughtShoppingItems: clearBoughtShoppingItems,
                         onClearAllShoppingItems: clearAllShoppingItems,
+                        onBookStatusChanged: updateBookReadingStatus,
                       ),
                       const SizedBox(height: 96),
                     ],

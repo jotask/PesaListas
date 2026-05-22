@@ -10,6 +10,7 @@ import 'package:pesalistas/widgets/list_detail/not_implemented_view.dart';
 import 'package:pesalistas/widgets/list_detail/recipes_items_view.dart';
 import 'package:pesalistas/widgets/list_detail/shopping_items_view.dart';
 import 'package:pesalistas/widgets/list_detail/task_items_view.dart';
+import 'package:pesalistas/widgets/list_detail/books_items_view.dart';
 
 class ItemsViewFactory extends StatelessWidget {
   const ItemsViewFactory({
@@ -28,6 +29,7 @@ class ItemsViewFactory extends StatelessWidget {
     required this.onDeleteRecipe,
     required this.onGenerateShoppingFromMealPlans,
     required this.onClearAll,
+    required this.onBookStatusChanged,
   });
 
   final String listType;
@@ -44,6 +46,11 @@ class ItemsViewFactory extends StatelessWidget {
   final void Function(String recipeId) onDeleteRecipe;
   final VoidCallback onGenerateShoppingFromMealPlans;
   final VoidCallback onClearAll;
+  final void Function({
+    required Map<String, dynamic> item,
+    required String status,
+  })
+  onBookStatusChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +89,21 @@ class ItemsViewFactory extends StatelessWidget {
         onDelete: onDelete,
         onVote: onVote,
         onViewVotes: onViewVotes,
+      );
+    }
+
+    if (listType == AppListTypes.books.value) {
+      return BooksItemsView(
+        items: items,
+        loading: loading,
+        onCreate: onCreate,
+        onComplete: onComplete,
+        onReopen: onReopen,
+        onEdit: onEdit,
+        onDelete: onDelete,
+        onVote: onVote,
+        onViewVotes: onViewVotes,
+        onStatusChanged: onBookStatusChanged,
       );
     }
 
