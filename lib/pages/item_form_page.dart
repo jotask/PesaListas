@@ -261,8 +261,8 @@ class _ItemFormPageState extends State<ItemFormPage> {
       selectedMovie = Map<String, dynamic>.from(itemMovie);
     }
 
-    selectedBookOpenLibraryKey =
-        widget.item?[AppItemFields.bookOpenLibraryKey]?.toString();
+    selectedBookOpenLibraryKey = widget.item?[AppItemFields.bookOpenLibraryKey]
+        ?.toString();
 
     if (selectedBookOpenLibraryKey != null &&
         selectedBookOpenLibraryKey!.trim().isEmpty) {
@@ -1157,7 +1157,6 @@ class _LinkedMovieActionsCard extends StatelessWidget {
   }
 }
 
-
 class _LinkedBookActionsCard extends StatelessWidget {
   const _LinkedBookActionsCard({
     required this.book,
@@ -1190,7 +1189,9 @@ class _LinkedBookActionsCard extends StatelessWidget {
   String get title {
     return text(
       book?[AppBookFields.title],
-      fallback: bookOpenLibraryKey == null ? 'Linked book' : 'Linked book details',
+      fallback: bookOpenLibraryKey == null
+          ? 'Linked book'
+          : 'Linked book details',
     );
   }
 
@@ -1252,8 +1253,8 @@ class _LinkedBookActionsCard extends StatelessWidget {
                       Text(
                         hasBook
                             ? book == null
-                                ? 'This item has an Open Library link, but cached details were not loaded yet.'
-                                : 'This list item is linked to cached Open Library book details.'
+                                  ? 'This item has an Open Library link, but cached details were not loaded yet.'
+                                  : 'This list item is linked to cached Open Library book details.'
                             : 'Search Open Library and link this item to a book.',
                         style: theme.textTheme.bodySmall,
                       ),
