@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/fields/group_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
@@ -10,8 +11,9 @@ import 'package:pesalistas/pages/settings_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/group_repository.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
+import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/profile_repository.dart';
-import 'package:pesalistas/widgets/home/group_grid_section.dart';
+import 'package:pesalistas/widgets/home/home_lists_section.dart';
 import 'package:pesalistas/widgets/home/pending_invitations_section.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -25,6 +27,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late final AuthRepository authRepository;
   late final GroupRepository groupRepository;
+  late final ListRepository listRepository;
   late final InvitationRepository invitationRepository;
   late final ProfileRepository profileRepository;
 
@@ -35,6 +38,8 @@ class _HomePageState extends State<HomePage> {
   bool signingOut = false;
 
   List<Map<String, dynamic>> groups = [];
+  List<Map<String, dynamic>> lists = [];
+  Map<String, String> listSummaries = {};
   List<Map<String, dynamic>> invitations = [];
 
   bool get processingInvitation => acceptingInvitation || decliningInvitation;
@@ -47,6 +52,7 @@ class _HomePageState extends State<HomePage> {
 
     authRepository = AuthRepository(client);
     groupRepository = GroupRepository(client);
+    listRepository = ListRepository(client);
     invitationRepository = InvitationRepository(client);
     profileRepository = ProfileRepository(client);
 
@@ -65,16 +71,28 @@ class _HomePageState extends State<HomePage> {
     setState(() => loading = true);
 
     try {
-      final results = await Future.wait([
-        groupRepository.getMyGroups(),
-        invitationRepository.getPendingInvitations(),
-      ]);
+      final invitationsFuture = invitationRepository.getPendingInvitations();
+      final loadedGroups = await groupRepository.getMyGroups();
+
+      final groupIds = loadedGroups
+          .map((group) => group[AppGroupFields.id]?.toString())
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toList();
+
+      final loadedLists = await listRepository.getListsForGroups(groupIds);
+      final loadedListSummaries = await listRepository.getHomeListSummaries(
+        loadedLists,
+      );
+      final loadedInvitations = await invitationsFuture;
 
       if (!mounted) return;
 
       setState(() {
-        groups = results[0];
-        invitations = results[1];
+        groups = loadedGroups;
+        lists = loadedLists;
+        invitations = loadedInvitations;
+        listSummaries = loadedListSummaries;
         loading = false;
       });
     } catch (error) {
@@ -207,7 +225,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.l10n.myGroups),
+        title: const Text('Home'),
         actions: [
           IconButton(
             onPressed: () {
@@ -243,12 +261,14 @@ class _HomePageState extends State<HomePage> {
                     onDeclineInvitation: declineInvitation,
                   ),
                   if (invitations.isNotEmpty) const SizedBox(height: 16),
-                  GroupGridSection(
+                  HomeListsSection(
                     groups: groups,
+                    lists: lists,
                     loading: false,
                     creatingGroup: creatingGroup,
                     onCreateGroup: createGroupDialog,
-                    onGroupsChanged: loadHomeData,
+                    onHomeChanged: loadHomeData,
+                    listSummaries: listSummaries,
                   ),
                 ],
               ),
