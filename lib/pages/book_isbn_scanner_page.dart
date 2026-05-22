@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pesalistas/core/fields/book_fields.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/repositories/book_repository.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BookIsbnScannerPage extends StatefulWidget {
@@ -189,13 +190,23 @@ class _BookIsbnScannerPageState extends State<BookIsbnScannerPage> {
                   ),
                   const SizedBox(height: 12),
                   if (lookingUpBook)
-                    const _LoadingBookCard()
+                    const AppMessageCard(
+                      icon: Icons.sync_outlined,
+                      message: 'Loading book info...',
+                    )
                   else if (errorMessage != null)
-                    _ErrorCard(message: errorMessage!)
+                    AppMessageCard(
+                      icon: Icons.error_outline,
+                      message: errorMessage!,
+                      tone: AppMessageCardTone.error,
+                    )
                   else if (currentBook != null)
                     _ScannedBookCard(book: currentBook, onSelect: selectBook)
                   else
-                    const _EmptyBookCard(),
+                    const AppMessageCard(
+                      icon: Icons.menu_book_outlined,
+                      message: 'Scan or enter an ISBN to load book data.',
+                    ),
                 ],
               ),
             ),
@@ -305,50 +316,6 @@ class _ManualIsbnLookupCard extends StatelessWidget {
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LoadingBookCard extends StatelessWidget {
-  const _LoadingBookCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Card(
-      child: Padding(
-        padding: EdgeInsets.all(18),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            SizedBox(width: 12),
-            Expanded(child: Text('Loading book info...')),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyBookCard extends StatelessWidget {
-  const _EmptyBookCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Card(
-      child: Padding(
-        padding: EdgeInsets.all(18),
-        child: Row(
-          children: [
-            CircleAvatar(child: Icon(Icons.menu_book_outlined)),
-            SizedBox(width: 12),
-            Expanded(child: Text('Scan or enter an ISBN to load book data.')),
           ],
         ),
       ),
@@ -503,37 +470,6 @@ class _InfoChip extends StatelessWidget {
           color: theme.colorScheme.onSurfaceVariant,
           fontSize: 12,
           fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundColor: theme.colorScheme.errorContainer,
-              child: Icon(
-                Icons.error_outline,
-                color: theme.colorScheme.onErrorContainer,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
         ),
       ),
     );

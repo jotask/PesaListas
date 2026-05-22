@@ -7,6 +7,7 @@ import 'package:pesalistas/core/value_parsing.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
 import 'package:pesalistas/repositories/shopping_repository.dart';
+import 'package:pesalistas/widgets/common/app_message_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductScannerPage extends StatefulWidget {
@@ -437,9 +438,16 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
                   ),
                   const SizedBox(height: 12),
                   if (lookingUpProduct)
-                    const _LoadingProductCard()
+                    const AppMessageCard(
+                      icon: Icons.sync_outlined,
+                      message: 'Loading product info...',
+                    )
                   else if (errorMessage != null)
-                    _ErrorCard(message: errorMessage!)
+                    AppMessageCard(
+                      icon: Icons.error_outline,
+                      message: errorMessage!,
+                      tone: AppMessageCardTone.error,
+                    )
                   else if (currentProduct != null) ...[
                     _ProductCard(
                       product: currentProduct,
@@ -470,7 +478,10 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
                       onAdd: addToShoppingList,
                     ),
                   ] else
-                    const _EmptyProductCard(),
+                    const AppMessageCard(
+                      icon: Icons.qr_code_scanner_outlined,
+                      message: 'Scan or enter a barcode to load product data.',
+                    ),
                 ],
               ),
             ),
@@ -591,83 +602,6 @@ class _ManualLookupCard extends StatelessWidget {
                 label: Text(context.l10n.requestThisBarcodeAgain),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LoadingProductCard extends StatelessWidget {
-  const _LoadingProductCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            const SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(context.l10n.loadingProductInfo)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyProductCard extends StatelessWidget {
-  const _EmptyProductCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            const CircleAvatar(child: Icon(Icons.inventory_2_outlined)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(context.l10n.scanOrEnterBarcodeToLoadProductData),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundColor: theme.colorScheme.errorContainer,
-              child: Icon(
-                Icons.error_outline,
-                color: theme.colorScheme.onErrorContainer,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
           ],
         ),
       ),
@@ -925,7 +859,11 @@ class _ProductPriceCard extends StatelessWidget {
             ),
             if (validationMessage != null) ...[
               const SizedBox(height: 12),
-              _InlineErrorMessage(message: validationMessage!),
+              AppMessageCard(
+                icon: Icons.error_outline,
+                message: validationMessage!,
+                tone: AppMessageCardTone.error,
+              ),
             ],
             const SizedBox(height: 14),
             FilledButton.icon(
@@ -943,40 +881,6 @@ class _ProductPriceCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _InlineErrorMessage extends StatelessWidget {
-  const _InlineErrorMessage({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: theme.colorScheme.onErrorContainer,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1210,7 +1114,11 @@ class _AddToShoppingListCard extends StatelessWidget {
             ),
             if (validationMessage != null) ...[
               const SizedBox(height: 12),
-              _InlineErrorMessage(message: validationMessage!),
+              AppMessageCard(
+                icon: Icons.error_outline,
+                message: validationMessage!,
+                tone: AppMessageCardTone.error,
+              ),
             ],
             const SizedBox(height: 14),
             FilledButton.icon(
