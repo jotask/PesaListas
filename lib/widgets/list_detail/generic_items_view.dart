@@ -4,6 +4,7 @@ import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 import 'package:pesalistas/widgets/list_detail/item_card.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class GenericItemsView extends StatelessWidget {
   const GenericItemsView({
@@ -54,11 +55,14 @@ class GenericItemsView extends StatelessWidget {
     return Column(
       children: [
         for (final item in items)
-          ItemCard(
+          UnreadItemHighlight(
             item: item,
-            onComplete: () => toggleItem(item),
-            onEdit: () => onEdit(item),
-            onDelete: () => onDelete(item[AppItemFields.id].toString()),
+            child: ItemCard(
+              item: item,
+              onComplete: () => toggleItem(item),
+              onEdit: () => onEdit(item),
+              onDelete: () => onDelete(item[AppItemFields.id].toString()),
+            ),
           ),
       ],
     );

@@ -4,7 +4,9 @@ import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/fields/shopping_item_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/repositories/activity_repository.dart';
 import 'package:pesalistas/widgets/list_detail/items_view_factory.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class ListItemsSection extends StatefulWidget {
   const ListItemsSection({
@@ -26,6 +28,7 @@ class ListItemsSection extends StatefulWidget {
     required this.onClearBoughtShoppingItems,
     required this.onClearAllShoppingItems,
     required this.onBookStatusChanged,
+    required this.unreadActivityByItemId,
   });
 
   final String listType;
@@ -50,6 +53,7 @@ class ListItemsSection extends StatefulWidget {
     required String status,
   })
   onBookStatusChanged;
+  final Map<String, ItemUnreadActivity> unreadActivityByItemId;
 
   @override
   State<ListItemsSection> createState() => _ListItemsSectionState();
@@ -58,7 +62,7 @@ class ListItemsSection extends StatefulWidget {
 class _ListItemsSectionState extends State<ListItemsSection> {
   ItemStatusFilter selectedFilter = ItemStatusFilter.all;
 
-  int get totalCount => widget.items.length;
+  int get totalCount => itemsWithUnreadActivity.length;
 
   int get doneCount {
     return widget.items.where(isItemDone).length;
@@ -69,19 +73,21 @@ class _ListItemsSectionState extends State<ListItemsSection> {
   }
 
   List<Map<String, dynamic>> get filteredItems {
+    final sourceItems = itemsWithUnreadActivity;
+
     if (!widget.showStatusSummary) {
-      return widget.items;
+      return sourceItems;
     }
 
     switch (selectedFilter) {
       case ItemStatusFilter.all:
-        return widget.items;
+        return sourceItems;
 
       case ItemStatusFilter.open:
-        return widget.items.where((item) => !isItemDone(item)).toList();
+        return sourceItems.where((item) => !isItemDone(item)).toList();
 
       case ItemStatusFilter.done:
-        return widget.items.where(isItemDone).toList();
+        return sourceItems.where(isItemDone).toList();
     }
   }
 
@@ -100,6 +106,24 @@ class _ListItemsSectionState extends State<ListItemsSection> {
       case ItemStatusFilter.done:
         return context.l10n.noDoneItems;
     }
+  }
+
+  List<Map<String, dynamic>> get itemsWithUnreadActivity {
+    return widget.items.map((item) {
+      final itemId = item[AppItemFields.id]?.toString();
+
+      if (itemId == null || itemId.isEmpty) {
+        return item;
+      }
+
+      final activity = widget.unreadActivityByItemId[itemId];
+
+      if (activity == null || !activity.hasUnread) {
+        return item;
+      }
+
+      return {...item, UnreadItemHighlight.activityKey: activity};
+    }).toList();
   }
 
   String get emptyFilteredSubtitle {

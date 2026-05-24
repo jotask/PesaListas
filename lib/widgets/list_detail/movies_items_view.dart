@@ -5,6 +5,7 @@ import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 import 'package:pesalistas/widgets/list_detail/movie_item_card.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class MovieItemsView extends StatefulWidget {
   const MovieItemsView({
@@ -106,21 +107,24 @@ class _MovieItemsViewState extends State<MovieItemsView> {
           _NoMovieFilterResultsCard(onClear: clearFilter)
         else
           for (final item in filteredItems)
-            MovieItemCard(
+            UnreadItemHighlight(
               item: item,
-              fallbackTitle: context.l10n.untitledMovie,
-              onEdit: () => widget.onEdit(item),
-              onVote: () => widget.onVote(item),
-              onViewVotes: () => widget.onViewVotes(item),
-              onMarkWatched: () {
-                widget.onComplete(item[AppItemFields.id].toString());
-              },
-              onMarkToWatch: () {
-                widget.onReopen(item[AppItemFields.id].toString());
-              },
-              onDelete: () {
-                widget.onDelete(item[AppItemFields.id].toString());
-              },
+              child: MovieItemCard(
+                item: item,
+                fallbackTitle: context.l10n.untitledMovie,
+                onEdit: () => widget.onEdit(item),
+                onVote: () => widget.onVote(item),
+                onViewVotes: () => widget.onViewVotes(item),
+                onMarkWatched: () {
+                  widget.onComplete(item[AppItemFields.id].toString());
+                },
+                onMarkToWatch: () {
+                  widget.onReopen(item[AppItemFields.id].toString());
+                },
+                onDelete: () {
+                  widget.onDelete(item[AppItemFields.id].toString());
+                },
+              ),
             ),
       ],
     );

@@ -4,6 +4,7 @@ import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/widgets/list_detail/chore_item_card.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class ChoreItemsView extends StatelessWidget {
   const ChoreItemsView({
@@ -43,20 +44,23 @@ class ChoreItemsView extends StatelessWidget {
     return Column(
       children: [
         for (final item in items)
-          ChoreItemCard(
+          UnreadItemHighlight(
             item: item,
-            onComplete: () {
-              final itemId = item[AppItemFields.id].toString();
-              final isDone = AppItemStatus.isDone(item[AppItemFields.status]);
+            child: ChoreItemCard(
+              item: item,
+              onComplete: () {
+                final itemId = item[AppItemFields.id].toString();
+                final isDone = AppItemStatus.isDone(item[AppItemFields.status]);
 
-              if (isDone) {
-                onReopen(itemId);
-              } else {
-                onComplete(itemId);
-              }
-            },
-            onEdit: () => onEdit(item),
-            onDelete: () => onDelete(item[AppItemFields.id].toString()),
+                if (isDone) {
+                  onReopen(itemId);
+                } else {
+                  onComplete(itemId);
+                }
+              },
+              onEdit: () => onEdit(item),
+              onDelete: () => onDelete(item[AppItemFields.id].toString()),
+            ),
           ),
       ],
     );

@@ -3,6 +3,7 @@ import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/list_detail/activity_item_card.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class ActivitiesItemsView extends StatelessWidget {
   const ActivitiesItemsView({
@@ -44,13 +45,16 @@ class ActivitiesItemsView extends StatelessWidget {
     return Column(
       children: [
         for (final item in items)
-          ActivityItemCard(
+          UnreadItemHighlight(
             item: item,
-            fallbackTitle: context.l10n.untitledActivity,
-            onEdit: () => onEdit(item),
-            onVote: () => onVote(item),
-            onViewVotes: () => onViewVotes(item),
-            onDelete: () => onDelete(item[AppItemFields.id].toString()),
+            child: ActivityItemCard(
+              item: item,
+              fallbackTitle: context.l10n.untitledActivity,
+              onEdit: () => onEdit(item),
+              onVote: () => onVote(item),
+              onViewVotes: () => onViewVotes(item),
+              onDelete: () => onDelete(item[AppItemFields.id].toString()),
+            ),
           ),
       ],
     );

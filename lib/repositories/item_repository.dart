@@ -3,11 +3,13 @@ import 'package:pesalistas/core/app_analytics.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/controllers/app_notification_controller.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
+import 'package:pesalistas/core/fields/list_fields.dart';
 import 'package:pesalistas/core/item_assignee_fields.dart';
 import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/recurrence_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
+import 'package:pesalistas/repositories/activity_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ItemRepository {
@@ -26,6 +28,8 @@ class ItemRepository {
   }
 
   Future<void> completeItem(String itemId) async {
+    final activityContext = await _getItemActivityContext(itemId);
+
     await _client.rpc(
       'complete_item',
       params: {'target_item_id': itemId, 'completion_note': null},
@@ -36,21 +40,54 @@ class ItemRepository {
         .update({AppItemFields.status: AppItemStatus.done})
         .eq(AppItemFields.id, itemId);
 
+    if (activityContext != null) {
+      await _recordItemActivity(
+        context: activityContext,
+        eventType: 'item_completed',
+        body: 'Completed ${activityContext.itemTitle}',
+        metadata: {'item_title': activityContext.itemTitle},
+      );
+    }
+
     await AppNotificationController.cancelItemReminders(itemId);
     await AppAnalytics.instance.logItemCompleted();
   }
 
   Future<void> reopenItem(String itemId) async {
+    final activityContext = await _getItemActivityContext(itemId);
+
     await _client
         .from(AppTables.items)
         .update({AppItemFields.status: AppItemStatus.open})
         .eq(AppItemFields.id, itemId);
 
+    if (activityContext != null) {
+      await _recordItemActivity(
+        context: activityContext,
+        eventType: 'item_reopened',
+        body: 'Reopened ${activityContext.itemTitle}',
+        metadata: {'item_title': activityContext.itemTitle},
+      );
+    }
+
     await AppAnalytics.instance.logItemReopened();
   }
 
   Future<void> deleteItem(String itemId) async {
+    final activityContext = await _getItemActivityContext(itemId);
+
     await _client.from(AppTables.items).delete().eq(AppItemFields.id, itemId);
+
+    if (activityContext != null) {
+      await _recordListActivity(
+        groupId: activityContext.groupId,
+        listId: activityContext.listId,
+        eventType: 'item_deleted',
+        title: activityContext.listTitle,
+        body: 'Deleted ${activityContext.itemTitle}',
+        metadata: {'item_title': activityContext.itemTitle},
+      );
+    }
 
     await AppNotificationController.cancelItemReminders(itemId);
     await AppAnalytics.instance.logItemDeleted();
@@ -182,6 +219,8 @@ class ItemRepository {
       AppItemFields.description: description,
     };
 
+    final activityContext = await _getItemActivityContext(itemId);
+
     if (updateTaskFields) {
       values.addAll({
         AppItemFields.priority: priority,
@@ -264,6 +303,15 @@ class ItemRepository {
       nextDueAt: updateChoreFields ? nextDueAt : null,
     );
 
+    if (activityContext != null) {
+      await _recordItemActivity(
+        context: activityContext,
+        eventType: 'item_updated',
+        body: 'Updated $title',
+        metadata: {'item_title': title},
+      );
+    }
+
     await AppAnalytics.instance.logItemUpdated();
   }
 
@@ -281,6 +329,8 @@ class ItemRepository {
     if (cleanStatus.isEmpty) {
       throw ArgumentError('Status is required.');
     }
+
+    final activityContext = await _getItemActivityContext(cleanItemId);
 
     final values = <String, dynamic>{
       AppItemFields.status: cleanStatus,
@@ -301,6 +351,18 @@ class ItemRepository {
         .from(AppTables.items)
         .update(values)
         .eq(AppItemFields.id, cleanItemId);
+
+    if (activityContext != null) {
+      await _recordItemActivity(
+        context: activityContext,
+        eventType: 'book_status_updated',
+        body: 'Updated ${activityContext.itemTitle}',
+        metadata: {
+          'item_title': activityContext.itemTitle,
+          'status': cleanStatus,
+        },
+      );
+    }
   }
 
   Future<void> _sendItemAssignedPush({
@@ -335,6 +397,132 @@ class ItemRepository {
         stackTrace,
         reason: 'send_item_assigned_push_failed',
       );
+    }
+  }
+
+  ActivityRepository get _activityRepository => ActivityRepository(_client);
+
+  Future<_ListActivityContext?> _getListActivityContext(String listId) async {
+    final cleanListId = listId.trim();
+
+    if (cleanListId.isEmpty) {
+      return null;
+    }
+
+    final response = await _client
+        .from(AppTables.lists)
+        .select(
+          '${AppListFields.id}, '
+          '${AppListFields.groupId}, '
+          '${AppListFields.name}',
+        )
+        .eq(AppListFields.id, cleanListId)
+        .maybeSingle();
+
+    if (response == null) {
+      return null;
+    }
+
+    final list = Map<String, dynamic>.from(response);
+    final groupId = list[AppListFields.groupId]?.toString();
+    final title = list[AppListFields.name]?.toString().trim();
+
+    if (groupId == null || groupId.isEmpty) {
+      return null;
+    }
+
+    return _ListActivityContext(
+      groupId: groupId,
+      listId: cleanListId,
+      listTitle: title == null || title.isEmpty ? 'List' : title,
+    );
+  }
+
+  Future<_ItemActivityContext?> _getItemActivityContext(String itemId) async {
+    final cleanItemId = itemId.trim();
+
+    if (cleanItemId.isEmpty) {
+      return null;
+    }
+
+    final response = await _client
+        .from(AppTables.items)
+        .select(
+          '${AppItemFields.id}, '
+          '${AppItemFields.listId}, '
+          '${AppItemFields.title}',
+        )
+        .eq(AppItemFields.id, cleanItemId)
+        .maybeSingle();
+
+    if (response == null) {
+      return null;
+    }
+
+    final item = Map<String, dynamic>.from(response);
+    final listId = item[AppItemFields.listId]?.toString();
+    final itemTitle = item[AppItemFields.title]?.toString().trim();
+
+    if (listId == null || listId.isEmpty) {
+      return null;
+    }
+
+    final listContext = await _getListActivityContext(listId);
+
+    if (listContext == null) {
+      return null;
+    }
+
+    return _ItemActivityContext(
+      groupId: listContext.groupId,
+      listId: listContext.listId,
+      listTitle: listContext.listTitle,
+      itemId: cleanItemId,
+      itemTitle: itemTitle == null || itemTitle.isEmpty
+          ? 'Untitled item'
+          : itemTitle,
+    );
+  }
+
+  Future<void> _recordItemActivity({
+    required _ItemActivityContext context,
+    required String eventType,
+    required String body,
+    Map<String, dynamic> metadata = const {},
+  }) async {
+    await _recordListActivity(
+      groupId: context.groupId,
+      listId: context.listId,
+      itemId: context.itemId,
+      eventType: eventType,
+      title: context.listTitle,
+      body: body,
+      metadata: metadata,
+    );
+  }
+
+  Future<void> _recordListActivity({
+    required String groupId,
+    required String listId,
+    required String eventType,
+    required String title,
+    required String body,
+    String? itemId,
+    Map<String, dynamic> metadata = const {},
+  }) async {
+    try {
+      await _activityRepository.createActivityEvent(
+        groupId: groupId,
+        listId: listId,
+        itemId: itemId,
+        eventType: eventType,
+        title: title,
+        body: body,
+        metadata: metadata,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('ITEM ACTIVITY EVENT FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
     }
   }
 
@@ -385,6 +573,20 @@ class ItemRepository {
     final createdItem = Map<String, dynamic>.from(created);
     final createdItemId = createdItem[AppItemFields.id].toString();
 
+    final listContext = await _getListActivityContext(listId);
+
+    if (listContext != null) {
+      await _recordListActivity(
+        groupId: listContext.groupId,
+        listId: listContext.listId,
+        itemId: createdItemId,
+        eventType: 'item_created',
+        title: listContext.listTitle,
+        body: 'Added $title',
+        metadata: {'item_title': title},
+      );
+    }
+
     if (normalizedScope == AppItemAssignmentScopes.specific) {
       await replaceAssignees(itemId: createdItemId, userIds: assigneeUserIds);
 
@@ -415,4 +617,32 @@ class ItemRepository {
 
     return createdItem;
   }
+}
+
+class _ListActivityContext {
+  const _ListActivityContext({
+    required this.groupId,
+    required this.listId,
+    required this.listTitle,
+  });
+
+  final String groupId;
+  final String listId;
+  final String listTitle;
+}
+
+class _ItemActivityContext {
+  const _ItemActivityContext({
+    required this.groupId,
+    required this.listId,
+    required this.listTitle,
+    required this.itemId,
+    required this.itemTitle,
+  });
+
+  final String groupId;
+  final String listId;
+  final String listTitle;
+  final String itemId;
+  final String itemTitle;
 }

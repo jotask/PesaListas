@@ -1,8 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/meal_plan_fields.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/core/fields/shopping_item_fields.dart';
+import 'package:pesalistas/core/list_types.dart';
+import 'package:pesalistas/repositories/activity_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 
@@ -10,6 +13,55 @@ class ShoppingRepository {
   ShoppingRepository(this._client);
 
   final SupabaseClient _client;
+
+  ActivityRepository get _activityRepository => ActivityRepository(_client);
+
+  Future<Map<String, dynamic>?> _getShoppingItem(String shoppingItemId) async {
+    final response = await _client
+        .from(AppTables.shoppingListItems)
+        .select()
+        .eq(AppShoppingItemFields.id, shoppingItemId)
+        .maybeSingle();
+
+    if (response == null) {
+      return null;
+    }
+
+    return Map<String, dynamic>.from(response);
+  }
+
+  String _shoppingItemName(
+    Map<String, dynamic>? item, {
+    String fallback = 'item',
+  }) {
+    final value = item?[AppShoppingItemFields.name]?.toString().trim();
+
+    if (value == null || value.isEmpty) {
+      return fallback;
+    }
+
+    return value;
+  }
+
+  Future<void> _recordShoppingActivity({
+    required String groupId,
+    required String eventType,
+    required String body,
+    Map<String, dynamic> metadata = const {},
+  }) async {
+    try {
+      await _activityRepository.createGroupListActivity(
+        groupId: groupId,
+        listType: AppListTypes.shopping.value,
+        eventType: eventType,
+        body: body,
+        metadata: metadata,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('SHOPPING ACTIVITY EVENT FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
 
   Future<List<Map<String, dynamic>>> getShoppingItemsForGroup(
     String groupId,
@@ -70,20 +122,55 @@ class ShoppingRepository {
   }
 
   Future<void> clearAllItems(String groupId) async {
+    final existingResponse = await _client
+        .from(AppTables.shoppingListItems)
+        .select(AppShoppingItemFields.id)
+        .eq(AppShoppingItemFields.groupId, groupId);
+
+    final existingItems = List<Map<String, dynamic>>.from(existingResponse);
+    final count = existingItems.length;
+
     await _client
         .from(AppTables.shoppingListItems)
         .delete()
         .eq(AppShoppingItemFields.groupId, groupId);
 
+    if (count > 0) {
+      await _recordShoppingActivity(
+        groupId: groupId,
+        eventType: 'shopping_items_cleared',
+        body: 'Cleared $count shopping ${count == 1 ? 'item' : 'items'}',
+        metadata: {'count': count},
+      );
+    }
+
     await AppAnalytics.instance.logShoppingItemsCleared(scope: 'all');
   }
 
   Future<void> clearBoughtItems(String groupId) async {
+    final existingResponse = await _client
+        .from(AppTables.shoppingListItems)
+        .select(AppShoppingItemFields.id)
+        .eq(AppShoppingItemFields.groupId, groupId)
+        .eq(AppShoppingItemFields.checked, true);
+
+    final existingItems = List<Map<String, dynamic>>.from(existingResponse);
+    final count = existingItems.length;
+
     await _client
         .from(AppTables.shoppingListItems)
         .delete()
         .eq(AppShoppingItemFields.groupId, groupId)
         .eq(AppShoppingItemFields.checked, true);
+
+    if (count > 0) {
+      await _recordShoppingActivity(
+        groupId: groupId,
+        eventType: 'shopping_bought_items_cleared',
+        body: 'Cleared $count bought shopping ${count == 1 ? 'item' : 'items'}',
+        metadata: {'count': count},
+      );
+    }
 
     await AppAnalytics.instance.logShoppingItemsCleared(scope: 'bought');
   }
@@ -130,6 +217,17 @@ class ShoppingRepository {
         .insert(row)
         .select()
         .single();
+
+    await _recordShoppingActivity(
+      groupId: groupId,
+      eventType: 'shopping_item_created',
+      body: 'Added $name',
+      metadata: {
+        'shopping_item_id': result[AppShoppingItemFields.id]?.toString(),
+        'item_name': name,
+        'source': 'product',
+      },
+    );
 
     await AppAnalytics.instance.logShoppingItemCreated(
       source: 'product',
@@ -178,20 +276,35 @@ class ShoppingRepository {
         ? quantity * estimatedUnitPrice
         : estimatedUnitPrice;
 
-    await _client.from(AppTables.shoppingListItems).insert({
-      AppShoppingItemFields.groupId: groupId,
-      AppShoppingItemFields.name: name,
-      AppShoppingItemFields.quantity: quantity,
-      AppShoppingItemFields.unit: unit,
-      AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
-      AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
-      AppShoppingItemFields.priceCurrency: priceCurrency,
-      AppShoppingItemFields.barcode: barcode,
-      AppShoppingItemFields.catalogItemId: catalogItemId,
-      AppShoppingItemFields.productName: productName,
-      AppShoppingItemFields.productImageUrl: productImageUrl,
-      AppShoppingItemFields.createdBy: _client.auth.currentUser!.id,
-    });
+    final result = await _client
+        .from(AppTables.shoppingListItems)
+        .insert({
+          AppShoppingItemFields.groupId: groupId,
+          AppShoppingItemFields.name: name,
+          AppShoppingItemFields.quantity: quantity,
+          AppShoppingItemFields.unit: unit,
+          AppShoppingItemFields.estimatedUnitPrice: estimatedUnitPrice,
+          AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
+          AppShoppingItemFields.priceCurrency: priceCurrency,
+          AppShoppingItemFields.barcode: barcode,
+          AppShoppingItemFields.catalogItemId: catalogItemId,
+          AppShoppingItemFields.productName: productName,
+          AppShoppingItemFields.productImageUrl: productImageUrl,
+          AppShoppingItemFields.createdBy: _client.auth.currentUser!.id,
+        })
+        .select()
+        .single();
+
+    await _recordShoppingActivity(
+      groupId: groupId,
+      eventType: 'shopping_item_created',
+      body: 'Added $name',
+      metadata: {
+        'shopping_item_id': result[AppShoppingItemFields.id]?.toString(),
+        'item_name': name,
+        'source': 'manual',
+      },
+    );
 
     await AppAnalytics.instance.logShoppingItemCreated(
       source: 'manual',
@@ -214,6 +327,10 @@ class ShoppingRepository {
     String? productName,
     String? productImageUrl,
   }) async {
+    final previousItem = await _getShoppingItem(shoppingItemId);
+    final groupId = previousItem?[AppShoppingItemFields.groupId]?.toString();
+    final previousName = _shoppingItemName(previousItem, fallback: name);
+
     final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
         ? quantity * estimatedUnitPrice
         : estimatedUnitPrice;
@@ -234,6 +351,19 @@ class ShoppingRepository {
         })
         .eq(AppShoppingItemFields.id, shoppingItemId);
 
+    if (groupId != null && groupId.isNotEmpty) {
+      await _recordShoppingActivity(
+        groupId: groupId,
+        eventType: 'shopping_item_updated',
+        body: 'Updated $name',
+        metadata: {
+          'shopping_item_id': shoppingItemId,
+          'item_name': name,
+          'previous_name': previousName,
+        },
+      );
+    }
+
     await AppAnalytics.instance.logShoppingItemUpdated(
       hasQuantity: quantity != null,
       hasEstimatedPrice: estimatedUnitPrice != null,
@@ -246,19 +376,51 @@ class ShoppingRepository {
     required String shoppingItemId,
     required bool checked,
   }) async {
+    final previousItem = await _getShoppingItem(shoppingItemId);
+    final groupId = previousItem?[AppShoppingItemFields.groupId]?.toString();
+    final itemName = _shoppingItemName(previousItem);
+
     await _client
         .from(AppTables.shoppingListItems)
         .update({AppShoppingItemFields.checked: checked})
         .eq(AppShoppingItemFields.id, shoppingItemId);
 
+    if (groupId != null && groupId.isNotEmpty) {
+      await _recordShoppingActivity(
+        groupId: groupId,
+        eventType: checked
+            ? 'shopping_item_checked'
+            : 'shopping_item_unchecked',
+        body: checked ? 'Bought $itemName' : 'Marked $itemName as not bought',
+        metadata: {
+          'shopping_item_id': shoppingItemId,
+          'item_name': itemName,
+          'checked': checked,
+        },
+      );
+    }
+
     await AppAnalytics.instance.logShoppingItemChecked(checked: checked);
   }
 
   Future<void> deleteShoppingItem(String shoppingItemId) async {
+    final previousItem = await _getShoppingItem(shoppingItemId);
+    final groupId = previousItem?[AppShoppingItemFields.groupId]?.toString();
+    final itemName = _shoppingItemName(previousItem);
+
     await _client
         .from(AppTables.shoppingListItems)
         .delete()
         .eq(AppShoppingItemFields.id, shoppingItemId);
+
+    if (groupId != null && groupId.isNotEmpty) {
+      await _recordShoppingActivity(
+        groupId: groupId,
+        eventType: 'shopping_item_deleted',
+        body: 'Deleted $itemName',
+        metadata: {'shopping_item_id': shoppingItemId, 'item_name': itemName},
+      );
+    }
 
     await AppAnalytics.instance.logShoppingItemDeleted();
   }

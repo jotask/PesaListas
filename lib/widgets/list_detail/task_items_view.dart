@@ -4,6 +4,7 @@ import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 import 'package:pesalistas/widgets/list_detail/task_item_card.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class TaskItemsView extends StatelessWidget {
   const TaskItemsView({
@@ -43,20 +44,23 @@ class TaskItemsView extends StatelessWidget {
     return Column(
       children: [
         for (final item in items)
-          TaskItemCard(
+          UnreadItemHighlight(
             item: item,
-            onComplete: () {
-              final itemId = item[AppItemFields.id].toString();
-              final isDone = AppItemStatus.isDone(item[AppItemFields.status]);
+            child: TaskItemCard(
+              item: item,
+              onComplete: () {
+                final itemId = item[AppItemFields.id].toString();
+                final isDone = AppItemStatus.isDone(item[AppItemFields.status]);
 
-              if (isDone) {
-                onReopen(itemId);
-              } else {
-                onComplete(itemId);
-              }
-            },
-            onEdit: () => onEdit(item),
-            onDelete: () => onDelete(item[AppItemFields.id].toString()),
+                if (isDone) {
+                  onReopen(itemId);
+                } else {
+                  onComplete(itemId);
+                }
+              },
+              onEdit: () => onEdit(item),
+              onDelete: () => onDelete(item[AppItemFields.id].toString()),
+            ),
           ),
       ],
     );

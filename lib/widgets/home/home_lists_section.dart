@@ -5,6 +5,7 @@ import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/group_detail_page.dart';
 import 'package:pesalistas/pages/list_detail_page.dart';
+import 'package:pesalistas/repositories/activity_repository.dart';
 import 'package:pesalistas/widgets/common/app_list_type_pill.dart';
 import 'package:pesalistas/widgets/common/empty_info_card.dart';
 
@@ -18,6 +19,8 @@ class HomeListsSection extends StatefulWidget {
     required this.creatingGroup,
     required this.onCreateGroup,
     required this.onHomeChanged,
+    required this.unreadActivityByListId,
+    this.onOpenList,
   });
 
   final List<Map<String, dynamic>> groups;
@@ -27,6 +30,8 @@ class HomeListsSection extends StatefulWidget {
   final bool creatingGroup;
   final VoidCallback onCreateGroup;
   final VoidCallback onHomeChanged;
+  final Map<String, ListUnreadActivity> unreadActivityByListId;
+  final Future<void> Function(Map<String, dynamic> list)? onOpenList;
 
   @override
   State<HomeListsSection> createState() => _HomeListsSectionState();
@@ -183,7 +188,8 @@ class _HomeListsSectionState extends State<HomeListsSection> {
               toggleGroup(groupId);
             },
             onOpenGroup: () => openGroup(group),
-            onOpenList: openList,
+            onOpenList: widget.onOpenList ?? openList,
+            unreadActivityByListId: widget.unreadActivityByListId,
           ),
           const SizedBox(height: 12),
         ],
@@ -236,6 +242,7 @@ class _HomeGroupSection extends StatelessWidget {
     required this.onToggle,
     required this.onOpenGroup,
     required this.onOpenList,
+    required this.unreadActivityByListId,
   });
 
   final Map<String, dynamic> group;
@@ -245,6 +252,7 @@ class _HomeGroupSection extends StatelessWidget {
   final VoidCallback onToggle;
   final VoidCallback onOpenGroup;
   final Future<void> Function(Map<String, dynamic> list) onOpenList;
+  final Map<String, ListUnreadActivity> unreadActivityByListId;
 
   String get groupName {
     final value = group[AppGroupFields.name]?.toString().trim();
@@ -266,6 +274,22 @@ class _HomeGroupSection extends StatelessWidget {
     }
 
     return '${lists.length} active lists';
+  }
+
+  int get unreadCount {
+    var total = 0;
+
+    for (final list in lists) {
+      final listId = list[AppListFields.id]?.toString();
+
+      if (listId == null || listId.isEmpty) {
+        continue;
+      }
+
+      total += unreadActivityByListId[listId]?.unreadCount ?? 0;
+    }
+
+    return total;
   }
 
   @override
@@ -314,6 +338,10 @@ class _HomeGroupSection extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (unreadCount > 0) ...[
+                    _UnreadBadge(count: unreadCount),
+                    const SizedBox(width: 8),
+                  ],
                   IconButton(
                     onPressed: onOpenGroup,
                     icon: const Icon(Icons.settings_outlined),
@@ -342,6 +370,9 @@ class _HomeGroupSection extends StatelessWidget {
                   summaryText:
                       listSummaries[list[AppListFields.id]?.toString()],
                   onTap: () => onOpenList(list),
+                  unreadActivity:
+                      unreadActivityByListId[list[AppListFields.id]
+                          ?.toString()],
                 ),
           ],
         ],
@@ -383,11 +414,13 @@ class _HomeListRow extends StatelessWidget {
     required this.list,
     required this.summaryText,
     required this.onTap,
+    required this.unreadActivity,
   });
 
   final Map<String, dynamic> list;
   final String? summaryText;
   final VoidCallback onTap;
+  final ListUnreadActivity? unreadActivity;
 
   String get name {
     final value = list[AppListFields.name]?.toString().trim();
@@ -412,6 +445,10 @@ class _HomeListRow extends StatelessWidget {
     }
 
     return DateTime.tryParse(value)?.toLocal();
+  }
+
+  bool get hasUnread {
+    return unreadActivity?.hasUnread == true;
   }
 
   String updatedLabel(BuildContext context) {
@@ -515,11 +552,53 @@ class _HomeListRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
+            if (hasUnread) ...[
+              _UnreadBadge(count: unreadActivity!.unreadCount),
+              const SizedBox(width: 8),
+            ],
             Icon(
               Icons.chevron_right,
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _UnreadBadge extends StatelessWidget {
+  const _UnreadBadge({required this.count});
+
+  final int count;
+
+  String get label {
+    if (count > 99) {
+      return '99+';
+    }
+
+    return count.toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 22),
+      height: 22,
+      padding: const EdgeInsets.symmetric(horizontal: 7),
+      decoration: BoxDecoration(
+        color: colors.error,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        style: TextStyle(
+          color: colors.onError,
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
         ),
       ),
     );

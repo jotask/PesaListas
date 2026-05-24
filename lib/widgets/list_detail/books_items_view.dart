@@ -4,6 +4,7 @@ import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/list_detail/book_item_card.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class BooksItemsView extends StatefulWidget {
   const BooksItemsView({
@@ -127,17 +128,20 @@ class _BooksItemsViewState extends State<BooksItemsView> {
           _NoBookFilterResultsCard(onClear: clearFilter)
         else
           for (final item in visibleItems)
-            BookItemCard(
+            UnreadItemHighlight(
               item: item,
-              fallbackTitle: 'Book',
-              onEdit: () => widget.onEdit(item),
-              onVote: () => widget.onVote(item),
-              onViewVotes: () => widget.onViewVotes(item),
-              onDelete: () =>
-                  widget.onDelete(item[AppItemFields.id].toString()),
-              onStatusChanged: (status) {
-                widget.onStatusChanged(item: item, status: status);
-              },
+              child: BookItemCard(
+                item: item,
+                fallbackTitle: 'Book',
+                onEdit: () => widget.onEdit(item),
+                onVote: () => widget.onVote(item),
+                onViewVotes: () => widget.onViewVotes(item),
+                onDelete: () =>
+                    widget.onDelete(item[AppItemFields.id].toString()),
+                onStatusChanged: (status) {
+                  widget.onStatusChanged(item: item, status: status);
+                },
+              ),
             ),
       ],
     );

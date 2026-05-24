@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
@@ -35,6 +37,7 @@ import 'package:pesalistas/pages/product_scanner_page.dart';
 import 'package:pesalistas/pages/recipe_details_page.dart';
 import 'package:pesalistas/pages/recipe_ingredient_form_page.dart';
 import 'package:pesalistas/pages/shopping_item_form_page.dart';
+import 'package:pesalistas/repositories/activity_repository.dart';
 import 'package:pesalistas/repositories/item_repository.dart';
 import 'package:pesalistas/repositories/list_repository.dart';
 import 'package:pesalistas/repositories/meal_plan_repository.dart';
@@ -68,6 +71,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   late final ListRepository listRepository;
   late final TmdbRepository tmdbRepository;
   late final BookRepository bookRepository;
+  late final ActivityRepository activityRepository;
 
   bool loadingItems = true;
   bool creatingItem = false;
@@ -87,6 +91,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool listChanged = false;
 
   List<Map<String, dynamic>> items = [];
+  Map<String, ItemUnreadActivity> unreadActivityByItemId = {};
   late Map<String, dynamic> currentList;
   List<Map<String, dynamic>> groupMembers = [];
 
@@ -173,6 +178,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
     mealPlanRepository = MealPlanRepository(client);
     shoppingRepository = ShoppingRepository(client);
     listRepository = ListRepository(client);
+    activityRepository = ActivityRepository(client);
 
     tmdbRepository = TmdbRepository(client);
     bookRepository = BookRepository(client);
@@ -296,6 +302,15 @@ class _ListDetailPageState extends State<ListDetailPage> {
     }).toList();
   }
 
+  Future<void> markCurrentListAsRead() async {
+    try {
+      await activityRepository.markListAsRead(listId);
+    } catch (error, stackTrace) {
+      debugPrint('MARK LIST AS READ FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   Future<void> loadItems() async {
     if (!mounted) return;
 
@@ -303,6 +318,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
 
     try {
       final loadedGroupMembers = await loadGroupMembersWithProfiles();
+
+      final loadedUnreadActivityByItemId = await activityRepository
+          .getUnreadItemActivityForList(listId);
 
       if (isShoppingList) {
         final shoppingItems = await shoppingRepository.getShoppingItemsForGroup(
@@ -312,10 +330,13 @@ class _ListDetailPageState extends State<ListDetailPage> {
         if (!mounted) return;
 
         setState(() {
+          groupMembers = loadedGroupMembers;
           items = shoppingItems;
+          unreadActivityByItemId = loadedUnreadActivityByItemId;
           loadingItems = false;
         });
 
+        unawaited(markCurrentListAsRead());
         return;
       }
 
@@ -374,9 +395,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
         setState(() {
           groupMembers = loadedGroupMembers;
           items = enrichedMealPlans;
+          unreadActivityByItemId = loadedUnreadActivityByItemId;
           loadingItems = false;
         });
 
+        unawaited(markCurrentListAsRead());
         return;
       }
 
@@ -388,9 +411,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
         setState(() {
           groupMembers = loadedGroupMembers;
           items = recipes;
+          unreadActivityByItemId = loadedUnreadActivityByItemId;
           loadingItems = false;
         });
 
+        unawaited(markCurrentListAsRead());
         return;
       }
 
@@ -413,8 +438,11 @@ class _ListDetailPageState extends State<ListDetailPage> {
       setState(() {
         groupMembers = loadedGroupMembers;
         items = enrichedItems;
+        unreadActivityByItemId = loadedUnreadActivityByItemId;
         loadingItems = false;
       });
+
+      unawaited(markCurrentListAsRead());
     } catch (error) {
       if (!mounted) return;
 
@@ -1948,6 +1976,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
                       onClearBoughtShoppingItems: clearBoughtShoppingItems,
                       onClearAllShoppingItems: clearAllShoppingItems,
                       onBookStatusChanged: updateBookReadingStatus,
+                      unreadActivityByItemId: unreadActivityByItemId,
                     ),
                     const SizedBox(height: 96),
                   ],

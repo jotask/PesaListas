@@ -11,6 +11,7 @@ import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/create_group_page.dart';
 import 'package:pesalistas/pages/list_detail_page.dart';
 import 'package:pesalistas/pages/settings_page.dart';
+import 'package:pesalistas/repositories/activity_repository.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/group_repository.dart';
 import 'package:pesalistas/repositories/invitation_repository.dart';
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   late final AuthRepository authRepository;
   late final GroupRepository groupRepository;
   late final ListRepository listRepository;
+  late final ActivityRepository activityRepository;
   late final InvitationRepository invitationRepository;
   late final ProfileRepository profileRepository;
 
@@ -44,6 +46,7 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> groups = [];
   List<Map<String, dynamic>> lists = [];
   Map<String, String> listSummaries = {};
+  Map<String, ListUnreadActivity> unreadActivityByListId = {};
   List<Map<String, dynamic>> invitations = [];
   HomeAttentionSummary attentionSummary = const HomeAttentionSummary();
 
@@ -58,6 +61,7 @@ class _HomePageState extends State<HomePage> {
     authRepository = AuthRepository(client);
     groupRepository = GroupRepository(client);
     listRepository = ListRepository(client);
+    activityRepository = ActivityRepository(client);
     invitationRepository = InvitationRepository(client);
     profileRepository = ProfileRepository(client);
 
@@ -90,6 +94,15 @@ class _HomePageState extends State<HomePage> {
         loadedLists,
       );
 
+      final loadedUnreadActivityByListId = await activityRepository
+          .getUnreadActivityByList(
+            loadedLists
+                .map((list) => list[AppListFields.id]?.toString())
+                .whereType<String>()
+                .where((id) => id.isNotEmpty)
+                .toList(),
+          );
+
       final loadedAttentionSummary = await listRepository
           .getHomeAttentionSummary(groups: loadedGroups, lists: loadedLists);
 
@@ -103,6 +116,7 @@ class _HomePageState extends State<HomePage> {
         invitations = loadedInvitations;
         listSummaries = loadedListSummaries;
         attentionSummary = loadedAttentionSummary;
+        unreadActivityByListId = loadedUnreadActivityByListId;
         loading = false;
       });
     } catch (error) {
@@ -111,6 +125,19 @@ class _HomePageState extends State<HomePage> {
       setState(() => loading = false);
       showErrorSnackBar(context, context.l10n.failedToLoadHomeData, error);
     }
+  }
+
+  Future<void> openHomeList(Map<String, dynamic> list) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/list_detail'),
+        builder: (_) => ListDetailPage(list: list),
+      ),
+    );
+
+    if (!mounted) return;
+
+    await loadHomeData();
   }
 
   Future<void> acceptInvitation(String invitationId) async {
@@ -248,16 +275,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        settings: const RouteSettings(name: '/list_detail'),
-        builder: (_) => ListDetailPage(list: list),
-      ),
-    );
-
-    if (!mounted) return;
-
-    await loadHomeData();
+    await openHomeList(list);
   }
 
   @override
@@ -322,6 +340,8 @@ class _HomePageState extends State<HomePage> {
                     onCreateGroup: createGroupDialog,
                     onHomeChanged: loadHomeData,
                     listSummaries: listSummaries,
+                    unreadActivityByListId: unreadActivityByListId,
+                    onOpenList: openHomeList,
                   ),
                 ],
               ),

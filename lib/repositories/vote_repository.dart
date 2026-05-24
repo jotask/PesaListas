@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/vote_fields.dart';
 import 'package:pesalistas/core/fields/vote_summary_fields.dart';
+import 'package:pesalistas/repositories/activity_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 
@@ -8,6 +10,27 @@ class VoteRepository {
   VoteRepository(this._client);
 
   final SupabaseClient _client;
+
+  ActivityRepository get _activityRepository => ActivityRepository(_client);
+
+  Future<void> _recordVoteActivity({
+    required String itemId,
+    required String eventType,
+    required String body,
+    Map<String, dynamic> metadata = const {},
+  }) async {
+    try {
+      await _activityRepository.createItemActivity(
+        itemId: itemId,
+        eventType: eventType,
+        body: body,
+        metadata: metadata,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('VOTE ACTIVITY EVENT FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
 
   Future<Map<String, dynamic>?> getMyVote(String itemId) async {
     final userId = _client.auth.currentUser!.id;
@@ -117,6 +140,7 @@ class VoteRepository {
     String? comment,
   }) async {
     final userId = _client.auth.currentUser!.id;
+    final existingVote = await getMyVote(itemId);
 
     await _client.from(AppTables.itemVotes).upsert({
       AppVoteFields.itemId: itemId,
@@ -124,6 +148,18 @@ class VoteRepository {
       AppVoteFields.points: points,
       AppVoteFields.comment: comment,
     });
+
+    await _recordVoteActivity(
+      itemId: itemId,
+      eventType: existingVote == null ? 'vote_created' : 'vote_updated',
+      body: existingVote == null
+          ? 'Voted on this item'
+          : 'Updated vote on this item',
+      metadata: {
+        'points': points,
+        'has_comment': comment?.trim().isNotEmpty ?? false,
+      },
+    );
 
     await AppAnalytics.instance.logVoteUpserted(
       points: points,
@@ -133,6 +169,12 @@ class VoteRepository {
 
   Future<void> deleteMyVote(String itemId) async {
     final userId = _client.auth.currentUser!.id;
+
+    await _recordVoteActivity(
+      itemId: itemId,
+      eventType: 'vote_deleted',
+      body: 'Removed vote from this item',
+    );
 
     await _client
         .from(AppTables.itemVotes)

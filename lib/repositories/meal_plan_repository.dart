@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/meal_plan_fields.dart';
 import 'package:pesalistas/core/fields/recipe_ingredient_fields.dart';
 import 'package:pesalistas/core/fields/shopping_item_fields.dart';
+import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/value_parsing.dart';
+import 'package:pesalistas/repositories/activity_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 
@@ -11,6 +14,65 @@ class MealPlanRepository {
   MealPlanRepository(this._client);
 
   final SupabaseClient _client;
+
+  ActivityRepository get _activityRepository => ActivityRepository(_client);
+
+  Future<Map<String, dynamic>?> _getMealPlan(String mealPlanId) async {
+    final response = await _client
+        .from(AppTables.mealPlans)
+        .select()
+        .eq(AppMealPlanFields.id, mealPlanId)
+        .maybeSingle();
+
+    if (response == null) {
+      return null;
+    }
+
+    return Map<String, dynamic>.from(response);
+  }
+
+  Future<void> _recordMealPlanActivity({
+    required String groupId,
+    required String eventType,
+    required String body,
+    Map<String, dynamic> metadata = const {},
+  }) async {
+    try {
+      await _activityRepository.createGroupListActivity(
+        groupId: groupId,
+        listType: AppListTypes.mealPlan.value,
+        eventType: eventType,
+        body: body,
+        metadata: metadata,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('MEAL PLAN ACTIVITY EVENT FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> _recordGeneratedShoppingActivity({
+    required String groupId,
+    required int count,
+  }) async {
+    if (count <= 0) {
+      return;
+    }
+
+    try {
+      await _activityRepository.createGroupListActivity(
+        groupId: groupId,
+        listType: AppListTypes.shopping.value,
+        eventType: 'shopping_generated_from_meal_plans',
+        body:
+            'Generated $count shopping ${count == 1 ? 'item' : 'items'} from meal plans',
+        metadata: {'count': count},
+      );
+    } catch (error, stackTrace) {
+      debugPrint('GENERATED SHOPPING ACTIVITY EVENT FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
 
   Future<List<Map<String, dynamic>>> getMealPlansForGroup(
     String groupId,
@@ -32,14 +94,30 @@ class MealPlanRepository {
     String? recipeId,
     String? note,
   }) async {
-    await _client.from(AppTables.mealPlans).insert({
-      AppMealPlanFields.groupId: groupId,
-      AppMealPlanFields.recipeId: recipeId,
-      AppMealPlanFields.plannedFor: _yyyyMmDd(plannedFor),
-      AppMealPlanFields.mealType: mealType,
-      AppMealPlanFields.note: note,
-      AppMealPlanFields.createdBy: _client.auth.currentUser!.id,
-    });
+    final response = await _client
+        .from(AppTables.mealPlans)
+        .insert({
+          AppMealPlanFields.groupId: groupId,
+          AppMealPlanFields.recipeId: recipeId,
+          AppMealPlanFields.plannedFor: _yyyyMmDd(plannedFor),
+          AppMealPlanFields.mealType: mealType,
+          AppMealPlanFields.note: note,
+          AppMealPlanFields.createdBy: _client.auth.currentUser!.id,
+        })
+        .select()
+        .single();
+
+    await _recordMealPlanActivity(
+      groupId: groupId,
+      eventType: 'meal_plan_created',
+      body: 'Planned $mealType for ${_yyyyMmDd(plannedFor)}',
+      metadata: {
+        'meal_plan_id': response[AppMealPlanFields.id]?.toString(),
+        'meal_type': mealType,
+        'planned_for': _yyyyMmDd(plannedFor),
+        'recipe_id': recipeId,
+      },
+    );
 
     await AppAnalytics.instance.logMealPlanCreated(
       mealType: mealType,
@@ -55,6 +133,9 @@ class MealPlanRepository {
     String? recipeId,
     String? note,
   }) async {
+    final previousMealPlan = await _getMealPlan(mealPlanId);
+    final groupId = previousMealPlan?[AppMealPlanFields.groupId]?.toString();
+
     await _client
         .from(AppTables.mealPlans)
         .update({
@@ -65,6 +146,20 @@ class MealPlanRepository {
         })
         .eq(AppMealPlanFields.id, mealPlanId);
 
+    if (groupId != null && groupId.isNotEmpty) {
+      await _recordMealPlanActivity(
+        groupId: groupId,
+        eventType: 'meal_plan_updated',
+        body: 'Updated $mealType for ${_yyyyMmDd(plannedFor)}',
+        metadata: {
+          'meal_plan_id': mealPlanId,
+          'meal_type': mealType,
+          'planned_for': _yyyyMmDd(plannedFor),
+          'recipe_id': recipeId,
+        },
+      );
+    }
+
     await AppAnalytics.instance.logMealPlanUpdated(
       mealType: mealType,
       hasRecipe: recipeId != null && recipeId.trim().isNotEmpty,
@@ -73,10 +168,24 @@ class MealPlanRepository {
   }
 
   Future<void> deleteMealPlan(String mealPlanId) async {
+    final previousMealPlan = await _getMealPlan(mealPlanId);
+    final groupId = previousMealPlan?[AppMealPlanFields.groupId]?.toString();
+    final mealType =
+        previousMealPlan?[AppMealPlanFields.mealType]?.toString() ?? 'meal';
+
     await _client
         .from(AppTables.mealPlans)
         .delete()
         .eq(AppMealPlanFields.id, mealPlanId);
+
+    if (groupId != null && groupId.isNotEmpty) {
+      await _recordMealPlanActivity(
+        groupId: groupId,
+        eventType: 'meal_plan_deleted',
+        body: 'Deleted $mealType from meal plan',
+        metadata: {'meal_plan_id': mealPlanId, 'meal_type': mealType},
+      );
+    }
 
     await AppAnalytics.instance.logMealPlanDeleted();
   }
@@ -289,6 +398,11 @@ class MealPlanRepository {
     }
 
     await _client.from(AppTables.shoppingListItems).insert(rowsToInsert);
+
+    await _recordGeneratedShoppingActivity(
+      groupId: groupId,
+      count: rowsToInsert.length,
+    );
 
     await AppAnalytics.instance.logShoppingGeneratedFromMealPlans(
       insertedCount: rowsToInsert.length,
