@@ -6,10 +6,18 @@ class HomeAttentionSection extends StatelessWidget {
     super.key,
     required this.summary,
     required this.pendingInvitationCount,
+    this.onOpenTasks,
+    this.onOpenChores,
+    this.onOpenShopping,
+    this.onOpenMealPlan,
   });
 
   final HomeAttentionSummary summary;
   final int pendingInvitationCount;
+  final VoidCallback? onOpenTasks;
+  final VoidCallback? onOpenChores;
+  final VoidCallback? onOpenShopping;
+  final VoidCallback? onOpenMealPlan;
 
   bool get hasAttention {
     return pendingInvitationCount > 0 || summary.hasAttention;
@@ -33,42 +41,49 @@ class HomeAttentionSection extends StatelessWidget {
           icon: Icons.warning_amber_rounded,
           label: _plural(summary.overdueChores, 'overdue chore'),
           tone: _AttentionTone.danger,
+          onTap: onOpenChores,
         ),
       if (summary.choresDueToday > 0)
         _AttentionItem(
           icon: Icons.today_outlined,
           label: _plural(summary.choresDueToday, 'chore due today'),
           tone: _AttentionTone.primary,
+          onTap: onOpenChores,
         ),
       if (summary.overdueTasks > 0)
         _AttentionItem(
           icon: Icons.assignment_late_outlined,
           label: _plural(summary.overdueTasks, 'overdue task'),
           tone: _AttentionTone.danger,
+          onTap: onOpenTasks,
         ),
       if (summary.tasksDueToday > 0)
         _AttentionItem(
           icon: Icons.event_available_outlined,
           label: _plural(summary.tasksDueToday, 'task due today'),
           tone: _AttentionTone.primary,
+          onTap: onOpenTasks,
         ),
       if (summary.tasksDueSoon > 0)
         _AttentionItem(
           icon: Icons.schedule_outlined,
           label: _plural(summary.tasksDueSoon, 'task due soon'),
           tone: _AttentionTone.secondary,
+          onTap: onOpenTasks,
         ),
       if (summary.shoppingToBuy > 0)
         _AttentionItem(
           icon: Icons.shopping_basket_outlined,
           label: _plural(summary.shoppingToBuy, 'shopping item'),
           tone: _AttentionTone.secondary,
+          onTap: onOpenShopping,
         ),
       if (summary.mealsToday > 0)
         _AttentionItem(
           icon: Icons.restaurant_menu_outlined,
           label: _plural(summary.mealsToday, 'meal planned today'),
           tone: _AttentionTone.info,
+          onTap: onOpenMealPlan,
         ),
     ];
 
@@ -127,11 +142,13 @@ class _AttentionItem {
     required this.icon,
     required this.label,
     required this.tone,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final _AttentionTone tone;
+  final VoidCallback? onTap;
 }
 
 class _AttentionChip extends StatelessWidget {
@@ -160,7 +177,7 @@ class _AttentionChip extends StatelessWidget {
       ),
     };
 
-    return Container(
+    final chip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -181,6 +198,16 @@ class _AttentionChip extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (item.onTap == null) {
+      return chip;
+    }
+
+    return InkWell(
+      onTap: item.onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: chip,
     );
   }
 }

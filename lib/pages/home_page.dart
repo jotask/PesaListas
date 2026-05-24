@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/fields/group_fields.dart';
+import 'package:pesalistas/core/fields/list_fields.dart';
+import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/create_group_page.dart';
+import 'package:pesalistas/pages/list_detail_page.dart';
 import 'package:pesalistas/pages/settings_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
 import 'package:pesalistas/repositories/group_repository.dart';
@@ -228,6 +231,35 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Map<String, dynamic>? firstListOfType(String listType) {
+    for (final list in lists) {
+      if (list[AppListFields.listType]?.toString() == listType) {
+        return list;
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> openHomeListType(String listType) async {
+    final list = firstListOfType(listType);
+
+    if (list == null) {
+      return;
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/list_detail'),
+        builder: (_) => ListDetailPage(list: list),
+      ),
+    );
+
+    if (!mounted) return;
+
+    await loadHomeData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -271,6 +303,14 @@ class _HomePageState extends State<HomePage> {
                   HomeAttentionSection(
                     summary: attentionSummary,
                     pendingInvitationCount: invitations.length,
+                    onOpenTasks: () =>
+                        openHomeListType(AppListTypes.tasks.value),
+                    onOpenChores: () =>
+                        openHomeListType(AppListTypes.chores.value),
+                    onOpenShopping: () =>
+                        openHomeListType(AppListTypes.shopping.value),
+                    onOpenMealPlan: () =>
+                        openHomeListType(AppListTypes.mealPlan.value),
                   ),
                   if (invitations.isNotEmpty || attentionSummary.hasAttention)
                     const SizedBox(height: 16),
