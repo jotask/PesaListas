@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/group_fields.dart';
 import 'package:pesalistas/core/fields/list_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
@@ -51,6 +52,9 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> invitations = [];
   HomeAttentionSummary attentionSummary = const HomeAttentionSummary();
 
+  RealtimeChannel? activityChannel;
+  Timer? homeRealtimeReloadDebounce;
+
   bool get processingInvitation => acceptingInvitation || decliningInvitation;
 
   @override
@@ -72,7 +76,26 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
+    subscribeToHomeActivity();
+
     loadHomeData();
+  }
+
+  @override
+  void dispose() {
+    homeRealtimeReloadDebounce?.cancel();
+
+    final channel = activityChannel;
+
+    if (channel != null) {
+      unawaited(Supabase.instance.client.removeChannel(channel));
+    }
+
+    super.dispose();
+  }
+
+  String? get currentUserId {
+    return Supabase.instance.client.auth.currentUser?.id;
   }
 
   bool get hasUnreadInboxActivity {
@@ -92,10 +115,55 @@ class _HomePageState extends State<HomePage> {
     await loadHomeData();
   }
 
-  Future<void> loadHomeData() async {
+  void subscribeToHomeActivity() {
+    final channel = Supabase.instance.client.channel(
+      'home:list_activity_events',
+    );
+
+    activityChannel = channel;
+
+    channel
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: AppTables.listActivityEvents,
+          callback: (payload) {
+            unawaited(handleHomeRealtimeActivity(payload));
+          },
+        )
+        .subscribe();
+
+    debugPrint('HOME ACTIVITY REALTIME SUBSCRIBED');
+  }
+
+  Future<void> handleHomeRealtimeActivity(PostgresChangePayload payload) async {
+    final event = payload.newRecord;
+    final actorId = event['actor_id']?.toString();
+
+    if (actorId != null && actorId == currentUserId) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    debugPrint('HOME REALTIME ACTIVITY RECEIVED: ${event['event_type']}');
+
+    homeRealtimeReloadDebounce?.cancel();
+    homeRealtimeReloadDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+
+      unawaited(loadHomeData(showLoading: false));
+    });
+  }
+
+  Future<void> loadHomeData({bool showLoading = true}) async {
     if (!mounted) return;
 
-    setState(() => loading = true);
+    if (showLoading) {
+      setState(() => loading = true);
+    }
 
     try {
       final invitationsFuture = invitationRepository.getPendingInvitations();
@@ -140,7 +208,9 @@ class _HomePageState extends State<HomePage> {
     } catch (error) {
       if (!mounted) return;
 
-      setState(() => loading = false);
+      if (showLoading) {
+        setState(() => loading = false);
+      }
       showErrorSnackBar(context, context.l10n.failedToLoadHomeData, error);
     }
   }

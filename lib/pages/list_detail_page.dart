@@ -96,6 +96,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
   List<Map<String, dynamic>> groupMembers = [];
   Map<String, EntityUnreadActivity> unreadActivityByEntityKey = {};
 
+  RealtimeChannel? activityChannel;
+
   String get listId => currentList[AppListFields.id].toString();
 
   String get groupId => currentList[AppListFields.groupId].toString();
@@ -184,7 +186,70 @@ class _ListDetailPageState extends State<ListDetailPage> {
     tmdbRepository = TmdbRepository(client);
     bookRepository = BookRepository(client);
 
+    subscribeToListActivity();
+
     loadItems();
+  }
+
+  @override
+  void dispose() {
+    final channel = activityChannel;
+
+    if (channel != null) {
+      unawaited(Supabase.instance.client.removeChannel(channel));
+    }
+
+    super.dispose();
+  }
+
+  void subscribeToListActivity() {
+    final channel = Supabase.instance.client.channel(
+      'list_activity_events:$listId',
+    );
+
+    activityChannel = channel;
+
+    channel
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: AppTables.listActivityEvents,
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'list_id',
+            value: listId,
+          ),
+          callback: (payload) {
+            unawaited(handleRealtimeActivity(payload));
+          },
+        )
+        .subscribe();
+
+    debugPrint('LIST ACTIVITY REALTIME SUBSCRIBED: $listId');
+  }
+
+  Future<void> handleRealtimeActivity(PostgresChangePayload payload) async {
+    final event = payload.newRecord;
+
+    final actorId = event['actor_id']?.toString();
+
+    if (actorId != null && actorId == currentUserId) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    debugPrint('LIST REALTIME ACTIVITY RECEIVED: ${event['event_type']}');
+
+    await loadItems();
+
+    if (!mounted) {
+      return;
+    }
+
+    showInfoSnackBar(context, 'New activity in this list');
   }
 
   Future<List<Map<String, dynamic>>> loadGroupMembersWithProfiles() async {
