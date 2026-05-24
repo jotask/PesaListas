@@ -13,11 +13,23 @@ class UnreadItemHighlight extends StatelessWidget {
   final Map<String, dynamic> item;
   final Widget child;
 
-  static ItemUnreadActivity? activityFor(Map<String, dynamic> item) {
+  static EntityUnreadActivity? activityFor(Map<String, dynamic> item) {
     final value = item[activityKey];
 
-    if (value is ItemUnreadActivity) {
+    if (value is EntityUnreadActivity) {
       return value;
+    }
+
+    if (value is ItemUnreadActivity) {
+      return EntityUnreadActivity(
+        entityType: 'item',
+        entityId: value.itemId,
+        unreadCount: value.unreadCount,
+        latestActivityAt: value.latestActivityAt,
+        latestEventType: value.latestEventType,
+        latestTitle: value.latestTitle,
+        latestBody: value.latestBody,
+      );
     }
 
     return null;

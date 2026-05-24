@@ -94,6 +94,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   Map<String, ItemUnreadActivity> unreadActivityByItemId = {};
   late Map<String, dynamic> currentList;
   List<Map<String, dynamic>> groupMembers = [];
+  Map<String, EntityUnreadActivity> unreadActivityByEntityKey = {};
 
   String get listId => currentList[AppListFields.id].toString();
 
@@ -322,6 +323,9 @@ class _ListDetailPageState extends State<ListDetailPage> {
       final loadedUnreadActivityByItemId = await activityRepository
           .getUnreadItemActivityForList(listId);
 
+      final loadedUnreadActivityByEntityKey = await activityRepository
+          .getUnreadEntityActivityForList(listId);
+
       if (isShoppingList) {
         final shoppingItems = await shoppingRepository.getShoppingItemsForGroup(
           groupId,
@@ -333,6 +337,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
           groupMembers = loadedGroupMembers;
           items = shoppingItems;
           unreadActivityByItemId = loadedUnreadActivityByItemId;
+          unreadActivityByEntityKey = loadedUnreadActivityByEntityKey;
           loadingItems = false;
         });
 
@@ -396,6 +401,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
           groupMembers = loadedGroupMembers;
           items = enrichedMealPlans;
           unreadActivityByItemId = loadedUnreadActivityByItemId;
+          unreadActivityByEntityKey = loadedUnreadActivityByEntityKey;
           loadingItems = false;
         });
 
@@ -412,6 +418,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
           groupMembers = loadedGroupMembers;
           items = recipes;
           unreadActivityByItemId = loadedUnreadActivityByItemId;
+          unreadActivityByEntityKey = loadedUnreadActivityByEntityKey;
           loadingItems = false;
         });
 
@@ -439,6 +446,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
         groupMembers = loadedGroupMembers;
         items = enrichedItems;
         unreadActivityByItemId = loadedUnreadActivityByItemId;
+        unreadActivityByEntityKey = loadedUnreadActivityByEntityKey;
         loadingItems = false;
       });
 
@@ -1977,6 +1985,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
                       onClearAllShoppingItems: clearAllShoppingItems,
                       onBookStatusChanged: updateBookReadingStatus,
                       unreadActivityByItemId: unreadActivityByItemId,
+                      unreadActivityByEntityKey: unreadActivityByEntityKey,
                     ),
                     const SizedBox(height: 96),
                   ],

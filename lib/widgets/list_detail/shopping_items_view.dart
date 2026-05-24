@@ -13,6 +13,7 @@ import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/common/app_network_image_thumbnail.dart';
 import 'package:pesalistas/widgets/common/app_state_pill.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class ShoppingItemsView extends StatefulWidget {
   const ShoppingItemsView({
@@ -538,13 +539,16 @@ class _ShoppingSourceGroup extends StatelessWidget {
             ),
           ),
           for (final item in items)
-            _ShoppingItemCard(
+            UnreadItemHighlight(
               item: item,
-              onToggle: () => onToggle(item),
-              onEdit: () => onEdit(item),
-              onDelete: () {
-                onDelete(item[AppShoppingItemFields.id].toString());
-              },
+              child: _ShoppingItemCard(
+                item: item,
+                onToggle: () => onToggle(item),
+                onEdit: () => onEdit(item),
+                onDelete: () {
+                  onDelete(item[AppShoppingItemFields.id].toString());
+                },
+              ),
             ),
         ],
       ),

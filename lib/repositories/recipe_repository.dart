@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/activity_entity_types.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/core/list_types.dart';
@@ -17,6 +18,7 @@ class RecipeRepository {
     required String groupId,
     required String eventType,
     required String body,
+    String? entityId,
     Map<String, dynamic> metadata = const {},
   }) async {
     try {
@@ -25,6 +27,8 @@ class RecipeRepository {
         listType: AppListTypes.recipes.value,
         eventType: eventType,
         body: body,
+        entityType: entityId == null ? null : AppActivityEntityTypes.recipe,
+        entityId: entityId,
         metadata: metadata,
       );
     } catch (error, stackTrace) {
@@ -72,14 +76,14 @@ class RecipeRepository {
         .select()
         .single();
 
+    final recipeId = response[AppRecipeFields.id]?.toString();
+
     await _recordRecipeActivity(
       groupId: groupId,
       eventType: 'recipe_created',
       body: 'Added recipe $name',
-      metadata: {
-        'recipe_id': response[AppRecipeFields.id]?.toString(),
-        'recipe_name': name,
-      },
+      entityId: recipeId,
+      metadata: {'recipe_id': recipeId, 'recipe_name': name},
     );
 
     await AppAnalytics.instance.logRecipeCreated(
@@ -132,6 +136,7 @@ class RecipeRepository {
           'recipe_name': name,
           'previous_name': previousName,
         },
+        entityId: recipeId,
       );
     }
 
@@ -186,6 +191,7 @@ class RecipeRepository {
         eventType: 'recipe_deleted',
         body: 'Deleted recipe $recipeName',
         metadata: {'recipe_id': recipeId, 'recipe_name': recipeName},
+        entityId: recipeId,
       );
     }
 

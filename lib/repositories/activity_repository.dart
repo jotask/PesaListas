@@ -76,10 +76,98 @@ class ItemUnreadActivity {
   }
 }
 
+class EntityUnreadActivity {
+  const EntityUnreadActivity({
+    required this.entityType,
+    required this.entityId,
+    required this.unreadCount,
+    this.latestActivityAt,
+    this.latestEventType,
+    this.latestTitle,
+    this.latestBody,
+  });
+
+  final String entityType;
+  final String entityId;
+  final int unreadCount;
+  final DateTime? latestActivityAt;
+  final String? latestEventType;
+  final String? latestTitle;
+  final String? latestBody;
+
+  bool get hasUnread => unreadCount > 0;
+
+  String get key => keyFor(entityType: entityType, entityId: entityId);
+
+  static String keyFor({required String entityType, required String entityId}) {
+    return '${entityType.trim()}:${entityId.trim()}';
+  }
+
+  factory EntityUnreadActivity.fromMap(Map<String, dynamic> map) {
+    final rawCount = map['unread_count'];
+    final rawDate = map['latest_activity_at'];
+
+    return EntityUnreadActivity(
+      entityType: map['entity_type']?.toString() ?? '',
+      entityId: map['entity_id']?.toString() ?? '',
+      unreadCount: rawCount is int
+          ? rawCount
+          : int.tryParse(rawCount?.toString() ?? '') ?? 0,
+      latestActivityAt: rawDate == null
+          ? null
+          : DateTime.tryParse(rawDate.toString())?.toLocal(),
+      latestEventType: map['latest_event_type']?.toString(),
+      latestTitle: map['latest_title']?.toString(),
+      latestBody: map['latest_body']?.toString(),
+    );
+  }
+}
+
 class ActivityRepository {
   ActivityRepository(this._client);
 
   final SupabaseClient _client;
+
+  Future<Map<String, EntityUnreadActivity>> getUnreadEntityActivityForList(
+    String listId,
+  ) async {
+    final cleanListId = listId.trim();
+
+    if (cleanListId.isEmpty) {
+      return {};
+    }
+
+    final response = await _client.rpc(
+      'get_unread_entity_activity_for_list',
+      params: {'target_list_id': cleanListId},
+    );
+
+    if (response is! List) {
+      return {};
+    }
+
+    final result = <String, EntityUnreadActivity>{};
+
+    for (final row in response) {
+      if (row is! Map) {
+        continue;
+      }
+
+      final activity = EntityUnreadActivity.fromMap(
+        Map<String, dynamic>.from(row),
+      );
+
+      if (activity.entityType.isEmpty ||
+          activity.entityId.isEmpty ||
+          !activity.hasUnread) {
+        continue;
+      }
+
+      result[activity.key] = activity;
+    }
+
+    return result;
+  }
 
   Future<Map<String, ListUnreadActivity>> getUnreadActivityByList(
     List<String> listIds,
@@ -182,6 +270,8 @@ class ActivityRepository {
     required String title,
     String? listId,
     String? itemId,
+    String? entityType,
+    String? entityId,
     String body = '',
     Map<String, dynamic> metadata = const {},
   }) async {
@@ -200,6 +290,8 @@ class ActivityRepository {
       'title': title,
       'body': body,
       'metadata': metadata,
+      'entity_type': entityType ?? (itemId == null ? null : 'item'),
+      'entity_id': entityId ?? itemId,
     });
   }
 
@@ -251,6 +343,8 @@ class ActivityRepository {
     required String body,
     String? title,
     Map<String, dynamic> metadata = const {},
+    String? entityType,
+    String? entityId,
   }) async {
     final list = await _getListForGroupAndType(
       groupId: groupId,
@@ -278,6 +372,8 @@ class ActivityRepository {
                 : listName
           : title,
       body: body,
+      entityType: entityType,
+      entityId: entityId,
       metadata: metadata,
     );
   }

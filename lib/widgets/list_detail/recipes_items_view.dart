@@ -3,6 +3,7 @@ import 'package:pesalistas/core/fields/recipe_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class RecipesItemsView extends StatefulWidget {
   const RecipesItemsView({
@@ -170,12 +171,15 @@ class _RecipesItemsViewState extends State<RecipesItemsView> {
           )
         else
           for (final recipe in recipes)
-            _RecipeCard(
-              recipe: recipe,
-              onTap: () => widget.onViewRecipeDetails(recipe),
-              onDelete: () {
-                widget.onDeleteRecipe(recipe[AppRecipeFields.id].toString());
-              },
+            UnreadItemHighlight(
+              item: recipe,
+              child: _RecipeCard(
+                recipe: recipe,
+                onTap: () => widget.onViewRecipeDetails(recipe),
+                onDelete: () {
+                  widget.onDeleteRecipe(recipe[AppRecipeFields.id].toString());
+                },
+              ),
             ),
       ],
     );

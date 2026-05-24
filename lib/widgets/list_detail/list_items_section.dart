@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/activity_entity_types.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/list_types.dart';
@@ -29,6 +30,7 @@ class ListItemsSection extends StatefulWidget {
     required this.onClearAllShoppingItems,
     required this.onBookStatusChanged,
     required this.unreadActivityByItemId,
+    required this.unreadActivityByEntityKey,
   });
 
   final String listType;
@@ -54,6 +56,7 @@ class ListItemsSection extends StatefulWidget {
   })
   onBookStatusChanged;
   final Map<String, ItemUnreadActivity> unreadActivityByItemId;
+  final Map<String, EntityUnreadActivity> unreadActivityByEntityKey;
 
   @override
   State<ListItemsSection> createState() => _ListItemsSectionState();
@@ -108,7 +111,25 @@ class _ListItemsSectionState extends State<ListItemsSection> {
     }
   }
 
+  String entityTypeForListType(String listType) {
+    if (listType == AppListTypes.shopping.value) {
+      return AppActivityEntityTypes.shoppingItem;
+    }
+
+    if (listType == AppListTypes.recipes.value) {
+      return AppActivityEntityTypes.recipe;
+    }
+
+    if (listType == AppListTypes.mealPlan.value) {
+      return AppActivityEntityTypes.mealPlan;
+    }
+
+    return AppActivityEntityTypes.item;
+  }
+
   List<Map<String, dynamic>> get itemsWithUnreadActivity {
+    final entityType = entityTypeForListType(widget.listType);
+
     return widget.items.map((item) {
       final itemId = item[AppItemFields.id]?.toString();
 
@@ -116,13 +137,23 @@ class _ListItemsSectionState extends State<ListItemsSection> {
         return item;
       }
 
-      final activity = widget.unreadActivityByItemId[itemId];
+      final itemActivity = widget.unreadActivityByItemId[itemId];
 
-      if (activity == null || !activity.hasUnread) {
+      if (itemActivity != null && itemActivity.hasUnread) {
+        return {...item, UnreadItemHighlight.activityKey: itemActivity};
+      }
+
+      final entityActivity =
+          widget.unreadActivityByEntityKey[EntityUnreadActivity.keyFor(
+            entityType: entityType,
+            entityId: itemId,
+          )];
+
+      if (entityActivity == null || !entityActivity.hasUnread) {
         return item;
       }
 
-      return {...item, UnreadItemHighlight.activityKey: activity};
+      return {...item, UnreadItemHighlight.activityKey: entityActivity};
     }).toList();
   }
 

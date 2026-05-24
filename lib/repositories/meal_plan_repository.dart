@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/activity_entity_types.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/meal_plan_fields.dart';
@@ -35,6 +36,7 @@ class MealPlanRepository {
     required String groupId,
     required String eventType,
     required String body,
+    String? entityId,
     Map<String, dynamic> metadata = const {},
   }) async {
     try {
@@ -43,6 +45,8 @@ class MealPlanRepository {
         listType: AppListTypes.mealPlan.value,
         eventType: eventType,
         body: body,
+        entityType: entityId == null ? null : AppActivityEntityTypes.mealPlan,
+        entityId: entityId,
         metadata: metadata,
       );
     } catch (error, stackTrace) {
@@ -107,12 +111,15 @@ class MealPlanRepository {
         .select()
         .single();
 
+    final mealPlanId = response[AppMealPlanFields.id]?.toString();
+
     await _recordMealPlanActivity(
       groupId: groupId,
       eventType: 'meal_plan_created',
       body: 'Planned $mealType for ${_yyyyMmDd(plannedFor)}',
+      entityId: mealPlanId,
       metadata: {
-        'meal_plan_id': response[AppMealPlanFields.id]?.toString(),
+        'meal_plan_id': mealPlanId,
         'meal_type': mealType,
         'planned_for': _yyyyMmDd(plannedFor),
         'recipe_id': recipeId,
@@ -157,6 +164,7 @@ class MealPlanRepository {
           'planned_for': _yyyyMmDd(plannedFor),
           'recipe_id': recipeId,
         },
+        entityId: mealPlanId,
       );
     }
 
@@ -184,6 +192,7 @@ class MealPlanRepository {
         eventType: 'meal_plan_deleted',
         body: 'Deleted $mealType from meal plan',
         metadata: {'meal_plan_id': mealPlanId, 'meal_type': mealType},
+        entityId: mealPlanId,
       );
     }
 

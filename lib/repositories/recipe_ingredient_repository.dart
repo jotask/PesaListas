@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/activity_entity_types.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/recipe_fields.dart';
@@ -87,6 +88,8 @@ class RecipeIngredientRepository {
         listType: AppListTypes.recipes.value,
         eventType: eventType,
         body: body,
+        entityType: AppActivityEntityTypes.recipe,
+        entityId: recipeId,
         metadata: {
           'recipe_id': recipeId,
           'recipe_name': _recipeName(recipe),

@@ -7,6 +7,7 @@ import 'package:pesalistas/core/meal_types.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/common/app_meta_pill.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
+import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
 class MealPlanItemsView extends StatefulWidget {
   const MealPlanItemsView({
@@ -632,12 +633,15 @@ class _MealPlanDateSection extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           for (final mealPlan in mealPlans)
-            _MealPlanCard(
-              mealPlan: mealPlan,
-              onEdit: () => onEdit(mealPlan),
-              onDelete: () {
-                onDelete(mealPlan[AppMealPlanFields.id].toString());
-              },
+            UnreadItemHighlight(
+              item: mealPlan,
+              child: _MealPlanCard(
+                mealPlan: mealPlan,
+                onEdit: () => onEdit(mealPlan),
+                onDelete: () {
+                  onDelete(mealPlan[AppMealPlanFields.id].toString());
+                },
+              ),
             ),
         ],
       ),

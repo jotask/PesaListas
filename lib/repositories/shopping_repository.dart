@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/activity_entity_types.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/fields/meal_plan_fields.dart';
@@ -48,6 +49,7 @@ class ShoppingRepository {
     required String eventType,
     required String body,
     Map<String, dynamic> metadata = const {},
+    String? entityId,
   }) async {
     try {
       await _activityRepository.createGroupListActivity(
@@ -56,6 +58,9 @@ class ShoppingRepository {
         eventType: eventType,
         body: body,
         metadata: metadata,
+        entityType: entityId == null
+            ? null
+            : AppActivityEntityTypes.shoppingItem,
       );
     } catch (error, stackTrace) {
       debugPrint('SHOPPING ACTIVITY EVENT FAILED: $error');
@@ -102,8 +107,8 @@ class ShoppingRepository {
 
       return {
         ...item,
-        AppShoppingItemFields.sourceRecipe: ?sourceRecipe,
-        AppShoppingItemFields.sourceMealPlan: ?sourceMealPlan,
+        AppShoppingItemFields.sourceRecipe: sourceRecipe,
+        AppShoppingItemFields.sourceMealPlan: sourceMealPlan,
       };
     }).toList();
   }
@@ -218,12 +223,15 @@ class ShoppingRepository {
         .select()
         .single();
 
+    final shoppingItemId = result[AppShoppingItemFields.id]?.toString();
+
     await _recordShoppingActivity(
       groupId: groupId,
       eventType: 'shopping_item_created',
       body: 'Added $name',
+      entityId: shoppingItemId,
       metadata: {
-        'shopping_item_id': result[AppShoppingItemFields.id]?.toString(),
+        'shopping_item_id': shoppingItemId,
         'item_name': name,
         'source': 'product',
       },
@@ -295,12 +303,15 @@ class ShoppingRepository {
         .select()
         .single();
 
+    final shoppingItemId = result[AppShoppingItemFields.id]?.toString();
+
     await _recordShoppingActivity(
       groupId: groupId,
       eventType: 'shopping_item_created',
       body: 'Added $name',
+      entityId: shoppingItemId,
       metadata: {
-        'shopping_item_id': result[AppShoppingItemFields.id]?.toString(),
+        'shopping_item_id': shoppingItemId,
         'item_name': name,
         'source': 'manual',
       },
@@ -361,6 +372,7 @@ class ShoppingRepository {
           'item_name': name,
           'previous_name': previousName,
         },
+        entityId: shoppingItemId,
       );
     }
 
@@ -392,6 +404,7 @@ class ShoppingRepository {
             ? 'shopping_item_checked'
             : 'shopping_item_unchecked',
         body: checked ? 'Bought $itemName' : 'Marked $itemName as not bought',
+        entityId: shoppingItemId,
         metadata: {
           'shopping_item_id': shoppingItemId,
           'item_name': itemName,
@@ -419,6 +432,7 @@ class ShoppingRepository {
         eventType: 'shopping_item_deleted',
         body: 'Deleted $itemName',
         metadata: {'shopping_item_id': shoppingItemId, 'item_name': itemName},
+        entityId: shoppingItemId,
       );
     }
 
