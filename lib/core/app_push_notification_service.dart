@@ -1,7 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:pesalistas/core/app_local_notification_service.dart';
 import 'package:pesalistas/repositories/notification_device_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -179,6 +178,9 @@ class AppPushNotificationService {
     debugPrint('FCM FOREGROUND MESSAGE: ${message.messageId}');
     debugPrint('FCM DATA: ${message.data}');
 
+    // Do not show a system notification while the app is open.
+    // Background/terminated notifications are handled by the OS/FCM.
+    /*
     final notification = message.notification;
     final title = notification?.title ?? message.data['title']?.toString();
     final body = notification?.body ?? message.data['body']?.toString();
@@ -193,8 +195,10 @@ class AppPushNotificationService {
       body: body ?? '',
       payload: message.data.toString(),
     );
+    */
   }
 
+  /*
   static int _messageNotificationId(RemoteMessage message) {
     final input =
         message.messageId ?? message.sentTime?.toIso8601String() ?? '';
@@ -212,6 +216,7 @@ class AppPushNotificationService {
 
     return hash;
   }
+  */
 
   static String _platformName() {
     switch (defaultTargetPlatform) {
