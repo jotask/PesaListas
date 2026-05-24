@@ -378,6 +378,25 @@ class ActivityRepository {
     );
   }
 
+  Future<List<ActivityInboxEvent>> getActivityInbox({int limit = 100}) async {
+    final response = await _client.rpc(
+      'get_activity_inbox',
+      params: {'limit_count': limit},
+    );
+
+    if (response is! List) {
+      return [];
+    }
+
+    return response
+        .whereType<Map>()
+        .map(
+          (row) => ActivityInboxEvent.fromMap(Map<String, dynamic>.from(row)),
+        )
+        .where((event) => event.id.isNotEmpty && event.listId.isNotEmpty)
+        .toList();
+  }
+
   Future<void> createItemActivity({
     required String itemId,
     required String eventType,
@@ -436,6 +455,87 @@ class ActivityRepository {
         if (itemTitle != null && itemTitle.isNotEmpty) 'item_title': itemTitle,
         ...metadata,
       },
+    );
+  }
+}
+
+class ActivityInboxEvent {
+  const ActivityInboxEvent({
+    required this.id,
+    required this.groupId,
+    required this.listId,
+    this.itemId,
+    this.entityType,
+    this.entityId,
+    required this.eventType,
+    required this.title,
+    required this.body,
+    required this.metadata,
+    this.actorId,
+    required this.createdAt,
+    required this.listName,
+    this.listDescription,
+    required this.listType,
+    required this.groupName,
+    required this.isOwnEvent,
+    required this.isUnread,
+  });
+
+  final String id;
+  final String groupId;
+  final String listId;
+  final String? itemId;
+  final String? entityType;
+  final String? entityId;
+  final String eventType;
+  final String title;
+  final String body;
+  final Map<String, dynamic> metadata;
+  final String? actorId;
+  final DateTime createdAt;
+  final String listName;
+  final String? listDescription;
+  final String listType;
+  final String groupName;
+  final bool isOwnEvent;
+  final bool isUnread;
+
+  Map<String, dynamic> get list {
+    return {
+      AppListFields.id: listId,
+      AppListFields.groupId: groupId,
+      AppListFields.name: listName,
+      AppListFields.description: listDescription,
+      AppListFields.listType: listType,
+    };
+  }
+
+  factory ActivityInboxEvent.fromMap(Map<String, dynamic> map) {
+    final rawMetadata = map['metadata'];
+
+    return ActivityInboxEvent(
+      id: map['id']?.toString() ?? '',
+      groupId: map['group_id']?.toString() ?? '',
+      listId: map['list_id']?.toString() ?? '',
+      itemId: map['item_id']?.toString(),
+      entityType: map['entity_type']?.toString(),
+      entityId: map['entity_id']?.toString(),
+      eventType: map['event_type']?.toString() ?? '',
+      title: map['title']?.toString() ?? 'Activity',
+      body: map['body']?.toString() ?? '',
+      metadata: rawMetadata is Map
+          ? Map<String, dynamic>.from(rawMetadata)
+          : <String, dynamic>{},
+      actorId: map['actor_id']?.toString(),
+      createdAt:
+          DateTime.tryParse(map['created_at']?.toString() ?? '')?.toLocal() ??
+          DateTime.now(),
+      listName: map['list_name']?.toString() ?? 'List',
+      listDescription: map['list_description']?.toString(),
+      listType: map['list_type']?.toString() ?? 'generic',
+      groupName: map['group_name']?.toString() ?? 'Group',
+      isOwnEvent: map['is_own_event'] == true,
+      isUnread: map['is_unread'] == true,
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/ui_feedback.dart';
 import 'package:pesalistas/dialogs/confirm_delete_dialog.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/pages/activity_inbox_page.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/create_group_page.dart';
 import 'package:pesalistas/pages/list_detail_page.dart';
@@ -72,6 +73,23 @@ class _HomePageState extends State<HomePage> {
     );
 
     loadHomeData();
+  }
+
+  bool get hasUnreadInboxActivity {
+    return unreadActivityByListId.values.any((activity) => activity.hasUnread);
+  }
+
+  Future<void> openActivityInbox() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/activity_inbox'),
+        builder: (_) => const ActivityInboxPage(),
+      ),
+    );
+
+    if (!mounted) return;
+
+    await loadHomeData();
   }
 
   Future<void> loadHomeData() async {
@@ -284,6 +302,29 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
+          IconButton(
+            onPressed: openActivityInbox,
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.inbox_outlined),
+                if (hasUnreadInboxActivity)
+                  Positioned(
+                    right: -1,
+                    top: -1,
+                    child: Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.error,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            tooltip: 'Activity',
+          ),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
