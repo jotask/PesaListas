@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesalistas/core/app_analytics.dart';
 import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/app_platform.dart';
 import 'package:pesalistas/core/app_push_notification_service.dart';
 import 'package:pesalistas/core/controllers/app_locale_controller.dart';
 import 'package:pesalistas/core/controllers/app_notification_controller.dart';
@@ -20,7 +21,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  final shouldInitializeFirebase = AppPlatform.enableFirebase;
+
+  if (shouldInitializeFirebase) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } else {
+    debugPrint('Firebase skipped on ${defaultTargetPlatform.name}.');
+  }
 
   final envFile = kReleaseMode
       ? 'assets/env/.env.production'
@@ -28,9 +37,11 @@ Future<void> main() async {
 
   await dotenv.load(fileName: envFile);
 
-  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
-    kReleaseMode,
-  );
+  if (shouldInitializeFirebase) {
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+      kReleaseMode,
+    );
+  }
 
   FlutterError.onError = (FlutterErrorDetails details) {
     final message = details.exceptionAsString();
@@ -47,7 +58,7 @@ Future<void> main() async {
       debugPrint('=======================================================');
     }
 
-    if (kReleaseMode) {
+    if (kReleaseMode && shouldInitializeFirebase) {
       if (isOverflow) {
         FirebaseCrashlytics.instance.recordFlutterError(details);
       } else {
@@ -59,7 +70,7 @@ Future<void> main() async {
   };
 
   PlatformDispatcher.instance.onError = (Object error, StackTrace stackTrace) {
-    if (kReleaseMode) {
+    if (kReleaseMode && shouldInitializeFirebase) {
       FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
       return true;
     }
@@ -80,22 +91,23 @@ Future<void> main() async {
 
   final supabase = Supabase.instance.client;
 
-  await AppPushNotificationService.initialize();
-
-  await AppAnalytics.instance.setUserId(supabase.auth.currentUser?.id);
-
-  await AppAnalytics.instance.logAppOpened();
-
-  await AppPushNotificationService.syncCurrentDevice();
+  if (shouldInitializeFirebase) {
+    await AppPushNotificationService.initialize();
+    await AppAnalytics.instance.setUserId(supabase.auth.currentUser?.id);
+    await AppAnalytics.instance.logAppOpened();
+    await AppPushNotificationService.syncCurrentDevice();
+  }
 
   supabase.auth.onAuthStateChange.listen((data) async {
     final userId = data.session?.user.id;
 
-    await AppAnalytics.instance.setUserId(userId);
+    if (shouldInitializeFirebase) {
+      await AppAnalytics.instance.setUserId(userId);
 
-    if (userId != null) {
-      await AppAnalytics.instance.logAuthSessionRestored();
-      await AppPushNotificationService.syncCurrentDevice();
+      if (userId != null) {
+        await AppAnalytics.instance.logAuthSessionRestored();
+        await AppPushNotificationService.syncCurrentDevice();
+      }
     }
   });
 
@@ -107,6 +119,7 @@ class PesaListas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shouldInitializeFirebase = AppPlatform.enableFirebase;
     return ValueListenableBuilder<Locale?>(
       valueListenable: AppLocaleController.locale,
       builder: (context, locale, _) {
@@ -119,11 +132,13 @@ class PesaListas extends StatelessWidget {
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               themeMode: themeMode,
-              navigatorObservers: [
-                FirebaseAnalyticsObserver(
-                  analytics: FirebaseAnalytics.instance,
-                ),
-              ],
+              navigatorObservers: shouldInitializeFirebase
+                  ? [
+                      FirebaseAnalyticsObserver(
+                        analytics: FirebaseAnalytics.instance,
+                      ),
+                    ]
+                  : const [],
               theme: ThemeData(
                 useMaterial3: true,
                 colorScheme: ColorScheme.fromSeed(
