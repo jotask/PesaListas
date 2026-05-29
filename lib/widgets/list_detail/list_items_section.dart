@@ -6,6 +6,7 @@ import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/core/fields/shopping_item_fields.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/repositories/activity_repository.dart';
+import 'package:pesalistas/widgets/common/app_filter_menu_button.dart';
 import 'package:pesalistas/widgets/list_detail/items_view_factory.dart';
 import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
 
@@ -194,12 +195,31 @@ class _ListItemsSectionState extends State<ListItemsSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.showStatusSummary) ...[
-          _StatusFilterChips(
-            selectedFilter: selectedFilter,
-            totalCount: totalCount,
-            openCount: openCount,
-            doneCount: doneCount,
-            onSelected: selectFilter,
+          Align(
+            alignment: Alignment.centerRight,
+            child: AppFilterMenuButton<ItemStatusFilter>(
+              value: selectedFilter,
+              showSelectedLabel: hasActiveFilter,
+              tooltip: 'Filter items',
+              options: [
+                AppFilterMenuOption(
+                  value: ItemStatusFilter.all,
+                  label: context.l10n.allCount(totalCount),
+                  icon: Icons.list_alt_outlined,
+                ),
+                AppFilterMenuOption(
+                  value: ItemStatusFilter.open,
+                  label: context.l10n.openCount(openCount),
+                  icon: Icons.radio_button_unchecked,
+                ),
+                AppFilterMenuOption(
+                  value: ItemStatusFilter.done,
+                  label: context.l10n.doneCount(doneCount),
+                  icon: Icons.check_circle_outline,
+                ),
+              ],
+              onChanged: selectFilter,
+            ),
           ),
           const SizedBox(height: 12),
         ],
@@ -237,47 +257,6 @@ class _ListItemsSectionState extends State<ListItemsSection> {
 }
 
 enum ItemStatusFilter { all, open, done }
-
-class _StatusFilterChips extends StatelessWidget {
-  const _StatusFilterChips({
-    required this.selectedFilter,
-    required this.totalCount,
-    required this.openCount,
-    required this.doneCount,
-    required this.onSelected,
-  });
-
-  final ItemStatusFilter selectedFilter;
-  final int totalCount;
-  final int openCount;
-  final int doneCount;
-  final void Function(ItemStatusFilter filter) onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        FilterChip(
-          selected: selectedFilter == ItemStatusFilter.all,
-          label: Text(context.l10n.allCount(totalCount)),
-          onSelected: (_) => onSelected(ItemStatusFilter.all),
-        ),
-        FilterChip(
-          selected: selectedFilter == ItemStatusFilter.open,
-          label: Text(context.l10n.openCount(openCount)),
-          onSelected: (_) => onSelected(ItemStatusFilter.open),
-        ),
-        FilterChip(
-          selected: selectedFilter == ItemStatusFilter.done,
-          label: Text(context.l10n.doneCount(doneCount)),
-          onSelected: (_) => onSelected(ItemStatusFilter.done),
-        ),
-      ],
-    );
-  }
-}
 
 class _NoFilteredItemsCard extends StatelessWidget {
   const _NoFilteredItemsCard({

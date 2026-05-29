@@ -8,7 +8,7 @@ abstract final class AppShoppingStores {
   static const familycash = 'familycash';
   static const other = 'other';
 
-  static const defaultStore = mercadona;
+  static const defaultStore = familycash;
 
   static const values = [
     mercadona,

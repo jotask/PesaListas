@@ -61,6 +61,7 @@ class ShoppingRepository {
         entityType: entityId == null
             ? null
             : AppActivityEntityTypes.shoppingItem,
+        entityId: entityId,
       );
     } catch (error, stackTrace) {
       debugPrint('SHOPPING ACTIVITY EVENT FAILED: $error');
@@ -191,6 +192,8 @@ class ShoppingRepository {
     String? productImageUrl,
     double? estimatedUnitPrice,
     String priceCurrency = AppConfig.defaultCurrency,
+    String? storeKey,
+    String? storeName,
   }) async {
     final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
         ? quantity * estimatedUnitPrice
@@ -215,6 +218,8 @@ class ShoppingRepository {
       AppShoppingItemFields.estimatedTotalPrice: estimatedTotalPrice,
       AppShoppingItemFields.priceCurrency: priceCurrency,
       AppShoppingItemFields.createdBy: currentUserId,
+      AppShoppingItemFields.storeKey: storeKey,
+      AppShoppingItemFields.storeName: storeName,
     };
 
     final result = await _client
@@ -279,6 +284,8 @@ class ShoppingRepository {
     String? catalogItemId,
     String? productName,
     String? productImageUrl,
+    String? storeKey,
+    String? storeName,
   }) async {
     final estimatedTotalPrice = quantity != null && estimatedUnitPrice != null
         ? quantity * estimatedUnitPrice
@@ -298,6 +305,8 @@ class ShoppingRepository {
           AppShoppingItemFields.catalogItemId: catalogItemId,
           AppShoppingItemFields.productName: productName,
           AppShoppingItemFields.productImageUrl: productImageUrl,
+          AppShoppingItemFields.storeKey: storeKey,
+          AppShoppingItemFields.storeName: storeName,
           AppShoppingItemFields.createdBy: _client.auth.currentUser!.id,
         })
         .select()
@@ -337,6 +346,8 @@ class ShoppingRepository {
     String? catalogItemId,
     String? productName,
     String? productImageUrl,
+    String? storeKey,
+    String? storeName,
   }) async {
     final previousItem = await _getShoppingItem(shoppingItemId);
     final groupId = previousItem?[AppShoppingItemFields.groupId]?.toString();
@@ -359,6 +370,8 @@ class ShoppingRepository {
           AppShoppingItemFields.catalogItemId: catalogItemId,
           AppShoppingItemFields.productName: productName,
           AppShoppingItemFields.productImageUrl: productImageUrl,
+          AppShoppingItemFields.storeKey: storeKey,
+          AppShoppingItemFields.storeName: storeName,
         })
         .eq(AppShoppingItemFields.id, shoppingItemId);
 

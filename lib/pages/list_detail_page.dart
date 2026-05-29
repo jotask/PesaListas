@@ -48,6 +48,7 @@ import 'package:pesalistas/repositories/tmdb_repository.dart';
 import 'package:pesalistas/repositories/vote_repository.dart';
 import 'package:pesalistas/widgets/list_detail/list_detail_header.dart';
 import 'package:pesalistas/widgets/list_detail/list_items_section.dart';
+import 'package:pesalistas/widgets/list_detail/quick_shopping_item_bottom_sheet.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pesalistas/core/fields/book_fields.dart';
 import 'package:pesalistas/repositories/book_repository.dart';
@@ -143,7 +144,6 @@ class _ListDetailPageState extends State<ListDetailPage> {
   bool get shouldShowStatusSummary {
     return listType == AppListTypes.tasks.value ||
         listType == AppListTypes.chores.value ||
-        listType == AppListTypes.shopping.value ||
         listType == AppListTypes.generic.value;
   }
 
@@ -1014,12 +1014,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
   }
 
   Future<void> createShoppingItemDialog() async {
-    final result = await Navigator.of(context).push<ShoppingItemFormPageResult>(
-      MaterialPageRoute(
-        settings: const RouteSettings(name: '/shopping_item_form'),
-        builder: (_) => ShoppingItemFormPage(groupId: groupId),
-      ),
-    );
+    final result = await showQuickShoppingItemBottomSheet(context: context);
 
     if (result == null) return;
 
@@ -1037,6 +1032,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
         catalogItemId: result.catalogItemId,
         productName: result.productName,
         productImageUrl: result.productImageUrl,
+        storeKey: result.storeKey,
+        storeName: result.storeName,
       );
 
       await loadItems();
@@ -1257,6 +1254,8 @@ class _ListDetailPageState extends State<ListDetailPage> {
         catalogItemId: result.catalogItemId,
         productName: result.productName,
         productImageUrl: result.productImageUrl,
+        storeKey: result.storeKey,
+        storeName: result.storeName,
       );
 
       await loadItems();
@@ -2014,6 +2013,47 @@ class _ListDetailPageState extends State<ListDetailPage> {
             config: config,
             onBack: goBack,
             onEdit: editList,
+            actions: [
+              if (isShoppingList)
+                PopupMenuButton<_ShoppingToolsAction>(
+                  tooltip: 'Shopping tools',
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (action) {
+                    switch (action) {
+                      case _ShoppingToolsAction.scanProduct:
+                        openProductScanner();
+                        break;
+                      case _ShoppingToolsAction.openProducts:
+                        openProductCatalog();
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) {
+                    return [
+                      PopupMenuItem(
+                        value: _ShoppingToolsAction.scanProduct,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.qr_code_scanner_outlined),
+                            const SizedBox(width: 12),
+                            Text(context.l10n.productScannerTitle),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: _ShoppingToolsAction.openProducts,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.inventory_2_outlined),
+                            const SizedBox(width: 12),
+                            Text(context.l10n.productDatabaseTitle),
+                          ],
+                        ),
+                      ),
+                    ];
+                  },
+                ),
+            ],
           ),
           if (isBusy) const LinearProgressIndicator(),
           Expanded(
@@ -2024,12 +2064,6 @@ class _ListDetailPageState extends State<ListDetailPage> {
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    if (isShoppingList) ...[
-                      _ProductScannerShortcutCard(onTap: openProductScanner),
-                      const SizedBox(height: 12),
-                      _ProductCatalogShortcutCard(onTap: openProductCatalog),
-                      const SizedBox(height: 12),
-                    ],
                     ListItemsSection(
                       listType: listType,
                       items: items,
@@ -2064,62 +2098,4 @@ class _ListDetailPageState extends State<ListDetailPage> {
   }
 }
 
-class _ProductScannerShortcutCard extends StatelessWidget {
-  const _ProductScannerShortcutCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Icon(
-            Icons.qr_code_scanner_outlined,
-            color: theme.colorScheme.onPrimaryContainer,
-          ),
-        ),
-        title: Text(
-          context.l10n.productScannerTitle,
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-        subtitle: Text(context.l10n.productScannerShortcutSubtitle),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-      ),
-    );
-  }
-}
-
-class _ProductCatalogShortcutCard extends StatelessWidget {
-  const _ProductCatalogShortcutCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Icon(
-            Icons.inventory_2_outlined,
-            color: theme.colorScheme.onPrimaryContainer,
-          ),
-        ),
-        title: Text(
-          context.l10n.productDatabaseTitle,
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-        subtitle: Text(context.l10n.productCatalogShortcutSubtitle),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-      ),
-    );
-  }
-}
+enum _ShoppingToolsAction { scanProduct, openProducts }

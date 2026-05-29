@@ -486,17 +486,30 @@ class ProductRepository {
   Future<Map<String, dynamic>?> getLatestCatalogItemPrice({
     required String groupId,
     required String catalogItemId,
+    String? storeName,
   }) async {
-    final result = await client
+    var query = client
         .from(productPricesTable)
         .select()
         .eq(AppProductPriceFields.groupId, groupId)
-        .eq(AppProductPriceFields.catalogItemId, catalogItemId)
+        .eq(AppProductPriceFields.catalogItemId, catalogItemId);
+
+    final cleanStoreName = AppValueParsing.textOrNull(storeName);
+
+    if (cleanStoreName != null) {
+      query = query.eq(AppProductPriceFields.storeName, cleanStoreName);
+    }
+
+    final result = await query
         .order(AppProductPriceFields.observedAt, ascending: false)
         .limit(1)
         .maybeSingle();
 
-    return result;
+    if (result == null) {
+      return null;
+    }
+
+    return Map<String, dynamic>.from(result);
   }
 
   Future<Map<String, dynamic>> saveCatalogItemPrice({
@@ -551,17 +564,30 @@ class ProductRepository {
   Future<Map<String, dynamic>?> getLatestPrice({
     required String groupId,
     required String barcode,
+    String? storeName,
   }) async {
-    final result = await client
+    var query = client
         .from(productPricesTable)
         .select()
         .eq(AppProductPriceFields.groupId, groupId)
-        .eq(AppProductPriceFields.barcode, barcode)
+        .eq(AppProductPriceFields.barcode, barcode);
+
+    final cleanStoreName = AppValueParsing.textOrNull(storeName);
+
+    if (cleanStoreName != null) {
+      query = query.eq(AppProductPriceFields.storeName, cleanStoreName);
+    }
+
+    final result = await query
         .order(AppProductPriceFields.observedAt, ascending: false)
         .limit(1)
         .maybeSingle();
 
-    return result;
+    if (result == null) {
+      return null;
+    }
+
+    return Map<String, dynamic>.from(result);
   }
 
   Future<Map<String, dynamic>> savePrice({

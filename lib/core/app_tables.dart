@@ -22,4 +22,5 @@ class AppTables {
   static const movieCatalogLocalizations = 'movie_catalog_localizations';
   static const listActivityEvents = 'list_activity_events';
   static const userListReadStates = 'user_list_read_states';
+  static const userAppSettings = 'user_app_settings';
 }

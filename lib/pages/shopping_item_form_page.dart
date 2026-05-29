@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/app_config.dart';
+import 'package:pesalistas/core/shopping_stores.dart';
+import 'package:pesalistas/repositories/user_app_settings_repository.dart';
 import 'package:pesalistas/widgets/common/app_estimated_total_card.dart';
 import 'package:pesalistas/core/app_units.dart';
 import 'package:pesalistas/core/estimated_cost_calculator.dart';
@@ -12,8 +16,7 @@ import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/pages/catalog_item_price_page.dart';
 import 'package:pesalistas/pages/product_catalog_page.dart';
 import 'package:pesalistas/repositories/product_repository.dart';
-import 'package:pesalistas/widgets/common/app_linked_generic_item_actions_card.dart';
-import 'package:pesalistas/widgets/common/app_linked_product_actions_card.dart';
+import 'package:pesalistas/widgets/common/app_number_stepper_field.dart';
 import 'package:pesalistas/widgets/common/app_unit_dropdown_field.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -31,6 +34,8 @@ class ShoppingItemFormPageResult {
     this.catalogItemId,
     this.productName,
     this.productImageUrl,
+    this.storeKey,
+    this.storeName,
   });
 
   final String name;
@@ -42,6 +47,8 @@ class ShoppingItemFormPageResult {
   final String? catalogItemId;
   final String? productName;
   final String? productImageUrl;
+  final String? storeKey;
+  final String? storeName;
 }
 
 class ShoppingItemFormPage extends StatefulWidget {
@@ -55,12 +62,16 @@ class ShoppingItemFormPage extends StatefulWidget {
 }
 
 class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
+  static String _lastSelectedStoreKey = AppShoppingStores.defaultStore;
+
   late final ProductRepository productRepository;
 
   late final TextEditingController nameController;
   late final TextEditingController quantityController;
   late final TextEditingController unitController;
   late final TextEditingController priceController;
+
+  late final UserAppSettingsRepository userAppSettingsRepository;
 
   String? validationMessage;
   String? productLinkMessage;
@@ -72,6 +83,8 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
   String? linkedCatalogItemId;
   String? linkedCatalogItemName;
   String? linkedCatalogItemDefaultUnit;
+
+  late String selectedStoreKey;
 
   bool loadingProductPrice = false;
 
@@ -98,6 +111,10 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     return hasProductData || hasGenericItemData;
   }
 
+  String get selectedStoreName {
+    return AppShoppingStores.label(selectedStoreKey);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -108,6 +125,16 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     );
 
     final item = widget.item;
+
+    final initialStoreKey = AppValueParsing.textOrNull(
+      item?[AppShoppingItemFields.storeKey],
+    );
+
+    selectedStoreKey =
+        initialStoreKey != null &&
+            AppShoppingStores.values.contains(initialStoreKey)
+        ? initialStoreKey
+        : _lastSelectedStoreKey;
 
     linkedBarcode = AppValueParsing.textOrNull(
       item?[AppShoppingItemFields.barcode],
@@ -124,7 +151,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     );
 
     quantityController = TextEditingController(
-      text: item?[AppShoppingItemFields.quantity]?.toString() ?? '',
+      text: item?[AppShoppingItemFields.quantity]?.toString() ?? '1',
     );
 
     unitController = TextEditingController(
@@ -144,6 +171,14 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     linkedCatalogItemDefaultUnit = AppValueParsing.textOrNull(
       item?[AppShoppingItemFields.unit],
     );
+
+    userAppSettingsRepository = UserAppSettingsRepository(
+      Supabase.instance.client,
+    );
+
+    if (!isEditing) {
+      unawaited(loadDefaultShoppingStore());
+    }
   }
 
   @override
@@ -164,6 +199,19 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     });
   }
 
+  String? get selectedReusableItemLabel {
+    if (linkedCatalogItemName != null &&
+        linkedCatalogItemName!.trim().isNotEmpty) {
+      return linkedCatalogItemName!.trim();
+    }
+
+    if (linkedProductName != null && linkedProductName!.trim().isNotEmpty) {
+      return linkedProductName!.trim();
+    }
+
+    return null;
+  }
+
   Future<void> loadLatestGenericItemPrice() async {
     final catalogItemId = linkedCatalogItemId;
 
@@ -178,6 +226,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       final latestPrice = await productRepository.getLatestCatalogItemPrice(
         groupId: widget.groupId,
         catalogItemId: catalogItemId,
+        storeName: selectedStoreName,
       );
 
       if (!mounted) return;
@@ -198,9 +247,10 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
           }
 
           productLinkMessage =
-              'Generic item linked. Latest group price loaded.';
+              'Saved item linked. Latest $selectedStoreName price loaded.';
         } else {
-          productLinkMessage = 'Generic item linked. No group price saved yet.';
+          productLinkMessage =
+              'Saved item linked. No $selectedStoreName price saved yet.';
         }
       });
     } catch (error) {
@@ -216,11 +266,29 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     }
   }
 
+  void clearAnyLinkedItem() {
+    setState(() {
+      linkedCatalogItemId = null;
+      linkedCatalogItemName = null;
+      linkedCatalogItemDefaultUnit = null;
+
+      linkedBarcode = null;
+      linkedProductName = null;
+      linkedProductImageUrl = null;
+
+      productLinkMessage = 'Saved item link removed.';
+      validationMessage = null;
+    });
+  }
+
   Future<void> selectGenericItem() async {
     final item = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
         settings: const RouteSettings(name: '/catalog_item_picker'),
-        builder: (_) => const CatalogItemPickerPage(),
+        builder: (_) => CatalogItemPickerPage(
+          groupId: widget.groupId,
+          initialQuery: nameController.text.trim(),
+        ),
       ),
     );
 
@@ -366,6 +434,7 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       final latestPrice = await productRepository.getLatestPrice(
         groupId: widget.groupId,
         barcode: barcode,
+        storeName: selectedStoreName,
       );
 
       if (!mounted) return;
@@ -378,9 +447,11 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
             priceController.text = price.toString();
           }
 
-          productLinkMessage = context.l10n.productLinkedLatestGroupPriceLoaded;
+          productLinkMessage =
+              'Product linked. Latest $selectedStoreName price loaded.';
         } else {
-          productLinkMessage = context.l10n.productLinkedNoGroupPriceSavedYet;
+          productLinkMessage =
+              'Product linked. No $selectedStoreName price saved yet.';
         }
       });
     } catch (error) {
@@ -405,10 +476,11 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
     });
   }
 
-  void submit() {
+  Future<void> submit() async {
     final name = nameController.text.trim();
     final quantityText = quantityController.text.trim();
     final unit = unitController.text.trim();
+    final normalizedUnit = AppUnitType.valueOrNull(unit);
     final priceText = priceController.text.trim();
 
     setState(() => validationMessage = null);
@@ -418,10 +490,17 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       return;
     }
 
-    final quantity = AppValueParsing.doubleOrNull(quantityText);
+    final quantity = quantityText.isEmpty
+        ? 1.0
+        : AppValueParsing.doubleOrNull(quantityText);
 
     if (quantityText.isNotEmpty && quantity == null) {
       setState(() => validationMessage = context.l10n.quantityMustBeANumber);
+      return;
+    }
+
+    if (quantity != null && quantity <= 0) {
+      setState(() => validationMessage = 'Quantity must be greater than 0.');
       return;
     }
 
@@ -437,19 +516,103 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
       return;
     }
 
+    _lastSelectedStoreKey = selectedStoreKey;
+
+    await userAppSettingsRepository.saveDefaultShoppingStoreKey(
+      selectedStoreKey,
+    );
+
+    await savePriceObservationIfNeeded(
+      estimatedUnitPrice: estimatedUnitPrice,
+      unit: normalizedUnit,
+    );
+
+    if (!mounted) return;
+
     Navigator.of(context).pop(
       ShoppingItemFormPageResult(
         name: name,
         quantity: quantity,
-        unit: AppUnitType.valueOrNull(unit),
+        unit: normalizedUnit,
         estimatedUnitPrice: estimatedUnitPrice,
         priceCurrency: priceCurrency,
         barcode: linkedBarcode,
         catalogItemId: linkedCatalogItemId,
         productName: linkedProductName,
         productImageUrl: linkedProductImageUrl,
+        storeKey: selectedStoreKey,
+        storeName: selectedStoreName,
       ),
     );
+  }
+
+  Future<void> loadDefaultShoppingStore() async {
+    try {
+      final defaultStoreKey = await userAppSettingsRepository
+          .getDefaultShoppingStoreKey();
+
+      if (!mounted || defaultStoreKey == null) {
+        return;
+      }
+
+      setState(() {
+        selectedStoreKey = defaultStoreKey;
+        _lastSelectedStoreKey = defaultStoreKey;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('LOAD DEFAULT SHOPPING STORE FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> savePriceObservationIfNeeded({
+    required double? estimatedUnitPrice,
+    required String? unit,
+  }) async {
+    if (estimatedUnitPrice == null || estimatedUnitPrice <= 0) {
+      return;
+    }
+
+    final catalogItemId = linkedCatalogItemId;
+    final barcode = linkedBarcode;
+
+    if ((catalogItemId == null || catalogItemId.isEmpty) &&
+        (barcode == null || barcode.isEmpty)) {
+      return;
+    }
+
+    try {
+      if (catalogItemId != null && catalogItemId.isNotEmpty) {
+        await productRepository.saveCatalogItemPrice(
+          groupId: widget.groupId,
+          catalogItemId: catalogItemId,
+          price: estimatedUnitPrice,
+          currency: priceCurrency,
+          priceQuantity: 1,
+          priceUnit: unit,
+          storeName: selectedStoreName,
+          note: 'Saved from shopping list',
+        );
+
+        return;
+      }
+
+      if (barcode != null && barcode.isNotEmpty) {
+        await productRepository.savePrice(
+          groupId: widget.groupId,
+          barcode: barcode,
+          price: estimatedUnitPrice,
+          currency: priceCurrency,
+          priceQuantity: 1,
+          priceUnit: unit,
+          storeName: selectedStoreName,
+          note: 'Saved from shopping list',
+        );
+      }
+    } catch (error, stackTrace) {
+      debugPrint('SAVE SHOPPING PRICE OBSERVATION FAILED: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   @override
@@ -469,7 +632,9 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
         primaryLabel: isEditing ? context.l10n.save : context.l10n.add,
         primaryIcon: isEditing ? Icons.save_outlined : Icons.add,
         onCancel: () => Navigator.of(context).pop(),
-        onPrimary: submit,
+        onPrimary: () {
+          submit();
+        },
       ),
       body: SafeArea(
         top: false,
@@ -478,73 +643,62 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
           children: [
             AppFormPageHeaderCard(
               icon: Icons.shopping_cart_outlined,
-              title: context.l10n.shoppingItem,
-              subtitle: hasAnyLinkedItem
-                  ? 'This item is linked to a saved item.'
-                  : context.l10n.addAnItemQuantityAndUnit,
-            ),
-            AppLinkedProductActionsCard(
-              barcode: linkedBarcode,
-              productName: linkedProductName,
-              productImageUrl: linkedProductImageUrl,
-              loading: loadingProductPrice,
-              message: productLinkMessage,
-              linkedHelperText: context.l10n.itemProductLinkSaved,
-              emptyHelperText: context.l10n.linkCachedProductFromDatabase,
-              onSelectProduct: selectProduct,
-              onClearProduct: hasProductData ? clearProductLink : null,
-            ),
-            const SizedBox(height: 12),
-            AppLinkedGenericItemActionsCard(
-              catalogItemId: linkedCatalogItemId,
-              catalogItemName: linkedCatalogItemName,
-              defaultUnit: linkedCatalogItemDefaultUnit,
-              linkedTitle: 'Linked generic item',
-              emptyTitle: 'No generic item linked',
-              defaultUnitLabelBuilder: (unit) => 'Default unit: $unit',
-              linkedHelperText:
-                  'This item is linked to a reusable generic item.',
-              emptyHelperText: 'Link a generic item like Milk, Rice or Eggs.',
-              changeLabel: 'Change generic item',
-              linkLabel: 'Link generic item',
-              savePriceLabel: 'Save group price',
-              removeLabel: 'Remove generic item link',
-              onSelectGenericItem: selectGenericItem,
-              onClearGenericItem: hasGenericItemData
-                  ? clearGenericItemLink
-                  : null,
-              onSavePrice: hasGenericItemData ? openGenericItemPricePage : null,
+              title: isEditing ? 'Edit shopping item' : 'Add to shopping list',
+              subtitle: 'Add what you need to buy, how much, and where.',
             ),
             const SizedBox(height: 16),
+
+            const _ShoppingFormSectionTitle(
+              title: 'Shopping list item',
+              subtitle: 'This is what you need to buy now.',
+            ),
             AppFormSectionCard(
               children: [
                 TextField(
                   controller: nameController,
                   autofocus: true,
                   decoration: InputDecoration(
-                    labelText: context.l10n.name,
-                    hintText: context.l10n.tomatoes,
+                    labelText: 'What do you need?',
+                    hintText: 'Milk, bread, tomatoes...',
                     prefixIcon: const Icon(Icons.shopping_basket_outlined),
+                    helperText: selectedReusableItemLabel == null
+                        ? 'Type an item, or tap search to choose/create a saved one.'
+                        : 'Using saved item: $selectedReusableItemLabel',
+                    suffixIcon: selectedReusableItemLabel == null
+                        ? IconButton(
+                            onPressed: selectGenericItem,
+                            icon: const Icon(Icons.search),
+                            tooltip: 'Choose saved item',
+                          )
+                        : IconButton(
+                            onPressed: clearAnyLinkedItem,
+                            icon: const Icon(Icons.link_off_outlined),
+                            tooltip: 'Unlink saved item',
+                          ),
                   ),
                   textInputAction: TextInputAction.next,
-                  onChanged: (_) => clearValidation(),
+                  onChanged: (_) {
+                    clearValidation();
+
+                    if (hasAnyLinkedItem) {
+                      clearAnyLinkedItem();
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
+                      child: AppNumberStepperField(
                         controller: quantityController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: context.l10n.quantity,
-                          hintText: '2',
-                          prefixIcon: const Icon(Icons.numbers_outlined),
-                        ),
-                        textInputAction: TextInputAction.next,
-                        onChanged: (_) {
+                        labelText: context.l10n.quantity,
+                        hintText: '1',
+                        prefixIcon: Icons.numbers_outlined,
+                        min: 0.25,
+                        max: 9999,
+                        step: 1,
+                        decimal: true,
+                        onChanged: () {
                           clearValidation();
                           setState(() {});
                         },
@@ -566,40 +720,125 @@ class _ShoppingItemFormPageState extends State<ShoppingItemFormPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: priceController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+                DropdownButtonFormField<String>(
+                  initialValue: selectedStoreKey,
+                  decoration: const InputDecoration(
+                    labelText: 'Store',
+                    prefixIcon: Icon(Icons.storefront_outlined),
                   ),
-                  decoration: InputDecoration(
-                    labelText: context.l10n.estimatedUnitPrice,
-                    hintText: '2.49',
-                    prefixIcon: const Icon(Icons.euro_outlined),
-                    suffixText: priceCurrency,
-                  ),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => submit(),
-                  onChanged: (_) {
-                    clearValidation();
-                    setState(() {});
+                  items: AppShoppingStores.values.map((storeKey) {
+                    return DropdownMenuItem<String>(
+                      value: storeKey,
+                      child: Text(AppShoppingStores.label(storeKey)),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value == null) return;
+
+                    setState(() {
+                      selectedStoreKey = value;
+                      _lastSelectedStoreKey = value;
+                      validationMessage = null;
+                    });
+
+                    if (linkedCatalogItemId != null) {
+                      loadLatestGenericItemPrice();
+                    } else if (linkedBarcode != null) {
+                      loadLatestProductPrice();
+                    }
                   },
                 ),
-                if (estimatedTotal != null) ...[
-                  const SizedBox(height: 12),
-                  AppEstimatedTotalCard(
-                    total: estimatedTotal,
-                    currency: priceCurrency,
-                  ),
-                ],
                 if (validationMessage != null) ...[
                   const SizedBox(height: 16),
                   AppFormValidationMessage(message: validationMessage!),
                 ],
               ],
             ),
+
+            const SizedBox(height: 16),
+
+            ExpansionTile(
+              tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+              childrenPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.euro_outlined),
+              title: const Text(
+                'Optional price',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+              subtitle: const Text('Only if you want to estimate the total.'),
+              children: [
+                AppFormSectionCard(
+                  children: [
+                    TextField(
+                      controller: priceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.estimatedUnitPrice,
+                        hintText: '2.49',
+                        prefixIcon: const Icon(Icons.euro_outlined),
+                        suffixText: priceCurrency,
+                      ),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) {
+                        submit();
+                      },
+                      onChanged: (_) {
+                        clearValidation();
+                        setState(() {});
+                      },
+                    ),
+                    if (estimatedTotal != null) ...[
+                      const SizedBox(height: 12),
+                      AppEstimatedTotalCard(
+                        total: estimatedTotal,
+                        currency: priceCurrency,
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
             const SizedBox(height: 96),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ShoppingFormSectionTitle extends StatelessWidget {
+  const _ShoppingFormSectionTitle({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }

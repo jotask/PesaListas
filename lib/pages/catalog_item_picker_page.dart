@@ -17,10 +17,12 @@ class CatalogItemPickerPage extends StatefulWidget {
     super.key,
     this.selectionMode = true,
     this.groupId,
+    this.initialQuery = '',
   });
 
   final bool selectionMode;
   final String? groupId;
+  final String initialQuery;
 
   @override
   State<CatalogItemPickerPage> createState() => _CatalogItemPickerPageState();
@@ -29,7 +31,7 @@ class CatalogItemPickerPage extends StatefulWidget {
 class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
   late final CatalogItemRepository catalogItemRepository;
 
-  final TextEditingController searchController = TextEditingController();
+  late final TextEditingController searchController;
   final TextEditingController defaultUnitController = TextEditingController();
 
   Timer? searchDebounce;
@@ -44,6 +46,11 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
   @override
   void initState() {
     super.initState();
+
+    final initialQuery = widget.initialQuery.trim();
+
+    searchController = TextEditingController(text: initialQuery);
+    query = initialQuery;
 
     catalogItemRepository = CatalogItemRepository(Supabase.instance.client);
 
@@ -231,9 +238,7 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.selectionMode ? 'Select generic item' : 'Generic items',
-        ),
+        title: Text(widget.selectionMode ? 'Choose item' : 'Saved items'),
         actions: [
           IconButton(
             onPressed: loading ? null : loadItems,
@@ -249,12 +254,10 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _CatalogItemPickerHeaderCard(totalCount: items.length),
-              const SizedBox(height: 12),
               SearchBar(
                 controller: searchController,
                 leading: const Icon(Icons.search),
-                hintText: 'Search generic item',
+                hintText: 'Search or create item',
                 onChanged: updateSearch,
                 trailing: [
                   if (query.isNotEmpty)
@@ -311,52 +314,6 @@ class _CatalogItemPickerPageState extends State<CatalogItemPickerPage> {
   }
 }
 
-class _CatalogItemPickerHeaderCard extends StatelessWidget {
-  const _CatalogItemPickerHeaderCard({required this.totalCount});
-
-  final int totalCount;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: theme.colorScheme.primaryContainer,
-              child: Icon(
-                Icons.category_outlined,
-                color: theme.colorScheme.onPrimaryContainer,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Generic items',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$totalCount loaded from catalog',
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _CreateCatalogItemCard extends StatelessWidget {
   const _CreateCatalogItemCard({
     required this.name,
@@ -406,8 +363,8 @@ class _CreateCatalogItemCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               selectedUnit.isEmpty
-                  ? 'Add this as a reusable generic item.'
-                  : 'Add this as a reusable generic item using "$selectedUnit" by default.',
+                  ? 'Save this item so you can reuse it later.'
+                  : 'Save this item using "$selectedUnit" by default.',
             ),
             const SizedBox(height: 12),
             AppUnitDropdownField(
@@ -422,7 +379,7 @@ class _CreateCatalogItemCard extends StatelessWidget {
             FilledButton.icon(
               onPressed: loading ? null : onCreate,
               icon: const Icon(Icons.add),
-              label: const Text('Create generic item'),
+              label: const Text('Create and use item'),
             ),
           ],
         ),
