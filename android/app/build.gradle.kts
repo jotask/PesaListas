@@ -10,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "com.josevives.pesalistas"
+    namespace = "com.aiko.pesalistas"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.josevives.pesalistas"
+        applicationId = "com.aiko.pesalistas"
 
         minSdk = flutter.minSdkVersion
         targetSdk = 35

@@ -1,4 +1,4 @@
-package com.josevives.pesalistas
+package com.aiko.pesalistas
 
 import io.flutter.embedding.android.FlutterActivity
 
