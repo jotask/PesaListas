@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesalistas/core/date_formatting.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
-import 'package:pesalistas/core/item_assignee_fields.dart';
+import 'package:pesalistas/core/fields/item_assignee_fields.dart';
 import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/list_types.dart';

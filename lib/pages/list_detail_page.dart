@@ -6,7 +6,7 @@ import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/book_reading_status.dart';
 import 'package:pesalistas/core/estimated_cost_calculator.dart';
 import 'package:pesalistas/core/fields/movie_fields.dart';
-import 'package:pesalistas/core/item_assignee_fields.dart';
+import 'package:pesalistas/core/fields/item_assignee_fields.dart';
 import 'package:pesalistas/core/fields/meal_plan_cost_fields.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/fields/member_fields.dart';

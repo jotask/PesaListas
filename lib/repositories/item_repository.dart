@@ -4,7 +4,7 @@ import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/core/controllers/app_notification_controller.dart';
 import 'package:pesalistas/core/fields/item_fields.dart';
 import 'package:pesalistas/core/fields/list_fields.dart';
-import 'package:pesalistas/core/item_assignee_fields.dart';
+import 'package:pesalistas/core/fields/item_assignee_fields.dart';
 import 'package:pesalistas/core/item_assignment_scope.dart';
 import 'package:pesalistas/core/item_status.dart';
 import 'package:pesalistas/core/recurrence_types.dart';

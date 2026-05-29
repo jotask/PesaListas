@@ -14,6 +14,7 @@ import 'package:pesalistas/widgets/common/app_state_pill.dart';
 
 class ShoppingItemCard extends StatelessWidget {
   const ShoppingItemCard({
+    super.key,
     required this.item,
     required this.onToggle,
     required this.onEdit,
