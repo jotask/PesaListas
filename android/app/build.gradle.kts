@@ -59,10 +59,17 @@ android {
     }
 
     buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("release")
-        }
+    debug {
+        applicationIdSuffix = ".debug"
+        versionNameSuffix = "-debug"
+        manifestPlaceholders["appLabel"] = "PesaListas Debug"
     }
+
+    release {
+        signingConfig = signingConfigs.getByName("release")
+        manifestPlaceholders["appLabel"] = "PesaListas"
+    }
+}
 }
 
 dependencies {
