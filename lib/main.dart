@@ -39,7 +39,7 @@ Future<void> main() async {
 
   if (shouldInitializeFirebase) {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
-      kReleaseMode,
+      AppPlatform.isRelease,
     );
   }
 
@@ -58,7 +58,7 @@ Future<void> main() async {
       debugPrint('=======================================================');
     }
 
-    if (kReleaseMode && shouldInitializeFirebase) {
+    if (AppPlatform.isRelease && shouldInitializeFirebase) {
       if (isOverflow) {
         FirebaseCrashlytics.instance.recordFlutterError(details);
       } else {
@@ -70,7 +70,7 @@ Future<void> main() async {
   };
 
   PlatformDispatcher.instance.onError = (Object error, StackTrace stackTrace) {
-    if (kReleaseMode && shouldInitializeFirebase) {
+    if (AppPlatform.isRelease && shouldInitializeFirebase) {
       FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
       return true;
     }

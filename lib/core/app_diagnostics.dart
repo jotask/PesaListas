@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesalistas/core/app_config.dart';
 import 'package:pesalistas/core/app_language.dart';
+import 'package:pesalistas/core/app_platform.dart';
 import 'package:pesalistas/core/app_tables.dart';
 import 'package:pesalistas/repositories/account_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -186,11 +187,11 @@ class AppDiagnostics {
 
       return DiagnosticItem(
         label: 'Firebase Crashlytics',
-        status: kReleaseMode
+        status: AppPlatform.isRelease
             ? DiagnosticStatus.success
             : DiagnosticStatus.warning,
         message: enabled ? 'Collection enabled' : 'Collection disabled',
-        details: kReleaseMode
+        details: AppPlatform.isRelease
             ? 'Release mode should collect crash reports.'
             : 'Debug/profile mode should usually keep Crashlytics collection disabled.',
       );

@@ -1,4 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pesalistas/core/app_platform.dart';
 
 class AppConfig {
   const AppConfig._();
@@ -14,7 +15,7 @@ class AppConfig {
   }
 
   static bool get useOpenFoodFactsStaging {
-    return _boolFromEnv('USE_OPEN_FOOD_FACTS_STAGING', defaultValue: false);
+    return AppPlatform.isRelease == false;
   }
 
   static void validate() {
@@ -25,15 +26,5 @@ class AppConfig {
     if (supabaseAnonKey.trim().isEmpty) {
       throw StateError('Missing SUPABASE_ANON_KEY in env file.');
     }
-  }
-
-  static bool _boolFromEnv(String key, {required bool defaultValue}) {
-    final value = dotenv.env[key]?.trim().toLowerCase();
-
-    if (value == null || value.isEmpty) {
-      return defaultValue;
-    }
-
-    return value == 'true' || value == '1' || value == 'yes';
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:pesalistas/core/app_platform.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AccountDeletionBlockingGroup {
@@ -252,7 +253,7 @@ class AccountRepository {
     required int status,
     required Map<String, dynamic> data,
   }) {
-    if (kReleaseMode) return;
+    if (AppPlatform.isRelease) return;
 
     const encoder = JsonEncoder.withIndent('  ');
 
@@ -269,7 +270,7 @@ class AccountRepository {
     required Object error,
     required StackTrace stackTrace,
   }) {
-    if (kReleaseMode) return;
+    if (AppPlatform.isRelease) return;
 
     debugPrint('================ EDGE FUNCTION EXCEPTION ===============');
     debugPrint('Function: $label');

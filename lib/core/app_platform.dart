@@ -3,6 +3,11 @@ import 'package:flutter/foundation.dart';
 class AppPlatform {
   const AppPlatform._();
 
+  static bool get isRelease {
+    if (kReleaseMode) return true;
+    return false;
+  }
+
   static bool get isDesktop {
     if (kIsWeb) return false;
 
