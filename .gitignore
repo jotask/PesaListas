@@ -53,3 +53,9 @@ release.env
 android/key.properties
 *.jks
 *.keystore
+
+# Local/generated app config
+android/app/google-services.json
+lib/firebase_options.dart
+ios/Runner/GoogleService-Info.plist
+assets/.env
