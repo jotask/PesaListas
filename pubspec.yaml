@@ -78,8 +78,7 @@ flutter:
   uses-material-design: true
 
   assets:
-  - assets/env/.env.development
-  - assets/env/.env.production
+  - assets/.env
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -31,9 +31,7 @@ Future<void> main() async {
     debugPrint('Firebase skipped on ${defaultTargetPlatform.name}.');
   }
 
-  final envFile = kReleaseMode
-      ? 'assets/env/.env.production'
-      : 'assets/env/.env.development';
+  final envFile = 'assets/.env';
 
   await dotenv.load(fileName: envFile);
 
