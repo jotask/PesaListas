@@ -26,13 +26,47 @@ jobs:
 
       - name: Create CI env asset files
         run: |
-          mkdir -p assets/env
-      
+          mkdir -p assets
+
           cat > assets/.env <<'EOF'
           SUPABASE_URL=https://example.supabase.co
           SUPABASE_ANON_KEY=dummy
           GOOGLE_WEB_CLIENT_ID=dummy
           EOF
+
+      - name: Create CI Firebase options
+        run: |
+          cat > lib/firebase_options.dart <<'EOF'
+          // Generated in CI. Real Firebase options are restored only in release workflows.
+          import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+          import 'package:flutter/foundation.dart'
+              show TargetPlatform, defaultTargetPlatform, kIsWeb;
+
+          class DefaultFirebaseOptions {
+            static FirebaseOptions get currentPlatform {
+              if (kIsWeb) {
+                throw UnsupportedError('Firebase web options are not configured in CI.');
+              }
+
+              switch (defaultTargetPlatform) {
+                case TargetPlatform.android:
+                  return android;
+                default:
+                  throw UnsupportedError('Firebase options are only stubbed for Android in CI.');
+              }
+            }
+
+            static const FirebaseOptions android = FirebaseOptions(
+              apiKey: 'dummy-api-key',
+              appId: '1:000000000000:android:0000000000000000000000',
+              messagingSenderId: '000000000000',
+              projectId: 'dummy-project',
+              storageBucket: 'dummy-project.firebasestorage.app',
+            );
+          }
+          EOF
+
+          dart format lib/firebase_options.dart
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
@@ -42,6 +76,6 @@ jobs:
 
       - name: Run tests
         run: flutter test
-        
+
       #- name: Build Android debug APK
       #  run: flutter build apk --debug
