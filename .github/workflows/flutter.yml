@@ -28,16 +28,10 @@ jobs:
         run: |
           mkdir -p assets/env
       
-          cat > assets/env/.env.development <<'EOF'
+          cat > assets/.env <<'EOF'
           SUPABASE_URL=https://example.supabase.co
           SUPABASE_ANON_KEY=dummy
-          USE_OPEN_FOOD_FACTS_STAGING=true
-          EOF
-      
-          cat > assets/env/.env.production <<'EOF'
-          SUPABASE_URL=https://example.supabase.co
-          SUPABASE_ANON_KEY=dummy
-          USE_OPEN_FOOD_FACTS_STAGING=false
+          GOOGLE_WEB_CLIENT_ID=dummy
           EOF
 
       - name: Verify formatting
