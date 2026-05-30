@@ -1,6 +1,9 @@
 # PesaListas
 
 [![Flutter CI](https://github.com/jotask/pesalistas/actions/workflows/flutter.yml/badge.svg?branch=main)](https://github.com/jotask/pesalistas/actions/workflows/flutter.yml)
+[![Android Internal Release](https://github.com/jotask/pesalistas/actions/workflows/android_internal_release.yml/badge.svg)](https://github.com/jotask/pesalistas/actions/workflows/android_internal_release.yml)
+[![GitHub release](https://img.shields.io/github/v/release/jotask/pesalistas?include_prereleases)](https://github.com/jotask/pesalistas/releases)
+[![Latest release](https://img.shields.io/github/v/release/jotask/pesalistas?label=latest%20release)](https://github.com/jotask/pesalistas/releases/latest)
 
 PesaListas is a shared household planning app built with Flutter and Supabase. It helps people organize groups, lists, chores, tasks, recipes, meal plans, shopping, ideas, movies, and activities in one shared space.
 
