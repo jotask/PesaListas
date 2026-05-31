@@ -1,225 +1,188 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PesaListas — Shared household planning</title>
-    <meta
-      name="description"
-      content="PesaListas helps families, couples, roommates, and small groups organize shared lists, chores, recipes, shopping, meal plans, movies, ideas, and activities."
-    />
-    <meta name="theme-color" content="#f7c948" />
-    <meta property="og:title" content="PesaListas — Shared household planning" />
-    <meta
-      property="og:description"
-      content="Plan together. Share lists, chores, recipes, shopping, ideas, movies, and household decisions in one friendly app."
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://raw.githubusercontent.com/jotask/PesaListas/main/assets/icons/app_icon.png" />
-    <link rel="icon" href="https://raw.githubusercontent.com/jotask/PesaListas/main/assets/icons/app_icon.png" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="site-shell">
-      <header class="nav" aria-label="Primary navigation">
-        <a class="brand" href="#top" aria-label="PesaListas home">
-          <span class="brand-mark">
-            <img src="assets/app_icon.png" alt="" onerror="this.src='https://raw.githubusercontent.com/jotask/PesaListas/main/assets/icons/app_icon.png'" />
-          </span>
-          <span>PesaListas</span>
-        </a>
-        <nav class="nav-links" aria-label="Page sections">
-          <a href="#features">Features</a>
-          <a href="#how-it-works">How it works</a>
-          <a href="#tech">Tech</a>
-          <a href="privacy.html">Privacy</a>
-        </nav>
-      </header>
-
-      <main id="top">
-        <section class="hero section-grid" aria-labelledby="hero-title">
-          <div class="hero-copy">
-            <p class="eyebrow">Shared planning for real households</p>
-            <h1 id="hero-title">Your home, lists, meals, and chores — organized together.</h1>
-            <p class="hero-text">
-              PesaListas is a collaborative household app for couples, families, roommates, and small groups.
-              Keep tasks, recipes, shopping, votes, activities, and plans in one shared space.
-            </p>
-            <div class="hero-actions" aria-label="Primary actions">
-              <a class="button primary" href="https://github.com/jotask/PesaListas">View on GitHub</a>
-              <a class="button ghost" href="https://github.com/jotask/PesaListas/releases/latest">Latest release</a>
-            </div>
-            <dl class="trust-row" aria-label="Project highlights">
-              <div>
-                <dt>Built with</dt>
-                <dd>Flutter + Supabase</dd>
-              </div>
-              <div>
-                <dt>Languages</dt>
-                <dd>English + Spanish</dd>
-              </div>
-              <div>
-                <dt>Designed for</dt>
-                <dd>Shared living</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div class="hero-visual" aria-label="PesaListas app preview illustration">
-            <div class="orb orb-one"></div>
-            <div class="orb orb-two"></div>
-            <div class="phone-card">
-              <div class="phone-top">
-                <div class="phone-brand">
-                  <img src="assets/app_icon.png" alt="PesaListas icon" onerror="this.src='https://raw.githubusercontent.com/jotask/PesaListas/main/assets/icons/app_icon.png'" />
-                  <span>PesaListas</span>
-                </div>
-                <span class="status-pill">Family</span>
-              </div>
-              <div class="screen-list">
-                <article class="list-card active">
-                  <span class="list-icon">✓</span>
-                  <div>
-                    <h2>Weekly chores</h2>
-                    <p>3 due today · recurring</p>
-                  </div>
-                </article>
-                <article class="list-card">
-                  <span class="list-icon">🍝</span>
-                  <div>
-                    <h2>Dinner plan</h2>
-                    <p>Shopping generated from recipes</p>
-                  </div>
-                </article>
-                <article class="list-card">
-                  <span class="list-icon">🛒</span>
-                  <div>
-                    <h2>Grocery list</h2>
-                    <p>12 to buy · 5 bought</p>
-                  </div>
-                </article>
-                <article class="list-card vote-card">
-                  <span class="list-icon">★</span>
-                  <div>
-                    <h2>Movie night</h2>
-                    <p>Vote together and choose faster</p>
-                  </div>
-                </article>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="features" class="features" aria-labelledby="features-title">
-          <div class="section-heading">
-            <p class="eyebrow">Everything has a place</p>
-            <h2 id="features-title">Flexible list types for everyday shared life.</h2>
-          </div>
-
-          <div class="feature-grid">
-            <article class="feature-card">
-              <span class="feature-icon">👥</span>
-              <h3>Shared groups</h3>
-              <p>Create spaces for your household, invite members, and manage planning together.</p>
-            </article>
-            <article class="feature-card">
-              <span class="feature-icon">✅</span>
-              <h3>Tasks & chores</h3>
-              <p>Track priorities, deadlines, recurring chores, completed items, and what is due next.</p>
-            </article>
-            <article class="feature-card">
-              <span class="feature-icon">🥘</span>
-              <h3>Recipes & meals</h3>
-              <p>Store recipes, plan meals, and keep cooking instructions and ingredients organized.</p>
-            </article>
-            <article class="feature-card">
-              <span class="feature-icon">🛍️</span>
-              <h3>Smart shopping</h3>
-              <p>Build shopping lists manually or generate items from recipe-based meal plans.</p>
-            </article>
-            <article class="feature-card">
-              <span class="feature-icon">🗳️</span>
-              <h3>Group voting</h3>
-              <p>Use votes for movies, ideas, and activities so decisions feel easy and collaborative.</p>
-            </article>
-            <article class="feature-card">
-              <span class="feature-icon">🌗</span>
-              <h3>Personal preferences</h3>
-              <p>English and Spanish interfaces, light and dark themes, and saved preferences.</p>
-            </article>
-          </div>
-        </section>
-
-        <section id="how-it-works" class="split-section" aria-labelledby="flow-title">
-          <div>
-            <p class="eyebrow">Simple flow</p>
-            <h2 id="flow-title">Start with a group. Add the lists you actually use.</h2>
-            <p>
-              PesaListas keeps the structure lightweight: create a shared space, choose the list type,
-              then add the details that matter for that list — deadlines for chores, ingredients for recipes,
-              votes for ideas, or bought status for shopping.
-            </p>
-          </div>
-          <ol class="steps">
-            <li>
-              <span>01</span>
-              <div>
-                <h3>Create or join a group</h3>
-                <p>Use one group for your home or several for different shared spaces.</p>
-              </div>
-            </li>
-            <li>
-              <span>02</span>
-              <div>
-                <h3>Pick the right list type</h3>
-                <p>Tasks, chores, recipes, shopping, meals, movies, ideas, activities, or generic lists.</p>
-              </div>
-            </li>
-            <li>
-              <span>03</span>
-              <div>
-                <h3>Plan together</h3>
-                <p>Complete, vote, cook, buy, archive, and keep shared information tidy.</p>
-              </div>
-            </li>
-          </ol>
-        </section>
-
-        <section id="tech" class="tech-section" aria-labelledby="tech-title">
-          <div class="section-heading compact">
-            <p class="eyebrow">Open project</p>
-            <h2 id="tech-title">Built with a practical mobile stack.</h2>
-          </div>
-          <div class="tech-grid" aria-label="Technology stack">
-            <span>Flutter</span>
-            <span>Dart</span>
-            <span>Supabase Auth</span>
-            <span>Supabase Postgres</span>
-            <span>Google Sign-In</span>
-            <span>Firebase</span>
-            <span>Localizations</span>
-            <span>Shared preferences</span>
-          </div>
-        </section>
-
-        <section class="cta-card" aria-labelledby="cta-title">
-          <img src="assets/app_icon.png" alt="PesaListas icon" onerror="this.src='https://raw.githubusercontent.com/jotask/PesaListas/main/assets/icons/app_icon.png'" />
-          <div>
-            <p class="eyebrow">Ready to organize the home?</p>
-            <h2 id="cta-title">Explore PesaListas and follow the project.</h2>
-          </div>
-          <a class="button primary" href="https://github.com/jotask/PesaListas">Open repository</a>
-        </section>
-      </main>
-
-      <footer class="site-footer" aria-label="Footer">
-        <span>© <span id="year">2026</span> PesaListas</span>
-        <a href="privacy.html">Privacy Policy</a>
-        <a href="https://github.com/jotask/PesaListas">GitHub</a>
-      </footer>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PesaListas</title>
+  <meta
+    name="description"
+    content="Organize shared household lists, tasks, chores, recipes, meal plans, shopping, ideas, movies, and activities with PesaListas."
+  />
+  <meta name="theme-color" content="#f7c948" />
+  <meta property="og:title" content="PesaListas" />
+  <meta
+    property="og:description"
+    content="A shared household planning app for lists, chores, shopping, recipes, meals, ideas, movies, and activities."
+  />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="assets/icon/app_icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <div class="language-switcher" aria-label="Language selector">
+      <button type="button" data-lang-button="en">English</button>
+      <button type="button" data-lang-button="es">Español</button>
     </div>
-    <script>
-      document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
-  </body>
+
+    <section class="hero card">
+      <img class="app-icon" src="assets/icon/app_icon.svg" alt="PesaListas app icon" />
+      <p class="eyebrow" data-i18n="eyebrow">Shared planning for real households</p>
+      <h1>PesaListas</h1>
+
+      <p class="subtitle" data-i18n="subtitle">
+        Organize lists, tasks, chores, recipes, meal plans, shopping, ideas, movies, and activities in one shared space.
+      </p>
+
+      <div class="actions">
+        <a class="button" href="privacy.html" data-i18n="privacyLink">Privacy Policy</a>
+        <a class="button secondary" href="https://github.com/jotask/PesaListas" data-i18n="githubLink">GitHub Repository</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="aboutTitle">About the app</h2>
+      <p data-i18n="aboutText">
+        PesaListas is a collaborative household planning app built for families, couples, roommates, and small groups who want to stay organized together.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="featuresTitle">Features</h2>
+      <ul class="icon-list">
+        <li><span aria-hidden="true">👥</span><span data-i18n="featureGroups">Shared groups with member invitations</span></li>
+        <li><span aria-hidden="true">✅</span><span data-i18n="featureTasks">Tasks, chores, priorities, deadlines, and recurring work</span></li>
+        <li><span aria-hidden="true">🛒</span><span data-i18n="featureShopping">Shopping lists with bought and to-buy sections</span></li>
+        <li><span aria-hidden="true">🍳</span><span data-i18n="featureRecipes">Recipes, ingredients, cooking instructions, and meal planning</span></li>
+        <li><span aria-hidden="true">🗳️</span><span data-i18n="featureVoting">Voting for movies, ideas, and activities</span></li>
+        <li><span aria-hidden="true">🌍</span><span data-i18n="featureLanguage">English and Spanish interface with light and dark themes</span></li>
+      </ul>
+    </section>
+
+    <section class="card showcase">
+      <h2 data-i18n="organizedTitle">Everything your home decides together</h2>
+      <div class="mini-grid" aria-label="PesaListas use cases">
+        <div><strong>👥</strong><span data-i18n="miniGroups">Groups</span></div>
+        <div><strong>✅</strong><span data-i18n="miniTasks">Tasks</span></div>
+        <div><strong>🔁</strong><span data-i18n="miniChores">Chores</span></div>
+        <div><strong>🛒</strong><span data-i18n="miniShopping">Shopping</span></div>
+        <div><strong>🍽️</strong><span data-i18n="miniMeals">Meals</span></div>
+        <div><strong>🎬</strong><span data-i18n="miniMovies">Movies</span></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const translations = {
+      en: {
+        pageTitle: "PesaListas",
+        metaDescription:
+          "Organize shared household lists, tasks, chores, recipes, meal plans, shopping, ideas, movies, and activities with PesaListas.",
+        eyebrow: "Shared planning for real households",
+        subtitle:
+          "Organize lists, tasks, chores, recipes, meal plans, shopping, ideas, movies, and activities in one shared space.",
+        privacyLink: "Privacy Policy",
+        githubLink: "GitHub Repository",
+        aboutTitle: "About the app",
+        aboutText:
+          "PesaListas is a collaborative household planning app built for families, couples, roommates, and small groups who want to stay organized together.",
+        featuresTitle: "Features",
+        featureGroups: "Shared groups with member invitations",
+        featureTasks: "Tasks, chores, priorities, deadlines, and recurring work",
+        featureShopping: "Shopping lists with bought and to-buy sections",
+        featureRecipes: "Recipes, ingredients, cooking instructions, and meal planning",
+        featureVoting: "Voting for movies, ideas, and activities",
+        featureLanguage: "English and Spanish interface with light and dark themes",
+        organizedTitle: "Everything your home decides together",
+        miniGroups: "Groups",
+        miniTasks: "Tasks",
+        miniChores: "Chores",
+        miniShopping: "Shopping",
+        miniMeals: "Meals",
+        miniMovies: "Movies"
+      },
+      es: {
+        pageTitle: "PesaListas",
+        metaDescription:
+          "Organiza listas, tareas, rutinas, recetas, comidas, compra, ideas, películas y actividades compartidas con PesaListas.",
+        eyebrow: "Planificación compartida para hogares reales",
+        subtitle:
+          "Organiza listas, tareas, rutinas, recetas, comidas, compra, ideas, películas y actividades en un único espacio compartido.",
+        privacyLink: "Política de privacidad",
+        githubLink: "Repositorio de GitHub",
+        aboutTitle: "Sobre la aplicación",
+        aboutText:
+          "PesaListas es una aplicación colaborativa de organización del hogar para familias, parejas, compañeros de piso y grupos pequeños que quieren organizarse juntos.",
+        featuresTitle: "Funciones",
+        featureGroups: "Grupos compartidos con invitaciones a miembros",
+        featureTasks: "Tareas, rutinas, prioridades, fechas límite y trabajos recurrentes",
+        featureShopping: "Listas de la compra con secciones de pendiente y comprado",
+        featureRecipes: "Recetas, ingredientes, instrucciones de cocina y planificación de comidas",
+        featureVoting: "Votaciones para películas, ideas y actividades",
+        featureLanguage: "Interfaz en español e inglés con tema claro y oscuro",
+        organizedTitle: "Todo lo que tu hogar decide en común",
+        miniGroups: "Grupos",
+        miniTasks: "Tareas",
+        miniChores: "Rutinas",
+        miniShopping: "Compra",
+        miniMeals: "Comidas",
+        miniMovies: "Películas"
+      }
+    };
+
+    function getInitialLanguage() {
+      const params = new URLSearchParams(window.location.search);
+      const urlLang = params.get("lang");
+
+      if (urlLang === "en" || urlLang === "es") {
+        return urlLang;
+      }
+
+      const savedLang = localStorage.getItem("pesalistas-language");
+
+      if (savedLang === "en" || savedLang === "es") {
+        return savedLang;
+      }
+
+      return navigator.language.startsWith("es") ? "es" : "en";
+    }
+
+    function setLanguage(lang) {
+      const text = translations[lang];
+
+      document.documentElement.lang = lang;
+      document.title = text.pageTitle;
+
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute("content", text.metaDescription);
+      }
+
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
+        const key = element.getAttribute("data-i18n");
+        element.textContent = text[key];
+      });
+
+      document.querySelectorAll("[data-lang-button]").forEach((button) => {
+        const isActive = button.getAttribute("data-lang-button") === lang;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      });
+
+      localStorage.setItem("pesalistas-language", lang);
+
+      const url = new URL(window.location.href);
+      url.searchParams.set("lang", lang);
+      window.history.replaceState({}, "", url);
+    }
+
+    document.querySelectorAll("[data-lang-button]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setLanguage(button.getAttribute("data-lang-button"));
+      });
+    });
+
+    setLanguage(getInitialLanguage());
+  </script>
+</body>
 </html>
