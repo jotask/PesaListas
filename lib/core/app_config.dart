@@ -14,6 +14,10 @@ class AppConfig {
     return dotenv.env['SUPABASE_ANON_KEY'] ?? '';
   }
 
+  static String get googleWebClientId {
+    return dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '';
+  }
+
   static bool get useOpenFoodFactsStaging {
     return AppPlatform.isRelease == false;
   }
@@ -25,6 +29,10 @@ class AppConfig {
 
     if (supabaseAnonKey.trim().isEmpty) {
       throw StateError('Missing SUPABASE_ANON_KEY in env file.');
+    }
+
+    if (googleWebClientId.trim().isEmpty) {
+      throw StateError('Missing GOOGLE_WEB_CLIENT_ID in env file.');
     }
   }
 }
