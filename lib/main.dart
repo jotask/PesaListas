@@ -13,6 +13,7 @@ import 'package:pesalistas/core/app_push_notification_service.dart';
 import 'package:pesalistas/core/controllers/app_locale_controller.dart';
 import 'package:pesalistas/core/controllers/app_notification_controller.dart';
 import 'package:pesalistas/core/controllers/app_theme_controller.dart';
+import 'package:pesalistas/core/design/app_theme.dart';
 import 'package:pesalistas/firebase_options.dart';
 import 'package:pesalistas/l10n/app_localizations.dart';
 import 'package:pesalistas/pages/splash_page.dart';
@@ -137,20 +138,8 @@ class PesaListas extends StatelessWidget {
                       ),
                     ]
                   : const [],
-              theme: ThemeData(
-                useMaterial3: true,
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.green,
-                  brightness: Brightness.light,
-                ),
-              ),
-              darkTheme: ThemeData(
-                useMaterial3: true,
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.green,
-                  brightness: Brightness.dark,
-                ),
-              ),
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
               home: const SplashPage(),
             );
           },
