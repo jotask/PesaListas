@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/design/app_radius.dart';
+import 'package:pesalistas/core/design/app_spacing.dart';
 import 'package:pesalistas/core/fields/shopping_item_fields.dart';
 import 'package:pesalistas/core/shopping_stores.dart';
 import 'package:pesalistas/core/value_parsing.dart';
-import 'package:pesalistas/l10n/l10n_extensions.dart';
+import 'package:pesalistas/widgets/design/app_surface.dart';
 import 'package:pesalistas/widgets/list_detail/empty_items_card.dart';
 import 'package:pesalistas/widgets/list_detail/shopping_item_card.dart';
 import 'package:pesalistas/widgets/list_detail/unread_item_highlight.dart';
@@ -53,13 +55,8 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
   String? get activeStoreLabel {
     final selected = selectedStoreLabel;
 
-    if (selected == null) {
-      return null;
-    }
-
-    if (!availableStoreLabels.contains(selected)) {
-      return null;
-    }
+    if (selected == null) return null;
+    if (!availableStoreLabels.contains(selected)) return null;
 
     return selected;
   }
@@ -67,9 +64,7 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
   List<Map<String, dynamic>> get visibleItems {
     final store = activeStoreLabel;
 
-    if (store == null) {
-      return widget.items;
-    }
+    if (store == null) return widget.items;
 
     return widget.items.where((item) {
       return storeLabelForItem(item) == store;
@@ -98,6 +93,16 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
     return widget.items.where((item) {
       return item[AppShoppingItemFields.checked] == true;
     }).length;
+  }
+
+  int get visibleToBuyCount => toBuyItems.length;
+
+  int get visibleBoughtCount => boughtItems.length;
+
+  double get progress {
+    final total = allToBuyCount + allBoughtCount;
+    if (total == 0) return 0;
+    return allBoughtCount / total;
   }
 
   bool isChecked(Map<String, dynamic> item) {
@@ -141,7 +146,8 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
 
     for (final item in sourceItems) {
       final store = storeLabelForItem(item);
-      grouped.putIfAbsent(store, () => []).add(item);
+      grouped.putIfAbsent(store, () => []);
+      grouped[store]!.add(item);
     }
 
     return grouped;
@@ -159,28 +165,33 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
 
     if (widget.items.isEmpty) {
       return EmptyItemsCard(
-        icon: Icons.shopping_cart_outlined,
-        title: context.l10n.noShoppingItemsYet,
-        subtitle: 'Add what you need to buy.',
+        icon: Icons.shopping_bag_outlined,
+        title: 'No shopping items yet',
+        subtitle: 'Add what you need to buy or generate a list from meals.',
         onCreate: widget.onCreate,
       );
     }
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _ShoppingStoreFocusBar(
-          selectedStoreLabel: activeStoreLabel,
-          storeLabels: availableStoreLabels,
-          visibleToBuyCount: toBuyItems.length,
-          visibleBoughtCount: boughtItems.length,
+        _ShoppingSummaryCard(
+          progress: progress,
           allToBuyCount: allToBuyCount,
           allBoughtCount: allBoughtCount,
-          onSelected: selectStore,
+          storeCount: availableStoreLabels.length,
           onClearBought: allBoughtCount == 0 ? null : widget.onClearBought,
           onClearAll: widget.onClearAll,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
+        _ShoppingStoreFilter(
+          selectedStoreLabel: activeStoreLabel,
+          storeLabels: availableStoreLabels,
+          visibleToBuyCount: visibleToBuyCount,
+          visibleBoughtCount: visibleBoughtCount,
+          onSelected: selectStore,
+        ),
+        const SizedBox(height: AppSpacing.md),
         if (toBuyItems.isEmpty && activeStoreLabel != null)
           _NoStoreItemsCard(
             storeName: activeStoreLabel!,
@@ -189,8 +200,8 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
         else ...[
           if (toBuyItems.isNotEmpty)
             _ShoppingSection(
-              title: context.l10n.toBuy,
-              icon: Icons.shopping_cart_outlined,
+              title: 'To buy',
+              icon: Icons.shopping_bag_outlined,
               itemsByStore: groupItemsByStore(toBuyItems),
               showStoreHeaders: activeStoreLabel == null,
               onToggle: toggleItem,
@@ -198,11 +209,11 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
               onDelete: widget.onDelete,
             ),
           if (toBuyItems.isNotEmpty && boughtItems.isNotEmpty)
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.lg),
           if (boughtItems.isNotEmpty)
             _ShoppingSection(
-              title: context.l10n.bought,
-              icon: Icons.shopping_cart_checkout,
+              title: 'Bought',
+              icon: Icons.shopping_cart_checkout_rounded,
               itemsByStore: groupItemsByStore(boughtItems),
               showStoreHeaders: activeStoreLabel == null,
               onToggle: toggleItem,
@@ -215,34 +226,138 @@ class _ShoppingItemsViewState extends State<ShoppingItemsView> {
   }
 }
 
-class _ShoppingStoreFocusBar extends StatelessWidget {
-  const _ShoppingStoreFocusBar({
+class _ShoppingSummaryCard extends StatelessWidget {
+  const _ShoppingSummaryCard({
+    required this.progress,
+    required this.allToBuyCount,
+    required this.allBoughtCount,
+    required this.storeCount,
+    required this.onClearBought,
+    required this.onClearAll,
+  });
+
+  final double progress;
+  final int allToBuyCount;
+  final int allBoughtCount;
+  final int storeCount;
+  final VoidCallback? onClearBought;
+  final VoidCallback onClearAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final percentage = (progress * 100).round();
+
+    return AppSurface(
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.38),
+      borderColor: theme.colorScheme.primary.withValues(alpha: 0.16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  Icons.shopping_basket_rounded,
+                  color: theme.colorScheme.onPrimary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Shopping trip',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$allToBuyCount left • $allBoughtCount bought • $storeCount stores',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '$percentage%',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              PopupMenuButton<_ShoppingListAction>(
+                tooltip: 'Shopping actions',
+                onSelected: (action) {
+                  switch (action) {
+                    case _ShoppingListAction.clearBought:
+                      onClearBought?.call();
+                      break;
+                    case _ShoppingListAction.clearAll:
+                      onClearAll();
+                      break;
+                  }
+                },
+                itemBuilder: (context) {
+                  return [
+                    PopupMenuItem(
+                      value: _ShoppingListAction.clearBought,
+                      enabled: onClearBought != null,
+                      child: const Text('Clear bought items'),
+                    ),
+                    const PopupMenuItem(
+                      value: _ShoppingListAction.clearAll,
+                      child: Text('Clear all items'),
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 9,
+              backgroundColor: theme.colorScheme.surface.withValues(
+                alpha: 0.75,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShoppingStoreFilter extends StatelessWidget {
+  const _ShoppingStoreFilter({
     required this.selectedStoreLabel,
     required this.storeLabels,
     required this.visibleToBuyCount,
     required this.visibleBoughtCount,
-    required this.allToBuyCount,
-    required this.allBoughtCount,
     required this.onSelected,
-    required this.onClearBought,
-    required this.onClearAll,
   });
 
   final String? selectedStoreLabel;
   final List<String> storeLabels;
   final int visibleToBuyCount;
   final int visibleBoughtCount;
-  final int allToBuyCount;
-  final int allBoughtCount;
   final void Function(String? store) onSelected;
-  final VoidCallback? onClearBought;
-  final VoidCallback onClearAll;
 
   String get summary {
-    if (selectedStoreLabel == null) {
-      return '$allToBuyCount to buy • $allBoughtCount bought';
-    }
-
     return '$visibleToBuyCount to buy • $visibleBoughtCount bought';
   }
 
@@ -250,72 +365,42 @@ class _ShoppingStoreFocusBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
-        child: Row(
-          children: [
-            Icon(Icons.storefront_outlined, color: theme.colorScheme.primary),
-            const SizedBox(width: 10),
-            Expanded(
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String?>(
-                  value: selectedStoreLabel,
-                  isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down),
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text(
-                        'All stores',
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
+    return AppSurface(
+      padding: const EdgeInsets.fromLTRB(12, 8, 10, 8),
+      child: Row(
+        children: [
+          Icon(Icons.storefront_outlined, color: theme.colorScheme.primary),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String?>(
+                value: selectedStoreLabel,
+                isExpanded: true,
+                icon: const Icon(Icons.keyboard_arrow_down),
+                items: [
+                  const DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text(
+                      'All stores',
+                      style: TextStyle(fontWeight: FontWeight.w900),
                     ),
-                    for (final store in storeLabels)
-                      DropdownMenuItem<String?>(
-                        value: store,
-                        child: Text(store),
-                      ),
-                  ],
-                  onChanged: onSelected,
-                ),
+                  ),
+                  for (final store in storeLabels)
+                    DropdownMenuItem<String?>(value: store, child: Text(store)),
+                ],
+                onChanged: onSelected,
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              summary,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w700,
-              ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            summary,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w800,
             ),
-            PopupMenuButton<_ShoppingListAction>(
-              onSelected: (action) {
-                switch (action) {
-                  case _ShoppingListAction.clearBought:
-                    onClearBought?.call();
-                    break;
-                  case _ShoppingListAction.clearAll:
-                    onClearAll();
-                    break;
-                }
-              },
-              itemBuilder: (context) {
-                return [
-                  PopupMenuItem(
-                    value: _ShoppingListAction.clearBought,
-                    enabled: onClearBought != null,
-                    child: Text(context.l10n.clearBought),
-                  ),
-                  PopupMenuItem(
-                    value: _ShoppingListAction.clearAll,
-                    child: Text(context.l10n.clearAll),
-                  ),
-                ];
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -357,15 +442,17 @@ class _ShoppingSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, size: 18, color: theme.colorScheme.primary),
-            const SizedBox(width: 8),
+            Icon(icon, size: 19, color: theme.colorScheme.primary),
+            const SizedBox(width: AppSpacing.xs),
             Text(
               '$title ($totalCount)',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         for (final storeEntry in storeEntries) ...[
           if (showStoreHeaders)
             _StoreShoppingGroup(
@@ -388,7 +475,7 @@ class _ShoppingSection extends StatelessWidget {
                   },
                 ),
               ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
         ],
       ],
     );
@@ -414,15 +501,10 @@ class _StoreShoppingGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      width: double.infinity,
+    return AppSurface(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 2),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(
-          alpha: 0.26,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.28),
+      borderColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.42),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -476,49 +558,35 @@ class _NoStoreItemsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              child: Icon(
-                Icons.shopping_cart_outlined,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+    return AppSurface(
+      child: Row(
+        children: [
+          const Icon(Icons.shopping_bag_outlined, size: 34),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Nothing to buy at $storeName',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Switch back to all stores to see the full shopping list.',
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                OutlinedButton.icon(
+                  onPressed: onShowAllStores,
+                  icon: const Icon(Icons.storefront_outlined),
+                  label: const Text('Show all stores'),
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Nothing to buy at $storeName',
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Switch back to all stores to see the full shopping list.',
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: onShowAllStores,
-                    icon: const Icon(Icons.storefront_outlined),
-                    label: const Text('Show all stores'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

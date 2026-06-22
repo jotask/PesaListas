@@ -248,6 +248,7 @@ class _ListItemsSectionState extends State<ListItemsSection> {
             onDeleteRecipe: widget.onDeleteRecipe,
             onGenerateShoppingFromMealPlans:
                 widget.onGenerateShoppingFromMealPlans,
+            onClearBoughtShoppingItems: widget.onClearBoughtShoppingItems,
             onClearAll: widget.onClearAllShoppingItems,
             onBookStatusChanged: widget.onBookStatusChanged,
           ),

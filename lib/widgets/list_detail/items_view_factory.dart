@@ -28,6 +28,7 @@ class ItemsViewFactory extends StatelessWidget {
     required this.onViewRecipeDetails,
     required this.onDeleteRecipe,
     required this.onGenerateShoppingFromMealPlans,
+    required this.onClearBoughtShoppingItems,
     required this.onClearAll,
     required this.onBookStatusChanged,
   });
@@ -45,6 +46,7 @@ class ItemsViewFactory extends StatelessWidget {
   final void Function(Map<String, dynamic> recipe) onViewRecipeDetails;
   final void Function(String recipeId) onDeleteRecipe;
   final VoidCallback onGenerateShoppingFromMealPlans;
+  final VoidCallback onClearBoughtShoppingItems;
   final VoidCallback onClearAll;
   final void Function({
     required Map<String, dynamic> item,
@@ -152,7 +154,7 @@ class ItemsViewFactory extends StatelessWidget {
         onReopen: onReopen,
         onEdit: onEdit,
         onDelete: onDelete,
-        onClearBought: onGenerateShoppingFromMealPlans,
+        onClearBought: onClearBoughtShoppingItems,
         onClearAll: onClearAll,
       );
     }
