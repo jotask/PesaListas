@@ -2062,7 +2062,7 @@ class _ListDetailPageState extends State<ListDetailPage> {
               child: RefreshIndicator(
                 onRefresh: loadItems,
                 child: ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
                   children: [
                     ListItemsSection(
                       listType: listType,

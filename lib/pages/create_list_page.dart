@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pesalistas/core/design/app_spacing.dart';
+import 'package:pesalistas/core/design/list_type_style.dart';
 import 'package:pesalistas/core/list_types.dart';
 import 'package:pesalistas/l10n/l10n_extensions.dart';
 import 'package:pesalistas/widgets/common/form_page_layout.dart';
+import 'package:pesalistas/widgets/design/app_list_type_card.dart';
+import 'package:pesalistas/widgets/design/app_section_header.dart';
+import 'package:pesalistas/widgets/design/app_surface.dart';
 
 class CreateListPageResult {
   const CreateListPageResult({required this.name, required this.listType});
@@ -59,6 +64,7 @@ class _CreateListPageState extends State<CreateListPage> {
   @override
   Widget build(BuildContext context) {
     final config = selectedConfig;
+    final style = ListTypeStyle.of(listType);
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.createList)),
@@ -72,142 +78,114 @@ class _CreateListPageState extends State<CreateListPage> {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screenHorizontal,
+            AppSpacing.screenTop,
+            AppSpacing.screenHorizontal,
+            AppSpacing.screenBottom,
+          ),
           children: [
-            AppFormPageHeaderCard(
-              icon: config.icon,
-              title: context.l10n.createList,
-              subtitle: config.description(context),
-            ),
-            const SizedBox(height: 16),
-            AppFormSectionCard(
-              children: [
-                TextField(
-                  controller: nameController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.listName,
-                    hintText: context.l10n.moviesToWatch,
-                    prefixIcon: const Icon(Icons.list_alt_outlined),
-                  ),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => submit(),
-                  onChanged: (_) => clearValidation(),
+            AppSurface(
+              padding: EdgeInsets.zero,
+              color: style.soft,
+              borderColor: style.accent.withValues(alpha: 0.18),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: style.gradient,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                if (validationMessage != null) ...[
-                  const SizedBox(height: 16),
-                  AppFormValidationMessage(message: validationMessage!),
-                ],
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.listType,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            for (final config in AppListTypes.all)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: _ListTypeOptionCard(
-                  config: config,
-                  selected: listType == config.value,
-                  onTap: () => selectListType(config.value),
-                ),
-              ),
-            const SizedBox(height: 96),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ListTypeOptionCard extends StatelessWidget {
-  const _ListTypeOptionCard({
-    required this.config,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final AppListTypeConfig config;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final backgroundColor = selected
-        ? theme.colorScheme.primaryContainer
-        : theme.colorScheme.surface;
-
-    final foregroundColor = selected
-        ? theme.colorScheme.onPrimaryContainer
-        : theme.colorScheme.onSurface;
-
-    final borderColor = selected
-        ? theme.colorScheme.primary
-        : theme.dividerColor.withValues(alpha: 0.45);
-
-    return Card(
-      color: backgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: borderColor),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: selected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.surfaceContainerHighest,
-                child: Icon(
-                  config.icon,
-                  color: selected
-                      ? theme.colorScheme.onPrimary
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
                   children: [
-                    Text(
-                      config.label(context),
-                      style: TextStyle(
-                        color: foregroundColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: style.accent,
+                        borderRadius: BorderRadius.circular(18),
                       ),
+                      child: Icon(config.icon, color: Colors.white, size: 30),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      config.description(context),
-                      style: TextStyle(
-                        color: foregroundColor.withValues(alpha: 0.78),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.createList,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                  color: style.onSoft,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            config.description(context),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: style.onSoft.withValues(alpha: 0.78),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Icon(
-                selected
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked,
-                color: selected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AppSurface(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.listName,
+                      hintText: context.l10n.moviesToWatch,
+                      prefixIcon: const Icon(Icons.list_alt_outlined),
+                    ),
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => submit(),
+                    onChanged: (_) => clearValidation(),
+                  ),
+                  if (validationMessage != null) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    AppFormValidationMessage(message: validationMessage!),
+                  ],
+                ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AppSectionHeader(
+              title: context.l10n.listType,
+              subtitle: config.label(context),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            GridView.builder(
+              itemCount: AppListTypes.all.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: AppSpacing.sm,
+                crossAxisSpacing: AppSpacing.sm,
+                childAspectRatio: 0.96,
+              ),
+              itemBuilder: (context, index) {
+                final config = AppListTypes.all[index];
+
+                return AppListTypeCard(
+                  config: config,
+                  selected: listType == config.value,
+                  onTap: () => selectListType(config.value),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

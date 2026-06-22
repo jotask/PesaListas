@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/widgets/common/empty_info_card.dart';
+import 'package:pesalistas/widgets/design/app_empty_state.dart';
 
 class EmptyItemsCard extends StatelessWidget {
   const EmptyItemsCard({
@@ -17,12 +17,15 @@ class EmptyItemsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EmptyInfoCard(
+    return AppEmptyState(
       icon: icon,
       title: title,
       subtitle: subtitle,
-      trailing: const Icon(Icons.add_circle_outline),
-      onTap: onCreate,
+      action: FilledButton.icon(
+        onPressed: onCreate,
+        icon: const Icon(Icons.add),
+        label: Text(title),
+      ),
     );
   }
 }

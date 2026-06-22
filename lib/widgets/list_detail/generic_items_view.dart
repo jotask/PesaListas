@@ -45,7 +45,7 @@ class GenericItemsView extends StatelessWidget {
 
     if (items.isEmpty) {
       return EmptyItemsCard(
-        icon: Icons.add_task,
+        icon: Icons.notes_outlined,
         title: context.l10n.noItemsYet,
         subtitle: context.l10n.addYourFirstItem,
         onCreate: onCreate,
