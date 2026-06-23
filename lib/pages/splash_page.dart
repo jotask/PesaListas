@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pesalistas/animated_logo.dart';
-import 'package:pesalistas/core/design/app_colors.dart';
-import 'package:pesalistas/core/design/app_radius.dart';
-import 'package:pesalistas/core/design/app_spacing.dart';
 import 'package:pesalistas/pages/auth_page.dart';
 import 'package:pesalistas/pages/home_page.dart';
 import 'package:pesalistas/repositories/auth_repository.dart';
@@ -33,224 +29,227 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> setupApp() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future.delayed(const Duration(milliseconds: 1100));
 
     if (!mounted) return;
 
-    if (authRepository.currentSession != null) {
-      await profileRepository.syncCurrentProfileFromAuth(
-        debugLabel: 'SplashProfileSync',
-      );
+    final hasSession = authRepository.currentSession != null;
 
-      if (!mounted) return;
-
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          settings: const RouteSettings(name: '/home'),
-          builder: (_) => const HomePage(),
-        ),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          settings: const RouteSettings(name: '/auth'),
-          builder: (_) => const AuthPage(),
-        ),
-      );
+    if (!hasSession) {
+      // goToAuth();
+      return;
     }
+
+    try {
+      await profileRepository
+          .syncCurrentProfileFromAuth(debugLabel: 'SplashProfileSync')
+          .timeout(const Duration(seconds: 3));
+    } catch (error, stackTrace) {
+      debugPrint('Splash profile sync failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+
+    if (!mounted) return;
+
+    // goToHome();
+  }
+
+  void goToHome() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/home'),
+        builder: (_) => const HomePage(),
+      ),
+    );
+  }
+
+  void goToAuth() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/auth'),
+        builder: (_) => const AuthPage(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF06251F), Color(0xFF0F6F63), Color(0xFF26A68A)],
-          ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              const Positioned(
-                top: -90,
-                right: -70,
-                child: _GlowOrb(size: 220, opacity: 0.16),
-              ),
-              const Positioned(
-                bottom: -100,
-                left: -80,
-                child: _GlowOrb(size: 260, opacity: 0.12),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Column(
-                  children: [
-                    const Spacer(),
-                    Container(
-                      width: 122,
-                      height: 122,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(AppRadius.xl),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.24),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.18),
-                            blurRadius: 34,
-                            offset: const Offset(0, 18),
-                          ),
-                        ],
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(18),
-                        child: AnimatedLogo(),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    Text(
-                      'PesaListas',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.displaySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.8,
-                        height: 0.98,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Shared lists for real life',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.78),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xxl),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(AppRadius.pill),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.16),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.4,
-                              color: Colors.white.withValues(alpha: 0.92),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(
-                            'Preparing your space',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.86),
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    _SplashFeaturePill(
-                      icon: Icons.groups_2_outlined,
-                      label: 'Groups',
-                      color: AppColors.blue,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    _SplashFeaturePill(
-                      icon: Icons.checklist_rounded,
-                      label: 'Tasks, shopping, meals and plans',
-                      color: AppColors.amber,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return const Scaffold(
+      backgroundColor: Color(0xFFFFFCF4),
+      body: SafeArea(child: _SplashContent()),
     );
   }
 }
 
-class _GlowOrb extends StatelessWidget {
-  const _GlowOrb({required this.size, required this.opacity});
-
-  final double size;
-  final double opacity;
+class _SplashAppIcon extends StatelessWidget {
+  const _SplashAppIcon();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size,
-      height: size,
+      width: 86,
+      height: 86,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: opacity),
-      ),
-    );
-  }
-}
-
-class _SplashFeaturePill extends StatelessWidget {
-  const _SplashFeaturePill({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 17, color: color),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.84),
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF149D6E).withValues(alpha: 0.22),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.asset(
+        'assets/icons/app_icon.png',
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+        errorBuilder: (_, __, ___) {
+          return Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF25C889), Color(0xFF149D6E)],
+              ),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const Icon(
+              Icons.checklist_rounded,
+              color: Colors.white,
+              size: 46,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SplashContent extends StatelessWidget {
+  const _SplashContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: const Alignment(0, -0.08),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: SizedBox(
+            width: 340,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                _SplashAppIcon(),
+                SizedBox(height: 22),
+                _SplashWordmark(),
+                SizedBox(height: 4),
+                Text(
+                  'Organizamos juntos, vivimos mejor.',
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: TextStyle(
+                    color: Color(0xFF727A83),
+                    fontSize: 15,
+                    height: 1.2,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+                SizedBox(height: 30),
+                _HouseIllustration(),
+                SizedBox(height: 28),
+                _SplashLoading(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SplashWordmark extends StatelessWidget {
+  const _SplashWordmark();
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      textAlign: TextAlign.center,
+      text: const TextSpan(
+        style: TextStyle(
+          fontSize: 43,
+          height: 0.95,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -1.9,
+        ),
+        children: [
+          TextSpan(
+            text: 'Pesa',
+            style: TextStyle(color: Color(0xFF26363B)),
+          ),
+          TextSpan(
+            text: 'Listas',
+            style: TextStyle(color: Color(0xFF19A873)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HouseIllustration extends StatelessWidget {
+  const _HouseIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'assets/illustrations/splash_house.png',
+      width: 320,
+      height: 230,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      errorBuilder: (_, __, ___) {
+        return const SizedBox(
+          width: 300,
+          height: 210,
+          child: Center(
+            child: Icon(Icons.home_rounded, color: Color(0xFF19A873), size: 84),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SplashLoading extends StatelessWidget {
+  const _SplashLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: const [
+        SizedBox(
+          width: 30,
+          height: 30,
+          child: CircularProgressIndicator(
+            strokeWidth: 3.2,
+            color: Color(0xFF19A873),
+            backgroundColor: Color(0xFFEAF5EF),
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'Cargando...',
+          style: TextStyle(
+            color: Color(0xFF727A83),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }
