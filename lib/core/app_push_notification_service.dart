@@ -79,7 +79,14 @@ class AppPushNotificationService {
       return;
     }
 
-    final token = await FirebaseMessaging.instance.getToken();
+    String? token;
+
+    try {
+      token = await FirebaseMessaging.instance.getToken();
+    } catch (error) {
+      debugPrint('FCM TOKEN FETCH FAILED: $error');
+      return;
+    }
 
     if (token == null || token.trim().isEmpty) {
       debugPrint('FCM TOKEN SYNC SKIPPED: token is empty.');
@@ -118,7 +125,15 @@ class AppPushNotificationService {
   }
 
   static Future<void> unregisterCurrentDevice() async {
-    final token = await FirebaseMessaging.instance.getToken();
+    String? token;
+
+    try {
+      token = await FirebaseMessaging.instance.getToken();
+    } catch (error, stackTrace) {
+      debugPrint('FCM TOKEN FETCH FAILED: $error');
+      debugPrint('FCM TOKEN FETCH STACKTRACE: $stackTrace');
+      return;
+    }
 
     if (token == null || token.trim().isEmpty) {
       return;
