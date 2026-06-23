@@ -36,7 +36,7 @@ class _SplashPageState extends State<SplashPage> {
     final hasSession = authRepository.currentSession != null;
 
     if (!hasSession) {
-      // goToAuth();
+      goToAuth();
       return;
     }
 
@@ -51,7 +51,7 @@ class _SplashPageState extends State<SplashPage> {
 
     if (!mounted) return;
 
-    // goToHome();
+    goToHome();
   }
 
   void goToHome() {
@@ -104,7 +104,7 @@ class _SplashAppIcon extends StatelessWidget {
         'assets/icons/app_icon.png',
         fit: BoxFit.cover,
         filterQuality: FilterQuality.high,
-        errorBuilder: (_, __, ___) {
+        errorBuilder: (_, _, _) {
           return Container(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -211,7 +211,7 @@ class _HouseIllustration extends StatelessWidget {
       height: 230,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,
-      errorBuilder: (_, __, ___) {
+      errorBuilder: (_, _, _) {
         return const SizedBox(
           width: 300,
           height: 210,

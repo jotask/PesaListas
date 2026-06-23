@@ -368,95 +368,420 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final attentionCount =
+        invitations.length +
+        attentionSummary.overdueChores +
+        attentionSummary.choresDueToday +
+        attentionSummary.overdueTasks +
+        attentionSummary.tasksDueToday +
+        attentionSummary.tasksDueSoon +
+        attentionSummary.shoppingToBuy +
+        attentionSummary.mealsToday;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: [
-          IconButton(
-            onPressed: openActivityInbox,
-            icon: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const Icon(Icons.inbox_outlined),
-                if (hasUnreadInboxActivity)
-                  Positioned(
-                    right: -1,
-                    top: -1,
-                    child: Container(
-                      width: 9,
-                      height: 9,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.error,
-                        shape: BoxShape.circle,
+      backgroundColor: const Color(0xFFFFFCF4),
+      floatingActionButton: loading
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: creatingGroup ? null : createGroupDialog,
+              backgroundColor: const Color(0xFF19A873),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              icon: creatingGroup
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.3,
+                        color: Colors.white,
                       ),
-                    ),
-                  ),
-              ],
+                    )
+                  : const Icon(Icons.add_rounded),
+              label: const Text(
+                'New group',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
             ),
-            tooltip: 'Activity',
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  settings: const RouteSettings(name: '/settings'),
-                  builder: (_) => const SettingsPage(),
+      body: SafeArea(
+        child: loading
+            ? const _HomeLoadingView()
+            : RefreshIndicator(
+                onRefresh: loadHomeData,
+                color: const Color(0xFF19A873),
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 104),
+                  children: [
+                    _HomeHeroHeader(
+                      groupCount: groups.length,
+                      listCount: lists.length,
+                      attentionCount: attentionCount,
+                      hasUnreadInboxActivity: hasUnreadInboxActivity,
+                      onOpenActivity: openActivityInbox,
+                      onOpenSettings: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            settings: const RouteSettings(name: '/settings'),
+                            builder: (_) => const SettingsPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    PendingInvitationsSection(
+                      invitations: invitations,
+                      loading: false,
+                      processingInvitation: processingInvitation,
+                      onAcceptInvitation: acceptInvitation,
+                      onDeclineInvitation: declineInvitation,
+                    ),
+                    if (invitations.isNotEmpty) const SizedBox(height: 16),
+                    HomeAttentionSection(
+                      summary: attentionSummary,
+                      pendingInvitationCount: invitations.length,
+                      onOpenTasks: () =>
+                          openHomeListType(AppListTypes.tasks.value),
+                      onOpenChores: () =>
+                          openHomeListType(AppListTypes.chores.value),
+                      onOpenShopping: () =>
+                          openHomeListType(AppListTypes.shopping.value),
+                      onOpenMealPlan: () =>
+                          openHomeListType(AppListTypes.mealPlan.value),
+                    ),
+                    if (invitations.isNotEmpty || attentionSummary.hasAttention)
+                      const SizedBox(height: 16),
+                    HomeListsSection(
+                      groups: groups,
+                      lists: lists,
+                      loading: false,
+                      creatingGroup: creatingGroup,
+                      onCreateGroup: createGroupDialog,
+                      onHomeChanged: loadHomeData,
+                      listSummaries: listSummaries,
+                      unreadActivityByListId: unreadActivityByListId,
+                      onOpenList: openHomeList,
+                    ),
+                  ],
                 ),
-              );
-            },
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: context.l10n.settingsTitle,
+              ),
+      ),
+    );
+  }
+}
+
+class _HomeLoadingView extends StatelessWidget {
+  const _HomeLoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _HomeAppIcon(size: 72, radius: 22),
+          SizedBox(height: 18),
+          SizedBox(
+            width: 30,
+            height: 30,
+            child: CircularProgressIndicator(
+              strokeWidth: 3.2,
+              color: Color(0xFF19A873),
+              backgroundColor: Color(0xFFEAF5EF),
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Loading your home...',
+            style: TextStyle(
+              color: Color(0xFF727A83),
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: creatingGroup ? null : createGroupDialog,
-        icon: const Icon(Icons.add),
-        label: Text(context.l10n.newGroup),
+    );
+  }
+}
+
+class _HomeHeroHeader extends StatelessWidget {
+  const _HomeHeroHeader({
+    required this.groupCount,
+    required this.listCount,
+    required this.attentionCount,
+    required this.hasUnreadInboxActivity,
+    required this.onOpenActivity,
+    required this.onOpenSettings,
+  });
+
+  final int groupCount;
+  final int listCount;
+  final int attentionCount;
+  final bool hasUnreadInboxActivity;
+  final VoidCallback onOpenActivity;
+  final VoidCallback onOpenSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: const Color(0xFFECE7DC)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.045),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
+          ),
+        ],
       ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: loadHomeData,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  PendingInvitationsSection(
-                    invitations: invitations,
-                    loading: false,
-                    processingInvitation: processingInvitation,
-                    onAcceptInvitation: acceptInvitation,
-                    onDeclineInvitation: declineInvitation,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const _HomeAppIcon(size: 52, radius: 16),
+              const SizedBox(width: 12),
+              Expanded(
+                child: RichText(
+                  text: const TextSpan(
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      height: 0.98,
+                      letterSpacing: -1,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'Pesa',
+                        style: TextStyle(color: Color(0xFF26363B)),
+                      ),
+                      TextSpan(
+                        text: 'Listas',
+                        style: TextStyle(color: Color(0xFF19A873)),
+                      ),
+                    ],
                   ),
-                  if (invitations.isNotEmpty) const SizedBox(height: 16),
-                  HomeAttentionSection(
-                    summary: attentionSummary,
-                    pendingInvitationCount: invitations.length,
-                    onOpenTasks: () =>
-                        openHomeListType(AppListTypes.tasks.value),
-                    onOpenChores: () =>
-                        openHomeListType(AppListTypes.chores.value),
-                    onOpenShopping: () =>
-                        openHomeListType(AppListTypes.shopping.value),
-                    onOpenMealPlan: () =>
-                        openHomeListType(AppListTypes.mealPlan.value),
-                  ),
-                  if (invitations.isNotEmpty || attentionSummary.hasAttention)
-                    const SizedBox(height: 16),
-                  HomeListsSection(
-                    groups: groups,
-                    lists: lists,
-                    loading: false,
-                    creatingGroup: creatingGroup,
-                    onCreateGroup: createGroupDialog,
-                    onHomeChanged: loadHomeData,
-                    listSummaries: listSummaries,
-                    unreadActivityByListId: unreadActivityByListId,
-                    onOpenList: openHomeList,
-                  ),
-                ],
+                ),
+              ),
+              _HomeIconButton(
+                icon: Icons.inbox_outlined,
+                tooltip: 'Activity',
+                hasBadge: hasUnreadInboxActivity,
+                onPressed: onOpenActivity,
+              ),
+              const SizedBox(width: 8),
+              _HomeIconButton(
+                icon: Icons.settings_outlined,
+                tooltip: 'Settings',
+                onPressed: onOpenSettings,
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          Text(
+            'Your shared home',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: const Color(0xFF26363B),
+              fontWeight: FontWeight.w900,
+              height: 1.02,
+              letterSpacing: -0.7,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Groups, lists, meals and routines in one calm place.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: const Color(0xFF727A83),
+              fontWeight: FontWeight.w600,
+              height: 1.25,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Expanded(
+                child: _HomeMetricCard(
+                  label: 'Groups',
+                  value: groupCount.toString(),
+                  icon: Icons.groups_2_outlined,
+                  color: const Color(0xFF19A873),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _HomeMetricCard(
+                  label: 'Lists',
+                  value: listCount.toString(),
+                  icon: Icons.checklist_rounded,
+                  color: const Color(0xFF3478F6),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _HomeMetricCard(
+                  label: 'Focus',
+                  value: attentionCount.toString(),
+                  icon: Icons.priority_high_rounded,
+                  color: const Color(0xFFFF7A59),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeAppIcon extends StatelessWidget {
+  const _HomeAppIcon({required this.size, required this.radius});
+
+  final double size;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF149D6E).withValues(alpha: 0.18),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Image.asset(
+        'assets/icons/app_icon.png',
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+        errorBuilder: (_, _, _) {
+          return Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF25C889), Color(0xFF149D6E)],
+              ),
+              borderRadius: BorderRadius.circular(radius),
+            ),
+            child: Icon(
+              Icons.checklist_rounded,
+              color: Colors.white,
+              size: size * 0.52,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _HomeIconButton extends StatelessWidget {
+  const _HomeIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.hasBadge = false,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final bool hasBadge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton.filledTonal(
+          onPressed: onPressed,
+          tooltip: tooltip,
+          style: IconButton.styleFrom(
+            backgroundColor: const Color(0xFFF3F8F4),
+            foregroundColor: const Color(0xFF26363B),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+          icon: Icon(icon),
+        ),
+        if (hasBadge)
+          Positioned(
+            right: 7,
+            top: 7,
+            child: Container(
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 1.4),
               ),
             ),
+          ),
+      ],
+    );
+  }
+}
+
+class _HomeMetricCard extends StatelessWidget {
+  const _HomeMetricCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 11, 10, 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.12)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 7),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              height: 0.95,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF727A83),
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
