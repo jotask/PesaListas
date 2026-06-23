@@ -32,7 +32,7 @@ class HomeAttentionSection extends StatelessWidget {
     final items = <_AttentionItem>[
       if (pendingInvitationCount > 0)
         _AttentionItem(
-          icon: Icons.mail_outline,
+          icon: Icons.mail_outline_rounded,
           label: _plural(pendingInvitationCount, 'pending invitation'),
           tone: _AttentionTone.info,
         ),
@@ -87,37 +87,31 @@ class HomeAttentionSection extends StatelessWidget {
         ),
     ];
 
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.priority_high_rounded,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Needs attention',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [for (final item in items) _AttentionChip(item: item)],
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: const Color(0xFFECE7DC)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _AttentionHeader(),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 9,
+            runSpacing: 9,
+            children: [for (final item in items) _AttentionChip(item: item)],
+          ),
+        ],
       ),
     );
   }
@@ -127,11 +121,59 @@ class HomeAttentionSection extends StatelessWidget {
       return '1 $singular';
     }
 
-    if (singular.endsWith('today') || singular.endsWith('soon')) {
-      return '$count ${singular}s';
-    }
-
     return '$count ${singular}s';
+  }
+}
+
+class _AttentionHeader extends StatelessWidget {
+  const _AttentionHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFF7A59).withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: const Icon(
+            Icons.priority_high_rounded,
+            color: Color(0xFFFF7A59),
+            size: 23,
+          ),
+        ),
+        const SizedBox(width: 12),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Focus today',
+                style: TextStyle(
+                  color: Color(0xFF26363B),
+                  fontSize: 18,
+                  height: 1.05,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              SizedBox(height: 3),
+              Text(
+                'Things that need a quick look',
+                style: TextStyle(
+                  color: Color(0xFF727A83),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -158,42 +200,30 @@ class _AttentionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final palette = _paletteForTone(item.tone);
 
-    final (backgroundColor, foregroundColor) = switch (item.tone) {
-      _AttentionTone.danger => (colors.errorContainer, colors.onErrorContainer),
-      _AttentionTone.primary => (
-        colors.primaryContainer,
-        colors.onPrimaryContainer,
-      ),
-      _AttentionTone.secondary => (
-        colors.secondaryContainer,
-        colors.onSecondaryContainer,
-      ),
-      _AttentionTone.info => (
-        colors.surfaceContainerHighest,
-        colors.onSurfaceVariant,
-      ),
-    };
-
-    final chip = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+    final content = Container(
+      padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: palette.background,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: palette.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(item.icon, size: 16, color: foregroundColor),
+          Icon(item.icon, size: 16, color: palette.foreground),
           const SizedBox(width: 6),
-          Text(
-            item.label,
-            style: TextStyle(
-              color: foregroundColor,
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
+          Flexible(
+            child: Text(
+              item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: palette.foreground,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ),
         ],
@@ -201,13 +231,54 @@ class _AttentionChip extends StatelessWidget {
     );
 
     if (item.onTap == null) {
-      return chip;
+      return content;
     }
 
-    return InkWell(
-      onTap: item.onTap,
+    return Material(
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(999),
-      child: chip,
+      child: InkWell(
+        onTap: item.onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: content,
+      ),
     );
   }
+}
+
+class _AttentionPalette {
+  const _AttentionPalette({
+    required this.background,
+    required this.foreground,
+    required this.border,
+  });
+
+  final Color background;
+  final Color foreground;
+  final Color border;
+}
+
+_AttentionPalette _paletteForTone(_AttentionTone tone) {
+  return switch (tone) {
+    _AttentionTone.primary => _AttentionPalette(
+      background: const Color(0xFF3478F6).withValues(alpha: 0.10),
+      foreground: const Color(0xFF2563EB),
+      border: const Color(0xFF3478F6).withValues(alpha: 0.12),
+    ),
+    _AttentionTone.secondary => _AttentionPalette(
+      background: const Color(0xFF19A873).withValues(alpha: 0.11),
+      foreground: const Color(0xFF0F7F67),
+      border: const Color(0xFF19A873).withValues(alpha: 0.14),
+    ),
+    _AttentionTone.danger => _AttentionPalette(
+      background: const Color(0xFFE94747).withValues(alpha: 0.10),
+      foreground: const Color(0xFFC83232),
+      border: const Color(0xFFE94747).withValues(alpha: 0.14),
+    ),
+    _AttentionTone.info => _AttentionPalette(
+      background: const Color(0xFFF7F3EA),
+      foreground: const Color(0xFF64748B),
+      border: const Color(0xFFECE7DC),
+    ),
+  };
 }
